@@ -1,0 +1,22 @@
+---
+import type { HomeReviewsContent } from "../../lib/types";
+
+interface Props {
+  content: HomeReviewsContent;
+}
+
+const { content } = Astro.props;
+---
+
+<section class="bg-light-grey py-20">
+  <div class="mx-auto max-w-3xl px-6 text-center">
+    <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
+    <p class="mt-4 text-black/60">{content.subheading}</p>
+    <a
+      href={content.ctaButton.href}
+      class="mt-8 inline-block rounded-full bg-primary-green px-8 py-4 text-sm font-semibold text-white transition hover:opacity-90"
+    >
+      {content.ctaButton.label}
+    </a>
+  </div>
+</section>

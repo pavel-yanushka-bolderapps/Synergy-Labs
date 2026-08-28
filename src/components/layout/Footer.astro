@@ -1,0 +1,43 @@
+---
+import type { SiteFooter } from "../../lib/types";
+
+interface Props {
+  footer: SiteFooter;
+}
+
+const { footer } = Astro.props;
+---
+
+<footer class="bg-primary-green text-white">
+  <div class="mx-auto max-w-7xl px-6 py-16">
+    <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
+      <div>
+        <img src={footer.logoSrc} alt="Synergy Labs" class="h-8 w-auto brightness-0 invert" />
+      </div>
+
+      <nav class="flex flex-col gap-3">
+        {footer.links.map((link) => (
+          <a href={link.href} class="text-sm text-white/80 transition hover:text-white">
+            {link.label}
+          </a>
+        ))}
+      </nav>
+
+      <div class="flex flex-col gap-3 text-sm text-white/80">
+        <span class="text-white">Contacts</span>
+        <a href={`mailto:${footer.email}`} class="hover:text-white">{footer.email}</a>
+        <a href={`tel:${footer.phone.replace(/[^+\d]/g, "")}`} class="hover:text-white">{footer.phone}</a>
+        <span>{footer.address}</span>
+      </div>
+    </div>
+
+    <div class="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/60 md:flex-row md:items-center">
+      <span>{footer.copyright}</span>
+      <div class="flex gap-6">
+        {footer.legalLinks.map((link) => (
+          <a href={link.href} class="hover:text-white">{link.label}</a>
+        ))}
+      </div>
+    </div>
+  </div>
+</footer>

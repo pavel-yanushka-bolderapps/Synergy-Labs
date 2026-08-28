@@ -1,0 +1,27 @@
+---
+import Layout from "../components/layout/Layout.astro";
+import Hero from "../components/sections/Hero.astro";
+import Stats from "../components/sections/Stats.astro";
+import SelectedWorks from "../components/sections/SelectedWorks.astro";
+import HowWeWork from "../components/sections/HowWeWork.astro";
+import WhyUs from "../components/sections/WhyUs.astro";
+import Reviews from "../components/sections/Reviews.astro";
+import ServicesGrid from "../components/sections/ServicesGrid.astro";
+import CTA from "../components/sections/CTA.astro";
+import Locations from "../components/sections/Locations.astro";
+import FAQ from "../components/sections/FAQ.astro";
+import { home } from "../content/home";
+---
+
+<Layout title="AI + Mobile App Development Agency | Synergy Labs">
+  <Hero content={home.hero} />
+  <Stats content={home.stats} />
+  <SelectedWorks content={home.selectedWorks} />
+  <HowWeWork content={home.howWeWork} />
+  <WhyUs content={home.whyUs} />
+  <Reviews content={home.reviews} />
+  <ServicesGrid content={home.services} />
+  <CTA content={home.cta} />
+  <Locations content={home.locations} />
+  <FAQ content={home.faq} />
+</Layout>

@@ -1,0 +1,35 @@
+---
+import type { HomeHeroContent } from "../../lib/types";
+
+interface Props {
+  content: HomeHeroContent;
+}
+
+const { content } = Astro.props;
+const lines = content.heading.split("\n");
+---
+
+<section class="relative overflow-hidden bg-primary-green">
+  <img src={content.bgImageSrc} alt="" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
+  <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:grid-cols-2 md:py-32">
+    <div>
+      <h1 class="font-display text-4xl leading-tight text-white md:text-6xl">
+        {lines.map((line, i) => (
+          <>
+            {line}
+            {i < lines.length - 1 && <br />}
+          </>
+        ))}
+      </h1>
+      <a
+        href={content.ctaButton.href}
+        class="mt-8 inline-block rounded-full bg-secondary-green px-8 py-4 font-semibold text-white transition hover:opacity-90"
+      >
+        {content.ctaButton.label}
+      </a>
+    </div>
+    <div class="flex justify-center md:justify-end">
+      <img src={content.phoneImageSrc} alt="Synergy Labs app preview" class="w-56 md:w-72" />
+    </div>
+  </div>
+</section>

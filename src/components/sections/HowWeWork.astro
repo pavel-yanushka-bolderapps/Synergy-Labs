@@ -1,0 +1,27 @@
+---
+import type { HomeHowWeWorkContent } from "../../lib/types";
+
+interface Props {
+  content: HomeHowWeWorkContent;
+}
+
+const { content } = Astro.props;
+---
+
+<section class="bg-primary-green py-20 text-white">
+  <div class="mx-auto max-w-7xl px-6">
+    <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
+
+    <div class="mt-12 flex flex-col gap-10">
+      {content.steps.map((step) => (
+        <div class="grid grid-cols-[auto_1fr] gap-6 border-t border-white/10 pt-8 first:border-t-0 first:pt-0">
+          <span class="font-display text-2xl text-secondary-green">{step.number}</span>
+          <div>
+            <h3 class="text-lg font-semibold">{step.title}</h3>
+            <p class="mt-2 max-w-2xl text-sm text-white/70">{step.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

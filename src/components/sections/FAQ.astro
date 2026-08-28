@@ -1,0 +1,25 @@
+---
+import type { HomeFAQContent } from "../../lib/types";
+
+interface Props {
+  content: HomeFAQContent;
+}
+
+const { content } = Astro.props;
+---
+
+<section class="mx-auto max-w-4xl px-6 py-20">
+  <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
+
+  <div class="mt-10 flex flex-col divide-y divide-black/10 border-t border-black/10">
+    {content.items.map((item) => (
+      <details class="group py-6">
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-black">
+          {item.question}
+          <span class="shrink-0 text-black/40 transition group-open:rotate-45">+</span>
+        </summary>
+        <p class="mt-4 text-sm leading-relaxed text-black/60">{item.answer}</p>
+      </details>
+    ))}
+  </div>
+</section>

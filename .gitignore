@@ -1,0 +1,12 @@
+dist/
+.astro/
+node_modules/
+npm-debug.log*
+.env
+.env.production
+.DS_Store
+.idea/
+
+# Webflow export reference material (not part of the built site)
+webflow-export/
+synergylabs.webflow-home.zip

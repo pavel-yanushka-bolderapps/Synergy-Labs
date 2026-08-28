@@ -1,0 +1,79 @@
+---
+import type { HomeSelectedWorksContent } from "../../lib/types";
+
+interface Props {
+  content: HomeSelectedWorksContent;
+}
+
+const { content } = Astro.props;
+---
+
+<section class="mx-auto max-w-7xl px-6 py-20">
+  <div class="mb-10 flex items-center justify-between">
+    <h2 class="font-display text-3xl text-black md:text-4xl">{content.heading}</h2>
+  </div>
+
+  <div class="flex flex-col gap-8">
+    {content.items.map((item) => (
+      <article
+        class:list={[
+          "grid grid-cols-1 items-center gap-8 rounded-3xl p-8 md:grid-cols-2 md:p-12",
+          item.theme === "dark" ? "bg-primary-green text-white" : "bg-light-grey text-black",
+        ]}
+      >
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-4">
+            <img src={item.logoSrc} alt={item.logoAlt} class="h-8 w-auto" />
+            <div class="flex gap-2">
+              {item.tags.map((tag) => (
+                <span
+                  class:list={[
+                    "rounded-full px-3 py-1 text-xs font-medium",
+                    item.theme === "dark" ? "bg-white/10 text-white" : "bg-white text-black/70",
+                  ]}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <p class:list={["text-sm leading-relaxed", item.theme === "dark" ? "text-white/80" : "text-black/70"]}>
+            {item.description}
+          </p>
+
+          <div class="flex gap-8">
+            {item.highlights.map((h) => (
+              <span class="text-sm font-semibold">{h.label}</span>
+            ))}
+          </div>
+
+          <a
+            href={item.caseStudyHref}
+            class:list={[
+              "mt-2 inline-block w-fit rounded-full px-6 py-3 text-sm font-semibold transition",
+              item.theme === "dark"
+                ? "bg-white text-primary-green hover:opacity-90"
+                : "bg-primary-green text-white hover:opacity-90",
+            ]}
+          >
+            View case study
+          </a>
+        </div>
+
+        <div class="flex justify-center">
+          <img src={item.imageSrc} alt={item.imageAlt} class="max-h-80 w-auto" />
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <div class="mt-12 text-center">
+    <a
+      href={content.viewAllButton.href}
+      class="inline-block rounded-full bg-primary-green px-8 py-4 text-sm font-semibold text-white transition hover:opacity-90"
+    >
+      {content.viewAllButton.label}
+    </a>
+  </div>
+</section>
