@@ -12,7 +12,7 @@ const lines = content.heading.split("\n");
 <section class="relative overflow-hidden bg-green-50">
   <img src={content.bgImageSrc} alt="" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
   <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:grid-cols-2 md:py-32">
-    <div>
+    <div class="flex flex-col items-center text-center md:block md:text-start">
       <h1 class="font-display text-4xl leading-tight md:text-5xl">
         {lines.map((line, i) => (
           <>
@@ -23,14 +23,14 @@ const lines = content.heading.split("\n");
       </h1>
       <a
         href={content.ctaButton.href}
-        class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 font-semibold text-white transition hover:opacity-90"
+        class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 font-semibold text-white transition hover:bg-primary-green"
       >
         {content.ctaButton.label}
       </a>
     </div>
     <div class="flex justify-center md:justify-end">
       <div class="relative flex h-[22.375rem] w-[22.375rem] items-center justify-center">
-        <canvas id="hero-lottie" class="scale-[1.4]"></canvas>
+        <canvas id="hero-lottie" class="h-full w-full"></canvas>
         <img
           src={content.phoneImageSrc}
           alt="Synergy Labs app preview"
@@ -44,6 +44,15 @@ const lines = content.heading.split("\n");
 <script>
   import { DotLottie } from "@lottiefiles/dotlottie-web";
 
+  // @lottiefiles/lottie-player (tried previously) doesn't understand the
+  // zipped .lottie container format at all -- it only accepts raw Lottie
+  // JSON -- so it was failing to load this file entirely. dotlottie-web is
+  // the correct library for a .lottie source; it unzips and resolves the
+  // embedded assets itself. The earlier blurriness wasn't from the renderer
+  // -- it was the CSS `scale-[1.35]` transform stretching an
+  // already-rasterized canvas. Sizing the canvas via CSS (h-full/w-full on
+  // its container) with no transform, and letting dotlottie-web manage its
+  // own resolution via renderConfig below, avoids that.
   const canvas = document.getElementById("hero-lottie") as HTMLCanvasElement | null;
 
   if (canvas) {
@@ -52,6 +61,10 @@ const lines = content.heading.split("\n");
       src: "/lottie/hero-animation.lottie",
       loop: true,
       autoplay: true,
+      renderConfig: {
+        autoResize: true,
+        devicePixelRatio: window.devicePixelRatio || 1,
+      },
     });
   }
 </script>

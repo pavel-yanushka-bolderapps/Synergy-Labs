@@ -17,7 +17,7 @@ const { content } = Astro.props;
         <tr>
           <th class="p-4 text-left font-medium text-black/50"></th>
           <th class="bg-light-grey p-4 text-left font-semibold text-black/70">Other agencies</th>
-          <th class="bg-primary-green p-4 text-left font-semibold text-white">Synergy Labs</th>
+          <th class="bg-secondary-green p-4 text-left font-semibold text-white">Synergy Labs</th>
         </tr>
       </thead>
       <tbody>
@@ -25,7 +25,7 @@ const { content } = Astro.props;
           <tr class="border-t border-black/10">
             <td class="p-4 font-medium text-black/70">{row.label}</td>
             <td class="bg-light-grey/60 p-4 text-black/60">{row.otherAgencies}</td>
-            <td class="bg-primary-green/5 p-4 font-semibold text-primary-green">{row.synergyLabs}</td>
+            <td class="bg-secondary-green/5 p-4 font-semibold text-primary-green">{row.synergyLabs}</td>
           </tr>
         ))}
       </tbody>

@@ -10,9 +10,9 @@ export const home: HomePageContent = {
 
   stats: {
     items: [
-      { value: "5/5", label: "average client rating" },
-      { value: "10 weeks", label: "to launch your app" },
-      { value: "100+", label: "products" },
+      { value: "5/5", label: "average client rating", iconSrc: "/images/synergy-hero-stat-01.svg" },
+      { value: "10 weeks", label: "to launch your app", iconSrc: "/images/synergy-hero-stat-02.svg" },
+      { value: "100+", label: "products", iconSrc: "/images/synergy-hero-stat-03.svg" },
     ],
   },
 
@@ -28,12 +28,16 @@ export const home: HomePageContent = {
         tags: ["Social"],
         description:
           "Clapper partnered with us to bring their vision of a real community-driven social media platform to life. We developed and delivered the first version of their app, empowering users to share content, connect authentically, and engage with their audience without filters or algorithms. Our team ensured a seamless launch, laying the foundation for Clapper’s growth.",
-        highlights: [{ label: "18 weeks to launch" }, { label: "1M+ downloads" }],
+        highlights: [
+          { label: "18 weeks to launch", iconSrc: "/images/portfolio-black-weeks-to-launch.svg" },
+          { label: "1M+ downloads", iconSrc: "/images/portfolio-black-downloads.svg" },
+        ],
         imageSrc: "/images/V12f.webp",
         imageAlt:
           "Two smartphones displaying a social media app with video feeds and category tags like #Football and #FamilyFun.",
         caseStudyHref: "/projects/casestudy/clapper",
         theme: "light",
+        backgroundImage: "linear-gradient(#fff, #96b7fd73 23%)",
       },
       {
         slug: "peanut",
@@ -43,12 +47,17 @@ export const home: HomePageContent = {
         tags: ["Social"],
         description:
           "Peanut partnered with us to enhance their platform, providing a beautifully crafted design that resonates with their community of women seeking connection and support. We delivered a user-centered design tailored to the unique needs of their audience, while also outstaffing highly skilled developers to ensure seamless execution and implementation.",
-        highlights: [{ label: "22 weeks to launch" }, { label: "Over 5 million users" }],
+        highlights: [
+          { label: "22 weeks to launch", iconSrc: "/images/portfolio-black-weeks-to-launch.svg" },
+          { label: "Over 5 million users", iconSrc: "/images/portfolio-black-downloads.svg" },
+        ],
         imageSrc: "/images/peanut-app-image.webp",
         imageAlt:
           "Three smartphones displaying the Peanut app showing pregnancy week 8, supplement ad, and Needed introduction screen.",
         caseStudyHref: "/projects/casestudy/peanut",
         theme: "light",
+        backgroundImage:
+          "radial-gradient(circle at 0 0, #f3f3f3b5 23%, #fde9ea66 35%, #ea515a38 78%)",
       },
       {
         slug: "forbes-councils",
@@ -58,11 +67,15 @@ export const home: HomePageContent = {
         tags: ["Business", "Education"],
         description:
           "Forbes Councils partnered with Synergy Labs to elevate their members-only app, making it faster, more intuitive. We introduced essential tools like expert panels, event access, private messaging, and group discussions.",
-        highlights: [{ label: "16 weeks to launch" }, { label: "2K exclusive users" }],
+        highlights: [
+          { label: "16 weeks to launch", iconSrc: "/images/portfolio-white-weeks-to-launch.svg" },
+          { label: "2K exclusive users", iconSrc: "/images/portfolio-white-people.svg" },
+        ],
         imageSrc: "/images/Forbes-Image_1.avif",
         imageAlt: "Forbes Councils app screens",
         caseStudyHref: "/projects/casestudy/forbes-councils",
         theme: "dark",
+        backgroundImage: "linear-gradient(#112134, #33629a)",
       },
       {
         slug: "open",
@@ -72,11 +85,15 @@ export const home: HomePageContent = {
         tags: ["Health", "Lifestyle"],
         description:
           "Open partnered with us to revamp their app with a fresh design and key performance improvements, creating a smoother and more modern user experience.",
-        highlights: [{ label: "8 weeks to launch" }, { label: "500k downloads" }],
+        highlights: [
+          { label: "8 weeks to launch", iconSrc: "/images/portfolio-white-weeks-to-launch.svg" },
+          { label: "500k downloads", iconSrc: "/images/portfolio-white-downloads.svg" },
+        ],
         imageSrc: "/images/Open-Iphone.avif",
         imageAlt: "iPhone screen with Open app",
         caseStudyHref: "/projects/casestudy/open",
         theme: "dark",
+        backgroundImage: "linear-gradient(#000, #333)",
       },
     ],
   },
@@ -127,11 +144,11 @@ export const home: HomePageContent = {
   services: {
     heading: "So you just do apps? Nope, we do a lil more",
     items: [
-      { title: "Web Apps", imageSrc: "/images/Top-App-Development.webp", href: "/our-services/web-app-development" },
-      { title: "Mobile Apps", href: "/our-services/app-development" },
-      { title: "Staff Augmentation", imageSrc: "/images/Top-App-Development-Boutique-p-800.webp", href: "/our-services/staff-augmentation" },
-      { title: "Custom Software", href: "/our-services/ai-infusion" },
-      { title: "Marketing Services", href: "/our-services/marketing-services" },
+      { title: "Web Apps", imageSrc: "/images/services-web-apps.svg", href: "/our-services/web-app-development" },
+      { title: "Mobile Apps", imageSrc: "/images/services-mobile-apps.svg", href: "/our-services/app-development" },
+      { title: "Staff Augmentation", imageSrc: "/images/services-staff-augmentation.svg", href: "/our-services/staff-augmentation" },
+      { title: "Custom Software", imageSrc: "/images/services-custom-software.webp", href: "/our-services/ai-infusion" },
+      { title: "Marketing Services", imageSrc: "/images/services-marketing-services.png", href: "/our-services/marketing-services" },
     ],
   },
 

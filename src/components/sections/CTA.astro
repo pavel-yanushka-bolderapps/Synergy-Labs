@@ -8,13 +8,18 @@ interface Props {
 const { content } = Astro.props;
 ---
 
-<section class="bg-primary-green py-20 text-center text-white">
-  <div class="mx-auto max-w-2xl px-6">
+<section class="relative overflow-hidden bg-secondary-green py-20 text-center text-white">
+  <img
+    src="/images/Hero-Bg.svg"
+    alt=""
+    class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+  />
+  <div class="relative mx-auto max-w-2xl px-6">
     <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
     <p class="mt-4 text-white/70">{content.body}</p>
     <a
       href={content.ctaButton.href}
-      class="mt-8 inline-block rounded-full border border-white px-8 py-4 text-sm font-semibold transition hover:bg-white hover:text-primary-green"
+      class="mt-8 inline-block rounded-md border border-white bg-transparent px-8 py-4 text-sm font-semibold text-white transition hover:bg-white hover:text-primary-green"
     >
       {content.ctaButton.label}
     </a>

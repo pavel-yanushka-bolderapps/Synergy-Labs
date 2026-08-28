@@ -13,10 +13,12 @@ export interface CTAButton {
 export interface StatItem {
   value: string;
   label: string;
+  iconSrc: string;
 }
 
 export interface PortfolioHighlight {
   label: string;
+  iconSrc?: string;
 }
 
 export interface PortfolioItem {
@@ -31,6 +33,7 @@ export interface PortfolioItem {
   imageAlt: string;
   caseStudyHref: string;
   theme: "light" | "dark";
+  backgroundImage: string;
 }
 
 export interface ProcessStep {
