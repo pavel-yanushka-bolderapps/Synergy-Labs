@@ -9,11 +9,11 @@ const { content } = Astro.props;
 const lines = content.heading.split("\n");
 ---
 
-<section class="relative overflow-hidden bg-primary-green">
+<section class="relative overflow-hidden bg-green-50">
   <img src={content.bgImageSrc} alt="" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
   <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:grid-cols-2 md:py-32">
     <div>
-      <h1 class="font-display text-4xl leading-tight text-white md:text-6xl">
+      <h1 class="font-display text-4xl leading-tight md:text-5xl">
         {lines.map((line, i) => (
           <>
             {line}
@@ -23,13 +23,36 @@ const lines = content.heading.split("\n");
       </h1>
       <a
         href={content.ctaButton.href}
-        class="mt-8 inline-block rounded-full bg-secondary-green px-8 py-4 font-semibold text-white transition hover:opacity-90"
+        class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 font-semibold text-white transition hover:opacity-90"
       >
         {content.ctaButton.label}
       </a>
     </div>
     <div class="flex justify-center md:justify-end">
-      <img src={content.phoneImageSrc} alt="Synergy Labs app preview" class="w-56 md:w-72" />
+      <div class="relative flex h-[22.375rem] w-[22.375rem] items-center justify-center">
+        <canvas id="hero-lottie" class="scale-[1.4]"></canvas>
+        <img
+          src={content.phoneImageSrc}
+          alt="Synergy Labs app preview"
+          class="absolute right-[7.1875rem] top-[3.125rem] h-[16.125rem] w-auto"
+        />
+      </div>
     </div>
   </div>
 </section>
+
+<script>
+  import { DotLottie } from "@lottiefiles/dotlottie-web";
+
+  const canvas = document.getElementById("hero-lottie") as HTMLCanvasElement | null;
+
+  if (canvas) {
+    new DotLottie({
+      canvas,
+      src: "/lottie/hero-animation.lottie",
+      loop: true,
+      autoplay: true,
+    });
+  }
+</script>
+

@@ -15,23 +15,44 @@ const { nav } = Astro.props;
     </a>
 
     <nav class="hidden items-center gap-8 md:flex">
-      {nav.links.map((link) => (
-        <a
-          href={link.href}
-          class="text-sm font-medium text-black/80 transition hover:text-black"
-        >
-          {link.label}
-        </a>
-      ))}
+      {nav.links.map((link) =>
+        link.children && link.children.length > 0 ? (
+          <div class="group relative">
+            <span class="flex cursor-pointer items-center gap-1 text-sm font-medium text-black/80 transition hover:text-black">
+              {link.label}
+              <span class="text-xs transition group-hover:rotate-180">▾</span>
+            </span>
+            <div class="invisible absolute left-0 top-full z-50 w-max pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100">
+              <div class="min-w-[160px] rounded-lg border border-black/10 bg-white py-2 shadow-lg">
+                {link.children.map((child) => (
+                  <a
+                    href={child.href}
+                    class="block px-4 py-2 text-sm text-black/80 hover:bg-light-grey hover:text-black"
+                  >
+                    {child.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <a
+            href={link.href}
+            class="text-sm font-medium text-black/80 transition hover:text-black"
+          >
+            {link.label}
+          </a>
+        )
+      )}
     </nav>
 
     <div class="hidden items-center gap-6 md:flex">
-      <a href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`} class="text-sm font-medium text-black/80">
+      <a href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`} class="text-xs font-medium text-black/80">
         {nav.phone}
       </a>
       <a
         href={nav.ctaButton.href}
-        class="rounded-full bg-primary-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-secondary-green"
+        class="rounded-md bg-secondary-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-green"
       >
         {nav.ctaButton.label}
       </a>

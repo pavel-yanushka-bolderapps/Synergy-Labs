@@ -66,6 +66,7 @@ export interface FAQItem {
 export interface NavLink {
   label: string;
   href: string;
+  children?: NavLink[];
 }
 
 export interface SiteNavigation {
