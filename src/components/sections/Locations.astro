@@ -6,6 +6,10 @@ interface Props {
 }
 
 const { content } = Astro.props;
+
+const [rowOneA, rowOneB, ...rest] = content.items;
+const visibleRowThree = rest.slice(0, 3);
+const hiddenItems = rest.slice(3);
 ---
 
 <section class="mx-auto max-w-7xl px-6 py-20">
@@ -13,11 +17,11 @@ const { content } = Astro.props;
     Our <span class="text-secondary-green">Locations</span>
   </h2>
 
-  <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-    {content.items.map((loc) => (
-      <div class="group relative overflow-hidden rounded-2xl">
+  <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
+    {[rowOneA, rowOneB].map((loc) => (
+      <div class="group relative min-h-[20rem] h-full overflow-hidden rounded-2xl">
         {loc.imageSrc && (
-          <img src={loc.imageSrc} alt={loc.city} class="h-48 w-full object-cover transition duration-300 group-hover:scale-105" />
+          <img src={loc.imageSrc} alt={loc.city} class="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
         )}
         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
         {loc.isHeadquarters && (
@@ -32,4 +36,76 @@ const { content } = Astro.props;
       </div>
     ))}
   </div>
+
+  <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+    {visibleRowThree.map((loc) => (
+      <div class="group relative min-h-[20rem] h-full overflow-hidden rounded-2xl">
+        {loc.imageSrc && (
+          <img src={loc.imageSrc} alt={loc.city} class="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+        )}
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+        {loc.isHeadquarters && (
+          <span class="absolute left-4 top-4 rounded-full bg-secondary-green px-3 py-1 text-xs font-semibold text-white">
+            HEADQUARTERS
+          </span>
+        )}
+        <div class="absolute bottom-4 left-4 right-4 text-white">
+          <p class="font-display text-lg">{loc.city}</p>
+          <p class="text-xs text-white/80">{loc.address}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  {hiddenItems.length > 0 && (
+    <div id="locations-more" class="mt-6 hidden grid-cols-1 gap-6 sm:grid-cols-3">
+      {hiddenItems.map((loc) => (
+        <div class="group relative min-h-[20rem] h-full overflow-hidden rounded-2xl">
+          {loc.imageSrc && (
+            <img src={loc.imageSrc} alt={loc.city} class="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+          )}
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+          {loc.isHeadquarters && (
+            <span class="absolute left-4 top-4 rounded-full bg-secondary-green px-3 py-1 text-xs font-semibold text-white">
+              HEADQUARTERS
+            </span>
+          )}
+          <div class="absolute bottom-4 left-4 right-4 text-white">
+            <p class="font-display text-lg">{loc.city}</p>
+            <p class="text-xs text-white/80">{loc.address}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+
+  {hiddenItems.length > 0 && (
+    <div class="mt-10 text-center">
+      <button
+        id="locations-more-button"
+        type="button"
+        class="inline-block cursor-pointer rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
+      >
+        {content.moreLocationsLabel}
+      </button>
+    </div>
+  )}
 </section>
+
+<script>
+  const moreButton = document.getElementById("locations-more-button");
+  const morePanel = document.getElementById("locations-more");
+
+  moreButton?.addEventListener("click", () => {
+    const isHidden = morePanel?.classList.contains("hidden");
+    morePanel?.classList.toggle("hidden", !isHidden);
+    morePanel?.classList.toggle("grid", isHidden);
+    if (moreButton instanceof HTMLButtonElement) {
+      moreButton.textContent = isHidden ? "Show less" : moreButton.dataset.defaultLabel ?? moreButton.textContent;
+    }
+  });
+
+  if (moreButton && !moreButton.dataset.defaultLabel) {
+    moreButton.dataset.defaultLabel = moreButton.textContent ?? "";
+  }
+</script>

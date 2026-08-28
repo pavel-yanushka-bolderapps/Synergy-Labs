@@ -13,18 +13,19 @@ const { content } = Astro.props;
     <h2 class="font-display text-3xl text-black md:text-4xl">{content.heading}</h2>
   </div>
 
-  <div class="flex flex-col gap-8">
+  <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
     {content.items.map((item) => (
       <article
         class:list={[
-          "grid grid-cols-1 items-center gap-8 rounded-3xl p-8 md:grid-cols-2 md:p-12",
-          item.theme === "dark" ? "bg-primary-green text-white" : "bg-light-grey text-black",
+          "group relative flex min-h-[25rem] flex-col overflow-hidden rounded-3xl p-8 md:p-12",
+          item.theme === "dark" ? "text-white" : "text-black",
         ]}
+        style={{ backgroundImage: item.backgroundImage }}
       >
-        <div class="flex flex-col gap-4">
-          <div class="flex items-center gap-4">
+        <div class="relative z-10 flex items-start justify-between gap-4">
+          <div class="flex flex-col gap-3">
             <img src={item.logoSrc} alt={item.logoAlt} class="h-8 w-auto" />
-            <div class="flex gap-2">
+            <div class="flex flex-row flex-wrap gap-2 transition-opacity duration-300 ease-out group-hover:opacity-0">
               {item.tags.map((tag) => (
                 <span
                   class:list={[
@@ -38,31 +39,35 @@ const { content } = Astro.props;
             </div>
           </div>
 
-          <p class:list={["text-sm leading-relaxed", item.theme === "dark" ? "text-white/80" : "text-black/70"]}>
-            {item.description}
-          </p>
-
-          <div class="flex gap-8">
-            {item.highlights.map((h) => (
-              <span class="text-sm font-semibold">{h.label}</span>
-            ))}
-          </div>
-
           <a
             href={item.caseStudyHref}
-            class:list={[
-              "mt-2 inline-block w-fit rounded-full px-6 py-3 text-sm font-semibold transition",
-              item.theme === "dark"
-                ? "bg-white text-primary-green hover:opacity-90"
-                : "bg-primary-green text-white hover:opacity-90",
-            ]}
+            class="shrink-0 whitespace-nowrap rounded-md bg-white/80 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white"
           >
             View case study
           </a>
         </div>
 
-        <div class="flex justify-center">
-          <img src={item.imageSrc} alt={item.imageAlt} class="max-h-80 w-auto" />
+        <div class="relative z-0 flex items-end justify-center pt-8">
+          <img
+            src={item.imageSrc}
+            alt={item.imageAlt}
+            class="max-h-72 w-auto object-contain transition-opacity duration-500 ease-out group-hover:opacity-0 sm:max-h-80 md:max-h-96"
+          />
+        </div>
+
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex translate-y-6 flex-col gap-5 rounded-t-3xl p-8 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 md:p-12">
+          <p class:list={["text-sm leading-relaxed", item.theme === "dark" ? "text-white/80" : "text-black/70"]}>
+            {item.description}
+          </p>
+
+          <div class="flex flex-wrap gap-x-8 gap-y-2">
+            {item.highlights.map((h) => (
+              <span class="flex items-center gap-2 text-sm font-semibold">
+                {h.iconSrc && <img src={h.iconSrc} alt="" class="h-4 w-4" />}
+                {h.label}
+              </span>
+            ))}
+          </div>
         </div>
       </article>
     ))}
@@ -71,7 +76,7 @@ const { content } = Astro.props;
   <div class="mt-12 text-center">
     <a
       href={content.viewAllButton.href}
-      class="inline-block rounded-full bg-primary-green px-8 py-4 text-sm font-semibold text-white transition hover:opacity-90"
+      class="inline-block rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
     >
       {content.viewAllButton.label}
     </a>

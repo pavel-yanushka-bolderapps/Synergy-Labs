@@ -1,0 +1,21 @@
+{
+  "name": "synergy-labs",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@jridgewell/trace-mapping": "^0.3.31",
+    "@lottiefiles/dotlottie-web": "^0.80.0",
+    "@tailwindcss/node": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^5.0.0",
+    "shiki": "^3.23.0",
+    "tailwindcss": "^4.3.3"
+  }
+}

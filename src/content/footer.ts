@@ -1,7 +1,7 @@
 import type { SiteFooter } from "../lib/types";
 
 export const footer: SiteFooter = {
-  logoSrc: "/images/logo_primary_color_onLight.svg",
+  logoSrc: "/images/synergy-labs-logo.webp",
   links: [
     { label: "Services", href: "/our-services" },
     { label: "Portfolio", href: "/portfolio" },

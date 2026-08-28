@@ -57,5 +57,82 @@ const { nav } = Astro.props;
         {nav.ctaButton.label}
       </a>
     </div>
+
+    <div class="flex items-center gap-4 md:hidden">
+      <a href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`} class="text-xs font-medium text-black/80">
+        {nav.phone}
+      </a>
+      <button
+        id="mobile-menu-button"
+        type="button"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+        aria-label="Toggle navigation menu"
+        class="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-black/80 transition hover:text-black"
+      >
+        <svg data-icon="open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+        </svg>
+        <svg data-icon="close" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="hidden h-6 w-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
   </div>
+
+  <nav
+    id="mobile-menu"
+    class="grid grid-rows-[0fr] overflow-hidden opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-in-out md:hidden"
+  >
+    <div class="flex flex-col gap-1 overflow-hidden border-t border-black/10 px-6 py-4">
+      {nav.links.map((link) =>
+        link.children && link.children.length > 0 ? (
+          <div>
+            <span class="block px-2 py-2 text-sm font-medium text-black/80">{link.label}</span>
+            <div class="flex flex-col gap-1 pl-4">
+              {link.children.map((child) => (
+                <a href={child.href} class="block px-2 py-2 text-sm text-black/70 hover:text-black">
+                  {child.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <a href={link.href} class="block px-2 py-2 text-sm font-medium text-black/80 hover:text-black">
+            {link.label}
+          </a>
+        )
+      )}
+      <a
+        href={nav.ctaButton.href}
+        class="mt-2 rounded-md bg-secondary-green px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-primary-green"
+      >
+        {nav.ctaButton.label}
+      </a>
+    </div>
+  </nav>
 </header>
+
+<script>
+  const menuButton = document.getElementById("mobile-menu-button");
+  const menu = document.getElementById("mobile-menu");
+  const openIcon = menuButton?.querySelector('[data-icon="open"]');
+  const closeIcon = menuButton?.querySelector('[data-icon="close"]');
+
+  menuButton?.addEventListener("click", () => {
+    const isOpen = menuButton.getAttribute("aria-expanded") === "true";
+    const nowOpen = !isOpen;
+    menuButton.setAttribute("aria-expanded", String(nowOpen));
+
+    // Toggle grid-template-rows between 0fr/1fr: the panel's height animates
+    // smoothly via CSS transition without needing to measure its content
+    // height in JS (see the `grid grid-rows-[0fr] ... transition-[grid-template-rows,opacity]`
+    // classes on #mobile-menu).
+    menu?.classList.toggle("grid-rows-[0fr]", !nowOpen);
+    menu?.classList.toggle("grid-rows-[1fr]", nowOpen);
+    menu?.classList.toggle("opacity-0", !nowOpen);
+
+    openIcon?.classList.toggle("hidden", nowOpen);
+    closeIcon?.classList.toggle("hidden", !nowOpen);
+  });
+</script>

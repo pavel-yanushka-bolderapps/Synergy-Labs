@@ -9,16 +9,26 @@ const { content } = Astro.props;
 ---
 
 <section class="mx-auto max-w-7xl px-6 py-20">
-  <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="flex items-center rounded-2xl border border-black/10 bg-secondary p-8">
+      <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
+    </div>
 
-  <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {content.items.map((item) => (
       <a
         href={item.href}
-        class="group flex flex-col justify-between rounded-2xl border border-black/10 bg-secondary p-8 transition hover:border-primary-green"
+        class="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-black/10 bg-secondary p-8 transition hover:border-primary-green hover:bg-green-50"
       >
         <span class="font-display text-xl">{item.title}</span>
         <span class="mt-6 text-sm font-semibold text-primary-green group-hover:underline">Learn More</span>
+
+        {item.imageSrc && (
+          <img
+            src={item.imageSrc}
+            alt=""
+            class="pointer-events-none absolute bottom-0 right-0 h-30 w-30 object-contain"
+          />
+        )}
       </a>
     ))}
   </div>

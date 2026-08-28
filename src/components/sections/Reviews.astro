@@ -12,11 +12,16 @@ const { content } = Astro.props;
   <div class="mx-auto max-w-3xl px-6 text-center">
     <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
     <p class="mt-4 text-black/60">{content.subheading}</p>
+
+    <div class="clutch-widget mt-10" data-url="https://widget.clutch.co" data-widget-type="12" data-height="375" data-nofollow="true" data-expandifr="true" data-scale="100" data-primary-color="#007244" data-secondary-color="#007244" data-reviews="321740,320396,318762,312273,308672,307983,300535,299448,297518,297389,297117,295546" data-clutchcompany-id="2373941"></div>
+
     <a
       href={content.ctaButton.href}
-      class="mt-8 inline-block rounded-full bg-primary-green px-8 py-4 text-sm font-semibold text-white transition hover:opacity-90"
+      class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
     >
       {content.ctaButton.label}
     </a>
   </div>
 </section>
+
+<script is:inline type="text/javascript" src="https://widget.clutch.co/static/js/widget.js"></script>
