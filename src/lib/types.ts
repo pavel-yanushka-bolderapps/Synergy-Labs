@@ -166,6 +166,19 @@ export interface HomeFAQContent {
   items: FAQItem[];
 }
 
+export interface PortfolioPageContent {
+  heading: string;
+  subheading: string;
+  filterTags: string[];
+  items: PortfolioItem[];
+}
+
+export interface ServicesPageContent {
+  heading: string;
+  subheading: string;
+  items: ServiceItem[];
+}
+
 export interface HomePageContent {
   hero: HomeHeroContent;
   stats: HomeStatsContent;

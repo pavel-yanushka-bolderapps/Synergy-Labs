@@ -1,0 +1,21 @@
+---
+import Layout from "../../components/layout/Layout.astro";
+import ServicesGrid from "../../components/sections/ServicesGrid.astro";
+import CTA from "../../components/sections/CTA.astro";
+import ContactSection from "../../components/sections/ContactSection.astro";
+import { ourServicesPage } from "../../content/ourServicesPage";
+import { home } from "../../content/home";
+---
+
+<Layout title="Our Services | Synergy Labs" description={ourServicesPage.subheading}>
+  <section class="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
+    <h1 class="font-display text-4xl leading-tight md:text-5xl">{ourServicesPage.heading}</h1>
+    <p class="mt-6 text-lg text-black/70">{ourServicesPage.subheading}</p>
+  </section>
+
+  <ServicesGrid content={{ heading: "So you just do apps? Nope, we do a lil more", items: ourServicesPage.items }} />
+
+  <CTA content={home.cta} />
+
+  <ContactSection id="contact-form" />
+</Layout>

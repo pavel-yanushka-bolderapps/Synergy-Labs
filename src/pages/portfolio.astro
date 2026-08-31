@@ -1,0 +1,17 @@
+---
+import Layout from "../components/layout/Layout.astro";
+import PortfolioGrid from "../components/sections/PortfolioGrid.astro";
+import ContactSection from "../components/sections/ContactSection.astro";
+import { portfolioPage } from "../content/portfolio";
+---
+
+<Layout title="Portfolio | Synergy Labs" description={portfolioPage.subheading}>
+  <section class="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
+    <h1 class="font-display text-4xl leading-tight md:text-5xl">{portfolioPage.heading}</h1>
+    <p class="mt-6 text-lg text-black/70">{portfolioPage.subheading}</p>
+  </section>
+
+  <PortfolioGrid content={portfolioPage} />
+
+  <ContactSection id="contact-form" />
+</Layout>

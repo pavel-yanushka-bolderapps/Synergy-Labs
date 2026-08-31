@@ -1,0 +1,128 @@
+---
+import type { PortfolioPageContent } from "../../lib/types";
+
+interface Props {
+  content: PortfolioPageContent;
+}
+
+const { content } = Astro.props;
+---
+
+<section class="mx-auto max-w-7xl px-6 py-20">
+  <div class="mb-10 flex flex-wrap justify-center gap-3" id="portfolio-filters">
+    {content.filterTags.map((tag, i) => (
+      <button
+        type="button"
+        data-filter={tag}
+        class:list={[
+          "portfolio-filter-btn rounded-full border px-5 py-2 text-sm font-medium transition",
+          i === 0
+            ? "border-secondary-green bg-secondary-green text-white"
+            : "border-black/10 bg-secondary text-black/70 hover:border-primary-green hover:text-black",
+        ]}
+        aria-pressed={i === 0 ? "true" : "false"}
+      >
+        {tag}
+      </button>
+    ))}
+  </div>
+
+  <div class="grid grid-cols-1 gap-8 md:grid-cols-2" id="portfolio-items">
+    {content.items.map((item) => (
+      <article
+        data-tags={item.tags.join(",")}
+        class:list={[
+          "portfolio-card group relative flex min-h-[25rem] flex-col overflow-hidden rounded-3xl p-8 md:p-12",
+          item.theme === "dark" ? "text-white" : "text-black",
+        ]}
+        style={{ backgroundImage: item.backgroundImage }}
+      >
+        <div class="relative z-10 flex items-start justify-between gap-4">
+          <div class="flex flex-col gap-3">
+            <img src={item.logoSrc} alt={item.logoAlt} class="h-8 w-auto" />
+            <div class="flex flex-row flex-wrap gap-2 transition-opacity duration-300 ease-out group-hover:opacity-0">
+              {item.tags.map((tag) => (
+                <span
+                  class:list={[
+                    "rounded-full px-3 py-1 text-xs font-medium",
+                    item.theme === "dark" ? "bg-white/10 text-white" : "bg-white text-black/70",
+                  ]}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <a
+            href={item.caseStudyHref}
+            class="shrink-0 whitespace-nowrap rounded-md bg-white/80 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white"
+          >
+            View case study
+          </a>
+        </div>
+
+        <div class="relative z-0 flex items-end justify-center pt-8">
+          <img
+            src={item.imageSrc}
+            alt={item.imageAlt}
+            class="max-h-72 w-auto object-contain transition-opacity duration-500 ease-out group-hover:opacity-0 sm:max-h-80 md:max-h-96"
+          />
+        </div>
+
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex translate-y-6 flex-col gap-5 rounded-t-3xl p-8 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 md:p-12">
+          <p class:list={["text-sm leading-relaxed", item.theme === "dark" ? "text-white/80" : "text-black/70"]}>
+            {item.description}
+          </p>
+
+          <div class="flex flex-wrap gap-x-8 gap-y-2">
+            {item.highlights.map((h) => (
+              <span class="flex items-center gap-2 text-sm font-semibold">
+                {h.iconSrc && <img src={h.iconSrc} alt="" class="h-4 w-4" />}
+                {h.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <p class="hidden py-16 text-center text-black/50" id="portfolio-empty">
+    No projects match this filter yet.
+  </p>
+</section>
+
+<script>
+  const filterBar = document.getElementById("portfolio-filters");
+  const items = Array.from(document.querySelectorAll<HTMLElement>("#portfolio-items .portfolio-card"));
+  const emptyState = document.getElementById("portfolio-empty");
+
+  filterBar?.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>(".portfolio-filter-btn");
+    if (!button) return;
+
+    const filter = button.dataset.filter ?? "All Projects";
+
+    filterBar.querySelectorAll(".portfolio-filter-btn").forEach((btn) => {
+      const isActive = btn === button;
+      btn.setAttribute("aria-pressed", String(isActive));
+      btn.classList.toggle("border-secondary-green", isActive);
+      btn.classList.toggle("bg-secondary-green", isActive);
+      btn.classList.toggle("text-white", isActive);
+      btn.classList.toggle("border-black/10", !isActive);
+      btn.classList.toggle("bg-secondary", !isActive);
+      btn.classList.toggle("text-black/70", !isActive);
+    });
+
+    let visibleCount = 0;
+    items.forEach((item) => {
+      const tags = (item.dataset.tags ?? "").split(",");
+      const matches = filter === "All Projects" || tags.includes(filter);
+      item.classList.toggle("hidden", !matches);
+      if (matches) visibleCount++;
+    });
+
+    emptyState?.classList.toggle("hidden", visibleCount !== 0);
+  });
+</script>
