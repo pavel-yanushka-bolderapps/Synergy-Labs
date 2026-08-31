@@ -1,3 +1,5 @@
+_to_delete/
+.vercel/
 dist/
 .astro/
 node_modules/

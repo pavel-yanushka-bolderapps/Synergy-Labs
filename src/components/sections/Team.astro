@@ -1,0 +1,104 @@
+---
+import type { HomeTeamContent } from "../../lib/types";
+
+interface Props {
+  content: HomeTeamContent;
+}
+
+const { content } = Astro.props;
+
+// Duplicate the member list once so the marquee can scroll exactly -50% and
+// loop back to an identical starting frame (same technique as Badges.astro).
+const track = [...content.members, ...content.members];
+---
+
+<section class="overflow-hidden py-20">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-start">
+      <div>
+        <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-black/40">
+          <span class="h-2 w-2 rounded-full bg-secondary-green"></span>
+          {content.eyebrow}
+        </div>
+        <h2 class="mt-4 font-display text-4xl leading-tight md:text-5xl">
+          {content.headingLines.map((line, i) => (
+            <>
+              <span class:list={[i === 1 && "text-secondary-green"]}>{line}</span>
+              {i < content.headingLines.length - 1 && <br />}
+            </>
+          ))}
+        </h2>
+      </div>
+
+      <div class="md:pt-2">
+        <p class="text-black/70">{content.description}</p>
+        <a
+          href={content.ctaButton.href}
+          class="mt-6 inline-block rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
+        >
+          {content.ctaButton.label}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="team-carousel relative mt-16">
+    <div class="team-track flex w-max gap-6 px-6">
+      {track.map((member) => (
+        <a
+          href={member.linkedinHref ?? "#"}
+          target={member.linkedinHref ? "_blank" : undefined}
+          rel={member.linkedinHref ? "noopener noreferrer" : undefined}
+          aria-label={`${member.name} on LinkedIn`}
+          class:list={[
+            "team-card group relative h-[26rem] w-72 shrink-0 overflow-hidden rounded-3xl bg-black",
+            !member.linkedinHref && "pointer-events-none",
+          ]}
+        >
+          <img
+            src={member.imageSrc}
+            alt={member.name}
+            class="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-105 group-hover:grayscale-0"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+          <div class="absolute inset-x-0 bottom-0 p-6 text-white">
+            <p class="text-xs font-semibold uppercase tracking-wide text-white/70">{member.title}</p>
+            <p class="mt-1 font-display text-xl">{member.name}</p>
+            <p class="mt-2 text-sm text-white/80">{member.bio}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .team-carousel {
+    overflow: hidden;
+  }
+
+  .team-track {
+    animation: team-scroll 40s linear infinite;
+  }
+
+  .team-carousel:hover .team-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes team-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      /* Track is the member list duplicated once, so -50% lands exactly on
+         an identical repeat of the first copy -- a seamless loop. */
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .team-track {
+      animation: none;
+    }
+  }
+</style>

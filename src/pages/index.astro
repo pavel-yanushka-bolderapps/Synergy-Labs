@@ -9,8 +9,22 @@ import Reviews from "../components/sections/Reviews.astro";
 import ServicesGrid from "../components/sections/ServicesGrid.astro";
 import CTA from "../components/sections/CTA.astro";
 import Locations from "../components/sections/Locations.astro";
+import Badges from "../components/sections/Badges.astro";
+import Team from "../components/sections/Team.astro";
 import FAQ from "../components/sections/FAQ.astro";
+import ContactSection from "../components/sections/ContactSection.astro";
 import { home } from "../content/home";
+import { getServices } from "../lib/sanity";
+
+// Services now live in Sanity (see /studio) instead of home.ts. If the CMS
+// isn't configured yet (no PUBLIC_SANITY_PROJECT_ID) or has no `service`
+// documents, getServices() returns null and this falls back to the static
+// list in content/home.ts so the site never renders an empty grid.
+const sanityServices = await getServices();
+const servicesContent = {
+  heading: home.services.heading,
+  items: sanityServices ?? home.services.items,
+};
 ---
 
 <Layout title="AI + Mobile App Development Agency | Synergy Labs">
@@ -20,8 +34,11 @@ import { home } from "../content/home";
   <HowWeWork content={home.howWeWork} />
   <WhyUs content={home.whyUs} />
   <Reviews content={home.reviews} />
-  <ServicesGrid content={home.services} />
+  <ServicesGrid content={servicesContent} />
   <CTA content={home.cta} />
+  <Badges content={home.badges} />
   <Locations content={home.locations} />
+  <Team content={home.team} />
   <FAQ content={home.faq} />
+  <ContactSection id="cta" />
 </Layout>

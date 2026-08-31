@@ -140,6 +140,27 @@ export interface HomeLocationsContent {
   moreLocationsLabel: string;
 }
 
+export interface HomeBadgesContent {
+  heading: string;
+  badges: string[];
+}
+
+export interface TeamMember {
+  name: string;
+  title: string;
+  bio: string;
+  imageSrc: string;
+  linkedinHref?: string;
+}
+
+export interface HomeTeamContent {
+  eyebrow: string;
+  headingLines: string[];
+  description: string;
+  ctaButton: CTAButton;
+  members: TeamMember[];
+}
+
 export interface HomeFAQContent {
   heading: string;
   items: FAQItem[];
@@ -155,5 +176,7 @@ export interface HomePageContent {
   services: HomeServicesContent;
   cta: HomeCTAContent;
   locations: HomeLocationsContent;
+  badges: HomeBadgesContent;
+  team: HomeTeamContent;
   faq: HomeFAQContent;
 }

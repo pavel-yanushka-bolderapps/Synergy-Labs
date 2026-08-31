@@ -1,0 +1,446 @@
+---
+import { nav } from "../../content/nav";
+
+interface Props {
+  // Anchor id this section is targeted by (e.g. header/CTA buttons link to
+  // `#${id}`). The standalone /contact page uses "contact"; the section
+  // embedded on the homepage uses "cta" so on-page buttons can jump straight
+  // to it.
+  id?: string;
+  heading?: string;
+}
+
+const { id = "contact", heading = "Partner with a top-tier agency" } = Astro.props;
+
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY ?? "";
+// Temporary local-testing escape hatch: set PUBLIC_DISABLE_RECAPTCHA=true in
+// .env to skip reCAPTCHA entirely (widget, client check, and server
+// verification all respect this same flag -- see src/pages/api/contact.ts).
+// Flip it back to false/unset before deploying anywhere real.
+const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
+---
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css" />
+
+<section id={id} class="mx-auto max-w-7xl px-6 py-20">
+  <div id="contact-form-wrapper" class="grid grid-cols-1 overflow-hidden rounded-3xl shadow-xl lg:grid-cols-2">
+    <div class="relative overflow-hidden bg-secondary-green p-10 text-white md:p-16">
+      <img
+        src="/images/Hero-Bg.svg"
+        alt=""
+        class="pointer-events-none absolute inset-0 h-full w-full object-cover"
+      />
+      <div class="relative flex h-full flex-col">
+        <h1 class="font-display text-3xl leading-tight md:text-4xl">{heading}</h1>
+
+        <p class="mt-8 text-white/90">Ready to get started on your project?</p>
+        <p class="mt-4 text-white/90">
+          <strong class="font-semibold">Schedule a meeting via the form here</strong> and you'll connect directly
+          with our director of product -- no salespeople involved.
+        </p>
+
+        <p class="mt-8 text-white/90">Prefer to talk now?</p>
+        <p class="mt-4 text-white/90">
+          Give us a call at
+          {" "}
+          <a href={`tel:+1${nav.phone.replace(/[^+\d]/g, "")}`} class="font-semibold hover:underline">
+            +1 {nav.phone}
+          </a>
+        </p>
+
+        <div class="mt-auto flex flex-wrap items-center gap-4 pt-10">
+          <img src="/images/contact-form-badge-01.svg" alt="Sortlist Verified Agency" class="h-10 w-auto" />
+
+          <div class="clutch-badge flex items-center gap-3 rounded-xl bg-[#17232c] px-4 py-3">
+            <a
+              href="https://clutch.co/profile/synergy-labs?utm_source=widget&utm_medium=14&utm_campaign=widget&utm_content=logo&utm_term=www.synergylabs.co"
+              aria-label="Synergy Labs on Clutch"
+              rel="nofollow noopener noreferrer"
+              target="_blank"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white"
+            >
+              <span class="relative font-display text-lg font-bold leading-none text-[#17232c]">
+                C
+                <span class="absolute -right-0.5 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#ff3722]"></span>
+              </span>
+            </a>
+
+            <div>
+              <div class="flex items-center gap-1.5">
+                <p class="text-sm font-bold leading-none text-white">4.9</p>
+                <a
+                  href="https://clutch.co/profile/synergy-labs?utm_source=widget&utm_medium=14&utm_campaign=widget&utm_content=stars&utm_term=www.synergylabs.co#reviews"
+                  rel="nofollow noopener noreferrer"
+                  target="_blank"
+                  class="flex items-center gap-0.5"
+                  aria-label="4.9 out of 5 stars"
+                >
+                  {[100, 100, 100, 100, 90].map((fillPercent) => (
+                    <span class="relative inline-block h-3 w-3">
+                      <svg viewBox="0 0 20 20" class="absolute inset-0 h-3 w-3 text-white/25" fill="currentColor">
+                        <path d="M10 1.6l2.53 5.62 6.13.57-4.63 4.15 1.36 6.06L10 14.97l-5.39 3.03 1.36-6.06L1.34 7.79l6.13-.57L10 1.6z" />
+                      </svg>
+                      <span class="absolute inset-0 overflow-hidden" style={`width:${fillPercent}%`}>
+                        <svg viewBox="0 0 20 20" class="h-3 w-3 text-[#ff3722]" fill="currentColor">
+                          <path d="M10 1.6l2.53 5.62 6.13.57-4.63 4.15 1.36 6.06L10 14.97l-5.39 3.03 1.36-6.06L1.34 7.79l6.13-.57L10 1.6z" />
+                        </svg>
+                      </span>
+                    </span>
+                  ))}
+                </a>
+              </div>
+              <a
+                href="https://clutch.co/profile/synergy-labs?utm_source=widget&utm_medium=14&utm_campaign=widget&utm_content=num_reviews&utm_term=www.synergylabs.co#reviews"
+                rel="nofollow noopener noreferrer"
+                target="_blank"
+                class="mt-1 block text-xs text-white/70 hover:text-white"
+              >
+                Based on 45 Clutch reviews
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-secondary p-10 md:p-16">
+      <form id="contact-form" class="flex flex-col gap-6" novalidate>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <label for="firstName" class="text-sm font-semibold">First Name</label>
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              required
+              placeholder="John"
+              class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+            />
+          </div>
+          <div>
+            <label for="lastName" class="text-sm font-semibold">Last Name</label>
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              required
+              placeholder="Smith"
+              class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="email" class="text-sm font-semibold">Your Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            placeholder="name@example.com"
+            class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+          />
+          <p id="email-error" class="mt-1.5 hidden text-xs font-semibold text-red-600"></p>
+        </div>
+
+        <div class="phone-field">
+          <label for="phone" class="text-sm font-semibold">Your Phone number</label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            placeholder="(201) 555-0123"
+            class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+          />
+          <p id="phone-error" class="mt-1.5 hidden text-xs font-semibold text-red-600"></p>
+        </div>
+
+        <div>
+          <label for="projectDetails" class="text-sm font-semibold">What do you need help with?</label>
+          <textarea
+            id="projectDetails"
+            name="projectDetails"
+            required
+            rows={4}
+            placeholder="Short description of your project"
+            class="mt-2 w-full resize-y rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+          ></textarea>
+        </div>
+
+        <div>
+          <label for="budgetRange" class="text-sm font-semibold">Budget Range</label>
+          <select
+            id="budgetRange"
+            name="budgetRange"
+            class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm focus:border-primary-green focus:outline-none"
+          >
+            <option value="">Select a range</option>
+            <option value="<$25K">Less than $25K</option>
+            <option value="$25K-$50K">$25K-$50K</option>
+            <option value="$50K-$100K">$50K-$100K</option>
+            <option value="$100K+">$100K+</option>
+          </select>
+        </div>
+
+        <!-- Honeypot: hidden from real visitors via CSS, invisible to
+             screen readers via aria-hidden + tabindex -- but a bot that
+             naively fills every input on the page will fill this one
+             too, which the API route uses to silently drop the submission. -->
+        <div class="hidden" aria-hidden="true">
+          <label for="website">Website</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        {!recaptchaDisabled && (
+          <div>
+            <div class="g-recaptcha" data-sitekey={recaptchaSiteKey}></div>
+          </div>
+        )}
+
+        <p id="contact-form-error" class="hidden text-sm font-semibold text-red-600"></p>
+
+        <button
+          id="contact-form-submit"
+          type="submit"
+          class="rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Submit
+        </button>
+
+        <p class="text-xs text-black/60">
+          By submitting this form you consent to be contacted by Synergy Labs, and acknowledge our
+          {" "}
+          <a href="/privacy-policy" class="text-secondary-green underline">Privacy Policy</a>.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <div id="contact-success" class="hidden flex-col items-center rounded-3xl bg-secondary p-10 text-center shadow-xl md:p-16">
+    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-secondary-green text-white">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="h-8 w-8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+      </svg>
+    </div>
+    <h2 class="mt-6 font-display text-3xl md:text-4xl">Thanks -- we got your message!</h2>
+    <p class="mt-4 max-w-md text-black/70">
+      Our director of product will reach out shortly to schedule your call. In the meantime, feel free to give us
+      a call at {" "}
+      <a href={`tel:+1${nav.phone.replace(/[^+\d]/g, "")}`} class="font-semibold text-secondary-green">
+        +1 {nav.phone}
+      </a>.
+    </p>
+  </div>
+</section>
+
+<style>
+  /* intl-tel-input renders its own wrapper (.iti) around the #phone input at
+     runtime -- Astro's scoped styles can't reach an element the library
+     injects after hydration, so this needs :global to stretch it to the
+     same width as every other field. */
+  :global(.phone-field .iti) {
+    display: block;
+    width: 100%;
+  }
+</style>
+
+{!recaptchaDisabled && (
+  <script src="https://www.google.com/recaptcha/api.js" async defer is:inline></script>
+)}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+<script>
+  declare global {
+    interface Window {
+      grecaptcha?: {
+        getResponse: (widgetId?: number) => string;
+        reset: (widgetId?: number) => void;
+      };
+      intlTelInput?: (input: HTMLInputElement, options: Record<string, unknown>) => {
+        isValidNumber: () => boolean;
+        getValidationError: () => number;
+        getNumber: () => string;
+      };
+    }
+  }
+
+  const form = document.getElementById("contact-form") as HTMLFormElement | null;
+  const formWrapper = document.getElementById("contact-form-wrapper");
+  const successBlock = document.getElementById("contact-success");
+  const submitButton = document.getElementById("contact-form-submit") as HTMLButtonElement | null;
+  const errorMessage = document.getElementById("contact-form-error");
+
+  // --- Email validation ------------------------------------------------------
+  const emailInput = document.getElementById("email") as HTMLInputElement | null;
+  const emailError = document.getElementById("email-error");
+  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  function validateEmail(showEmptyError: boolean): boolean {
+    if (!emailInput || !emailError) return true;
+    const value = emailInput.value.trim();
+
+    if (!value) {
+      emailError.classList.toggle("hidden", !showEmptyError);
+      if (showEmptyError) emailError.textContent = "Email is required.";
+      return false;
+    }
+
+    if (!EMAIL_PATTERN.test(value)) {
+      emailError.textContent = "Please enter a valid email address.";
+      emailError.classList.remove("hidden");
+      return false;
+    }
+
+    emailError.classList.add("hidden");
+    return true;
+  }
+
+  emailInput?.addEventListener("input", () => validateEmail(false));
+  emailInput?.addEventListener("blur", () => validateEmail(true));
+
+  // --- Phone validation (intl-tel-input) --------------------------------------
+  const phoneInput = document.getElementById("phone") as HTMLInputElement | null;
+  const phoneError = document.getElementById("phone-error");
+  const PHONE_ERROR_MESSAGES: Record<number, string> = {
+    0: "Invalid phone number.",
+    1: "Invalid country code.",
+    2: "Number is too short.",
+    3: "Number is too long.",
+    4: "Invalid phone number.",
+  };
+
+  const iti = phoneInput && window.intlTelInput
+    ? window.intlTelInput(phoneInput, {
+        preferredCountries: ["us", "gb", "ae"],
+        separateDialCode: true,
+        autoPlaceholder: "aggressive",
+        formatOnDisplay: true,
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      })
+    : null;
+
+  function validatePhone(): boolean {
+    if (!phoneInput || !phoneError) return true;
+    const value = phoneInput.value.trim();
+
+    // Phone is optional -- an empty field is valid, just not filled in.
+    if (!value) {
+      phoneError.classList.add("hidden");
+      return true;
+    }
+
+    if (!iti) return true;
+
+    if (iti.isValidNumber()) {
+      phoneError.classList.add("hidden");
+      return true;
+    }
+
+    const code = iti.getValidationError();
+    phoneError.textContent = PHONE_ERROR_MESSAGES[code] ?? "Please enter a valid phone number.";
+    phoneError.classList.remove("hidden");
+    return false;
+  }
+
+  phoneInput?.addEventListener("input", () => {
+    // Block anything that obviously isn't part of a phone number as the user types.
+    phoneInput.value = phoneInput.value.replace(/[^0-9+()\s-]/g, "");
+    validatePhone();
+  });
+  phoneInput?.addEventListener("keypress", (event) => {
+    if (!/[0-9+()\s-]/.test(event.key)) {
+      event.preventDefault();
+    }
+  });
+  phoneInput?.addEventListener("blur", validatePhone);
+  phoneInput?.addEventListener("countrychange", validatePhone);
+
+  // Timestamp when the form became interactive -- sent along with the
+  // submission so the API route can reject anything submitted faster than a
+  // human could plausibly fill it out (see the honeypot/timing check in
+  // src/pages/api/contact.ts).
+  const formLoadedAt = Date.now();
+
+  function showError(message: string) {
+    if (!errorMessage) return;
+    errorMessage.textContent = message;
+    errorMessage.classList.remove("hidden");
+  }
+
+  function clearError() {
+    errorMessage?.classList.add("hidden");
+  }
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    clearError();
+
+    const emailOk = validateEmail(true);
+    const phoneOk = validatePhone();
+    if (!emailOk) {
+      emailInput?.focus();
+      return;
+    }
+    if (!phoneOk) {
+      phoneInput?.focus();
+      return;
+    }
+
+    const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
+    const recaptchaToken = recaptchaDisabled ? "" : window.grecaptcha?.getResponse() ?? "";
+    if (!recaptchaDisabled && !recaptchaToken) {
+      showError("Please complete the reCAPTCHA check before submitting.");
+      return;
+    }
+
+    const data = new FormData(form);
+    // Send the phone number in normalized international (E.164) format when
+    // one was entered, so the same number is stored/emailed consistently
+    // regardless of how the visitor typed it.
+    const phoneValue = phoneInput?.value.trim() ? iti?.getNumber() ?? phoneInput.value.trim() : "";
+    const payload = {
+      firstName: String(data.get("firstName") ?? ""),
+      lastName: String(data.get("lastName") ?? ""),
+      email: String(data.get("email") ?? ""),
+      phone: phoneValue,
+      projectDetails: String(data.get("projectDetails") ?? ""),
+      budgetRange: String(data.get("budgetRange") ?? ""),
+      website: String(data.get("website") ?? ""),
+      recaptchaToken,
+      formLoadedAt,
+    };
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Sending...";
+    }
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || "Something went wrong. Please try again.");
+      }
+
+      // Success: swap the form card out for the success card.
+      formWrapper?.classList.add("hidden");
+      successBlock?.classList.remove("hidden");
+      successBlock?.classList.add("flex");
+      successBlock?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      window.grecaptcha?.reset();
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit";
+      }
+    }
+  });
+</script>
