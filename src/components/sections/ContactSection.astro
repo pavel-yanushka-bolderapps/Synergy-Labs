@@ -23,8 +23,8 @@ const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css" />
 
 <section id={id} class="mx-auto max-w-7xl px-6 py-20">
-  <div id="contact-form-wrapper" class="grid grid-cols-1 overflow-hidden rounded-3xl shadow-xl lg:grid-cols-2">
-    <div class="relative overflow-hidden bg-secondary-green p-10 text-white md:p-16">
+  <div id="contact-form-wrapper" class="grid grid-cols-1 gap-6 min-[760px]:grid-cols-2">
+    <div class="relative order-2 overflow-hidden rounded-3xl bg-secondary-green p-10 text-white shadow-xl min-[760px]:order-1 md:p-8">
       <img
         src="/images/Hero-Bg.svg"
         alt=""
@@ -103,7 +103,7 @@ const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
       </div>
     </div>
 
-    <div class="bg-secondary p-10 md:p-16">
+    <div class="order-1 overflow-hidden rounded-3xl bg-secondary p-10 shadow-xl min-[760px]:order-2 md:p-8">
       <form id="contact-form" class="flex flex-col gap-6" novalidate>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>

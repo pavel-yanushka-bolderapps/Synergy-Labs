@@ -35,6 +35,53 @@ export const service = defineType({
       description: "Lower numbers show first in the grid.",
       validation: (Rule) => Rule.integer(),
     }),
+    defineField({
+      name: "heroDescription",
+      title: "Detail page: hero description",
+      type: "text",
+      rows: 3,
+      description:
+        "Short paragraph shown under the heading on this service's own page. Leave blank and that page skips it.",
+    }),
+    defineField({
+      name: "heroImage",
+      title: "Detail page: hero image",
+      type: "image",
+      options: { hotspot: true },
+      description: "Large illustration/photo shown next to the heading on this service's own page.",
+    }),
+    defineField({
+      name: "bannerWords",
+      title: "Detail page: scrolling banner words",
+      type: "array",
+      of: [{ type: "string" }],
+      description:
+        'Short phrases for the scrolling banner strip on this service\'s own page (e.g. "Custom Web Apps", "Progressive Web Apps (PWAs)"). Leave empty to skip the banner.',
+    }),
+    defineField({
+      name: "features",
+      title: "Detail page: feature cards",
+      type: "array",
+      description: 'Cards like "Responsive Front-End" shown in a row on this service\'s own page. Leave empty to skip.',
+      of: [
+        {
+          type: "object",
+          name: "feature",
+          fields: [
+            defineField({ name: "title", title: "Title", type: "string", validation: (Rule) => Rule.required() }),
+            defineField({ name: "image", title: "Image", type: "image", options: { hotspot: true } }),
+          ],
+          preview: { select: { title: "title", media: "image" } },
+        },
+      ],
+    }),
+    defineField({
+      name: "metaDescription",
+      title: "Detail page: SEO description",
+      type: "text",
+      rows: 2,
+      description: "Shown in search results and social previews for this service's own page.",
+    }),
   ],
   orderings: [
     {

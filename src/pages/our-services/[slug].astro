@@ -1,0 +1,118 @@
+---
+import Layout from "../../components/layout/Layout.astro";
+import HowWeWork from "../../components/sections/HowWeWork.astro";
+import WhyUs from "../../components/sections/WhyUs.astro";
+import Reviews from "../../components/sections/Reviews.astro";
+import Badges from "../../components/sections/Badges.astro";
+import FAQ from "../../components/sections/FAQ.astro";
+import ContactSection from "../../components/sections/ContactSection.astro";
+import { home } from "../../content/home";
+import { getServiceSlugs, getServiceBySlug, type ServiceDetail } from "../../lib/sanity";
+
+// Static-output route: every service page is generated at build time from
+// whatever "service" documents exist in Sanity right now. There is no
+// static-content fallback here (unlike the homepage Services grid) -- a
+// service only gets a page if it has a matching Sanity document when the
+// site is built. Publishing a new service in Studio requires a rebuild
+// (git push / redeploy, or a Sanity webhook -> Vercel deploy hook) before
+// its page appears live, same as everywhere else Sanity content is used.
+export async function getStaticPaths() {
+  const slugs = await getServiceSlugs();
+  const details = await Promise.all(slugs.map((slug) => getServiceBySlug(slug)));
+
+  return slugs
+    .map((slug, i) => ({ params: { slug }, props: { service: details[i] } }))
+    .filter((entry): entry is { params: { slug: string }; props: { service: ServiceDetail } } =>
+      entry.props.service !== null
+    );
+}
+
+const { service } = Astro.props;
+const bannerTrack = service.bannerWords.length > 0 ? [...service.bannerWords, ...service.bannerWords] : [];
+---
+
+<Layout title={`${service.title} | Synergy Labs`} description={service.metaDescription}>
+  <section class="mx-auto max-w-7xl px-6 py-20 md:py-28">
+    <div class="grid items-center gap-12 md:grid-cols-2">
+      <div>
+        <h1 class="font-display text-4xl leading-tight md:text-5xl">{service.title}</h1>
+        {service.heroDescription && (
+          <p class="mt-6 text-lg text-black/70">{service.heroDescription}</p>
+        )}
+        <a
+          href="#contact-form"
+          class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
+        >
+          Explore
+        </a>
+      </div>
+
+      {service.heroImageSrc && (
+        <img src={service.heroImageSrc} alt="" class="w-full rounded-2xl object-cover" />
+      )}
+    </div>
+  </section>
+
+  {bannerTrack.length > 0 && (
+    <section class="overflow-hidden bg-secondary-green py-6 text-white">
+      <div class="banner-track flex w-max items-center gap-10 whitespace-nowrap">
+        {bannerTrack.map((word) => (
+          <span class="text-lg font-semibold">{word}</span>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {service.features.length > 0 && (
+    <section class="mx-auto max-w-7xl px-6 py-20">
+      <div class="feature-scroller flex gap-6 overflow-x-auto pb-4">
+        {service.features.map((feature) => (
+          <div class="feature-card flex min-w-[260px] flex-col items-center gap-4 rounded-2xl bg-secondary p-8 text-center">
+            <h3 class="font-display text-xl">{feature.title}</h3>
+            {feature.imageSrc && (
+              <img src={feature.imageSrc} alt="" class="h-32 w-32 object-contain" />
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <HowWeWork content={home.howWeWork} />
+  <WhyUs content={home.whyUs} />
+  <Reviews content={home.reviews} />
+  <Badges content={home.badges} />
+  <FAQ content={home.faq} />
+  <ContactSection id="contact-form" />
+</Layout>
+
+<style>
+  .banner-track {
+    animation: banner-scroll 20s linear infinite;
+  }
+
+  @keyframes banner-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      /* Track is the word list duplicated once, so -50% lands exactly on
+         an identical repeat of the first copy -- a seamless loop. */
+      transform: translateX(-50%);
+    }
+  }
+
+  .feature-scroller {
+    scroll-snap-type: x mandatory;
+  }
+
+  .feature-card {
+    scroll-snap-align: start;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .banner-track {
+      animation: none;
+    }
+  }
+</style>

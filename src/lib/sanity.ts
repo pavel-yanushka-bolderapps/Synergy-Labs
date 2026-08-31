@@ -40,3 +40,82 @@ export async function getServices(): Promise<ServiceItem[] | null> {
     return null;
   }
 }
+
+// --- Individual service detail pages (src/pages/our-services/[slug].astro) ---
+//
+// Unlike getServices() above, these pages have no static-content fallback --
+// they only exist for services that have a matching Sanity document at
+// build time. A service with no detail-page fields filled in (or missing
+// entirely from Sanity) just doesn't get a page built for it.
+
+export interface ServiceDetail {
+  title: string;
+  heroDescription?: string;
+  heroImageSrc?: string;
+  bannerWords: string[];
+  features: { title: string; imageSrc?: string }[];
+  metaDescription?: string;
+}
+
+interface SanityServiceDetailDoc {
+  title: string;
+  heroDescription?: string | null;
+  heroImage?: Record<string, unknown> | null;
+  bannerWords?: string[] | null;
+  features?: { title: string; image?: Record<string, unknown> | null }[] | null;
+  metaDescription?: string | null;
+}
+
+/**
+ * Returns the URL-safe slug (the part after "/our-services/") for every
+ * service document whose `href` looks like a detail-page path, so
+ * getStaticPaths() knows which pages to build.
+ */
+export async function getServiceSlugs(): Promise<string[]> {
+  try {
+    const hrefs = await sanityClient.fetch<string[]>(
+      `*[_type == "service" && defined(href)].href`
+    );
+    return hrefs
+      .filter((href) => href.startsWith("/our-services/"))
+      .map((href) => href.replace("/our-services/", "").replace(/\/$/, ""))
+      .filter(Boolean);
+  } catch (err) {
+    console.error("[sanity] Failed to fetch service slugs:", err);
+    return [];
+  }
+}
+
+/**
+ * Fetches the detail-page content for one service by its slug (matched
+ * against the `href` field as "/our-services/<slug>"). Returns null if the
+ * document doesn't exist or the request fails -- getStaticPaths() skips
+ * building a page in that case.
+ */
+export async function getServiceBySlug(slug: string): Promise<ServiceDetail | null> {
+  try {
+    const doc = await sanityClient.fetch<SanityServiceDetailDoc | null>(
+      `*[_type == "service" && href == $href][0]{
+        title, heroDescription, heroImage, bannerWords, features[]{ title, image }, metaDescription
+      }`,
+      { href: `/our-services/${slug}` }
+    );
+
+    if (!doc) return null;
+
+    return {
+      title: doc.title,
+      heroDescription: doc.heroDescription ?? undefined,
+      heroImageSrc: doc.heroImage ? imageBuilder.image(doc.heroImage).width(800).url() : undefined,
+      bannerWords: doc.bannerWords ?? [],
+      features: (doc.features ?? []).map((feature) => ({
+        title: feature.title,
+        imageSrc: feature.image ? imageBuilder.image(feature.image).width(300).url() : undefined,
+      })),
+      metaDescription: doc.metaDescription ?? undefined,
+    };
+  } catch (err) {
+    console.error(`[sanity] Failed to fetch service detail for "${slug}":`, err);
+    return null;
+  }
+}
