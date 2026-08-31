@@ -3,7 +3,7 @@ import type { HomePageContent } from "../lib/types";
 export const home: HomePageContent = {
   hero: {
     heading: "AI + Mobile App\nDevelopment Agency",
-    ctaButton: { label: "Free quote", href: "/contact" },
+    ctaButton: { label: "Free quote", href: "#cta" },
     phoneImageSrc: "/images/Iphone.avif",
     bgImageSrc: "/images/Hero-Bg.svg",
   },
@@ -138,7 +138,7 @@ export const home: HomePageContent = {
     heading: "What people say about us",
     subheading:
       "Don't just take our word for it. See what out clients have been saying about working with Synergy Labs.",
-    ctaButton: { label: "Contact us", href: "/contact" },
+    ctaButton: { label: "Contact us", href: "#cta" },
   },
 
   services: {
@@ -156,7 +156,79 @@ export const home: HomePageContent = {
     heading: "Ready to Start?",
     body:
       "Fill out our quick form and schedule a discovery meeting with our product expert and we will get you the best proposal in less than 48 hours!",
-    ctaButton: { label: "Contact us", href: "/contact" },
+    ctaButton: { label: "Contact us", href: "#cta" },
+  },
+
+  team: {
+    eyebrow: "THE TEAM",
+    headingLines: ["Real names.", "Real builders."],
+    description:
+      "The people who actually build your product — founders, operators, and engineers with seven years of shipping behind them.",
+    ctaButton: { label: "Contact us", href: "#cta" },
+    members: [
+      {
+        name: "Sardor Akhmedov",
+        title: "Founder and CEO",
+        bio: "Sets the vision, keeps the team shipping.",
+        imageSrc: "/images/6a31cb25fca5d34f74a96cdc_11-06-team-sardor.webp",
+        linkedinHref: "https://www.linkedin.com/in/sardor-akhmedov/",
+      },
+      {
+        name: "Andrew Abbey",
+        title: "Chief Marketing Officer",
+        bio: "Owns the story and how the world hears it.",
+        imageSrc: "/images/6a31cb198686707dee267344_11-06-team-andrew.webp",
+        linkedinHref: "https://www.linkedin.com/in/andrew-a-b94483108/",
+      },
+      {
+        name: "Connell O'Brien",
+        title: "Chief Relationships Officer",
+        bio: "Builds the engine that brings the right clients in.",
+        imageSrc: "/images/6a31cacd4e51b23759fdaec4_11-06-team-cj.webp",
+        linkedinHref: "https://www.linkedin.com/in/connellob/",
+      },
+      {
+        name: "Jon Knight",
+        title: "Chief Technology Officer",
+        bio: "Ensures the technical foundation is solid, scalable, and always shipping.",
+        imageSrc: "/images/6a326f89dc745a52c127f9f3_Jon-synergy-new.webp",
+        linkedinHref: "https://www.linkedin.com/in/jonscottknight/",
+      },
+      {
+        name: "Sean Weldon",
+        title: "Lead Agentic Developer",
+        bio: "Sets the technical bar and ships against it.",
+        imageSrc: "/images/6a3c6eba049d0fb8334ea258_synergy-sean.webp",
+        linkedinHref: "https://www.linkedin.com/in/sean-weldon-genai/",
+      },
+      {
+        name: "Tulkin Erkin",
+        title: "Co-Founder",
+        bio: "Turns strategy into a system that runs.",
+        imageSrc: "/images/6a3c6eab7dd578fc7f1749b3_synergy-tulkin.webp",
+        linkedinHref: "https://www.linkedin.com/in/tulkin/",
+      },
+      {
+        name: "Pavel Yanushka",
+        title: "Webflow Developer",
+        bio: "Crafts the interface layer agents speak through.",
+        imageSrc: "/images/6a3c6e9f29a617fc5dd0674b_synergy-pavel.webp",
+        linkedinHref: "https://www.linkedin.com/in/yanushka-pavel/",
+      },
+    ],
+  },
+
+  badges: {
+    heading: "Our Humble Recognitions",
+    badges: [
+      "/images/carousel-badge-01.jpg",
+      "/images/carousel-badge-02.avif",
+      "/images/carousel-badge-03.avif",
+      "/images/carousel-badge-04.avif",
+      "/images/carousel-badge-05.svg",
+      "/images/carousel-badge-06.webp",
+      "/images/carousel-badge-07.webp",
+    ],
   },
 
   locations: {

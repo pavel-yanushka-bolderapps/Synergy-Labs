@@ -9,17 +9,72 @@ const { content } = Astro.props;
 ---
 
 <section class="mx-auto max-w-4xl px-6 py-20">
-  <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
+  <h2 class="font-display text-3xl font-bold uppercase text-black md:text-4xl">{content.heading}</h2>
 
   <div class="mt-10 flex flex-col divide-y divide-black/10 border-t border-black/10">
-    {content.items.map((item) => (
-      <details class="group py-6">
-        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-black">
-          {item.question}
-          <span class="shrink-0 text-black/40 transition group-open:rotate-45">+</span>
-        </summary>
-        <p class="mt-4 text-sm leading-relaxed text-black/60">{item.answer}</p>
-      </details>
-    ))}
+    {content.items.map((item, index) => {
+      const triggerId = `faq-trigger-${index}`;
+      const panelId = `faq-panel-${index}`;
+      return (
+        <div class="faq-item">
+          <h3 class="contents">
+            <button
+              type="button"
+              id={triggerId}
+              aria-expanded="false"
+              aria-controls={panelId}
+              class="faq-trigger flex w-full cursor-pointer items-center gap-4 py-6 text-left"
+            >
+              <span class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary-green">
+                <span class="pointer-events-none absolute h-0.5 w-4 rounded-full bg-white"></span>
+                <span class="faq-icon-line-v pointer-events-none absolute h-0.5 w-4 rotate-90 rounded-full bg-white transition-transform duration-300 ease-in-out"></span>
+              </span>
+              <span class="font-medium text-black">{item.question}</span>
+            </button>
+          </h3>
+          <div
+            id={panelId}
+            role="region"
+            aria-labelledby={triggerId}
+            class="faq-panel grid grid-rows-[0fr] overflow-hidden opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-in-out"
+          >
+            <div class="min-h-0 overflow-hidden">
+              <p class="pb-6 pl-14 pr-4 text-sm leading-relaxed text-black/60">{item.answer}</p>
+            </div>
+          </div>
+        </div>
+      );
+    })}
   </div>
 </section>
+
+<script>
+  const items = document.querySelectorAll<HTMLElement>(".faq-item");
+
+  items.forEach((item) => {
+    const trigger = item.querySelector<HTMLButtonElement>(".faq-trigger");
+    const panel = item.querySelector<HTMLElement>(".faq-panel");
+    const line = item.querySelector<HTMLElement>(".faq-icon-line-v");
+    if (!trigger || !panel || !line) return;
+
+    trigger.addEventListener("click", () => {
+      const nowOpen = trigger.getAttribute("aria-expanded") !== "true";
+
+      trigger.setAttribute("aria-expanded", String(nowOpen));
+
+      // 0fr -> 1fr on the row track animates height smoothly without having
+      // to measure content height in JS (same technique as the mobile nav
+      // panel in Header.astro).
+      panel.classList.toggle("grid-rows-[0fr]", !nowOpen);
+      panel.classList.toggle("grid-rows-[1fr]", nowOpen);
+      panel.classList.toggle("opacity-0", !nowOpen);
+
+      // The "+" icon is two overlapping lines; rotating the vertical one
+      // from 90deg (perpendicular, forming a "+") to 0deg (aligned with the
+      // horizontal line, forming a "-") reads as the plus flattening into a
+      // minus as the panel opens.
+      line.classList.toggle("rotate-90", !nowOpen);
+      line.classList.toggle("rotate-0", nowOpen);
+    });
+  });
+</script>

@@ -10,12 +10,25 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/react": "^4.4.0",
+    "@astrojs/vercel": "^8.2.7",
     "@jridgewell/trace-mapping": "^0.3.31",
     "@lottiefiles/dotlottie-web": "^0.80.0",
+    "@sanity/astro": "^3.5.1",
+    "@sanity/client": "^8.4.0",
+    "@sanity/image-url": "^2.1.1",
     "@tailwindcss/node": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
     "astro": "^5.0.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-is": "^19.2.8",
+    "resend": "^6.25.0",
+    "sanity": "^6.11.0",
     "shiki": "^3.23.0",
+    "styled-components": "^6.5.3",
     "tailwindcss": "^4.3.3"
   }
 }

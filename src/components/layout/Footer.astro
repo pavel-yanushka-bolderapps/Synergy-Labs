@@ -8,7 +8,12 @@ interface Props {
 const { footer } = Astro.props;
 ---
 
-<footer class="bg-secondary-green text-white">
+<footer class="bg-secondary-green text-white relative">
+  <img
+    src="/images/Hero-Bg.svg"
+    alt=""
+    class="pointer-events-none absolute inset-0 h-full w-full object-cover"
+  />
   <div class="mx-auto max-w-7xl px-6 py-16">
     <div class="grid grid-cols-1 gap-12 md:grid-cols-3">
       <div>

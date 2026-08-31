@@ -11,7 +11,7 @@ const lines = content.heading.split("\n");
 
 <section class="relative overflow-hidden bg-green-50">
   <img src={content.bgImageSrc} alt="" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
-  <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:grid-cols-2 md:py-32">
+  <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:grid-cols-2 md:py-24">
     <div class="flex flex-col items-center text-center md:block md:text-start">
       <h1 class="font-display text-4xl leading-tight md:text-5xl">
         {lines.map((line, i) => (
@@ -29,12 +29,12 @@ const lines = content.heading.split("\n");
       </a>
     </div>
     <div class="flex justify-center md:justify-end">
-      <div class="relative flex h-[22.375rem] w-[22.375rem] items-center justify-center">
+      <div class="relative flex h-[25.75rem] w-[25.75rem] items-center justify-center">
         <canvas id="hero-lottie" class="h-full w-full"></canvas>
         <img
           src={content.phoneImageSrc}
           alt="Synergy Labs app preview"
-          class="absolute right-[7.1875rem] top-[3.125rem] h-[16.125rem] w-auto"
+          class="absolute right-[8.25rem] top-[3.6rem] h-[18.5rem] w-auto"
         />
       </div>
     </div>
