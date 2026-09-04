@@ -18,6 +18,10 @@ interface ImportMetaEnv {
   readonly PUBLIC_SANITY_PROJECT_ID: string;
   /** Public: Sanity dataset name, usually "production". */
   readonly PUBLIC_SANITY_DATASET: string;
+  /** Public, optional: set to "true" to turn on the Studio's Preview tab (drafts + click-to-edit overlays). Leave unset in production -- see src/lib/loadQuery.ts. */
+  readonly PUBLIC_SANITY_VISUAL_EDITING_ENABLED?: string;
+  /** Server-only, optional: Sanity Viewer token, required to read drafts for the Preview tab. Never expose to the client. */
+  readonly SANITY_API_READ_TOKEN?: string;
 }
 
 interface ImportMeta {

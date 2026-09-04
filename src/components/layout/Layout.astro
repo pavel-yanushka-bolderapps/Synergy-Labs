@@ -1,8 +1,10 @@
 ---
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
+import { VisualEditing } from "@sanity/astro/visual-editing";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
+import { previewEnabled } from "../../lib/loadQuery";
 import "../../styles/global.css";
 
 interface Props {
@@ -28,5 +30,11 @@ const { title, description = "Synergy Labs — AI + Mobile App Development Agenc
       <slot />
     </main>
     <Footer footer={footer} />
+    <!--
+      Click-to-edit overlay for the Studio's "Preview" tab. Renders nothing
+      unless queries are running in preview mode (see src/lib/loadQuery.ts),
+      so this costs the public site nothing.
+    -->
+    <VisualEditing enabled={previewEnabled} />
   </body>
 </html>

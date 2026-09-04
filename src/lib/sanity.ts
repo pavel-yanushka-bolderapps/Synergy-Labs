@@ -1,5 +1,6 @@
 import { sanityClient } from "sanity:client";
 import { createImageUrlBuilder } from "@sanity/image-url";
+import { loadQuery } from "./loadQuery";
 import type { ServiceItem } from "./types";
 
 const imageBuilder = createImageUrlBuilder(sanityClient);
@@ -24,9 +25,9 @@ interface SanityServiceDoc {
  */
 export async function getServices(): Promise<ServiceItem[] | null> {
   try {
-    const docs = await sanityClient.fetch<SanityServiceDoc[]>(
-      `*[_type == "service"] | order(order asc, _createdAt asc){ title, href, order, image }`
-    );
+    const docs = await loadQuery<SanityServiceDoc[]>({
+      query: `*[_type == "service"] | order(order asc, _createdAt asc){ title, href, order, image }`,
+    });
 
     if (!docs || docs.length === 0) return null;
 
@@ -73,9 +74,9 @@ interface SanityServiceDetailDoc {
  */
 export async function getServiceSlugs(): Promise<string[]> {
   try {
-    const hrefs = await sanityClient.fetch<string[]>(
-      `*[_type == "service" && defined(href)].href`
-    );
+    const hrefs = await loadQuery<string[]>({
+      query: `*[_type == "service" && defined(href)].href`,
+    });
     return hrefs
       .filter((href) => href.startsWith("/our-services/"))
       .map((href) => href.replace("/our-services/", "").replace(/\/$/, ""))
@@ -94,12 +95,12 @@ export async function getServiceSlugs(): Promise<string[]> {
  */
 export async function getServiceBySlug(slug: string): Promise<ServiceDetail | null> {
   try {
-    const doc = await sanityClient.fetch<SanityServiceDetailDoc | null>(
-      `*[_type == "service" && href == $href][0]{
+    const doc = await loadQuery<SanityServiceDetailDoc | null>({
+      query: `*[_type == "service" && href == $href][0]{
         title, heroDescription, heroImage, bannerWords, features[]{ title, image }, metaDescription
       }`,
-      { href: `/our-services/${slug}` }
-    );
+      params: { href: `/our-services/${slug}` },
+    });
 
     if (!doc) return null;
 
