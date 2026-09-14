@@ -1,4 +1,5 @@
 ---
+import Lottie from "../Lottie.astro";
 import type { HomeHeroContent } from "../../lib/types";
 
 interface Props {
@@ -30,7 +31,7 @@ const lines = content.heading.split("\n");
     </div>
     <div class="flex justify-center md:justify-end">
       <div class="relative flex h-[25.75rem] w-[25.75rem] items-center justify-center">
-        <canvas id="hero-lottie" class="h-full w-full"></canvas>
+        <Lottie src="/lottie/hero-animation.lottie" class="h-full w-full" />
         <img
           src={content.phoneImageSrc}
           alt="Synergy Labs app preview"
@@ -40,32 +41,3 @@ const lines = content.heading.split("\n");
     </div>
   </div>
 </section>
-
-<script>
-  import { DotLottie } from "@lottiefiles/dotlottie-web";
-
-  // @lottiefiles/lottie-player (tried previously) doesn't understand the
-  // zipped .lottie container format at all -- it only accepts raw Lottie
-  // JSON -- so it was failing to load this file entirely. dotlottie-web is
-  // the correct library for a .lottie source; it unzips and resolves the
-  // embedded assets itself. The earlier blurriness wasn't from the renderer
-  // -- it was the CSS `scale-[1.35]` transform stretching an
-  // already-rasterized canvas. Sizing the canvas via CSS (h-full/w-full on
-  // its container) with no transform, and letting dotlottie-web manage its
-  // own resolution via renderConfig below, avoids that.
-  const canvas = document.getElementById("hero-lottie") as HTMLCanvasElement | null;
-
-  if (canvas) {
-    new DotLottie({
-      canvas,
-      src: "/lottie/hero-animation.lottie",
-      loop: true,
-      autoplay: true,
-      renderConfig: {
-        autoResize: true,
-        devicePixelRatio: window.devicePixelRatio || 1,
-      },
-    });
-  }
-</script>
-

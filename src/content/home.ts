@@ -145,9 +145,9 @@ export const home: HomePageContent = {
     heading: "So you just do apps? Nope, we do a lil more",
     items: [
       { title: "Web Apps", imageSrc: "/images/services-web-apps.svg", href: "/our-services/web-app-development" },
-      { title: "Mobile Apps", imageSrc: "/images/services-mobile-apps.svg", href: "/our-services/app-development" },
-      { title: "Staff Augmentation", imageSrc: "/images/services-staff-augmentation.svg", href: "/our-services/staff-augmentation" },
-      { title: "Custom Software", imageSrc: "/images/services-custom-software.webp", href: "/our-services/ai-infusion" },
+      { title: "Mobile Apps", imageSrc: "/images/services-mobile-apps.svg", href: "/our-services/app-development-service" },
+      { title: "Staff Augmentation", imageSrc: "/images/services-staff-augmentation.svg", href: "/our-services/staff-augmentation-service" },
+      { title: "Custom Software", imageSrc: "/images/services-custom-software.webp", href: "/our-services/ai-infusion-service" },
       { title: "Marketing Services", imageSrc: "/images/services-marketing-services.png", href: "/our-services/marketing-services" },
     ],
   },

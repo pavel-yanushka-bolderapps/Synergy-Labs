@@ -1,0 +1,133 @@
+---
+// Per-service "How We Work" timeline: steps alternating either side of a
+// centre line, each with a circular icon sitting on the line and a large
+// ghost number behind the copy. Content comes from the `process*` fields on
+// the service document in Sanity.
+//
+// This is the service-page counterpart to HowWeWork.astro (the homepage's
+// numbered list on green). They are deliberately separate components: the
+// homepage version is a flat list with fixed copy from content/home.ts,
+// while this one is a CMS-driven timeline with a different layout, so
+// folding them together would mean a component that is mostly branches.
+//
+// Icons are files rather than inline SVG (unlike ServiceValues.astro)
+// because these came out of Webflow as multi-path illustrations with their
+// own internal fills, not single-colour marks. They are white-filled, which
+// is why they sit on the green circles. Adding one means dropping the file
+// in public/images/process/ and adding the key both to ICONS below and to
+// the dropdown in src/sanity/schemaTypes/service.ts.
+import type { ServiceProcessContent } from "../../lib/types";
+import { serviceDetailPage } from "../../content/serviceDetailPage";
+
+interface Props {
+  content: ServiceProcessContent;
+}
+
+const { content } = Astro.props;
+const { heading, eyebrow, steps } = content;
+const { processCta } = serviceDetailPage;
+
+const ICONS: Record<string, string> = {
+  research: "/images/process/research.svg",
+  prototype: "/images/process/prototype.svg",
+  design: "/images/process/design.svg",
+  development: "/images/process/development.svg",
+};
+
+const FALLBACK_ICON = "research";
+---
+
+<section class="overflow-hidden py-20 md:py-28">
+  <div class="mx-auto max-w-5xl px-6">
+    <div class="text-center">
+      <h2 class="font-display text-4xl leading-tight md:text-5xl">{heading}</h2>
+      <span class="mx-auto mt-6 block h-px w-10 bg-black/20"></span>
+      {eyebrow && (
+        <p
+          class="pointer-events-none -mt-2 font-display text-6xl leading-none text-black/5 select-none md:text-8xl"
+          aria-hidden="true"
+        >
+          {eyebrow}
+        </p>
+      )}
+    </div>
+
+    <ol class="process-timeline relative mt-16 md:mt-12">
+      {steps.map((step, i) => {
+        // Odd steps sit right of the line, even steps left -- matching the
+        // original's alternating rhythm. Below `md` everything stacks to the
+        // right of a line pinned to the left instead.
+        const onRight = i % 2 === 1;
+        const number = String(i + 1).padStart(2, "0");
+
+        return (
+          <li class="relative pb-14 pl-20 last:pb-0 md:grid md:grid-cols-2 md:gap-x-16 md:pl-0">
+            <span
+              class="absolute left-0 top-0 grid h-12 w-12 place-items-center rounded-full bg-secondary-green md:left-1/2 md:-translate-x-1/2"
+              aria-hidden="true"
+            >
+              <img src={ICONS[step.icon] ?? ICONS[FALLBACK_ICON]} alt="" class="h-6 w-6" />
+            </span>
+
+            <div
+              class:list={[
+                "relative",
+                onRight
+                  ? "md:col-start-2 md:pl-10 md:text-left"
+                  : "md:col-start-1 md:pr-10 md:text-right",
+              ]}
+            >
+              <span
+                class:list={[
+                  "pointer-events-none absolute -top-8 font-display text-6xl leading-none text-black/[0.06] select-none md:text-7xl",
+                  onRight ? "left-0 md:left-10" : "left-0 md:right-10",
+                ]}
+                aria-hidden="true"
+              >
+                {number}
+              </span>
+
+              <h3 class="relative font-display text-2xl leading-tight md:text-3xl">
+                <span class="text-black/30">Step {i + 1}.</span> {step.title}
+              </h3>
+              {step.description && (
+                <p class="relative mt-4 text-black/60">{step.description}</p>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+
+    <div class="mt-4 text-center">
+      <a
+        href={processCta.href}
+        class="inline-block rounded-full bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
+      >
+        {processCta.label}
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The connecting line. Drawn as a pseudo-element on the list so it spans
+     exactly the steps -- inset by half an icon at the top and bottom so it
+     runs between the first and last icons rather than past them. */
+  .process-timeline::before {
+    content: "";
+    position: absolute;
+    top: 1.5rem;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    width: 1px;
+    background: rgb(0 0 0 / 0.1);
+  }
+
+  @media (min-width: 768px) {
+    .process-timeline::before {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+</style>

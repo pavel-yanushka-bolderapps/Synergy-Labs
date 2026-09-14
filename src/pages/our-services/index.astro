@@ -5,6 +5,19 @@ import CTA from "../../components/sections/CTA.astro";
 import ContactSection from "../../components/sections/ContactSection.astro";
 import { ourServicesPage } from "../../content/ourServicesPage";
 import { home } from "../../content/home";
+import { getServices } from "../../lib/sanity";
+
+// Same source as the homepage grid (see src/pages/index.astro). This page
+// used to read the static list directly, which meant the detail pages --
+// built from the `href` on each Sanity document -- and the cards linking to
+// them could drift apart: three links here still pointed at the pre-Sanity
+// slugs and 404'd. Reading Sanity in both places keeps a card and the page
+// it opens on the same URL by construction.
+const sanityServices = await getServices();
+const servicesContent = {
+  heading: "So you just do apps? Nope, we do a lil more",
+  items: sanityServices ?? ourServicesPage.items,
+};
 ---
 
 <Layout title="Our Services | Synergy Labs" description={ourServicesPage.subheading}>
@@ -13,7 +26,7 @@ import { home } from "../../content/home";
     <p class="mt-6 text-lg text-black/70">{ourServicesPage.subheading}</p>
   </section>
 
-  <ServicesGrid content={{ heading: "So you just do apps? Nope, we do a lil more", items: ourServicesPage.items }} />
+  <ServicesGrid content={servicesContent} />
 
   <CTA content={home.cta} />
 

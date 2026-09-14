@@ -42,6 +42,18 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      watch: {
+        // `npm run build` writes into dist/ and .vercel/output/, and the dev
+        // server was watching both -- so a build kicked off next to a running
+        // `npm run dev` fired a burst of HMR reloads. That is worse than
+        // noise in the Studio: a reload mid-upload aborts the in-flight
+        // request, which surfaces as a bare "Upload failed" toast. Neither
+        // directory is a source input, so the dev server has no reason to
+        // watch either.
+        ignored: ["**/dist/**", "**/.vercel/**"],
+      },
+    },
     optimizeDeps: {
       // @sanity/mutate -- reached via @sanity/visual-editing, which powers
       // the Studio's Preview tab -- imports these CommonJS lodash modules as

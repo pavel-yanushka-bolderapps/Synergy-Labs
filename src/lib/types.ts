@@ -179,6 +179,69 @@ export interface ServicesPageContent {
   items: ServiceItem[];
 }
 
+export interface RatingBadgeContent {
+  /**
+   * Client photos, drawn overlapping in this order -- each one laps the
+   * left edge of the one before it, so array order is left-to-right.
+   */
+  avatarSrcs: string[];
+  starCount: number;
+  label: string;
+}
+
+/**
+ * The "what this service covers" block on a service detail page -- heading
+ * and copy beside a slider of feature cards. Built from the `features*`
+ * fields of a Sanity service document; the section is skipped entirely when
+ * there is no heading.
+ */
+export interface ServiceFeaturesContent {
+  heading: string;
+  lead?: string;
+  body?: string;
+  cards: { title: string; imageSrc?: string }[];
+}
+
+/**
+ * One card in the "why work with us" row under the features block. The icon
+ * is a key into the inline SVG set in ServiceValues.astro rather than an
+ * uploaded file, so the marks stay crisp and pick up the section's colour.
+ */
+export interface ServiceValueCard {
+  icon: string;
+  title: string;
+  description?: string;
+}
+
+/**
+ * The per-service "How We Work" timeline. Steps alternate left/right of a
+ * centre line; `icon` is a key into the icon set in ServiceProcess.astro.
+ */
+export interface ServiceProcessStep {
+  icon: string;
+  title: string;
+  description?: string;
+}
+
+export interface ServiceProcessContent {
+  heading: string;
+  eyebrow?: string;
+  steps: ServiceProcessStep[];
+}
+
+/**
+ * The parts of a service detail page that are the same on every service.
+ * Everything service-specific comes from Sanity instead -- see
+ * getServiceBySlug() in src/lib/sanity.ts.
+ */
+export interface ServiceDetailPageContent {
+  ratingBadge: RatingBadgeContent;
+  /** Award logos shown at the foot of the features section. */
+  awardBadges: { src: string; alt: string }[];
+  /** Button under the "How We Work" timeline. */
+  processCta: CTAButton;
+}
+
 export interface HomePageContent {
   hero: HomeHeroContent;
   stats: HomeStatsContent;

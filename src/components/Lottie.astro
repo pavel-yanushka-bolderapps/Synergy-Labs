@@ -1,0 +1,61 @@
+---
+// Decorative Lottie animation rendered onto a <canvas>.
+//
+// Deliberately renders *only* the canvas, with no wrapper: callers size it
+// through their own container (see Hero.astro's fixed square, or the
+// aspect-ratio box on the service detail page), which keeps this component
+// usable in layouts that need the animation positioned relative to other
+// elements.
+interface Props {
+  /** URL of a `.lottie` bundle or a raw Lottie `.json` animation. */
+  src: string;
+  /**
+   * Classes for the canvas itself. Give it `h-full w-full` and let the
+   * parent decide the box -- see the note on sizing in the script below.
+   */
+  class?: string;
+}
+
+const { src, class: className } = Astro.props;
+---
+
+<canvas class={className} data-lottie-src={src} aria-hidden="true"></canvas>
+
+<script>
+  import { DotLottie } from "@lottiefiles/dotlottie-web";
+
+  // Why dotlottie-web and not @lottiefiles/lottie-player (tried previously):
+  // lottie-player only accepts raw Lottie JSON, so it failed outright on the
+  // zipped `.lottie` container the homepage hero uses. dotlottie-web reads
+  // both formats -- unzipping and resolving embedded assets itself -- so one
+  // component covers `.lottie` bundles and the raw `.json` exports that come
+  // out of the Sanity file field on service pages.
+  //
+  // On sizing: never scale the canvas with a CSS transform. An earlier
+  // `scale-[1.35]` on the homepage hero was what made it look blurry -- it
+  // stretched an already-rasterized bitmap. Size the canvas through layout
+  // (h-full/w-full inside a container) and let renderConfig below pick the
+  // backing resolution.
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Astro bundles this module once no matter how many times the component is
+  // used on a page, so pick up every instance rather than a single id.
+  for (const canvas of document.querySelectorAll<HTMLCanvasElement>("canvas[data-lottie-src]")) {
+    const src = canvas.dataset.lottieSrc;
+    if (!src) continue;
+
+    new DotLottie({
+      canvas,
+      src,
+      // Reduced motion still loads the animation -- DotLottie paints the
+      // first frame on load -- it just never advances it, so the slot shows
+      // a still image instead of sitting empty.
+      loop: !reduceMotion,
+      autoplay: !reduceMotion,
+      renderConfig: {
+        autoResize: true,
+        devicePixelRatio: window.devicePixelRatio || 1,
+      },
+    });
+  }
+</script>

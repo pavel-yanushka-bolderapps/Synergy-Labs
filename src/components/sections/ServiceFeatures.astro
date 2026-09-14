@@ -1,0 +1,276 @@
+---
+// The "what this service covers" block on a service detail page: a heading
+// and one or two paragraphs on the left, and a slider of feature cards on
+// the right. Content comes from the `features*` fields on the service
+// document in Sanity (see src/sanity/schemaTypes/service.ts).
+//
+// The <img> below is the same grid decoration the hero and the other light
+// sections use (HowWeWork, CTA, Footer). It is absolutely positioned across
+// the whole section and the content wrapper after it is `relative`, so the
+// content stacks above it without either needing a z-index.
+//
+// Note: JSX-style {/* ... */} comments break the Astro parser inside this
+// markup, which is why the notes here live in the frontmatter and the style
+// block rather than next to the elements they describe.
+import type { ServiceFeaturesContent } from "../../lib/types";
+import { serviceDetailPage } from "../../content/serviceDetailPage";
+
+interface Props {
+  content: ServiceFeaturesContent;
+}
+
+const { content } = Astro.props;
+const { heading, lead, body, cards } = content;
+const { awardBadges } = serviceDetailPage;
+---
+
+<section class="relative overflow-hidden">
+  <img
+    src="/images/Hero-Bg.svg"
+    alt=""
+    class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+  />
+
+  <div class="relative mx-auto max-w-7xl px-6 py-20 md:py-28">
+    <div class="grid gap-12 md:grid-cols-2 md:items-center md:gap-16">
+      <div>
+        <h2 class="font-display text-4xl leading-tight md:text-5xl">{heading}</h2>
+        {lead && <p class="mt-6 text-lg text-black/70">{lead}</p>}
+        {body && <p class="mt-4 text-black/60">{body}</p>}
+      </div>
+
+      {cards.length > 0 && (
+        // The slider is a plain scroll-snap container, so it is swipeable
+        // and keyboard-scrollable with no JavaScript at all. The script
+        // below only adds the arrows and dots on top of that -- if it never
+        // runs, the cards are still reachable.
+        <!-- min-w-0 is load-bearing: a grid item defaults to min-width:auto,
+             so this column would be sized by the *full* width of all the
+             cards inside the scroller rather than its 1fr share, pushing the
+             grid wider than the page and leaving the whole page scrollable
+             sideways. Letting it shrink below its content is what keeps the
+             overflow inside the track where it belongs. -->
+        <div class="feature-slider min-w-0" data-feature-slider>
+          <div
+            class="feature-track flex snap-x snap-mandatory gap-6 overflow-x-auto"
+            data-feature-track
+            tabindex="0"
+            role="group"
+            aria-label={`${heading} — feature cards`}
+          >
+            {cards.map((card, i) => (
+              <article
+                class="feature-card flex min-w-full snap-start items-center justify-between gap-6 rounded-3xl bg-secondary p-8 md:p-10"
+                data-feature-card
+                aria-label={`${i + 1} of ${cards.length}: ${card.title}`}
+              >
+                <h3 class="font-display text-2xl leading-tight md:text-3xl">{card.title}</h3>
+                {card.imageSrc && (
+                  <img
+                    src={card.imageSrc}
+                    alt=""
+                    loading="lazy"
+                    class="h-28 w-28 shrink-0 object-contain md:h-36 md:w-36"
+                  />
+                )}
+              </article>
+            ))}
+          </div>
+
+          {cards.length > 1 && (
+            <div class="mt-2 flex items-center justify-between gap-6">
+              <div class="flex flex-wrap gap-2" data-feature-dots>
+                {cards.map((card, i) => (
+                  <button
+                    type="button"
+                    class="feature-dot"
+                    data-feature-dot={i}
+                    aria-label={`Show ${card.title}`}
+                    aria-current={i === 0 ? "true" : "false"}
+                  ></button>
+                ))}
+              </div>
+
+              <div class="flex shrink-0 gap-3">
+                <button
+                  type="button"
+                  class="feature-arrow"
+                  data-feature-prev
+                  aria-label="Previous feature"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path
+                      d="M3.31 8.75l5.72 5.72-1.06 1.06L.44 8 7.97.47l1.06 1.06-5.72 5.72H15.5v1.5H3.31z"
+                      fill="currentColor"></path>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="feature-arrow"
+                  data-feature-next
+                  aria-label="Next feature"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path
+                      d="M12.69 7.25L6.97 1.53 8.03.47 15.56 8l-7.53 7.53-1.06-1.06 5.72-5.72H.5v-1.5h12.19z"
+                      fill="currentColor"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+
+    {awardBadges.length > 0 && (
+      <ul class="mt-16 grid grid-cols-2 items-center justify-items-center gap-8 md:mt-20 md:grid-cols-4 md:gap-12">
+        {awardBadges.map((badge) => (
+          <li>
+            <img
+              src={badge.src}
+              alt={badge.alt}
+              loading="lazy"
+              class="h-24 w-auto object-contain md:h-28 lg:h-32"
+            />
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</section>
+
+<style>
+  .feature-track {
+    /* Hide the native scrollbar -- the dots and arrows are the affordance,
+       and the bar would sit awkwardly under a single full-width card. */
+    scrollbar-width: none;
+
+    /* A horizontal overflow container clips vertically too, which would
+       slice the card shadows off top and bottom. The padding gives the
+       shadow room to render; the negative margin pulls the track back out
+       so the cards still line up with the column edge; and scroll-padding
+       keeps scroll-snap landing on the padding edge rather than the border
+       edge, so a snapped card sits flush with the heading beside it.
+       Kept deliberately tight -- just enough for the soft shadow below --
+       because every bit of negative margin here is width the grid column
+       has to absorb. */
+    margin-inline: -0.5rem;
+    padding-inline: 0.5rem;
+    padding-block: 0.75rem;
+    scroll-padding-inline: 0.5rem;
+  }
+
+  .feature-card {
+    /* Close to the card and low-spread, so it reads as a lift off the page
+       rather than a halo -- and so it stays inside the track padding above
+       instead of bleeding past the slider edges. */
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.04),
+      0 4px 10px -4px rgb(0 0 0 / 0.1);
+  }
+
+  .feature-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .feature-track:focus-visible {
+    outline: 2px solid var(--color-secondary-green, currentColor);
+    outline-offset: 4px;
+    border-radius: 1.5rem;
+  }
+
+  .feature-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: rgb(0 0 0 / 0.2);
+    transition: background-color 200ms ease, transform 200ms ease;
+  }
+
+  .feature-dot[aria-current="true"] {
+    background: rgb(0 0 0 / 0.75);
+    transform: scale(1.25);
+  }
+
+  .feature-arrow {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background: var(--color-secondary-green, #14683b);
+    color: #fff;
+    transition: opacity 200ms ease, background-color 200ms ease;
+  }
+
+  .feature-arrow:hover:not(:disabled) {
+    background: var(--color-primary-green, #0f4f2d);
+  }
+
+  .feature-arrow:disabled {
+    opacity: 0.35;
+  }
+</style>
+
+<script>
+  // Wires the arrows and dots to the scroll-snap track. Everything here is
+  // additive: the track scrolls and snaps on its own, so a failure to hydrate
+  // leaves a working (if plainer) slider rather than a dead one.
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  for (const slider of document.querySelectorAll<HTMLElement>("[data-feature-slider]")) {
+    const track = slider.querySelector<HTMLElement>("[data-feature-track]");
+    if (!track) continue;
+
+    const cards = [...track.querySelectorAll<HTMLElement>("[data-feature-card]")];
+    const dots = [...slider.querySelectorAll<HTMLButtonElement>("[data-feature-dot]")];
+    const prev = slider.querySelector<HTMLButtonElement>("[data-feature-prev]");
+    const next = slider.querySelector<HTMLButtonElement>("[data-feature-next]");
+    if (cards.length === 0) continue;
+
+    let index = 0;
+
+    const scrollToCard = (i: number) => {
+      const card = cards[i];
+      if (!card) return;
+      // `block: "nearest"` is what keeps this from scrolling the page
+      // vertically to the card and yanking the reader away from the heading
+      // beside it. Using scrollIntoView rather than computing scrollLeft by
+      // hand means the track's scroll-padding is honoured for free.
+      card.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        inline: "start",
+        block: "nearest",
+      });
+    };
+
+    const render = () => {
+      dots.forEach((dot, i) => dot.setAttribute("aria-current", i === index ? "true" : "false"));
+      if (prev) prev.disabled = index === 0;
+      if (next) next.disabled = index === cards.length - 1;
+    };
+
+    // Derive the active card from scroll position rather than tracking it
+    // only on click, so swiping and keyboard scrolling keep the dots honest.
+    track.addEventListener("scroll", () => {
+      // Measured rather than derived from scrollLeft/offsetLeft, which would
+      // need the track's padding subtracting out by hand; rects are already
+      // in the same coordinate space as each other.
+      const bounds = track.getBoundingClientRect();
+      const middle = bounds.left + bounds.width / 2;
+      const active = cards.findIndex((card) => card.getBoundingClientRect().right > middle);
+      const resolved = active === -1 ? cards.length - 1 : active;
+      if (resolved !== index) {
+        index = resolved;
+        render();
+      }
+    }, { passive: true });
+
+    prev?.addEventListener("click", () => scrollToCard(Math.max(0, index - 1)));
+    next?.addEventListener("click", () => scrollToCard(Math.min(cards.length - 1, index + 1)));
+    dots.forEach((dot, i) => dot.addEventListener("click", () => scrollToCard(i)));
+
+    render();
+  }
+</script>

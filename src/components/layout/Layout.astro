@@ -36,5 +36,23 @@ const { title, description = "Synergy Labs — AI + Mobile App Development Agenc
       so this costs the public site nothing.
     -->
     <VisualEditing enabled={previewEnabled} />
+    {previewEnabled && (
+      <!--
+        The overlay positions its click-to-edit boxes with absolutely
+        positioned elements that can sit past the right edge of the page,
+        which gives the document a horizontal scrollbar and makes every
+        section look like it overflows. That is an artefact of preview mode
+        only -- the overlay is not in the production build at all -- but it
+        makes local layout checks read as broken, so clip it here.
+
+        Deliberately scoped to preview mode: applying this to the public
+        site would hide real overflow bugs instead of surfacing them.
+      -->
+      <style is:inline>
+        html {
+          overflow-x: clip;
+        }
+      </style>
+    )}
   </body>
 </html>
