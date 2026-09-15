@@ -105,7 +105,7 @@ export const portfolioPage: PortfolioPageContent = {
       ],
       imageSrc: `${CDN}/68120bf300f7f1d2652fe27d_Frame%201948753706-2.webp`,
       imageAlt: "Joe & The Juice app ordering screens.",
-      caseStudyHref: "/projects/casestudy/joe-and-the-juice",
+      caseStudyHref: "/projects/casestudy/joe-the-juice",
       theme: "light",
       backgroundImage: "linear-gradient(#fff, #ffe9c473 23%)",
     },

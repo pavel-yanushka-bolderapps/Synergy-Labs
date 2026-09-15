@@ -14,13 +14,18 @@ import Team from "../components/sections/Team.astro";
 import FAQ from "../components/sections/FAQ.astro";
 import ContactSection from "../components/sections/ContactSection.astro";
 import { home } from "../content/home";
-import { getServices } from "../lib/sanity";
+import { getServices, withExistingCaseStudies } from "../lib/sanity";
 
 // Services now live in Sanity (see /studio) instead of home.ts. If the CMS
 // isn't configured yet (no PUBLIC_SANITY_PROJECT_ID) or has no `service`
 // documents, getServices() returns null and this falls back to the static
 // list in content/home.ts so the site never renders an empty grid.
 const sanityServices = await getServices();
+// Hide "View case study" on projects that have no case study page.
+const selectedWorks = {
+  ...home.selectedWorks,
+  items: await withExistingCaseStudies(home.selectedWorks.items),
+};
 const servicesContent = {
   heading: home.services.heading,
   items: sanityServices ?? home.services.items,
@@ -31,7 +36,7 @@ const servicesContent = {
 <Layout title="AI + Mobile App Development Agency | Synergy Labs">
   <Hero content={home.hero} />
   <Stats content={home.stats} />
-  <SelectedWorks content={home.selectedWorks} />
+  <SelectedWorks content={selectedWorks} />
   <HowWeWork content={home.howWeWork} />
   <WhyUs content={home.whyUs} />
   <Reviews content={home.reviews} />

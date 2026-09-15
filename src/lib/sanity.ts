@@ -7,6 +7,8 @@ import type {
   ServiceFeaturesContent,
   ServiceValueCard,
   ServiceProcessContent,
+  CaseStudy,
+  CaseStudyFact,
 } from "./types";
 
 const imageBuilder = createImageUrlBuilder(sanityClient);
@@ -263,4 +265,211 @@ async function getLottieAspectRatio(
 
   lottieAspectRatios.set(url, ratio);
   return ratio;
+}
+
+// --- Portfolio case studies (src/pages/projects/casestudy/[slug].astro) ---
+
+interface SanityCaseStudyDoc {
+  slug?: { current?: string } | null;
+  clientName: string;
+  headline?: string | null;
+  intro?: string | null;
+  logo?: Record<string, unknown> | null;
+  brandColor?: string | null;
+  heroImage?: Record<string, unknown> | null;
+  heroImages?: Record<string, unknown>[] | null;
+  appStoreUrl?: string | null;
+  playStoreUrl?: string | null;
+  metaClient?: string | null;
+  metaYear?: string | null;
+  metaTechStack?: string | null;
+  metaCategory?: string | null;
+  overviewHeading?: string | null;
+  overviewBody?: string | null;
+  contentBlocks?:
+    | {
+        heading: string;
+        body?: string | null;
+        bullets?: string[] | null;
+        image?: Record<string, unknown> | null;
+        imageSide?: string | null;
+      }[]
+    | null;
+  statsEnabled?: boolean | null;
+  statsIcon?: Record<string, unknown> | null;
+  statsHeading?: string | null;
+  statsSubheading?: string | null;
+  statsBgColor?: string | null;
+  statsAccentColor?: string | null;
+  statsItems?: { value: string; label: string }[] | null;
+  metaDescription?: string | null;
+}
+
+/**
+ * Editors type paragraphs into a single textarea separated by blank lines
+ * (the same convention the service hero headings use for line breaks), so
+ * split on blank lines rather than asking them to manage an array of
+ * strings or learn a rich-text editor for what is plain prose.
+ */
+function toParagraphs(value?: string | null): string[] {
+  return (value ?? "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Every colour an editor picks ends up in an inline `style` attribute, which
+ * makes validating them here a correctness *and* an injection concern rather
+ * than just a tidiness one. Anything that isn't a plain hex code is dropped
+ * for the fallback, and #abc is expanded to #aabbcc so callers only ever see
+ * one shape.
+ */
+const DEFAULT_BRAND_COLOR = "#007244";
+
+function toHexColor(value: string | null | undefined, fallback: string): string {
+  // stegaClean for the usual reason: in preview mode this string carries
+  // invisible characters that make click-to-edit work on rendered copy, and
+  // they would turn a valid hex code into an invalid CSS colour.
+  const raw = (stegaClean(value ?? undefined) ?? "").trim();
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw) ? raw : fallback;
+  return hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+}
+
+/**
+ * The same colour at zero alpha. A gradient written `transparent -> #ff6500`
+ * fades through transparent *black*, which dirties the middle of the ramp;
+ * naming the faded colour explicitly keeps the whole gradient on one hue.
+ */
+function withZeroAlpha(hex: string): string {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  return `rgb(${r} ${g} ${b} / 0)`;
+}
+
+const CASE_STUDY_PROJECTION = `{
+  slug, clientName, headline, intro, logo, brandColor, heroImage, heroImages,
+  appStoreUrl, playStoreUrl,
+  metaClient, metaYear, metaTechStack, metaCategory,
+  overviewHeading, overviewBody,
+  contentBlocks[]{ heading, body, bullets, image, imageSide },
+  statsEnabled, statsIcon, statsHeading, statsSubheading,
+  statsBgColor, statsAccentColor,
+  statsItems[]{ value, label },
+  metaDescription
+}`;
+
+function toCaseStudy(doc: SanityCaseStudyDoc): CaseStudy {
+  const facts: CaseStudyFact[] = [
+    { label: "Client", value: doc.metaClient ?? "" },
+    { label: "Year", value: doc.metaYear ?? "" },
+    { label: "Tech Stack", value: doc.metaTechStack ?? "" },
+    { label: "Category", value: doc.metaCategory ?? "" },
+  ].filter((f) => f.value.trim().length > 0);
+
+  const brandColor = toHexColor(doc.brandColor, DEFAULT_BRAND_COLOR);
+
+  // Two gates, not one. The toggle is the editor saying they want the band;
+  // the numbers are what there is to put in it. Rendering a heading over an
+  // empty row because the toggle got flipped before the content was written
+  // is worse than waiting for the numbers, so both have to be true.
+  const statsItems = (doc.statsItems ?? []).filter((item) => item.value && item.label);
+  const stats =
+    doc.statsEnabled && statsItems.length > 0
+      ? {
+          heading: doc.statsHeading?.trim() || "Achievements and Impact",
+          subheading: doc.statsSubheading?.trim() || undefined,
+          iconSrc: doc.statsIcon
+            ? imageBuilder.image(doc.statsIcon).width(128).url()
+            : undefined,
+          // The band defaults to the client's own colour rather than to a
+          // second hardcoded green, so a study that fills in nothing here
+          // still comes out looking like the rest of its page.
+          bgColor: toHexColor(doc.statsBgColor, brandColor),
+          accentColor: toHexColor(doc.statsAccentColor, "#DAFF81"),
+          items: statsItems,
+        }
+      : undefined;
+
+  return {
+    slug: doc.slug?.current ?? "",
+    clientName: doc.clientName,
+    headline: doc.headline?.trim() || doc.clientName,
+    intro: doc.intro?.trim() || undefined,
+    logoSrc: doc.logo ? imageBuilder.image(doc.logo).width(400).url() : undefined,
+    brandColor,
+    brandColorFade: withZeroAlpha(brandColor),
+    heroImageSrc: doc.heroImage ? imageBuilder.image(doc.heroImage).width(900).url() : undefined,
+    heroImageSrcs: (doc.heroImages ?? []).map((img) =>
+      imageBuilder.image(img).width(600).url()
+    ),
+    // stegaClean: these end up in href attributes, where the invisible
+    // visual-editing characters would corrupt the address.
+    appStoreUrl: stegaClean(doc.appStoreUrl ?? undefined) || undefined,
+    playStoreUrl: stegaClean(doc.playStoreUrl ?? undefined) || undefined,
+    facts,
+    overviewHeading: doc.overviewHeading?.trim() || undefined,
+    overviewParagraphs: toParagraphs(doc.overviewBody),
+    blocks: (doc.contentBlocks ?? []).map((block, i) => {
+      // "auto" means alternate: first block image left, then right, and so
+      // on -- which is what every one of the original case studies did.
+      const side = stegaClean(block.imageSide ?? undefined);
+      return {
+        heading: block.heading,
+        paragraphs: toParagraphs(block.body),
+        bullets: (block.bullets ?? []).map((b) => b.trim()).filter(Boolean),
+        imageSrc: block.image ? imageBuilder.image(block.image).width(800).url() : undefined,
+        imageSide:
+          side === "left" || side === "right" ? side : i % 2 === 0 ? "left" : "right",
+      };
+    }),
+    stats,
+    metaDescription: doc.metaDescription ?? undefined,
+  };
+}
+
+/** Slugs for every case study that can be built, for getStaticPaths(). */
+export async function getCaseStudySlugs(): Promise<string[]> {
+  try {
+    const slugs = await loadQuery<string[]>({
+      query: `*[_type == "project" && defined(slug.current)].slug.current`,
+    });
+    return slugs.map((s) => stegaClean(s)).filter(Boolean);
+  } catch (err) {
+    console.error("[sanity] Failed to fetch case study slugs:", err);
+    return [];
+  }
+}
+
+export async function getCaseStudyBySlug(slug: string): Promise<CaseStudy | null> {
+  try {
+    const doc = await loadQuery<SanityCaseStudyDoc | null>({
+      query: `*[_type == "project" && slug.current == $slug][0]${CASE_STUDY_PROJECTION}`,
+      params: { slug },
+    });
+    return doc ? toCaseStudy(doc) : null;
+  } catch (err) {
+    console.error(`[sanity] Failed to fetch case study "${slug}":`, err);
+    return null;
+  }
+}
+
+/**
+ * Strips `caseStudyHref` from any portfolio item whose case study does not
+ * exist in Sanity.
+ *
+ * The portfolio lists in src/content/*.ts were written when the old Webflow
+ * site was the reference, and they point at nine case studies that were
+ * never built -- every one of those was a 404. Rather than hand-maintaining
+ * two lists that have to agree, the grids ask Sanity what actually exists
+ * and hide the button for the rest.
+ */
+export async function withExistingCaseStudies<T extends { caseStudyHref?: string }>(
+  items: T[]
+): Promise<T[]> {
+  const slugs = new Set(await getCaseStudySlugs());
+
+  return items.map((item) => {
+    const slug = item.caseStudyHref?.replace(/^\/projects\/casestudy\//, "").replace(/\/$/, "");
+    return slug && slugs.has(slug) ? item : { ...item, caseStudyHref: undefined };
+  });
 }

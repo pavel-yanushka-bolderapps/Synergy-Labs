@@ -3,6 +3,13 @@ import Layout from "../components/layout/Layout.astro";
 import PortfolioGrid from "../components/sections/PortfolioGrid.astro";
 import ContactSection from "../components/sections/ContactSection.astro";
 import { portfolioPage } from "../content/portfolio";
+import { withExistingCaseStudies } from "../lib/sanity";
+
+// Same as the homepage grid: only link projects that actually have a page.
+const portfolioContent = {
+  ...portfolioPage,
+  items: await withExistingCaseStudies(portfolioPage.items),
+};
 ---
 
 <Layout title="Portfolio | Synergy Labs" description={portfolioPage.subheading}>
@@ -11,7 +18,7 @@ import { portfolioPage } from "../content/portfolio";
     <p class="mt-6 text-lg text-black/70">{portfolioPage.subheading}</p>
   </section>
 
-  <PortfolioGrid content={portfolioPage} />
+  <PortfolioGrid content={portfolioContent} />
 
   <ContactSection id="contact-form" />
 </Layout>

@@ -1,0 +1,85 @@
+---
+// The coloured "Achievements and Impact" band on a case study -- an icon,
+// a heading and a row of number cards in the client's own two colours.
+// Rendered from the `stats*` fields on the project document in Sanity (see
+// src/sanity/schemaTypes/projects.ts), and only when the editor has switched
+// the section on and filled in at least one number; getCaseStudyBySlug()
+// resolves that to `stats` being undefined, so the page just skips it.
+//
+// Both colours arrive already validated as full hex codes -- see toHexColor()
+// in src/lib/sanity.ts -- and ride in on two custom properties rather than
+// being written into each rule, so every one of them below stays a plain
+// stylesheet rule that the scoped <style> block can hold.
+import type { CaseStudyStats } from "../../lib/types";
+
+interface Props {
+  content: CaseStudyStats;
+}
+
+const { content } = Astro.props;
+const { heading, subheading, iconSrc, bgColor, accentColor, items } = content;
+---
+
+<section
+  class="cs-stats"
+  style={`--cs-stats-bg: ${bgColor}; --cs-stats-accent: ${accentColor};`}
+>
+  <div class="mx-auto flex max-w-7xl flex-col items-center px-6 py-20">
+    {iconSrc && <img src={iconSrc} alt="" loading="lazy" class="mb-4 h-12 w-12 object-contain" />}
+
+    <h2 class="text-center text-3xl font-semibold text-white md:text-4xl">{heading}</h2>
+    {subheading && <p class="mt-4 text-center text-lg text-white/90">{subheading}</p>}
+
+    <ul class="mt-12 flex w-full flex-wrap justify-center gap-4 md:mt-14">
+      {items.map((item) => (
+        <li class="cs-stats__card">
+          <p class="cs-stats__value">{item.value}</p>
+          <p class="mt-1 text-center text-lg">{item.label}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .cs-stats {
+    background-color: var(--cs-stats-bg);
+  }
+
+  .cs-stats__card {
+    background-color: var(--cs-stats-accent);
+    /* Near-black rather than pure black to match the rest of the site, but
+       the border and the shadow stay a true black: they are the hard offset
+       outline the original design leans on, and softening them flattens the
+       card into its background. */
+    color: var(--color-black, #1b1b1b);
+    border: 1px solid #000;
+    border-radius: 0.5rem;
+    box-shadow: 0.2rem 0.2rem 0.1rem 1px #000;
+    padding: 1.5rem 1.5rem;
+
+    /* Three across on a wide screen, and a share of the row once they wrap.
+       `basis` rather than a fixed width so a study with four or five numbers
+       reflows instead of overflowing, and `max-width` so a study with one
+       number gets a card rather than a banner. */
+    flex: 1 1 16rem;
+    max-width: 24rem;
+  }
+
+  .cs-stats__value {
+    /* System stack, matching the original: the display face is a serif and
+       the body face has no bold cut, and neither carries a row of numbers
+       this size the way a plain grotesque does. */
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 3.2rem;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  @media (max-width: 767px) {
+    .cs-stats__value {
+      font-size: 2.5rem;
+    }
+  }
+</style>

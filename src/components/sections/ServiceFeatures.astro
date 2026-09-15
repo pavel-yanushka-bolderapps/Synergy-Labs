@@ -231,17 +231,26 @@ const { awardBadges } = serviceDetailPage;
 
     let index = 0;
 
+    // Deliberately NOT scrollIntoView: that walks up and scrolls *every*
+    // scrollable ancestor, the document included. The track sits inside a
+    // section that is only `overflow-hidden` -- which is still a scroll
+    // container -- so bringing a card into view also nudged the section and
+    // the page sideways, sliding the whole layout left and leaving a band of
+    // empty page on the right until some other event reset the scroll
+    // position (switching tabs and back, for instance). Setting scrollLeft on
+    // the track itself can only ever move the track.
     const scrollToCard = (i: number) => {
       const card = cards[i];
       if (!card) return;
-      // `block: "nearest"` is what keeps this from scrolling the page
-      // vertically to the card and yanking the reader away from the heading
-      // beside it. Using scrollIntoView rather than computing scrollLeft by
-      // hand means the track's scroll-padding is honoured for free.
-      card.scrollIntoView({
+      // Rects are already in the same coordinate space, so the delta between
+      // them is how far the track still has to travel; subtracting the
+      // track's own inline padding lands the card flush with its edge, the
+      // way scroll-padding does for a snap.
+      const padding = parseFloat(getComputedStyle(track).paddingInlineStart) || 0;
+      const delta = card.getBoundingClientRect().left - track.getBoundingClientRect().left;
+      track.scrollTo({
+        left: track.scrollLeft + delta - padding,
         behavior: reduceMotion ? "auto" : "smooth",
-        inline: "start",
-        block: "nearest",
       });
     };
 

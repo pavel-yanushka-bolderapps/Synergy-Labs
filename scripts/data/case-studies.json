@@ -1,0 +1,554 @@
+{
+  "clapper": {
+    "slug": "clapper",
+    "clientName": "Clapper",
+    "logo": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6788c12b4337cdff7d5fa722_logo.clapper.svg",
+    "brandColor": "#FF6500",
+    "headline": "Video, Live, Chat.",
+    "intro": "One of the fastest-growing social media platforms focused on promoting real lives, connections and communities.",
+    "heroImages": [
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67ea4dd6b4dc6057c5312996_230x0w.webp",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67ea7e1079ab6e20c93d6cb7_unnamed%20(1)%20(1).webp",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67ea7e11af6aa5fb1ff9c226_unnamed%20(3).webp",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67ea4dd53bd7c560349ee76b_230x0w%20(1).webp"
+    ],
+    "metaClient": "Clapper, Inc",
+    "metaYear": "2024",
+    "metaTechStack": "Flutter, Firebase",
+    "metaCategory": "Social Networking",
+    "overviewHeading": "The Challenge",
+    "overviewBody": [
+      "Clapper, founded in 2020, sought to create a platform that catered to a more mature audience, primarily between the ages of 35 and 55, offering an alternative to platforms like TikTok that are predominantly popular among younger users.",
+      "The challenge was to develop a user-friendly platform that simplified the content creation process, fostered genuine community engagement, and provided monetization opportunities for creators, all while maintaining a safe and respectful environment."
+    ],
+    "contentBlocks": [
+      {
+        "heading": "About Clapper",
+        "body": [],
+        "bullets": [
+          "Primarily targets users aged 35 to 55, providing a platform for those seeking fewer content restrictions and a more mature community.",
+          "Offers creators various ways to earn, including live streaming tips, subscription-based \"Clapper Fam\" memberships, and a tipping system through direct messages."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-01.webp"
+      },
+      {
+        "heading": "Key Features",
+        "body": [],
+        "bullets": [
+          "We combine modern technology with a customer-focused mindset to deliver a convenient experience, reliable service and affordable prices.",
+          "Enables real-time broadcasting, fostering direct interaction between creators and their audience. Features like group chats and the \"Clapback\" function facilitate meaningful conversations and community building."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-02.webp"
+      },
+      {
+        "heading": "Why Clapper Stands Out",
+        "body": [],
+        "bullets": [
+          "Clapper has differentiated itself by prioritizing a more mature user base, offering a platform that caters to individuals aged 35-55 who seek a TikTok alternative without the overwhelming youth-focused content",
+          "Clapper enables content creators to earn through various monetization methods, such as tips, memberships, and live streaming donations, further empowering creators to thrive on the platform."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-03.webp"
+      },
+      {
+        "heading": "Technical Innovation in Clapper's Architecture",
+        "body": [],
+        "bullets": [
+          "As developers, one of the standout aspects of Clapper’s platform is its scalable and efficient backend architecture.",
+          "By leveraging cloud-based infrastructure and a microservices approach, Clapper ensures smooth performance even with a high influx of concurrent users and video uploads."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-04.webp"
+      },
+      {
+        "heading": "Seamless Cross-Platform Development",
+        "body": [],
+        "bullets": [
+          "The app is designed to perform smoothly on both iOS and Android, offering native-like experiences on both platforms.",
+          "We focused on building a responsive and adaptive design, making the user experience seamless regardless of the device. This ensures that Clapper users enjoy the same smooth, consistent experience across smartphones and tablets."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-05.webp"
+      }
+    ],
+    "appStoreUrl": "https://apps.apple.com/us/app/clapper-video-live-chat/id1522122685",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.newsclapper.video",
+    "heroImage": "/images/Portfolio/Clapper/main.webp"
+  },
+  "clearcover": {
+    "slug": "clearcover",
+    "clientName": "Clearcover",
+    "logo": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67d47c4a5e98540f0d17fcbc_Clearcover_logo.webp",
+    "brandColor": "#4023D3",
+    "headline": "Clearcover",
+    "intro": "Car insurance that’s fast, easy, and affordable.  The fastest claims in car insurance.",
+    "heroImages": [
+      "/images/Portfolio/ClearCover/clearcover-3.webp",
+      "/images/Portfolio/ClearCover/clearcover-2.webp"
+    ],
+    "metaClient": "Clearcover, Inc",
+    "metaYear": "2024",
+    "metaTechStack": "Flutter, Firebase",
+    "metaCategory": "Insurance, Finance",
+    "overviewHeading": "Challenge",
+    "overviewBody": [
+      "Clearcover, a Chicago-based insurtech company, set out to transform the car insurance industry by offering a seamless, customer-centric experience. The primary challenge was to develop a digital platform that simplified insurance processes, making them faster and more user-friendly, while maintaining profitability in a competitive market.",
+      "Synergy Labs played a pivotal role in developing the Clearcover mobile application, aiming to streamline the car insurance experience for users. Our team was responsible for creating a user-friendly platform that allowed customers to manage policies, submit claims, make payments, and access roadside assistance—all from their smartphones. The app's intuitive design and seamless functionality reflect our commitment to delivering efficient digital solutions that enhance user engagement and satisfaction."
+    ],
+    "contentBlocks": [
+      {
+        "heading": "Clearcover Key Features",
+        "body": [
+          "A digital platform that simplifies insurance processes",
+          "UI Showcase",
+          "Discover how Clearcover's innovative approach to car insurance is transforming the industry by visiting their official website.",
+          "Celebrating our milestones and user success."
+        ],
+        "bullets": [],
+        "image": "/images/Portfolio/ClearCover/clearcover-01.webp"
+      }
+    ],
+    "appStoreUrl": "https://apps.apple.com/us/app/clearcover-car-insurance/id1267703900",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.clearcover.app",
+    "heroImage": "/images/Portfolio/ClearCover/clearcover-main.webp",
+    "stats": {
+      "enabled": true,
+      "icon": "/images/Medal-Streamline-Stickies.avif",
+      "heading": "Achievements and Impact",
+      "subheading": "Celebrating our milestones and user success.",
+      "bgColor": "#4023D3",
+      "accentColor": "#DAFF81",
+      "items": [
+        {
+          "value": "№ 9",
+          "label": "In Car insurance on App Store"
+        },
+        {
+          "value": "25,000",
+          "label": "Global downloads"
+        },
+        {
+          "value": "10x",
+          "label": "Faster report generation"
+        }
+      ]
+    }
+  },
+  "fanbase": {
+    "slug": "fanbase",
+    "clientName": "Fanbase",
+    "logo": null,
+    "brandColor": "#8816FA",
+    "headline": "Be you. Without Limits.",
+    "intro": "Fanbase is a FREE Next-Generation Social Media App that allows ANY user to earn money from day one.",
+    "heroImages": [
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67dc1e069170c9c45ca73165_image%2076.webp"
+    ],
+    "metaClient": "Fanbase, Inc",
+    "metaYear": "2024",
+    "metaTechStack": "Flutter, Firebase",
+    "metaCategory": "Social, Video",
+    "overviewHeading": "The Challenge",
+    "overviewBody": [
+      "Fanbase is a next-generation social media platform that empowers users to monetize their content from day one. Unlike traditional social apps, Fanbase offers a variety of features such as photos, videos, live audio, stories, and more, enabling creators to earn revenue through subscriptions and digital expressions of appreciation called \"Love.\"",
+      "Our team collaborated with Fanbase to develop a user-friendly mobile application that facilitates seamless content creation, sharing, and monetization. The app's intuitive design ensures that both creators and fans can easily navigate and engage with content. By integrating features like live audio sessions, long-form video uploads, and interactive stories, Fanbase fosters a vibrant community where users can connect, share, and support their favorite creators."
+    ],
+    "contentBlocks": [
+      {
+        "heading": "Fanbase Key Features",
+        "body": [
+          "Tools that empower creators and connect fans",
+          "Get a glimpse of Fanbase’s intuitive interface and powerful features in action.",
+          "Celebrating our milestones and user success.",
+          "In Social Networking on App Store"
+        ],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f4d21653aac8ff49bc8d63_phone_webP.webp"
+      }
+    ],
+    "appStoreUrl": "https://apps.apple.com/us/app/fanbase/id1439232869",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.fanbase"
+  },
+  "forbes-councils": {
+    "slug": "forbes-councils",
+    "clientName": "Forbes Councils",
+    "logo": null,
+    "brandColor": "#0D2544",
+    "headline": "Forbes Councils Members-Only App",
+    "intro": null,
+    "heroImages": [
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67fcefcfe7e89c24acfadbbe_unnamed__5__cr-removebg-preview.webp",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67fcefcfe7e89c24acfadbbf_unnamed__32__cr-removebg-preview.webp",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67fcefcfe7e89c24acfadbbc_unnamed_cr-removebg-preview.webp"
+    ],
+    "metaClient": "Forbes Councils",
+    "metaYear": "2023",
+    "metaTechStack": "Flutter, Firebase",
+    "metaCategory": "Business",
+    "overviewHeading": "Project Overview",
+    "overviewBody": [
+      "Forbes Councils, a private membership platform for entrepreneurs, executives, and industry leaders, required a modernized application to enhance usability, improve scalability, and introduce new tools for member interaction.",
+      "The goal was to replace the legacy app with a high-performance solution capable of handling a rapidly expanding user base and offering robust functionality to meet the dynamic needs of the community."
+    ],
+    "contentBlocks": [
+      {
+        "heading": "Challenges",
+        "body": [],
+        "bullets": [
+          "Slow performance, lack of modular architecture, and inefficient data handling.",
+          "The existing infrastructure could not efficiently accommodate a growing user base.",
+          "Limited tools for real-time communication and content sharing among members.",
+          "Ensure robust compliance with privacy standards, including secure messaging and data encryption."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67fe6622937905969821f2b8_Remove-Shield--Streamline-Ultimate.avif"
+      },
+      {
+        "heading": "Solution",
+        "body": [],
+        "bullets": [
+          "Synergy Labs worked with the Forbes Councils team  to create a new application suite.",
+          "Responsive platform accessible on any browser for seamless desktop use.",
+          "Optimized iOS and Android apps for convenient on-the-go access.",
+          "Tablet-specific app with a layout designed for larger screens."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6803e2af0f8de0d5270c258f_web2.png"
+      },
+      {
+        "heading": "Key Features Built:",
+        "body": [],
+        "bullets": [
+          "We built a serverless event registrations system to handle traffic spikes. Built calendar syncing for personal calendars and automated notifications.",
+          "Built an advanced search feature allowing users to filter and find members by industry, location, or expertise.",
+          "We implemented instant messaging with WebSocket protocols, end-to-end encryption, and optimized offline syncing for seamless communication.",
+          "Developed a tailored notification system enabling users to select updates for specific groups, events, or topics of interest.",
+          "Created modular discussion boards with topic threading and Markdown suppo",
+          "Added tools for members to create and participate in polls or surveys, promoting active participation in community decisions."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6803d6bbdc4ee14f998703d7_event.avif"
+      },
+      {
+        "heading": "Results",
+        "body": [
+          "Increased member participation in events by 40%, with significant growth in group discussions.",
+          "Maintained an average rating of 4.8 stars across app stores, reflecting high user satisfaction.",
+          "Over 100,000 downloads across web, mobile, and iPad platforms within the first six months of launch."
+        ],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/680659a676a305a0db65e0f9_5%20star.svg"
+      },
+      {
+        "heading": "Why Synergy Labs?",
+        "body": [],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/68079f3493117408c5072d69_Check.avif"
+      }
+    ],
+    "appStoreUrl": "https://apps.apple.com/us/app/forbes-councils/id1485242568",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.forbescouncils"
+  },
+  "joe-the-juice": {
+    "slug": "joe-the-juice",
+    "clientName": "Joe & The Juice",
+    "logo": null,
+    "brandColor": "#EFA13C",
+    "headline": "Revamping Joe & The Juice’s Mobile Experience",
+    "intro": null,
+    "heroImages": [
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6808f2b8933651ce7bfbd56b_unnamed%20(6).webp",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f62b7260af365dae0fd553_circle-scatter-haikei.svg",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/680a4476b2cf5b1f5622b45f_Arrow-Rectangle.avif",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/680a4476b2cf5b1f5622b45f_Arrow-Rectangle.avif"
+    ],
+    "metaClient": "Joe & The Juice",
+    "metaYear": "2021",
+    "metaTechStack": "Flutter, Firebase",
+    "metaCategory": "Food & Beverage",
+    "overviewHeading": "Project Overview",
+    "overviewBody": [
+      "Joe & The Juice is a global chain of upscale juice bars and coffee shops. We designed the mobile experience for iOS and Android to help streamline the ordering process for over 300 stores.",
+      "The new digital commerce and customer engagement platform features a vibrant visual identity with unique brand elements infused throughout the app.",
+      "Our team iterated on the app over a multi-year partnership to incorporate features supporting the loyalty program, pickup, delivery, and a seamless purchase flow."
+    ],
+    "contentBlocks": [
+      {
+        "heading": "Problem Statement",
+        "body": [],
+        "bullets": [
+          "The existing app design was outdated and needed a modern, cohesive look.",
+          "The user experience required better navigation and a more intuitive flow.",
+          "Additional features were necessary to improve customer engagement and satisfaction.",
+          "Ongoing design support was needed to keep the app aligned with the brand’s evolving needs."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/680ce81034808eee31319f86_Mobile-Phone-Warning.avif"
+      },
+      {
+        "heading": "Solution",
+        "body": [
+          "Synergy Labs redesigned the app with these key improvements:",
+          "Simplified navigation for ordering and loyalty",
+          "Added real-time order tracking"
+        ],
+        "bullets": [
+          "Fresh interface aligned with brand identity",
+          "Enhanced loyalty program",
+          "Regular UI/UX updates"
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/680fa96fcf683d6f2f4e027b_Mobile-Phone-Check.png"
+      },
+      {
+        "heading": "Scope of Work",
+        "body": [
+          "The work across our teams also helped Joe & The Juice sustain during the global pandemic by improving key flows and creating contactless solutions for order pickups.",
+          "Each illustration leverages a pleasant color palette and elevates what would typically be a boring experience."
+        ],
+        "bullets": [
+          "With time to expand on the app, we discovered ways to refine the presentation of the fresh products.",
+          "While waiting for pickup or delivery, customers are presented with animations that show the current stage of their order."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/680e21ffff3fd20da969f579_Screenshot_2025-02-17_at_2.38.58_PM.webp"
+      },
+      {
+        "heading": "Illustrated in 3D",
+        "body": [
+          "To make Joe's extensive loyalty program more engaging, we created a vibrant 3D world that brings rewards to life. Each feature received special treatment:",
+          "Our achievement system features carefully crafted 3D icons:",
+          "These 3D elements create a cohesive visual system that connects Joe's brand imagery with the points-based rewards program, making every interaction more delightful and memorable."
+        ],
+        "bullets": [
+          "Points tracking features playful 3D juice drops that accumulate and splash",
+          "Achievement badges are illustrated as rotating 3D medals with custom brand patterns",
+          "Reward tiers showcase animated 3D juice cups that fill up as customers progress",
+          "Special offers appear as floating 3D gift boxes with particle effects",
+          "Points tracking features playful 3D juice drops that accumulate and splash",
+          "First Purchase: A gleaming 3D golden cup with rising steam particles"
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/680e7867aa7a781ca247db9d_Screenshot_2025-02-17_at_2.43.56_PM.webp"
+      },
+      {
+        "heading": "Magazine Style",
+        "body": [
+          "The app has an unconventional magazine style while maintaining usability and allowing users to navigate without friction."
+        ],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/680e7de76a72adbb379ab21a_Screenshot%202025-02-17%20at%202.47.19%E2%80%AFPM-2.webp"
+      },
+      {
+        "heading": "Timeline",
+        "body": [
+          "From February 2021 to Present, Synergy Labs collaborated with Joe & The Juice to revamp their mobile app. The project focused on UI/UX design and frontend development, working alongside their internal team to modernize the app and enhance functionality. As an extension of their design team, we ensured a seamless user experience, integrated new features, and continuously optimized performance. The app now delivers a more engaging and efficient customer experience, with ongoing support for iterative improvements."
+        ],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/680f9043d2093b4120d7ab80_Presentacio%CC%81n%20de%20Gra%CC%81ficos%20Visuales%20Li%CC%81nea%20de%20Tiempo%20Minimalista%20Colores%20Pasteles.webp"
+      },
+      {
+        "heading": "Results",
+        "body": [
+          "Users praised the new interface and functionality across both iOS and Android platforms.",
+          "Enhanced loyalty program features resulted in a higher retention rate.",
+          "Optimized user flow and improved mobile payment options led to quicker transactions."
+        ],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f62b7260af365dae0fd553_circle-scatter-haikei.svg"
+      },
+      {
+        "heading": "Impact & Success",
+        "body": [],
+        "bullets": [
+          "By redesigning the mobile app and providing ongoing design support, Synergy Labs helped Joe & The Juice create a modern, user-friendly experience that continues to evolve.",
+          "Acting as an extension of their design team, we ensure the app stays aligned with their brand and user expectations"
+        ],
+        "image": null
+      }
+    ],
+    "appStoreUrl": "https://apps.apple.com/us/app/joe-the-juice/id1347116229",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.joejuice.joeloyalty"
+  },
+  "signal": {
+    "slug": "signal",
+    "clientName": "Signal",
+    "logo": null,
+    "brandColor": "#1F4068",
+    "headline": "Signal, a leader in tailored security solutions, partnered with us to create an app that streamlines on-site and remote assessments, boosting efficiency and precision as they grow",
+    "intro": null,
+    "heroImages": [
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6723dcafa33e2199f4924a10_Signal_RGB_Brandmark_SignalBlue.avif",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6723e23381563e179122853e_Signal%20Hero%20(1).avif",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6723e304262279d1919c0314_Signal_GradientMeshBeams-02.avif"
+    ],
+    "contentBlocks": [
+      {
+        "heading": "200+ locally-owned franchises",
+        "body": [],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6723ea6e8e3cef56efc7d019_Signal%20bg%20locations.avif"
+      },
+      {
+        "heading": "The Challenge",
+        "body": [
+          "The Signal team conducts security assessments for condominiums and commercial properties, a process that traditionally required assessors to spend up to three days preparing each report. Relying on multiple tools, such as Notetaker, PDF editors and Photoshop, this manual approach was time-intensive and complex. As the company grew rapidly, Signal recognized the need to automate their assessment process, seeking a streamlined solution to save time and improve operational efficiency."
+        ],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6723f8d046ff44a0db9ff9fd_Leadership.svg"
+      },
+      {
+        "heading": "Our Approach and Strategy",
+        "body": [
+          "The app needed to provide assessors with a seamless, all-in-one tool aligned with Signal’s brand identity for efficient report creation. Close collaboration between Synergy Labs’ design team and Signal’s content and development teams was crucial in achieving this vision.",
+          "The project required a flexible, adaptive process to accommodate ongoing adjustments throughout the app’s design and development lifecycle."
+        ],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6723f9f37055742f0c54cac2_image%201.avif"
+      },
+      {
+        "heading": "RESULTS",
+        "body": [
+          "Preparing reports previously took up to three days and required multiple tools. Now, assessors can complete the entire process within a single app, with reports generated automatically. This shift has resulted in a more efficient workflow, reducing both time and costs for Signal."
+        ],
+        "bullets": [],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6724ce324594a677f6cc38a5_Integrity%202.svg"
+      }
+    ]
+  },
+  "spendee": {
+    "slug": "spendee",
+    "clientName": "Spendee",
+    "logo": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67dab1379cd6e1a20f867e77_spendee_logo.avif",
+    "brandColor": "#2FBF7B",
+    "headline": "Take Control of Your  Finances Effortlessly",
+    "intro": "See all your money in one place, track spending habits, and set budgets with ease. Spendee makes managing money simple, organized, and empowering.",
+    "heroImages": [
+      "/images/Portfolio/Spendee/spendee-2.webp",
+      "/images/Portfolio/Spendee/spendee-3.webp",
+      "/images/Portfolio/Spendee/spendee-4.webp",
+      "/images/Portfolio/Spendee/spendee-5.webp"
+    ],
+    "metaClient": "Spendee, Inc",
+    "metaYear": "2024",
+    "metaTechStack": "Flutter, Firebase",
+    "metaCategory": "Finance",
+    "overviewHeading": "Task",
+    "overviewBody": [
+      "In 2024, we collaborated with Syenergy to revamp the Spendee app, a popular budgeting tool with over 3 million users worldwide. Our goal was to empower users by providing a seamless and visually engaging platform for tracking spending habits, setting financial goals, and gaining insights into their overall financial health.",
+      "To enhance user experience and accessibility, we focused on an intuitive interface that would cater to both new and experienced users. We streamlined the integration of various financial accounts—including online banking, e-wallets, and crypto wallets—enabling users to manage all their finances in one place. Additionally, we introduced features like automated categorization, stylish data visualizations, and insightful financial tips, all designed to simplify personal finance management."
+    ],
+    "contentBlocks": [
+      {
+        "heading": "Take control of your finances.",
+        "body": [
+          "Features",
+          "Spendee tracks your spending, budgets, and savings with insights  to manage your money. We’re transforming personal finance.",
+          "UI Showcase",
+          "Spendee simplifies budgeting and money management. Explore the app’s  user-friendly interface to track expenses, set goals, and save smarter."
+        ],
+        "bullets": [],
+        "image": "/images/Portfolio/Spendee/spendee-1.webp"
+      }
+    ],
+    "heroImage": "/images/Portfolio/Spendee/spendee-main.webp"
+  },
+  "urban-massage": {
+    "slug": "urban-massage",
+    "clientName": "Urban Massage",
+    "logo": null,
+    "brandColor": "#E8595E",
+    "headline": "On-Demand Massage Service App",
+    "intro": null,
+    "heroImages": [
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f67cbd7e3e2e6b6d8e2eb7_t7Sg1g8SF4knGaV8UlZTCTDvUQ8UVV29dyct7GMy_cr.avif",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f67c33ffe1ece722c974e7_mobile-app.webp",
+      "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f62b7260af365dae0fd553_circle-scatter-haikei.svg"
+    ],
+    "metaClient": "Urban Massage",
+    "metaYear": "2024",
+    "metaTechStack": "Flutter, Firebase",
+    "metaCategory": "Lifestyle",
+    "overviewHeading": "About Company",
+    "overviewBody": [
+      "Urban Massage is a UK based on-demand wellness service provider, offering users the convenience ofbooking professional massage therapists directly to their homes, offices, or hotels. They aim to makewellness accessible by allowing users to easily book a wide variety of massage treatments through theirmobile app.",
+      "Project Overview",
+      "Urban Massage engaged Synergy Labs to develop a mobile application aimed at streamlining themassage booking process and enhancing the communication between customers and therapists. Theobjective was to create a high-performance app that delivers seamless scheduling, secure payments, andefficient communication for both users and service providers."
+    ],
+    "contentBlocks": [
+      {
+        "heading": "User-Friendly Booking System",
+        "body": [],
+        "bullets": [
+          "We designed an intuitive booking flow where users can easily select their preferred treatment type, desired date and time, and location.",
+          "The app provides a seamlessbooking experience, allowing customers toschedule appointments with just a few taps."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f62b7260af365dae0fd545_unnamed%20(1)_cr.webp"
+      },
+      {
+        "heading": "Therapist Selection",
+        "body": [],
+        "bullets": [
+          "Users are given the option to choose from a list of available therapists based on location, reviews, and specializations.",
+          "The therapist profiles display their qualifications, ratings, and past customer feedback, enabling informed decisions when booking"
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f62b7260af365dae0fd54a_Check-Square--Streamline-Ultimate.avif"
+      },
+      {
+        "heading": "Real-Time Availability and Scheduling",
+        "body": [],
+        "bullets": [
+          "We integrated real-time scheduling features, allowing users to see therapist availability instantly.",
+          "The app dynamically updates based on the therapistsʼ schedules, ensuring that only available slots are shown, minimizing booking conflicts."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f63084b94192c653d49fd8_unnamed%20(5)_cr.webp"
+      },
+      {
+        "heading": "In-App Payment Integration",
+        "body": [],
+        "bullets": [
+          "Secure, seamless payment was a key requirement for Urban Massage.",
+          "We implemented in-app payment processing with multiple payment options, including credit cards and mobile wallets, allowing users to securely complete their transactions without leaving the app."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f62b7260af365dae0fd54a_Check-Square--Streamline-Ultimate.avif"
+      },
+      {
+        "heading": "GPS Tracking and Location Services",
+        "body": [],
+        "bullets": [
+          "To enhance the user experience, we included GPS tracking to show users the estimated time of arrival of their selected therapist.",
+          "This helps manage user expectations and ensures timely service delivery."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f63d2fa22f048fa6f405d8_unnamed%20(3)_cr.avif"
+      },
+      {
+        "heading": "Manage Booking",
+        "body": [],
+        "bullets": [
+          "The app includes a Manage Booking feature, allowing users to easily view, modify, or cancel their appointments.",
+          "This feature ensures flexibility and convenience, letting customers manage their schedules without any hassle."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f62b7260af365dae0fd54a_Check-Square--Streamline-Ultimate.avif"
+      },
+      {
+        "heading": "Chat with Therapist",
+        "body": [],
+        "bullets": [
+          "The app also incorporates a Chat with Therapist feature, enabling users to communicate directly with their therapist before or after appointments.",
+          "This ensures clear communication, allowing users to discuss preferences, ask questions, or address any concerns related to their booking."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f642c4b5fc458f2c4126ae_unnamed%20(7)_cr.webp"
+      },
+      {
+        "heading": "Review and Rating System",
+        "body": [],
+        "bullets": [
+          "After each session, users can leave ratings and reviews for the therapists.",
+          "This feature is crucial for maintaining quality control and ensuring customer satisfaction by encouraging continuous improvement among therapists."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f62b7260af365dae0fd54a_Check-Square--Streamline-Ultimate.avif"
+      },
+      {
+        "heading": "Therapist Management and Admin Dashboard",
+        "body": [],
+        "bullets": [
+          "For therapists, the app includes a robust management system. They can manage their schedules, accept or decline bookings, and track payment status.",
+          "Additionally, we built a backend dashboard that allows the Urban Massage team to monitor therapist performance, user engagement, and financial metrics."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f66087c90b25766574ea74_unnamed%20(14)_cr.avif"
+      }
+    ],
+    "appStoreUrl": "https://apps.apple.com/gb/app/massage-at-home-urban/id917672501",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.urbanmassage.Massage"
+  }
+}
