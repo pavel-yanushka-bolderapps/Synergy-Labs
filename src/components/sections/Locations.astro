@@ -3,13 +3,14 @@
 // locations/LocationsGrid.astro, shared with /locations -- this is just the
 // heading and the band around it.
 import LocationsGrid from "./locations/LocationsGrid.astro";
-import type { HomeLocationsContent } from "../../lib/types";
+import type { LocationItem } from "../../lib/types";
 
 interface Props {
-  content: HomeLocationsContent;
+  items: LocationItem[];
+  moreLabel: string;
 }
 
-const { content } = Astro.props;
+const { items, moreLabel } = Astro.props;
 ---
 
 <section class="mx-auto max-w-7xl px-6 py-20">
@@ -18,10 +19,6 @@ const { content } = Astro.props;
   </h2>
 
   <div class="mt-10">
-    <LocationsGrid
-      items={content.items}
-      moreLabel={content.moreLocationsLabel}
-      moreHref="/locations"
-    />
+    <LocationsGrid items={items} moreLabel={moreLabel} moreHref="/locations" />
   </div>
 </section>

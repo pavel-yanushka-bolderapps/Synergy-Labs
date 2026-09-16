@@ -18,6 +18,7 @@ export const location = defineType({
       type: "string",
       description: 'The name printed on the card, e.g. "Miami" or "New York City".',
       validation: (Rule) => Rule.required(),
+      group: "card",
     }),
     defineField({
       name: "address",
@@ -25,6 +26,7 @@ export const location = defineType({
       type: "string",
       description: 'The street address, e.g. "78 SW 7th St, Miami, FL 33130".',
       validation: (Rule) => Rule.required(),
+      group: "card",
     }),
     defineField({
       name: "image",
@@ -33,6 +35,7 @@ export const location = defineType({
       options: { hotspot: true },
       description:
         "A photo of the city. Cards are wide, and the image is cropped to fill, so set the hotspot on the part of the skyline that matters.",
+      group: "card",
     }),
     defineField({
       name: "isHeadquarters",
@@ -41,6 +44,16 @@ export const location = defineType({
       initialValue: false,
       description:
         "Adds the HEADQUARTERS badge. Ordering is what actually decides which offices get the two big cards at the top -- this only controls the badge.",
+      group: "card",
+    }),
+    defineField({
+      name: "slug",
+      title: "Slug",
+      type: "slug",
+      options: { source: "city", maxLength: 96 },
+      description: 'The URL for this office\'s own page, e.g. "miami" gives /locations/miami.',
+      validation: (Rule) => Rule.required(),
+      group: "card",
     }),
     defineField({
       name: "order",
@@ -49,7 +62,119 @@ export const location = defineType({
       description:
         "Lower numbers show first. The first two get the wide cards, the next three the row below, and everything after that goes behind the “Other locations” button -- so this field decides what a visitor sees before expanding.",
       validation: (Rule) => Rule.integer(),
+      group: "card",
     }),
+
+    // --- The office's own page (/locations/[slug]) -------------------------
+    //
+    // All optional. The source collection is unevenly filled -- 21 offices
+    // have the full treatment, the five international ones carry only a
+    // heading and a couple of paragraphs -- and the page renders a section
+    // only when its content exists, so an office with nothing here still gets
+    // a valid short page rather than a run of empty headings.
+
+    defineField({
+      name: "mainHeading",
+      title: "Page: heading",
+      type: "string",
+      description:
+        'The <h1> on this office\'s page, e.g. "Miami\'s Trusted Partner for Mobile App and Web Development". Leave blank and it falls back to the city name.',
+      group: "page",
+    }),
+    defineField({
+      name: "mainDescription",
+      title: "Page: intro",
+      type: "text",
+      rows: 5,
+      description: "The paragraph under the heading.",
+      group: "page",
+    }),
+    defineField({
+      name: "description",
+      title: "Page: overview",
+      type: "text",
+      rows: 5,
+      description: "A second, longer paragraph further down the page.",
+      group: "page",
+    }),
+    defineField({
+      name: "mapCode",
+      title: "Page: map embed parameters",
+      type: "text",
+      rows: 3,
+      description:
+        'Just the `pb=` value from a Google Maps embed URL -- the part starting "!1m18!1m12". The page builds the iframe around it. Leave blank to skip the map.',
+      group: "page",
+    }),
+    defineField({
+      name: "jsonLd",
+      title: "Page: LocalBusiness structured data",
+      type: "text",
+      rows: 6,
+      description:
+        "Schema.org JSON-LD, emitted verbatim into the page head for search engines. Must be valid JSON -- a broken value is dropped rather than printed.",
+      group: "page",
+    }),
+
+    defineField({ name: "servicesHeading", title: "Services: heading", type: "string", group: "page" }),
+    defineField({ name: "servicesDescription", title: "Services: description", type: "text", rows: 4, group: "page" }),
+    defineField({ name: "industriesHeading", title: "Industries: heading", type: "string", group: "page" }),
+    defineField({ name: "industriesDescription", title: "Industries: description", type: "text", rows: 4, group: "page" }),
+    defineField({ name: "processHeading", title: "Process: heading", type: "string", group: "page" }),
+    defineField({ name: "processDescription", title: "Process: description", type: "text", rows: 4, group: "page" }),
+    defineField({ name: "whyChooseUsHeading", title: "Why choose us: heading", type: "string", group: "page" }),
+    defineField({ name: "whyChooseUsDescription", title: "Why choose us: description", type: "text", rows: 5, group: "page" }),
+    defineField({ name: "serviceAreaHeading", title: "Service area: heading", type: "string", group: "page" }),
+    defineField({
+      name: "serviceAreaDescription",
+      title: "Service area: description",
+      type: "text",
+      rows: 5,
+      description: "Accepts basic HTML -- the original entries are paragraphs and lists.",
+      group: "page",
+    }),
+    defineField({ name: "faqHeading", title: "FAQ: heading", type: "string", group: "page" }),
+    defineField({ name: "technologiesHeading", title: "Technologies: heading", type: "string", group: "page" }),
+    defineField({ name: "contactHeading", title: "Contact: heading", type: "string", group: "page" }),
+    defineField({
+      name: "contactDescription",
+      title: "Contact: description",
+      type: "text",
+      rows: 4,
+      description: "Accepts basic HTML.",
+      group: "page",
+    }),
+
+    defineField({ name: "caseStudiesHeading", title: "Case studies: heading", type: "string", group: "page" }),
+    defineField({
+      name: "caseStudies",
+      title: "Case studies",
+      type: "array",
+      group: "page",
+      description:
+        "Short write-ups of work done for clients near this office. Two is what the original pages carried, but any number renders.",
+      of: [
+        {
+          type: "object",
+          fields: [
+            defineField({ name: "title", title: "Title", type: "string", validation: (Rule) => Rule.required() }),
+            defineField({
+              name: "body",
+              title: "Body",
+              type: "text",
+              rows: 6,
+              description: "Accepts basic HTML.",
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
+          preview: { select: { title: "title", subtitle: "body" } },
+        },
+      ],
+    }),
+  ],
+  groups: [
+    { name: "card", title: "Card", default: true },
+    { name: "page", title: "Own page" },
   ],
   orderings: [
     {

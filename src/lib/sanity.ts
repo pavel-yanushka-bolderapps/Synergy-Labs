@@ -2,7 +2,9 @@ import { sanityClient } from "sanity:client";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { stegaClean } from "@sanity/client/stega";
 import { loadQuery } from "./loadQuery";
+import locationsData from "../../scripts/data/locations.json";
 import type {
+  LocationDetail,
   LocationItem,
   ServiceItem,
   ServiceFeaturesContent,
@@ -95,6 +97,103 @@ export async function getLocations(): Promise<LocationItem[] | null> {
     console.error("[sanity] Failed to fetch locations, falling back to static content:", err);
     return null;
   }
+}
+
+// --- Individual office pages (src/pages/locations/[slug].astro) ---
+//
+// Unlike the sections above, these read through a repo-side copy of the
+// content as well as Sanity. scripts/data/locations.json is the transcription
+// of the Webflow Locations collection; it is the seeder's input *and* the
+// build-time fallback, so the pages exist before anyone runs the seeder and
+// switch over to Studio once they have. A `location` document always wins
+// where one exists, matched on slug.
+
+interface SanityLocationPageDoc extends SanityLocationDoc {
+  slug?: { current?: string };
+  mainHeading?: string;
+  mainDescription?: string;
+  description?: string;
+  mapCode?: string;
+  jsonLd?: string;
+  servicesHeading?: string;
+  servicesDescription?: string;
+  industriesHeading?: string;
+  industriesDescription?: string;
+  processHeading?: string;
+  processDescription?: string;
+  whyChooseUsHeading?: string;
+  whyChooseUsDescription?: string;
+  serviceAreaHeading?: string;
+  serviceAreaDescription?: string;
+  faqHeading?: string;
+  technologiesHeading?: string;
+  contactHeading?: string;
+  contactDescription?: string;
+  caseStudiesHeading?: string;
+  caseStudies?: { title?: string; body?: string }[];
+}
+
+const LOCATION_PAGE_FIELDS = `
+  city, address, isHeadquarters, image, "slug": slug.current,
+  mainHeading, mainDescription, description, mapCode, jsonLd,
+  servicesHeading, servicesDescription,
+  industriesHeading, industriesDescription,
+  processHeading, processDescription,
+  whyChooseUsHeading, whyChooseUsDescription,
+  serviceAreaHeading, serviceAreaDescription,
+  faqHeading, technologiesHeading,
+  contactHeading, contactDescription,
+  caseStudiesHeading, caseStudies[]{ title, body }
+`;
+
+/** Every office that should get a page, Sanity's merged over the repo copy. */
+export async function getLocationDetails(): Promise<LocationDetail[]> {
+  const fallback = locationsData as LocationDetail[];
+
+  let docs: SanityLocationPageDoc[] | null = null;
+  try {
+    docs = await loadQuery<SanityLocationPageDoc[]>({
+      query: `*[_type == "location" && defined(slug.current)] | order(order asc, city asc){${LOCATION_PAGE_FIELDS}}`,
+    });
+  } catch (err) {
+    console.error("[sanity] Failed to fetch location pages, using the repo copy:", err);
+  }
+
+  if (!docs || docs.length === 0) return fallback;
+
+  const bySlug = new Map(fallback.map((loc) => [loc.slug, loc]));
+
+  for (const doc of docs) {
+    const slug = doc.slug;
+    if (!slug) continue;
+
+    const existing = bySlug.get(slug);
+    // Drop the keys Sanity left empty so they don't blank out a populated
+    // fallback -- a half-filled document should add to the repo copy, not
+    // replace it with holes.
+    const fromSanity = Object.fromEntries(
+      Object.entries({
+        ...doc,
+        imageSrc: doc.image ? imageBuilder.image(doc.image).width(1600).url() : undefined,
+        caseStudies: doc.caseStudies
+          ?.filter((cs): cs is { title: string; body: string } => Boolean(cs?.title && cs?.body))
+          .map((cs) => ({ title: cs.title, body: cs.body })),
+        image: undefined,
+      }).filter(([, value]) => value !== undefined && value !== null && value !== "")
+    );
+
+    bySlug.set(slug, { ...(existing ?? { slug }), ...fromSanity } as LocationDetail);
+  }
+
+  return [...bySlug.values()];
+}
+
+export async function getLocationSlugs(): Promise<string[]> {
+  return (await getLocationDetails()).map((loc) => loc.slug);
+}
+
+export async function getLocationDetailBySlug(slug: string): Promise<LocationDetail | null> {
+  return (await getLocationDetails()).find((loc) => loc.slug === slug) ?? null;
 }
 
 // --- Individual service detail pages (src/pages/our-services/[slug].astro) ---

@@ -64,6 +64,58 @@ export interface LocationItem {
   address: string;
   isHeadquarters?: boolean;
   imageSrc?: string;
+  /** Set once the office has its own page; the card links to it. */
+  slug?: string;
+}
+
+/**
+ * One office's own page (/locations/[slug]).
+ *
+ * Every field past the card's own four is optional because the source
+ * collection is unevenly filled: 21 of the 26 offices have the full
+ * services/industries/process/FAQ treatment and five -- the international
+ * ones -- carry only a heading and a couple of paragraphs. Sections render
+ * only when their content exists, so a thin office gets a short page rather
+ * than a page full of empty headings.
+ */
+export interface LocationDetail extends LocationItem {
+  slug: string;
+  /** The <h1>. Falls back to the city name. */
+  mainHeading?: string;
+  /** The paragraph under the <h1>. */
+  mainDescription?: string;
+  /** A second, longer paragraph further down the page. */
+  description?: string;
+  /** Google Maps embed parameters (the `pb=` value), not a full URL. */
+  mapCode?: string;
+  /** LocalBusiness structured data, emitted verbatim into a script tag. */
+  jsonLd?: string;
+
+  servicesHeading?: string;
+  servicesDescription?: string;
+  industriesHeading?: string;
+  industriesDescription?: string;
+  processHeading?: string;
+  processDescription?: string;
+  whyChooseUsHeading?: string;
+  whyChooseUsDescription?: string;
+  serviceAreaHeading?: string;
+  /** Rich text. */
+  serviceAreaDescription?: string;
+  faqHeading?: string;
+  technologiesHeading?: string;
+  contactHeading?: string;
+  /** Rich text. */
+  contactDescription?: string;
+
+  caseStudiesHeading?: string;
+  caseStudies?: LocationCaseStudy[];
+}
+
+export interface LocationCaseStudy {
+  title: string;
+  /** Rich text. */
+  body: string;
 }
 
 export interface FAQItem {
@@ -141,7 +193,6 @@ export interface HomeCTAContent {
 
 export interface HomeLocationsContent {
   heading: string;
-  items: LocationItem[];
   moreLocationsLabel: string;
 }
 

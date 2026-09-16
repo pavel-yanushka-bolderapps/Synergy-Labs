@@ -1,5 +1,6 @@
-// Seeds the offices into Sanity as `location` documents, from the same files
-// the static fallback uses (src/content/home.ts -> public/images/Locations).
+// Seeds the offices into Sanity as `location` documents from
+// scripts/data/locations.json -- the transcription of the Webflow Locations
+// collection, which is also what the site falls back to before this is run.
 //
 //   node scripts/seed-locations.mjs --dry-run
 //   node scripts/seed-locations.mjs
@@ -8,9 +9,9 @@
 // updates rather than duplicates. Images are content-addressed by Sanity, so
 // re-uploading the same file returns the existing asset instead of a copy.
 //
-// It writes only the fields the schema owns (city, address, isHeadquarters,
-// order, image) via `createOrReplace`, so anything you add in Studio beyond
-// those is not preserved -- run it to populate, not to patch.
+// It writes every field the schema owns via `createOrReplace`, so anything you
+// add in Studio beyond them is not preserved -- run it to populate, not to
+// patch.
 //
 // Needs SANITY_API_WRITE_TOKEN in .env (Editor role). See .env.example.
 
@@ -32,16 +33,39 @@ const locations = await readLocations();
 if (dryRun) {
   console.log(`${locations.length} locations (dry run -- nothing written)\n`);
   for (const [i, loc] of locations.entries()) {
-    console.log(`  ${String(i + 1).padStart(2)}. ${loc.city}${loc.isHeadquarters ? " (HQ)" : ""}`);
-    console.log(`      ${loc.address}`);
-    console.log(`      ${loc.imageSrc ?? "(no image)"}`);
+    const page = [
+      loc.mainHeading && "heading",
+      loc.servicesHeading && "services",
+      loc.industriesHeading && "industries",
+      loc.processHeading && "process",
+      loc.whyChooseUsHeading && "why-us",
+      loc.serviceAreaHeading && "service-area",
+      loc.caseStudyOneTitle && "case-studies",
+      loc.mapCode && "map",
+      loc.jsonLd && "json-ld",
+    ].filter(Boolean);
+    console.log(
+      `  ${String(i + 1).padStart(2)}. ${loc.city.padEnd(16)} /${loc.slug.padEnd(16)} ${page.join(", ")}`
+    );
   }
   process.exit(0);
 }
 
 const mutations = [];
-for (const [i, loc] of locations.entries()) {
+for (const loc of locations) {
   const assetId = loc.imageSrc ? await uploadImage(loc.imageSrc) : null;
+
+  const page = {};
+  for (const key of PAGE_FIELDS) {
+    if (loc[key]) page[key] = loc[key];
+  }
+
+  const caseStudies = [
+    { title: loc.caseStudyOneTitle, body: loc.caseStudyOneBody },
+    { title: loc.caseStudyTwoTitle, body: loc.caseStudyTwoBody },
+  ]
+    .filter((cs) => cs.title && cs.body)
+    .map((cs, i) => ({ _key: `case-${i}`, _type: "object", ...cs }));
 
   mutations.push({
     createOrReplace: {
@@ -49,14 +73,19 @@ for (const [i, loc] of locations.entries()) {
       _type: "location",
       city: loc.city,
       address: loc.address,
+      slug: { _type: "slug", current: loc.slug },
       isHeadquarters: Boolean(loc.isHeadquarters),
-      // The array order is the display order -- first two get the wide cards,
+      // The JSON is already in display order -- first two get the wide cards,
       // next three the row below, the rest sit behind "Other locations".
-      order: (i + 1) * 10,
+      order: loc.order,
+      ...page,
+      ...(caseStudies.length > 0 ? { caseStudies } : {}),
       ...(assetId ? { image: { _type: "image", asset: { _type: "reference", _ref: assetId } } } : {}),
     },
   });
-  console.log(`  prepared ${loc.city}${assetId ? "" : " (no image)"}`);
+
+  const filled = Object.keys(page).length + caseStudies.length;
+  console.log(`  prepared ${loc.city.padEnd(16)} ${filled} page field(s)${assetId ? "" : ", no image"}`);
 }
 
 const res = await fetch(
@@ -73,27 +102,10 @@ console.log(`\nWrote ${mutations.length} location documents to ${projectId}/${da
 
 // --- helpers ---
 
-// home.ts is TypeScript, and this script runs in plain Node. Rather than pull
-// in a transpiler for one array, read the literal out of the file: the shape
-// is a flat list of single-line object literals, which is stable enough to
-// parse and loud enough to fail on if it ever stops being.
 async function readLocations() {
-  const src = await readFile(new URL("../src/content/home.ts", import.meta.url), "utf8");
-  const block = src.slice(src.indexOf("  locations: {"));
-  const items = block.slice(block.indexOf("items: ["), block.indexOf("],"));
-
-  const parsed = [...items.matchAll(/\{\s*city:\s*"((?:[^"\\]|\\.)*)"[^}]*\}/g)].map((m) => {
-    const entry = m[0];
-    const read = (key) => entry.match(new RegExp(`${key}:\\s*"((?:[^"\\\\]|\\\\.)*)"`))?.[1];
-    return {
-      city: read("city"),
-      address: read("address"),
-      imageSrc: read("imageSrc"),
-      isHeadquarters: /isHeadquarters:\s*true/.test(entry),
-    };
-  });
-
-  if (parsed.length === 0) fail("Could not read any locations out of src/content/home.ts.");
+  const raw = await readFile(new URL("./data/locations.json", import.meta.url), "utf8");
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed) || parsed.length === 0) fail("scripts/data/locations.json is empty.");
   return parsed;
 }
 

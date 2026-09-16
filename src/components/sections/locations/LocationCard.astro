@@ -11,11 +11,19 @@ interface Props {
 }
 
 const { location, size = "standard" } = Astro.props;
+
+// Offices with their own page link to it; the rest stay plain divs rather
+// than dead links. Rendered as a tag swap so the card markup stays single.
+const Tag = location.slug ? "a" : "div";
+const linkProps = location.slug
+  ? { href: `/locations/${location.slug}`, "aria-label": `${location.city} office` }
+  : {};
 ---
 
-<div
+<Tag
+  {...linkProps}
   class:list={[
-    "group relative h-full overflow-hidden rounded-2xl",
+    "group relative block h-full overflow-hidden rounded-2xl",
     size === "wide" ? "min-h-[22rem]" : "min-h-[20rem]",
   ]}
 >
@@ -40,4 +48,4 @@ const { location, size = "standard" } = Astro.props;
     <p class="font-display text-lg">{location.city}</p>
     <p class="text-xs text-white/80">{location.address}</p>
   </div>
-</div>
+</Tag>

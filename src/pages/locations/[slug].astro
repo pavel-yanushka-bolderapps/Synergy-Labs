@@ -1,0 +1,207 @@
+---
+// One office's page, e.g. /locations/miami.
+//
+// Same static-build contract as the case studies: a page per office that
+// exists at build time, from getLocationDetails() -- Sanity where a document
+// exists, the repo copy of the Webflow export otherwise.
+//
+// Every section below is conditional. The source collection is unevenly
+// filled: 21 of the 26 offices have the full services/industries/process/FAQ
+// treatment, and the five international ones carry only a heading and a
+// couple of paragraphs. Rendering a section only when it has content means a
+// thin office gets a genuinely shorter page instead of a run of empty
+// headings -- and fills itself in the moment someone writes the copy.
+import Layout from "../../components/layout/Layout.astro";
+import ContactSection from "../../components/sections/ContactSection.astro";
+import Badges from "../../components/sections/Badges.astro";
+import Stats from "../../components/sections/Stats.astro";
+import Reviews from "../../components/sections/Reviews.astro";
+import { home } from "../../content/home";
+import { getLocationDetails } from "../../lib/sanity";
+import type { LocationDetail } from "../../lib/types";
+
+export async function getStaticPaths() {
+  const locations = await getLocationDetails();
+  return locations.map((location) => ({ params: { slug: location.slug }, props: { location } }));
+}
+
+interface Props {
+  location: LocationDetail;
+}
+
+const { location } = Astro.props;
+
+const heading = location.mainHeading?.trim() || `${location.city} Office`;
+
+// The CSV carries the `pb=` parameter blob rather than a whole URL, so build
+// the embed around it here. A malformed value would still produce an iframe,
+// but Google renders its own error inside it rather than breaking the page.
+const mapSrc = location.mapCode ? `https://www.google.com/maps/embed?pb=${location.mapCode}` : null;
+
+// Emitted verbatim into a <script type="application/ld+json">, so it has to be
+// parseable -- a broken blob would be invalid structured data published under
+// our name. Parse and re-serialise instead of trusting the field.
+let structuredData: string | null = null;
+if (location.jsonLd) {
+  try {
+    structuredData = JSON.stringify(JSON.parse(location.jsonLd));
+  } catch {
+    console.warn(`[locations] ${location.slug}: JSON-LD is not valid JSON, skipping it.`);
+  }
+}
+
+const caseStudies = location.caseStudies ?? [];
+
+// The ordered run of prose sections. Written as data because they are all the
+// same shape -- heading plus body -- and half of them are missing on any given
+// office; a list keeps the markup below from being eight near-identical blocks
+// wrapped in eight near-identical conditionals.
+const prose = [
+  { heading: location.servicesHeading, body: location.servicesDescription, html: false },
+  { heading: location.industriesHeading, body: location.industriesDescription, html: false },
+  { heading: location.processHeading, body: location.processDescription, html: false },
+  { heading: location.whyChooseUsHeading, body: location.whyChooseUsDescription, html: false },
+  { heading: location.serviceAreaHeading, body: location.serviceAreaDescription, html: true },
+].filter((section): section is { heading: string; body: string; html: boolean } =>
+  Boolean(section.heading?.trim() && section.body?.trim())
+);
+---
+
+<Layout
+  title={`${location.city} | Synergy Labs`}
+  description={location.mainDescription ?? `Synergy Labs' ${location.city} office: ${location.address}.`}
+>
+  {structuredData && (
+    <script type="application/ld+json" is:inline set:html={structuredData} />
+  )}
+
+  <section class="relative overflow-hidden bg-green-50">
+    <img
+      src="/images/Hero-Bg.svg"
+      alt=""
+      class="pointer-events-none absolute inset-0 h-full w-full object-contain opacity-40 md:object-cover"
+    />
+
+    <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:gap-16 md:py-24">
+      <div class="min-w-0">
+        <p class="text-xs font-semibold uppercase tracking-widest text-secondary-green">
+          {location.isHeadquarters ? "Headquarters" : "Office"}
+        </p>
+        <h1 class="mt-4 font-display text-4xl leading-tight md:text-5xl">{heading}</h1>
+        {location.mainDescription && (
+          <p class="mt-6 max-w-2xl text-lg text-black/70">{location.mainDescription}</p>
+        )}
+        <address class="mt-8 not-italic text-black/70">{location.address}</address>
+        <a
+          href="#contact-form"
+          class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
+        >
+          Start a project in {location.city}
+        </a>
+      </div>
+
+      {location.imageSrc && (
+        <img
+          src={location.imageSrc}
+          alt={location.city}
+          class="h-full max-h-[26rem] w-full rounded-2xl object-cover"
+        />
+      )}
+    </div>
+  </section>
+
+  <Badges content={home.badges} />
+
+  {location.description && (
+    <section class="mx-auto max-w-3xl px-6 py-16 md:py-20">
+      <p class="text-lg leading-relaxed text-black/70">{location.description}</p>
+    </section>
+  )}
+
+  {prose.map((section) => (
+    <section class="mx-auto max-w-3xl px-6 pb-16 md:pb-20">
+      <h2 class="font-display text-3xl leading-tight md:text-4xl">{section.heading}</h2>
+      {section.html ? (
+        <div class="cs-prose mt-6 text-black/70" set:html={section.body} />
+      ) : (
+        <p class="mt-6 text-lg leading-relaxed text-black/70">{section.body}</p>
+      )}
+    </section>
+  ))}
+
+  {caseStudies.length > 0 && (
+    <section class="bg-green-50 py-16 md:py-20">
+      <div class="mx-auto max-w-7xl px-6">
+        <h2 class="font-display text-3xl leading-tight md:text-4xl">
+          {location.caseStudiesHeading ?? "Case studies"}
+        </h2>
+        <div class="mt-10 grid gap-6 md:grid-cols-2">
+          {caseStudies.map((study) => (
+            <article class="rounded-2xl bg-white p-8 shadow-sm">
+              <h3 class="font-display text-xl md:text-2xl">{study.title}</h3>
+              <div class="cs-prose mt-4 text-black/70" set:html={study.body} />
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <Reviews content={home.reviews} />
+
+  {mapSrc && (
+    <section class="mx-auto max-w-7xl px-6 py-16 md:py-20">
+      <h2 class="font-display text-3xl leading-tight md:text-4xl">Find us in {location.city}</h2>
+      <address class="mt-4 not-italic text-black/70">{location.address}</address>
+      <div class="mt-8 overflow-hidden rounded-2xl">
+        <iframe
+          src={mapSrc}
+          title={`Map of the Synergy Labs office in ${location.city}`}
+          width="100%"
+          height="400"
+          style="border:0"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </section>
+  )}
+
+  <Stats content={home.stats} />
+
+  {(location.contactHeading || location.contactDescription) && (
+    <section class="mx-auto max-w-3xl px-6 pt-16 text-center md:pt-20">
+      {location.contactHeading && (
+        <h2 class="font-display text-3xl leading-tight md:text-4xl">{location.contactHeading}</h2>
+      )}
+      {location.contactDescription && (
+        <div class="cs-prose mt-6 text-black/70" set:html={location.contactDescription} />
+      )}
+    </section>
+  )}
+
+  <ContactSection id="contact-form" />
+</Layout>
+
+<style is:global>
+  /* The Webflow fields are rich text -- paragraphs, the odd list -- and
+     arrive as a blob of HTML rather than as structured content, so the
+     spacing has to come from the container. */
+  .cs-prose > * + * {
+    margin-top: 1rem;
+  }
+
+  .cs-prose ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+
+  .cs-prose li + li {
+    margin-top: 0.5rem;
+  }
+
+  .cs-prose a {
+    text-decoration: underline;
+  }
+</style>

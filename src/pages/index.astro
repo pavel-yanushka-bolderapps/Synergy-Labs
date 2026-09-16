@@ -14,13 +14,16 @@ import Team from "../components/sections/Team.astro";
 import FAQ from "../components/sections/FAQ.astro";
 import ContactSection from "../components/sections/ContactSection.astro";
 import { home } from "../content/home";
-import { getServices, withExistingCaseStudies } from "../lib/sanity";
+import { getLocationDetails, getServices, withExistingCaseStudies } from "../lib/sanity";
 
 // Services now live in Sanity (see /studio) instead of home.ts. If the CMS
 // isn't configured yet (no PUBLIC_SANITY_PROJECT_ID) or has no `service`
 // documents, getServices() returns null and this falls back to the static
 // list in content/home.ts so the site never renders an empty grid.
 const sanityServices = await getServices();
+// The offices are shared with /locations and with each office's own page, so
+// they come from one place rather than a copy in home.ts.
+const locationItems = await getLocationDetails();
 // Hide "View case study" on projects that have no case study page.
 const selectedWorks = {
   ...home.selectedWorks,
@@ -43,7 +46,7 @@ const servicesContent = {
   <ServicesGrid content={servicesContent} />
   <CTA content={home.cta} />
   <Badges content={home.badges} />
-  <Locations content={home.locations} />
+  <Locations items={locationItems} moreLabel={home.locations.moreLocationsLabel} />
   <Team content={home.team} />
   <FAQ content={home.faq} />
   <ContactSection id="cta" />

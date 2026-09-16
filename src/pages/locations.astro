@@ -11,9 +11,9 @@ import Layout from "../components/layout/Layout.astro";
 import LocationsGrid from "../components/sections/locations/LocationsGrid.astro";
 import ContactSection from "../components/sections/ContactSection.astro";
 import { home } from "../content/home";
-import { getLocations } from "../lib/sanity";
+import { getLocationDetails } from "../lib/sanity";
 
-const items = (await getLocations()) ?? home.locations.items;
+const items = await getLocationDetails();
 const headquarters = items.find((item) => item.isHeadquarters);
 
 const description = headquarters
