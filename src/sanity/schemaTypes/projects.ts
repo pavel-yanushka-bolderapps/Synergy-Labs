@@ -1,4 +1,5 @@
 import { defineField, defineType } from "sanity";
+import { caseStudySectionRefs } from "./caseStudySections";
 
 // A portfolio case study -- one client project, rendered at
 // /projects/casestudy/<slug> by src/pages/projects/casestudy/[slug].astro.
@@ -170,12 +171,28 @@ export const projects = defineType({
     }),
 
     defineField({
-      name: "contentBlocks",
-      title: "Content blocks",
+      name: "sections",
+      title: "Page sections",
       type: "array",
       group: "content",
+      of: caseStudySectionRefs,
       description:
-        "The body of the case study. Each block is a heading, some text and/or bullets, and an image; they alternate down the page automatically unless you override the image side.",
+        "The body of the case study, built section by section. Add as many as you like, in any order, and drag to rearrange.",
+    }),
+
+    // Superseded by `sections` above, which can express everything this
+    // could and a good deal it couldn't. Kept until the last case study has
+    // been moved across: the page falls back to these blocks for any study
+    // with no sections yet, so the two can coexist through the migration
+    // rather than every study having to move on the same day.
+    defineField({
+      name: "contentBlocks",
+      title: "Content blocks (old)",
+      type: "array",
+      group: "content",
+      hidden: ({ document }) => Boolean((document?.sections as unknown[] | undefined)?.length),
+      description:
+        "The previous, fixed layout. Only used while this case study has no page sections above -- add one and these stop showing.",
       of: [
         {
           type: "object",
@@ -221,18 +238,19 @@ export const projects = defineType({
       ],
     }),
 
-    // The coloured "Achievements and Impact" band. It is off by default and
-    // every study decides for itself whether to show one, because a study
-    // with no hard numbers to point at is better off without the section than
-    // with three empty cards in it.
+    // Superseded by the "Achievements band" section in the page builder,
+    // which can sit anywhere on the page instead of always landing at the
+    // bottom. Kept alongside contentBlocks for the same reason: a study that
+    // hasn't moved to sections yet still renders from these.
     defineField({
       name: "statsEnabled",
-      title: "Show the achievements section",
+      title: "Show the achievements section (old)",
       type: "boolean",
       group: "stats",
       initialValue: false,
+      hidden: ({ document }) => Boolean((document?.sections as unknown[] | undefined)?.length),
       description:
-        "Turn on to show a coloured band of headline numbers between the case study and the footer. Everything below only takes effect while this is on.",
+        "The previous, fixed achievements band. Only used while this case study has no page sections on the Content tab -- add an Achievements band section there instead, which you can place anywhere on the page.",
     }),
     defineField({
       name: "statsIcon",

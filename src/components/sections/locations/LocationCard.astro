@@ -1,0 +1,43 @@
+---
+// One office card. Extracted because the same markup was written out three
+// times in Locations.astro (wide row, three-up row, hidden row) and is needed
+// again on /locations -- six copies of a card that has to stay identical.
+import type { LocationItem } from "../../../lib/types";
+
+interface Props {
+  location: LocationItem;
+  /** The two cards at the top of the grid are wide, so they get more height. */
+  size?: "wide" | "standard";
+}
+
+const { location, size = "standard" } = Astro.props;
+---
+
+<div
+  class:list={[
+    "group relative h-full overflow-hidden rounded-2xl",
+    size === "wide" ? "min-h-[22rem]" : "min-h-[20rem]",
+  ]}
+>
+  {location.imageSrc && (
+    <img
+      src={location.imageSrc}
+      alt={location.city}
+      loading="lazy"
+      class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+    />
+  )}
+
+  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+
+  {location.isHeadquarters && (
+    <span class="absolute left-4 top-4 rounded-full bg-secondary-green px-3 py-1 text-xs font-semibold text-white">
+      HEADQUARTERS
+    </span>
+  )}
+
+  <div class="absolute bottom-4 left-4 right-4 text-white">
+    <p class="font-display text-lg">{location.city}</p>
+    <p class="text-xs text-white/80">{location.address}</p>
+  </div>
+</div>

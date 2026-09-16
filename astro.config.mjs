@@ -30,10 +30,20 @@ export default defineConfig({
       useCdn: true,
       apiVersion: '2025-08-31',
       studioBasePath: '/studio',
+      // Must be set explicitly. @sanity/astro only falls back to reading
+      // `output` when this is absent, and `output` defaults to 'static' --
+      // which it maps to *hash* routing, injecting a single exact `/studio`
+      // route. Every deeper URL then 404s, including the
+      // `/studio/intent/edit/...` deep links stega writes into the page: the
+      // "Open in Studio" button on the Preview tab led straight to Astro's
+      // 404. 'browser' injects `/studio/[...params]` as an on-demand route
+      // instead, which is what the adapter note at the top of this file is
+      // describing. Path routing is also what stega.studioUrl below assumes.
+      studioRouterHistory: 'browser',
       // Tells stega-encoded strings which Studio to deep-link into when an
       // editor clicks an element in the Preview tab. Must match
-      // studioBasePath above, with no `#` suffix -- @sanity/astro handles
-      // the Studio's hash routing itself.
+      // studioBasePath above, and must stay `#`-free to match the browser
+      // history set above.
       stega: {
         studioUrl: '/studio',
       },

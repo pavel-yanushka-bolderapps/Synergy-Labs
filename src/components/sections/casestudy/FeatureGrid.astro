@@ -1,0 +1,92 @@
+---
+// A run of small items under one heading -- the most-used shape on the
+// original case studies. Two presentations of the same data: "cards" gives
+// each item an icon, a title and a line of copy; "tiles" packs them tighter
+// and shows titles only, which is what the "Why Synergy Labs?" row was.
+import SectionShell from "./SectionShell.astro";
+import type { CaseStudyFeatureGrid } from "../../../lib/types";
+
+interface Props {
+  content: CaseStudyFeatureGrid;
+}
+
+const { content } = Astro.props;
+const { eyebrow, heading, lead, layout, items, background } = content;
+
+// Three across reads best, but two items across three columns leaves a
+// conspicuous hole, so a short list gets a column each instead.
+const columns = items.length <= 2 ? items.length : 3;
+---
+
+<SectionShell background={background}>
+  <div class="max-w-3xl">
+    {eyebrow && (
+      <p class="mb-3 text-xs font-semibold uppercase tracking-widest opacity-60">{eyebrow}</p>
+    )}
+    <h2 class="font-display text-3xl leading-tight md:text-4xl">{heading}</h2>
+    {lead && <p class="mt-5 text-lg opacity-70">{lead}</p>}
+  </div>
+
+  <ul
+    class:list={[
+      "mt-12 grid gap-6 md:mt-14",
+      layout === "tiles" ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2",
+      layout === "cards" && columns === 3 && "lg:grid-cols-3",
+    ]}
+  >
+    {items.map((item) => (
+      <li
+        class:list={[
+          "cs-feature flex rounded-2xl",
+          layout === "tiles"
+            ? "items-center gap-4 p-5"
+            : "flex-col p-8",
+        ]}
+      >
+        {item.imageSrc && (
+          <img
+            src={item.imageSrc}
+            alt=""
+            loading="lazy"
+            class:list={[
+              "shrink-0 object-contain",
+              layout === "tiles" ? "h-10 w-10" : "h-14 w-14",
+            ]}
+          />
+        )}
+
+        <div class="min-w-0">
+          <h3
+            class:list={[
+              "font-display leading-tight",
+              layout === "tiles" ? "text-lg" : "mt-6 text-xl md:text-2xl",
+              layout === "cards" && !item.imageSrc && "mt-0",
+            ]}
+          >
+            {item.title}
+          </h3>
+          {layout === "cards" && item.description && (
+            <p class="mt-4 opacity-70">{item.description}</p>
+          )}
+        </div>
+      </li>
+    ))}
+  </ul>
+</SectionShell>
+
+<style>
+  /* A white card on the light grounds. On the brand background a white card
+     would fight the band, so there the item becomes a translucent panel that
+     lets the client's colour through and keeps the inherited white text. */
+  .cs-feature {
+    background-color: #fff;
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.04),
+      0 4px 10px -4px rgb(0 0 0 / 0.1);
+  }
+
+  :global(.cs-section--brand) .cs-feature {
+    background-color: rgb(255 255 255 / 0.1);
+    box-shadow: none;
+  }
+</style>

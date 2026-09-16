@@ -9,7 +9,9 @@
 import Layout from "../../../components/layout/Layout.astro";
 import ContactSection from "../../../components/sections/ContactSection.astro";
 import Badges from "../../../components/sections/Badges.astro";
-import CaseStudyStats from "../../../components/sections/CaseStudyStats.astro";
+import Sections from "../../../components/sections/casestudy/Sections.astro";
+import StatsBand from "../../../components/sections/casestudy/StatsBand.astro";
+import SplitBlock from "../../../components/sections/casestudy/SplitBlock.astro";
 import { home } from "../../../content/home";
 import { getCaseStudySlugs, getCaseStudyBySlug } from "../../../lib/sanity";
 import type { CaseStudy } from "../../../lib/types";
@@ -76,16 +78,38 @@ const storeLinks = [
     width: 160,
   },
 ].filter((link): link is typeof link & { href: string } => Boolean(link.href));
+
+// How the grid decoration sits on a brand-coloured band. CSS can't ask
+// whether a colour is dark, but readableInk() already answered that question
+// to pick the text colour, so reuse its answer: white ink means a dark band,
+// where the artwork's light lines read as drawn. Dark ink means a light band,
+// where they have to be inverted to dark to be seen at all. The light band
+// gets the lower opacity because dark-on-light carries further than
+// light-on-dark. See the note in SectionShell.astro.
+const gridBlend =
+  study.brandInk === "#ffffff"
+    ? { filter: "none", opacity: "0.4" }
+    : { filter: "invert(1)", opacity: "0.35" };
 ---
 
 <Layout
   title={`${study.clientName} Case Study | Synergy Labs`}
   description={study.metaDescription}
 >
-  <section
-    class="cs-hero relative overflow-hidden bg-secondary"
-    style={`--cs-brand: ${study.brandColor}; --cs-brand-fade: ${study.brandColorFade};`}
+  <!-- The client's colour is set once here rather than on the hero alone, so
+       every section down the page -- including the page-builder ones, which
+       are separate components -- can reach it through inheritance instead of
+       being handed it as a prop. -->
+  <div
+    style={[
+      `--cs-brand: ${study.brandColor}`,
+      `--cs-brand-fade: ${study.brandColorFade}`,
+      `--cs-brand-ink: ${study.brandInk}`,
+      `--cs-grid-filter: ${gridBlend.filter}`,
+      `--cs-grid-opacity: ${gridBlend.opacity}`,
+    ].join("; ")}
   >
+  <section class="cs-hero relative overflow-hidden bg-secondary">
     <img
       src="/images/Hero-Bg.svg"
       alt=""
@@ -201,61 +225,35 @@ const storeLinks = [
     </section>
   )}
 
-  {study.blocks.map((block) => (
-    <section class="relative overflow-hidden">
-      <img
-        src="/images/Portfolio/background-secondary-portfolio.avif"
-        alt=""
-        loading="lazy"
-        class="pointer-events-none absolute inset-0 h-full w-full object-cover"
-      />
-
-      <div class="relative mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 md:grid-cols-2 md:gap-16 md:py-20">
-        {block.imageSrc && (
-          <div class:list={["min-w-0", block.imageSide === "right" && "md:order-2"]}>
-            <img
-              src={block.imageSrc}
-              alt=""
-              loading="lazy"
-              class="w-full rounded-3xl object-cover"
-            />
-          </div>
-        )}
-
-        <div class="min-w-0">
-          <h2 class="font-display text-3xl leading-tight md:text-4xl">{block.heading}</h2>
-          {block.paragraphs.map((p) => (
-            <p class="mt-5 text-black/70">{p}</p>
-          ))}
-          {block.bullets.length > 0 && (
-            <ul class="mt-6 space-y-4">
-              {block.bullets.map((bullet) => (
-                <li class="flex gap-3">
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                    class="mt-1 h-5 w-5 shrink-0 text-secondary-green"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M10 18a8 8 0 1 0 0-16a8 8 0 0 0 0 16m3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79l-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089z"
-                      clip-rule="evenodd"></path>
-                  </svg>
-                  <span class="text-black/70">{bullet}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </section>
-  ))}
-
-  {study.stats && <CaseStudyStats content={study.stats} />}
+  <!-- The body of the page. A migrated case study renders its page-builder
+       sections; one that hasn't been moved across yet falls back to the old
+       fixed contentBlocks + achievements band, so the two can coexist for as
+       long as the migration takes rather than every study having to move on
+       the same day. Both paths render the same components. -->
+  {study.sections.length > 0 ? (
+    <Sections sections={study.sections} />
+  ) : (
+    <>
+      {study.blocks.map((block) => (
+        <SplitBlock
+          content={{
+            _type: "splitBlock",
+            heading: block.heading,
+            paragraphs: block.paragraphs,
+            bullets: block.bullets,
+            imageSrc: block.imageSrc,
+            imageSide: block.imageSide,
+            background: "default",
+          }}
+        />
+      ))}
+      {study.stats && <StatsBand content={study.stats} />}
+    </>
+  )}
 
   <Badges content={home.badges} />
   <ContactSection id="contact-form" />
+  </div>
 </Layout>
 
 <style>

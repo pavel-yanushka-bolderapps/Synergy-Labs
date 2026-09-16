@@ -1,0 +1,93 @@
+---
+// One large visual with centred copy above it -- the "UI Showcase",
+// "App Interface" and "Magazine Style" moments. The image is the point, so
+// it runs the full width of the container rather than sharing a row.
+import SectionShell from "./SectionShell.astro";
+import type { CaseStudyShowcase } from "../../../lib/types";
+
+interface Props {
+  content: CaseStudyShowcase;
+}
+
+const { content } = Astro.props;
+const { eyebrow, heading, body, imageSrc, imageSize, link, background } = content;
+---
+
+<SectionShell background={background}>
+  <div class="mx-auto max-w-3xl text-center">
+    {eyebrow && (
+      <p class="mb-3 text-xs font-semibold uppercase tracking-widest opacity-60">{eyebrow}</p>
+    )}
+    <h2 class="font-display text-3xl leading-tight md:text-4xl">{heading}</h2>
+    {body && <p class="mt-5 text-lg opacity-70">{body}</p>}
+
+    {link && (
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="cs-showcase__link mt-8 inline-block rounded-md px-8 py-4 font-semibold transition"
+      >
+        {link.label}
+      </a>
+    )}
+  </div>
+
+  <img
+    src={imageSrc}
+    alt=""
+    loading="lazy"
+    class:list={["cs-showcase__image mx-auto mt-12 rounded-3xl md:mt-14", `is-${imageSize}`]}
+  />
+</SectionShell>
+
+<style>
+  /* The showcase image is a product shot, not a banner: run full width, a
+     row of phone screens towers over the copy that introduces it. But how
+     wide it should actually be depends on how much empty space a given shot
+     carries around its subject -- a tight three-phone render and an airy
+     panoramic mockup want very different widths under the same heading --
+     so the size is an editor choice rather than one fixed value. See
+     `imageSize` in src/sanity/schemaTypes/caseStudySections/showcase.ts.
+     "full" needs no rule of its own: it is the base width below.
+
+     object-contain, not cover: these shots have deliberate empty space
+     around them and cover would crop it away at the edges. With no height
+     set the image keeps its own aspect ratio either way, so this only
+     matters if a future one is ever given a fixed box. */
+  .cs-showcase__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* Viewport units rather than fixed rem so the figure tracks the screen,
+     but only from md up -- 40vw on a phone is a thumbnail, so below that
+     every size takes the column and the reading width governs instead. */
+  @media (min-width: 768px) {
+    .cs-showcase__image.is-small {
+      width: 40vw;
+    }
+
+    .cs-showcase__image.is-medium {
+      width: 60vw;
+    }
+  }
+
+  /* The client's colour on light grounds. On the brand band that would be
+     invisible, so it inverts to a white button with the brand colour on it. */
+  .cs-showcase__link {
+    background-color: var(--cs-brand, var(--color-secondary-green, #007244));
+    color: #fff;
+  }
+
+  .cs-showcase__link:hover {
+    opacity: 0.85;
+  }
+
+  :global(.cs-section--brand) .cs-showcase__link {
+    background-color: #fff;
+    color: var(--cs-brand, var(--color-secondary-green, #007244));
+  }
+</style>

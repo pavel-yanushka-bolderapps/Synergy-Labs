@@ -1,0 +1,891 @@
+{
+  "forbes-councils": {
+    "brandColor": "#0D2544",
+    "sections": [
+      {
+        "_type": "featureGrid",
+        "_key": "challenges",
+        "background": "brand",
+        "heading": "Challenges",
+        "layout": "cards",
+        "items": [
+          {
+            "_type": "featureItem",
+            "_key": "ch-0",
+            "title": "Legacy System Bottlenecks",
+            "description": "Slow performance, lack of modular architecture, and inefficient data handling.",
+            "image": "/images/Remove-Shield--Streamline-Ultimate.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "ch-1",
+            "title": "Scalability",
+            "description": "The existing infrastructure could not efficiently accommodate a growing user base.",
+            "image": "/images/Remove-Shield--Streamline-Ultimate.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "ch-2",
+            "title": "Interactivity and Collaboration",
+            "description": "Limited tools for real-time communication and content sharing among members.",
+            "image": "/images/Remove-Shield--Streamline-Ultimate.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "ch-3",
+            "title": "Data Security",
+            "description": "Ensure robust compliance with privacy standards, including secure messaging and data encryption.",
+            "image": "/images/Remove-Shield--Streamline-Ultimate.avif"
+          }
+        ]
+      },
+      {
+        "_type": "featureGrid",
+        "_key": "solution",
+        "background": "default",
+        "heading": "Solution",
+        "layout": "cards",
+        "lead": "Synergy Labs worked with the Forbes Councils team to create a new application suite.",
+        "items": [
+          {
+            "_type": "featureItem",
+            "_key": "so-0",
+            "title": "Web Application",
+            "description": "Responsive platform accessible on any browser for seamless desktop use.",
+            "image": "/images/web2.png"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "so-1",
+            "title": "Mobile Application",
+            "description": "Optimized iOS and Android apps for convenient on-the-go access.",
+            "image": "/images/Phone.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "so-2",
+            "title": "iPad Version",
+            "description": "Tablet-specific app with a layout designed for larger screens.",
+            "image": "/images/Tablet.avif"
+          }
+        ]
+      },
+      {
+        "_type": "showcase",
+        "_key": "suite",
+        "background": "tinted",
+        "heading": "One suite, every screen",
+        "body": "The same member experience across web, mobile and tablet.",
+        "image": "/images/connections-hero-v2.webp",
+        "imageSize": "medium"
+      },
+      {
+        "_type": "featureGrid",
+        "_key": "keyfeatures",
+        "background": "default",
+        "heading": "Key Features Built",
+        "layout": "cards",
+        "items": [
+          {
+            "_type": "featureItem",
+            "_key": "kf-0",
+            "title": "Event Management",
+            "description": "We built a serverless event registrations system to handle traffic spikes. Built calendar syncing for personal calendars and automated notifications.",
+            "image": "/images/event.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "kf-1",
+            "title": "Member Directory",
+            "description": "Built an advanced search feature allowing users to filter and find members by industry, location, or expertise.",
+            "image": "/images/member.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "kf-2",
+            "title": "Real-Time Messaging",
+            "description": "We implemented instant messaging with WebSocket protocols, end-to-end encryption, and optimized offline syncing for seamless communication.",
+            "image": "/images/messaging.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "kf-3",
+            "title": "Custom Notifications",
+            "description": "Developed a tailored notification system enabling users to select updates for specific groups, events, or topics of interest.",
+            "image": "/images/notifications.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "kf-4",
+            "title": "Group Collaboration",
+            "description": "Created modular discussion boards with topic threading and Markdown support.",
+            "image": "/images/group.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "kf-5",
+            "title": "Interactive Polls and Surveys",
+            "description": "Added tools for members to create and participate in polls or surveys, promoting active participation in community decisions.",
+            "image": "/images/interactive.avif"
+          }
+        ]
+      },
+      {
+        "_type": "statsBand",
+        "_key": "results",
+        "heading": "Results",
+        "bgColor": "#0D2544",
+        "accentColor": "#E8EEF5",
+        "items": [
+          {
+            "_type": "statItem",
+            "_key": "rs-0",
+            "value": "40%",
+            "label": "Community Engagement",
+            "description": "Increased member participation in events by 40%, with significant growth in group discussions."
+          },
+          {
+            "_type": "statItem",
+            "_key": "rs-1",
+            "value": "4.8",
+            "label": "High Rating",
+            "description": "Maintained an average rating of 4.8 stars across app stores, reflecting high user satisfaction."
+          },
+          {
+            "_type": "statItem",
+            "_key": "rs-2",
+            "value": "100K",
+            "label": "Application Success",
+            "description": "Over 100,000 downloads across web, mobile, and iPad platforms within the first six months of launch."
+          }
+        ]
+      },
+      {
+        "_type": "testimonial",
+        "_key": "quote",
+        "background": "tinted",
+        "quote": "Synergy Labs did an amazing job helping us build our app. They made it easy to use, added great features like event tools and messaging, and really improved the overall experience for our members. We've seen a big boost in engagement, and our members love it. Couldn't have asked for a better team to work with!",
+        "authorName": "Scott Gerber",
+        "authorRole": "Founder of Forbes Councils"
+      },
+      {
+        "_type": "featureGrid",
+        "_key": "whysl",
+        "background": "default",
+        "heading": "Why Synergy Labs?",
+        "layout": "tiles",
+        "items": [
+          {
+            "_type": "featureItem",
+            "_key": "wy-0",
+            "title": "Expertise in Fintech",
+            "image": "/images/Check.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "wy-1",
+            "title": "User-Centered Design",
+            "image": "/images/Check.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "wy-2",
+            "title": "Scalability & Performance",
+            "image": "/images/Check.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "wy-3",
+            "title": "Security & Compliance",
+            "image": "/images/Check.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "wy-4",
+            "title": "Proven Track of Record",
+            "image": "/images/Check.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "wy-5",
+            "title": "Long-Term Partnership",
+            "image": "/images/Check.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "wy-6",
+            "title": "Cross-Platform Expertise",
+            "image": "/images/Check.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "wy-7",
+            "title": "Tailored Solutions for Business Growth",
+            "image": "/images/Check.avif"
+          }
+        ]
+      }
+    ]
+  },
+  "signal": {
+    "brandColor": "#1F4068",
+    "sections": [
+      {
+        "_type": "showcase",
+        "_key": "franchises",
+        "background": "default",
+        "heading": "200+ locally-owned franchises",
+        "image": "/images/Signal-bg-locations.avif",
+        "imageSize": "full"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "challenge",
+        "background": "default",
+        "heading": "The Challenge",
+        "imageSide": "right",
+        "image": "/images/Problem-Statement_1.avif",
+        "body": "The Signal team conducts security assessments for condominiums and commercial properties, a process that traditionally required assessors to spend up to three days preparing each report.\n\nRelying on multiple tools, such as Notetaker, PDF editors and Photoshop, this manual approach was time-intensive and complex. As the company grew rapidly, Signal recognized the need to automate their assessment process, seeking a streamlined solution to save time and improve operational efficiency."
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "approach",
+        "background": "default",
+        "heading": "Our Approach and Strategy",
+        "imageSide": "left",
+        "image": "/images/image-1_1.avif",
+        "body": "The app needed to provide assessors with a seamless, all-in-one tool aligned with Signal’s brand identity for efficient report creation. Close collaboration between Synergy Labs’ design team and Signal’s content and development teams was crucial in achieving this vision.\n\nThe project required a flexible, adaptive process to accommodate ongoing adjustments throughout the app’s design and development lifecycle."
+      },
+      {
+        "_type": "featureGrid",
+        "_key": "delivery",
+        "background": "tinted",
+        "heading": "What we delivered",
+        "layout": "cards",
+        "items": [
+          {
+            "_type": "featureItem",
+            "_key": "dl-0",
+            "title": "4 weeks",
+            "description": "To finish the project.",
+            "image": "/images/Partner.svg"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "dl-1",
+            "title": "Cross-Platform",
+            "description": "Web on React, iOS on Swift, Android on Kotlin.",
+            "image": "/images/Team.svg"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "dl-2",
+            "title": "Instant PDFs",
+            "description": "Seamless PDF generation for quick reporting.",
+            "image": "/images/Success.svg"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "dl-3",
+            "title": "Compressed Images",
+            "description": "Built-in image compression for faster uploads.",
+            "image": "/images/Settings.svg"
+          }
+        ]
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "results",
+        "background": "brand",
+        "eyebrow": "Results",
+        "heading": "From 3 Days to 3 Minutes",
+        "imageSide": "right",
+        "image": "/images/Signal-Hero-1.avif",
+        "body": "Preparing reports previously took up to three days and required multiple tools. Now, assessors can complete the entire process within a single app, with reports generated automatically. This shift has resulted in a more efficient workflow, reducing both time and costs for Signal."
+      }
+    ]
+  },
+  "clapper": {
+    "brandColor": "#FF6500",
+    "sections": [
+      {
+        "_type": "splitBlock",
+        "_key": "blk-0",
+        "heading": "About Clapper",
+        "bullets": [
+          "Primarily targets users aged 35 to 55, providing a platform for those seeking fewer content restrictions and a more mature community.",
+          "Offers creators various ways to earn, including live streaming tips, subscription-based \"Clapper Fam\" memberships, and a tipping system through direct messages."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-01.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-1",
+        "heading": "Key Features",
+        "bullets": [
+          "We combine modern technology with a customer-focused mindset to deliver a convenient experience, reliable service and affordable prices.",
+          "Enables real-time broadcasting, fostering direct interaction between creators and their audience. Features like group chats and the \"Clapback\" function facilitate meaningful conversations and community building."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-02.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-2",
+        "heading": "Why Clapper Stands Out",
+        "bullets": [
+          "Clapper has differentiated itself by prioritizing a more mature user base, offering a platform that caters to individuals aged 35-55 who seek a TikTok alternative without the overwhelming youth-focused content",
+          "Clapper enables content creators to earn through various monetization methods, such as tips, memberships, and live streaming donations, further empowering creators to thrive on the platform."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-03.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-3",
+        "heading": "Technical Innovation in Clapper's Architecture",
+        "bullets": [
+          "As developers, one of the standout aspects of Clapper’s platform is its scalable and efficient backend architecture.",
+          "By leveraging cloud-based infrastructure and a microservices approach, Clapper ensures smooth performance even with a high influx of concurrent users and video uploads."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-04.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-4",
+        "heading": "Seamless Cross-Platform Development",
+        "bullets": [
+          "The app is designed to perform smoothly on both iOS and Android, offering native-like experiences on both platforms.",
+          "We focused on building a responsive and adaptive design, making the user experience seamless regardless of the device. This ensures that Clapper users enjoy the same smooth, consistent experience across smartphones and tablets."
+        ],
+        "image": "/images/Portfolio/Clapper/clapper-05.webp",
+        "imageSide": "auto",
+        "background": "default"
+      }
+    ]
+  },
+  "spendee": {
+    "brandColor": "#1BCA93",
+    "sections": [
+      {
+        "_type": "featureGrid",
+        "_key": "features",
+        "background": "default",
+        "eyebrow": "Features",
+        "heading": "Take control of your finances.",
+        "layout": "cards",
+        "lead": "Spendee tracks your spending, budgets, and savings with insights to manage your money. We’re transforming personal finance.",
+        "items": [
+          {
+            "_type": "featureItem",
+            "_key": "ft-0",
+            "title": "Expense Tracking",
+            "description": "Easily track all your spending across multiple accounts, automatically categorized for a clear overview of where your money goes.",
+            "image": "/images/Featured-icon-1_2.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "ft-1",
+            "title": "Savings Goals",
+            "description": "Create personalized savings goals and monitor your progress, helping you save smarter for your future.",
+            "image": "/images/Featured-icon_2.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "ft-2",
+            "title": "Secure Syncing",
+            "description": "Keep your financial data safe with encrypted, secure cloud syncing across devices, ensuring your information stays private.",
+            "image": "/images/Featured-icon-2_1.avif"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "ft-3",
+            "title": "Budgeting Tools",
+            "description": "Set budgets for various categories and receive real-time notifications to stay on track with your financial goals.",
+            "image": "/images/Featured-icon-3_1.avif"
+          }
+        ]
+      },
+      {
+        "_type": "showcase",
+        "_key": "showcase",
+        "background": "tinted",
+        "eyebrow": "UI Showcase",
+        "heading": "Explore Spendee",
+        "body": "Spendee simplifies budgeting and money management. Explore the app’s user-friendly interface to track expenses, set goals, and save smarter.",
+        "image": "/images/Mockup-wrap-webp.webp",
+        "imageSize": "medium"
+      },
+      {
+        "_type": "statsBand",
+        "_key": "stats",
+        "heading": "Achievements and Impact",
+        "subheading": "Celebrating our milestones and user success.",
+        "icon": "/images/Featured-icon-2.webp",
+        "bgColor": "#1BCA93",
+        "accentColor": "#FFFFFF",
+        "items": [
+          {
+            "_type": "statItem",
+            "_key": "st-0",
+            "value": "400+",
+            "label": "In Finance on App Store"
+          },
+          {
+            "_type": "statItem",
+            "_key": "st-1",
+            "value": "1 mln",
+            "label": "Global downloads"
+          },
+          {
+            "_type": "statItem",
+            "_key": "st-2",
+            "value": "4.7",
+            "label": "App Store Rating"
+          }
+        ]
+      },
+      {
+        "_type": "testimonial",
+        "_key": "quote",
+        "background": "default",
+        "quote": "Working with the Syenergy team on Spendee has been fantastic. We sought a solution to help users manage finances with an intuitive interface. They nailed it. The app is visually appealing and packed with features. Thanks to their approach, we improved user experience and expanded our audience. Spendee is now essential for millions worldwide.",
+        "authorName": "Emily R",
+        "authorRole": "Project Lead at Spendee",
+        "avatar": "/images/Image-1_scale-650_1.avif"
+      }
+    ]
+  },
+  "fanbase": {
+    "brandColor": "#8816FA",
+    "sections": [
+      {
+        "_type": "featureGrid",
+        "_key": "features",
+        "background": "brand",
+        "heading": "Fanbase Key Features",
+        "lead": "Tools that empower creators and connect fans",
+        "layout": "cards",
+        "items": [
+          {
+            "_type": "featureItem",
+            "_key": "ft-0",
+            "title": "Fanbase Audio",
+            "description": "Host live audio sessions and create interest-based communities, allowing real-time interaction with followers. Engage with your audience through intimate, real-time conversations."
+          },
+          {
+            "_type": "featureItem",
+            "_key": "ft-1",
+            "title": "Flickz",
+            "description": "Share short-form video content to keep your audience entertained and engaged. Flickz helps creators connect with followers through quick, fun content."
+          },
+          {
+            "_type": "featureItem",
+            "_key": "ft-2",
+            "title": "Love Feature",
+            "description": "Allow your fans to express their appreciation for your content by giving 'Love.' This digital currency enhances fan engagement and supports creators directly."
+          }
+        ]
+      },
+      {
+        "_type": "showcase",
+        "_key": "interface",
+        "background": "tinted",
+        "heading": "App Interface",
+        "body": "Get a glimpse of Fanbase’s intuitive interface and powerful features in action.",
+        "image": "/images/image-79-corr-2.webp",
+        "imageSize": "medium"
+      },
+      {
+        "_type": "statsBand",
+        "_key": "stats",
+        "heading": "Achievements and Impact",
+        "subheading": "Celebrating our milestones and user success.",
+        "bgColor": "#8816FA",
+        "accentColor": "#FFFFFF",
+        "items": [
+          {
+            "_type": "statItem",
+            "_key": "st-0",
+            "value": "№12",
+            "label": "In Social Networking on App Store"
+          },
+          {
+            "_type": "statItem",
+            "_key": "st-1",
+            "value": "5,000",
+            "label": "Global downloads"
+          },
+          {
+            "_type": "statItem",
+            "_key": "st-2",
+            "value": "10x",
+            "label": "Faster report generation"
+          }
+        ]
+      },
+      {
+        "_type": "testimonial",
+        "_key": "quote",
+        "background": "default",
+        "quote": "Collaborating with the Synergy team on Fanbase has been rewarding. Their grasp of user needs and design excellence brought our vision to life. The app empowers creators to monetize content and exceeded expectations.",
+        "authorName": "Isaac Hayes",
+        "authorRole": "Founder Of Fanbase App",
+        "avatar": "/images/Avatar.webp"
+      }
+    ]
+  },
+  "joe-the-juice": {
+    "brandColor": "#EFA13C",
+    "sections": [
+      {
+        "_type": "splitBlock",
+        "_key": "blk-0",
+        "heading": "Problem Statement",
+        "bullets": [
+          "The existing app design was outdated and needed a modern, cohesive look.",
+          "The user experience required better navigation and a more intuitive flow.",
+          "Additional features were necessary to improve customer engagement and satisfaction.",
+          "Ongoing design support was needed to keep the app aligned with the brand’s evolving needs."
+        ],
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "featureGrid",
+        "_key": "solution",
+        "background": "default",
+        "heading": "Solution",
+        "layout": "cards",
+        "lead": "Synergy Labs redesigned the app with these key improvements:",
+        "items": [
+          {
+            "_type": "featureItem",
+            "_key": "sol-0",
+            "title": "UX/UI Overhaul",
+            "description": "Fresh interface aligned with brand identity. Simplified navigation for ordering and loyalty.",
+            "image": "/images/Mobile-Phone-Check.png"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "sol-1",
+            "title": "Feature Enhancements",
+            "description": "Enhanced loyalty program. Added real-time order tracking.",
+            "image": "/images/Mobile-Phone-Check.png"
+          },
+          {
+            "_type": "featureItem",
+            "_key": "sol-2",
+            "title": "Ongoing Support",
+            "description": "Regular UI/UX updates. Close collaboration with internal teams.",
+            "image": "/images/Mobile-Phone-Check.png"
+          }
+        ]
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-2",
+        "heading": "Scope of Work",
+        "body": "The work across our teams also helped Joe & The Juice sustain during the global pandemic by improving key flows and creating contactless solutions for order pickups.\n\nEach illustration leverages a pleasant color palette and elevates what would typically be a boring experience.",
+        "bullets": [
+          "With time to expand on the app, we discovered ways to refine the presentation of the fresh products.",
+          "While waiting for pickup or delivery, customers are presented with animations that show the current stage of their order."
+        ],
+        "image": "/images/Portfolio/Joe And Juice/joe-asset-1.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-3",
+        "heading": "Illustrated in 3D",
+        "body": "To make Joe's extensive loyalty program more engaging, we created a vibrant 3D world that brings rewards to life. Each feature received special treatment:\n\nOur achievement system features carefully crafted 3D icons:\n\nThese 3D elements create a cohesive visual system that connects Joe's brand imagery with the points-based rewards program, making every interaction more delightful and memorable.",
+        "bullets": [
+          "Points tracking features playful 3D juice drops that accumulate and splash",
+          "Achievement badges are illustrated as rotating 3D medals with custom brand patterns",
+          "Reward tiers showcase animated 3D juice cups that fill up as customers progress",
+          "Special offers appear as floating 3D gift boxes with particle effects",
+          "Points tracking features playful 3D juice drops that accumulate and splash",
+          "First Purchase: A gleaming 3D golden cup with rising steam particles"
+        ],
+        "image": "/images/Portfolio/Joe And Juice/joe-asset-2.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-4",
+        "heading": "Magazine Style",
+        "body": "The app has an unconventional magazine style while maintaining usability and allowing users to navigate without friction.",
+        "image": "/images/Portfolio/Joe And Juice/joe-asset-3.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-5",
+        "heading": "Timeline",
+        "body": "From February 2021 to Present, Synergy Labs collaborated with Joe & The Juice to revamp their mobile app. The project focused on UI/UX design and frontend development, working alongside their internal team to modernize the app and enhance functionality. As an extension of their design team, we ensured a seamless user experience, integrated new features, and continuously optimized performance. The app now delivers a more engaging and efficient customer experience, with ongoing support for iterative improvements.",
+        "image": "/images/Portfolio/Joe And Juice/joe-asset-4.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "statsBand",
+        "_key": "results",
+        "heading": "Results",
+        "bgColor": "#EFA13C",
+        "accentColor": "#FFF6E6",
+        "items": [
+          {
+            "_type": "statItem",
+            "_key": "rs-0",
+            "value": "4.8",
+            "label": "Average User Rating",
+            "description": "Users praised the new interface and functionality across both iOS and Android platforms."
+          },
+          {
+            "_type": "statItem",
+            "_key": "rs-1",
+            "value": "30%",
+            "label": "Increase in Repeat Purchases",
+            "description": "Enhanced loyalty program features resulted in a higher retention rate."
+          },
+          {
+            "_type": "statItem",
+            "_key": "rs-2",
+            "value": "20%",
+            "label": "Faster Checkout Process",
+            "description": "Optimized user flow and improved mobile payment options led to quicker transactions."
+          }
+        ]
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-6",
+        "heading": "Impact & Success",
+        "bullets": [
+          "By redesigning the mobile app and providing ongoing design support, Synergy Labs helped Joe & The Juice create a modern, user-friendly experience that continues to evolve.",
+          "Acting as an extension of their design team, we ensure the app stays aligned with their brand and user expectations"
+        ],
+        "imageSide": "auto",
+        "background": "default",
+        "image": "/images/Portfolio/Joe And Juice/joe-asset-5.webp"
+      }
+    ]
+  },
+  "urban-massage": {
+    "brandColor": "#F3C742",
+    "sections": [
+      {
+        "_type": "splitBlock",
+        "_key": "blk-0",
+        "heading": "User-Friendly Booking System",
+        "bullets": [
+          "We designed an intuitive booking flow where users can easily select their preferred treatment type, desired date and time, and location.",
+          "The app provides a seamlessbooking experience, allowing customers toschedule appointments with just a few taps."
+        ],
+        "image": "/images/Portfolio/Urban/urban-asset-05.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-1",
+        "heading": "Therapist Selection",
+        "bullets": [
+          "Users are given the option to choose from a list of available therapists based on location, reviews, and specializations.",
+          "The therapist profiles display their qualifications, ratings, and past customer feedback, enabling informed decisions when booking"
+        ],
+        "image": "/images/Portfolio/Urban/urban-asset-04.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-2",
+        "heading": "Real-Time Availability and Scheduling",
+        "bullets": [
+          "We integrated real-time scheduling features, allowing users to see therapist availability instantly.",
+          "The app dynamically updates based on the therapistsʼ schedules, ensuring that only available slots are shown, minimizing booking conflicts."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f63084b94192c653d49fd8_unnamed%20(5)_cr.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-3",
+        "heading": "In-App Payment Integration",
+        "bullets": [
+          "Secure, seamless payment was a key requirement for Urban Massage.",
+          "We implemented in-app payment processing with multiple payment options, including credit cards and mobile wallets, allowing users to securely complete their transactions without leaving the app."
+        ],
+        "image": "/images/Portfolio/Urban/urban-asset-03.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-4",
+        "heading": "GPS Tracking and Location Services",
+        "bullets": [
+          "To enhance the user experience, we included GPS tracking to show users the estimated time of arrival of their selected therapist.",
+          "This helps manage user expectations and ensures timely service delivery."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f63d2fa22f048fa6f405d8_unnamed%20(3)_cr.avif",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-5",
+        "heading": "Manage Booking",
+        "bullets": [
+          "The app includes a Manage Booking feature, allowing users to easily view, modify, or cancel their appointments.",
+          "This feature ensures flexibility and convenience, letting customers manage their schedules without any hassle."
+        ],
+        "image": "/images/Portfolio/Urban/urban-asset-01.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-6",
+        "heading": "Chat with Therapist",
+        "bullets": [
+          "The app also incorporates a Chat with Therapist feature, enabling users to communicate directly with their therapist before or after appointments.",
+          "This ensures clear communication, allowing users to discuss preferences, ask questions, or address any concerns related to their booking."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f642c4b5fc458f2c4126ae_unnamed%20(7)_cr.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-7",
+        "heading": "Review and Rating System",
+        "bullets": [
+          "After each session, users can leave ratings and reviews for the therapists.",
+          "This feature is crucial for maintaining quality control and ensuring customer satisfaction by encouraging continuous improvement among therapists."
+        ],
+        "image": "/images/Portfolio/Urban/urban-asset-02.webp",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "blk-8",
+        "heading": "Therapist Management and Admin Dashboard",
+        "bullets": [
+          "For therapists, the app includes a robust management system. They can manage their schedules, accept or decline bookings, and track payment status.",
+          "Additionally, we built a backend dashboard that allows the Urban Massage team to monitor therapist performance, user engagement, and financial metrics."
+        ],
+        "image": "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/67f66087c90b25766574ea74_unnamed%20(14)_cr.avif",
+        "imageSide": "auto",
+        "background": "default"
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "results",
+        "background": "brand",
+        "eyebrow": "Results",
+        "heading": "Results and Impact",
+        "imageSide": "right",
+        "body": "Urban Massage saw significant benefits from the app Synergy Labs developed. By making the booking process more streamlined and user-friendly, the app allowed Urban to scale its operations across major cities in the UK and Europe, including London, Manchester, and Paris.\n\nThe app has delivered over 1.3 million treatments, supporting more than 4,000 self-employed therapists while ensuring a high-quality user experience. Additionally, therapists benefit from one of the most competitive payout rates in the industry, ensuring a strong, motivated workforce.\n\nThe features built into the app—such as real-time booking, therapist selection, and in-app payments—helped Urban attract a large customer base of time-conscious city dwellers who want wellness treatments without the hassle of traveling to a spa.\n\nWith an average rating of 4.9 out of 5 stars and over 500,000 five-star reviews, the app has been instrumental in Urban’s success. It also enabled the company to introduce more services beyond massage, making it a one-stop wellness platform.\n\nOverall, the app Synergy Labs developed has played a pivotal role in transforming Urban into a leading on-demand wellness service provider, enabling them to grow rapidly while maintaining high customer satisfaction."
+      }
+    ]
+  },
+  "clearcover": {
+    "brandColor": "#4023D3",
+    "sections": [
+      {
+        "_type": "featureGrid",
+        "_key": "sec-features",
+        "background": "brand",
+        "heading": "Clearcover Key Features",
+        "lead": "A digital platform that simplifies insurance processes",
+        "layout": "cards",
+        "items": [
+          {
+            "_type": "featureItem",
+            "_key": "f-0",
+            "title": "User-Friendly Mobile Application",
+            "image": "/images/Validation-1--Streamline-Stickies.avif",
+            "description": "The Clearcover mobile app allows customers to obtain quotes, manage policies, and file claims effortlessly. Its intuitive design ensures users can navigate the app with ease, accessing essential features without complexity."
+          },
+          {
+            "_type": "featureItem",
+            "_key": "f-1",
+            "title": "Rapid Claims Processing with ClearAI®",
+            "image": "/images/Validation-1--Streamline-Stickies.avif",
+            "description": "Leveraging proprietary machine learning technology, ClearAI®, the app facilitates swift assessment of claims. This innovation enables Clearcover to process eligible claims in as little as seven minutes, significantly reducing the traditional claims cycle time."
+          },
+          {
+            "_type": "featureItem",
+            "_key": "f-2",
+            "title": "Comprehensive Coverage Options with the 60-Second Coverage Wizard",
+            "image": "/images/Validation-1--Streamline-Stickies.avif",
+            "description": "Understanding that customers may need assistance in determining appropriate coverage, Clearcover introduced the 60-Second Coverage Wizard. This feature guides users through a series of questions to recommend suitable coverage options tailored to their needs, ensuring personalized and adequate protection."
+          }
+        ]
+      },
+      {
+        "_type": "showcase",
+        "_key": "sec-showcase",
+        "background": "tinted",
+        "eyebrow": "UI Showcase",
+        "heading": "Explore Clearcover",
+        "body": "Discover how Clearcover’s innovative approach to car insurance is transforming the industry by visiting their official website.",
+        "image": "/images/Frame-Clearcover.webp",
+        "linkLabel": "Visit Clearcover",
+        "linkHref": "https://clearcover.com/",
+        "imageSize": "small"
+      },
+      {
+        "_type": "statsBand",
+        "_key": "sec-stats",
+        "heading": "Achievements and Impact",
+        "subheading": "Celebrating our milestones and user success.",
+        "icon": "/images/Medal-Streamline-Stickies.avif",
+        "bgColor": "#4023D3",
+        "accentColor": "#DAFF81",
+        "items": [
+          {
+            "_type": "statItem",
+            "_key": "s-0",
+            "value": "№ 9",
+            "label": "In Car insurance on App Store"
+          },
+          {
+            "_type": "statItem",
+            "_key": "s-1",
+            "value": "25,000",
+            "label": "Global downloads"
+          },
+          {
+            "_type": "statItem",
+            "_key": "s-2",
+            "value": "10x",
+            "label": "Faster report generation"
+          }
+        ]
+      },
+      {
+        "_type": "splitBlock",
+        "_key": "sec-about",
+        "background": "default",
+        "heading": "About Clearcover",
+        "imageSide": "left",
+        "image": "/images/Left_label-removebg-preview2.webp",
+        "body": "Clearcover is the smarter car insurance choice, offering better coverage for less money. We combine modern technology with a customer-focused mindset to deliver a convenient experience, reliable service and affordable prices. Built for the modern driver, Clearcover makes it easy to save money and get insured in minutes."
+      }
+    ]
+  }
+}

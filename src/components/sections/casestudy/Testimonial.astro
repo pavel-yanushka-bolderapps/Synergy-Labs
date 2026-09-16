@@ -1,0 +1,38 @@
+---
+// A client quote. Only the quote is required -- several of the original ones
+// ran without a photo, and one without a named role.
+import SectionShell from "./SectionShell.astro";
+import type { CaseStudyTestimonial } from "../../../lib/types";
+
+interface Props {
+  content: CaseStudyTestimonial;
+}
+
+const { content } = Astro.props;
+const { quote, authorName, authorRole, avatarSrc, background } = content;
+---
+
+<SectionShell background={background}>
+  <figure class="mx-auto max-w-3xl text-center">
+    <blockquote class="font-display text-2xl leading-snug md:text-3xl">
+      {`“${quote}”`}
+    </blockquote>
+
+    {(authorName || authorRole) && (
+      <figcaption class="mt-8 flex items-center justify-center gap-4">
+        {avatarSrc && (
+          <img
+            src={avatarSrc}
+            alt=""
+            loading="lazy"
+            class="h-14 w-14 shrink-0 rounded-full object-cover"
+          />
+        )}
+        <div class="text-start">
+          {authorName && <p class="font-semibold">{authorName}</p>}
+          {authorRole && <p class="text-sm opacity-70">{authorRole}</p>}
+        </div>
+      </figcaption>
+    )}
+  </figure>
+</SectionShell>

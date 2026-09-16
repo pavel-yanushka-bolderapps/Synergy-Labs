@@ -53,7 +53,10 @@ export const portfolioPage: PortfolioPageContent = {
       imageAlt: "Clearcover app screens showing car insurance policy management.",
       caseStudyHref: "/projects/casestudy/clearcover",
       theme: "light",
-      backgroundImage: "linear-gradient(#fff, #cfe3ff8a 23%)",
+      // #DAFF81 is the acid green the case study prints its number cards in
+      // (see the statsBand default for clearcover) -- the card now leads with
+      // the brand's secondary rather than the violet-adjacent blue it had.
+      backgroundImage: "linear-gradient(#fff, #daff818a 23%)",
     },
     {
       slug: "spendee",

@@ -11,7 +11,15 @@ const lines = content.heading.split("\n");
 ---
 
 <section class="relative overflow-hidden bg-green-50">
-  <img src={content.bgImageSrc} alt="" class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
+  <!--
+    Hero-Bg.svg is a bespoke 1440x1024 desktop drawing (an inset grid with a
+    fixed line pitch), not a tileable pattern. `object-cover` on a tall narrow
+    mobile section scales it to the section *height* and crops ~440px off each
+    side, so the designed frame disappears and the surviving lines read as a
+    random oversized grid. Scale it to the section width on mobile instead --
+    the grid then lands as a band in the middle of the hero, as designed.
+  -->
+  <img src={content.bgImageSrc} alt="" class="pointer-events-none absolute inset-0 h-full w-full object-contain md:object-cover opacity-40" />
   <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:grid-cols-2 md:py-24">
     <div class="flex flex-col items-center text-center md:block md:text-start">
       <h1 class="font-display text-4xl leading-tight md:text-5xl">
@@ -30,12 +38,23 @@ const lines = content.heading.split("\n");
       </a>
     </div>
     <div class="flex justify-center md:justify-end">
-      <div class="relative flex h-[25.75rem] w-[25.75rem] items-center justify-center">
+      <!--
+        The visual is a square that tracks the column width and caps at the
+        25.75rem the desktop layout was built around. It used to be a hard
+        25.75rem at every breakpoint, which is wider than the content area on
+        any phone -- so the phones broke out of the px-6 gutter every other
+        element lines up to, and rendered ~20% oversized against the original.
+
+        Everything layered on top is therefore sized in percentages: the still
+        iPhone has to stay locked to the slot the Lottie carousel leaves open
+        at the centre, and px offsets only held at exactly 412px.
+      -->
+      <div class="relative flex aspect-square w-full max-w-[25.75rem] items-center justify-center">
         <Lottie src="/lottie/hero-animation.lottie" class="h-full w-full" />
         <img
           src={content.phoneImageSrc}
           alt="Synergy Labs app preview"
-          class="absolute right-[8.25rem] top-[3.6rem] h-[18.5rem] w-auto scale-75"
+          class="absolute left-[37.04%] top-[22.96%] h-[53.88%] w-auto"
         />
       </div>
     </div>

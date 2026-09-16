@@ -234,17 +234,38 @@ export const home: HomePageContent = {
   locations: {
     heading: "Our Locations",
     moreLocationsLabel: "More locations",
+    // All 26 offices, transcribed from the Webflow Locations collection
+    // export. The first five are the ones the site shows before you follow
+    // "More locations"; the rest are alphabetical. This is the fallback --
+    // once `location` documents exist in Sanity, getLocations() wins. See
+    // src/sanity/schemaTypes/location.ts.
     items: [
-      { city: "Miami", address: "78 SW 7th St, Miami, FL 33130", isHeadquarters: true, imageSrc: "/images/FL.webp" },
-      { city: "Dubai", address: "One Central 9th Floor -Trade Centre 2 - Dubai - UAE", imageSrc: "/images/imageForEntry25-aa1_1.avif" },
-      { city: "Hartford", address: "200 Constitution Pl, Hartford, CT 06103", imageSrc: "/images/CT_1.webp" },
-      { city: "San Francisco", address: "44 Montgomery St, San Francisco, CA 94104", imageSrc: "/images/SF.webp" },
-      { city: "Qatar", address: "1st and 2nd floor, Iconoview, C Ring Rd, Doha, Qatar", imageSrc: "/images/Qatar.webp" },
-      { city: "New York City", address: "445 Park Ave, Manhattan, NY 10022", imageSrc: "/images/NY.webp" },
-      { city: "Austin", address: "600 Congress Ave. Austin, TX 78701", imageSrc: "/images/Austin-TX-Skyline_1.avif" },
-      { city: "Riyadh", address: "Building No. 44, Ibn Katheer St, King Abdul Aziz, Riyadh 13334, Saudi Arabia", imageSrc: "/images/riyadh.webp" },
-      { city: "London", address: "18 Finsbury Square, London EC2A 1AH, United Kingdom", imageSrc: "/images/London.webp" },
-      { city: "Chicago", address: "515 N State St, Chicago, IL 60654, United States", imageSrc: "/images/chicago.webp" },
+      { city: "Miami", address: "78 SW 7th St, Miami, FL 33130", isHeadquarters: true, imageSrc: "/images/Locations/miami.webp" },
+      { city: "Dubai", address: "One Central 9th Floor -Trade Centre 2 - Dubai - UAE", imageSrc: "/images/Locations/dubai.webp" },
+      { city: "San Francisco", address: "44 Montgomery St, San Francisco, CA 94104", imageSrc: "/images/Locations/san-francisco.webp" },
+      { city: "New York City", address: "445 Park Ave, Manhattan, NY 10022", imageSrc: "/images/Locations/new-york-city.webp" },
+      { city: "Dallas", address: "6900 Dallas Pkwy, Plano, TX 75024, United States", imageSrc: "/images/Locations/dallas.webp" },
+      { city: "Atlanta", address: "1175 Peachtree St NE, Atlanta, GA 30361, United States", imageSrc: "/images/Locations/atlanta.webp" },
+      { city: "Austin", address: "600 Congress Ave.Austin, TX 78701", imageSrc: "/images/Locations/austin.webp" },
+      { city: "Boston", address: "55 Court St Floor 2, Boston, MA 02108, United States", imageSrc: "/images/Locations/boston.webp" },
+      { city: "Chicago", address: "515 N State St, Chicago, IL 60654, United States", imageSrc: "/images/Locations/chicago.webp" },
+      { city: "Circleville", address: "Maumee Dr, Circleville, OH 43113, United States", imageSrc: "/images/Locations/circleville.webp" },
+      { city: "Hartford", address: "200 Constitution Pl, Hartford, CT 06103", imageSrc: "/images/Locations/hartford.webp" },
+      { city: "Houston", address: "2700 Post Oak Blvd, Houston, TX 77056, United States", imageSrc: "/images/Locations/houston.webp" },
+      { city: "Jackson", address: "140 E Broadway Ave #25, Jackson, WY 83001, United States", imageSrc: "/images/Locations/jackson.webp" },
+      { city: "Jacksonville", address: "13475 Atlantic Blvd Unit 8, Jacksonville, FL 32225, United States", imageSrc: "/images/Locations/jacksonville.webp" },
+      { city: "London", address: "18 Finsbury Square, London EC2A 1AH, United Kingdom", imageSrc: "/images/Locations/london.webp" },
+      { city: "Los Angeles", address: "12130 Millennium Dr #300, Los Angeles, CA 90094, United States", imageSrc: "/images/Locations/los-angeles.webp" },
+      { city: "Orlando", address: "20 N Orange Ave Suite 1100, Orlando, FL 32801, United States", imageSrc: "/images/Locations/orlando.webp" },
+      { city: "Philadelphia", address: "1900 Market St, Philadelphia, PA 19103, United States", imageSrc: "/images/Locations/philadelphia.webp" },
+      { city: "Phoenix", address: "515 E Grant St, Phoenix, AZ 85004, United States", imageSrc: "/images/Locations/phoenix.webp" },
+      { city: "Qatar", address: "1st and 2nd floor, Iconoview, C Ring Rd, Doha, Qatar", imageSrc: "/images/Locations/qatar.webp" },
+      { city: "Riyadh", address: "Building No. 44, Ibn Katheer St, King Abdul Aziz, Riyadh 13334, Saudi Arabia", imageSrc: "/images/Locations/riyadh.webp" },
+      { city: "San Antonio", address: "10127 Morocco St #195, San Antonio, TX 78216, United States", imageSrc: "/images/Locations/san-antonio.webp" },
+      { city: "San Diego", address: "3919 30th St, San Diego, CA 92104, United States", imageSrc: "/images/Locations/san-diego.webp" },
+      { city: "Singapore", address: "380 Jln Besar, Singapore 209000", imageSrc: "/images/Locations/singapore.webp" },
+      { city: "Springfield", address: "75 Market St, Springfield, MA 01103, United States", imageSrc: "/images/Locations/springfield.webp" },
+      { city: "Tampa", address: "501 E Kennedy Blvd Suite 1400, Tampa, FL 33602, United States", imageSrc: "/images/Locations/tampa.webp" },
     ],
   },
 

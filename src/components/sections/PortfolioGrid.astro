@@ -10,16 +10,19 @@ const { content } = Astro.props;
 
 <section class="mx-auto max-w-7xl px-6 py-20">
   <div class="mb-10 flex flex-wrap justify-center gap-3" id="portfolio-filters">
+    {/*
+      aria-pressed is the single source of truth for the active state, so the
+      script below only flips the attribute. The classes used to be toggled by
+      hand, and the hover pair was rendered on the initially-inactive buttons
+      only -- so `hover:text-black` stuck to whichever button you clicked and
+      turned its label black on the green fill, while "All Projects" never got
+      a hover state back once you left it.
+    */}
     {content.filterTags.map((tag, i) => (
       <button
         type="button"
         data-filter={tag}
-        class:list={[
-          "portfolio-filter-btn rounded-full border px-5 py-2 text-sm font-medium transition",
-          i === 0
-            ? "border-secondary-green bg-secondary-green text-white"
-            : "border-black/10 bg-secondary text-black/70 hover:border-primary-green hover:text-black",
-        ]}
+        class="portfolio-filter-btn cursor-pointer rounded-full border border-black/10 bg-secondary px-5 py-2 text-sm font-medium text-black/70 transition hover:border-primary-green hover:text-black aria-pressed:border-secondary-green aria-pressed:bg-secondary-green aria-pressed:text-white aria-pressed:hover:border-secondary-green aria-pressed:hover:text-white"
         aria-pressed={i === 0 ? "true" : "false"}
       >
         {tag}
@@ -32,14 +35,40 @@ const { content } = Astro.props;
       <article
         data-tags={item.tags.join(",")}
         class:list={[
-          "portfolio-card group relative flex min-h-[25rem] flex-col overflow-hidden rounded-3xl p-8 md:p-12",
+          // @container: see the note in SelectedWorks.astro -- the card sizes
+          // its own logo and name so neither can crowd the button.
+          "portfolio-card @container group relative flex min-h-[25rem] flex-col overflow-hidden rounded-3xl p-8 md:p-12",
           item.theme === "dark" ? "text-white" : "text-black",
         ]}
         style={{ backgroundImage: item.backgroundImage }}
       >
         <div class="relative z-10 flex items-start justify-between gap-4">
-          <div class="flex flex-col gap-3">
-            <img src={item.logoSrc} alt={item.logoAlt} class="h-8 w-auto" />
+          <div class="flex min-w-0 flex-1 flex-col gap-3">
+            {/*
+              The logo used to sit directly in this column, where the flex
+              default `align-items: stretch` blew its width out to the column
+              and squashed the artwork against the fixed h-8. Nesting it in a
+              row makes width the main axis, so `w-auto` resolves from the
+              intrinsic aspect ratio again; object-contain keeps it honest for
+              any logo the CMS hands us with an unexpected shape.
+            */}
+            <div class="flex min-w-0 items-center gap-3">
+              {/*
+                Sized in cqw against the card (see @container above), so the
+                pair shrinks with it instead of snapping at a breakpoint. The
+                clamps hold the desktop values: at the 504px content box a
+                two-up card has at 1280, 6.4cqw is 32px and 4.8cqw is 24px --
+                the h-8 and text-2xl these replace.
+              */}
+              <img
+                src={item.logoSrc}
+                alt={item.logoAlt}
+                class="h-[clamp(1.25rem,6.4cqw,2rem)] w-auto max-w-[32cqw] shrink-0 object-contain object-left"
+              />
+              <span class="min-w-0 break-words font-sans text-[clamp(1rem,4.8cqw,1.5rem)] leading-tight">
+                {item.clientName}
+              </span>
+            </div>
             <div class="flex flex-row flex-wrap gap-2 transition-opacity duration-300 ease-out group-hover:opacity-0">
               {item.tags.map((tag) => (
                 <span
@@ -107,14 +136,7 @@ const { content } = Astro.props;
     const filter = button.dataset.filter ?? "All Projects";
 
     filterBar.querySelectorAll(".portfolio-filter-btn").forEach((btn) => {
-      const isActive = btn === button;
-      btn.setAttribute("aria-pressed", String(isActive));
-      btn.classList.toggle("border-secondary-green", isActive);
-      btn.classList.toggle("bg-secondary-green", isActive);
-      btn.classList.toggle("text-white", isActive);
-      btn.classList.toggle("border-black/10", !isActive);
-      btn.classList.toggle("bg-secondary", !isActive);
-      btn.classList.toggle("text-black/70", !isActive);
+      btn.setAttribute("aria-pressed", String(btn === button));
     });
 
     let visibleCount = 0;

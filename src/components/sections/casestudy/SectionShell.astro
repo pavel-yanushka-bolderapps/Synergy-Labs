@@ -1,0 +1,82 @@
+---
+// The band every case-study section sits in: full-bleed background, the
+// shared max-width container, and the vertical rhythm.
+//
+// Colour is handled by inheritance rather than by rules reaching into the
+// slot. Astro scopes a component's styles to that component's own elements,
+// so a rule here could never have coloured slotted children anyway -- but
+// `color` is an inherited property, so setting it on the section carries
+// into whatever is slotted in. That is why the section components below use
+// `opacity` to de-emphasise secondary text instead of `text-black/70`: an
+// explicit black would survive onto the brand background and disappear.
+//
+// `--cs-brand` comes from the wrapper in
+// src/pages/projects/casestudy/[slug].astro, so every section on a page can
+// reach the client's colour without being handed it as a prop.
+import type { CaseStudySectionBackground } from "../../../lib/types";
+
+interface Props {
+  background: CaseStudySectionBackground;
+  /** Extra classes for the inner container, e.g. a different max-width. */
+  innerClass?: string;
+}
+
+const { background, innerClass = "" } = Astro.props;
+---
+
+<section class:list={["cs-section", `cs-section--${background}`]}>
+  {background !== "tinted" && (
+    <img
+      src="/images/Portfolio/background-secondary-portfolio.avif"
+      alt=""
+      loading="lazy"
+      class="cs-section__grid pointer-events-none absolute inset-0 h-full w-full object-cover"
+    />
+  )}
+
+  <div class:list={["relative mx-auto max-w-7xl px-6 py-16 md:py-20", innerClass]}>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .cs-section {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cs-section--tinted {
+    background-color: var(--color-green-50, #eef7f8);
+  }
+
+  .cs-section--brand {
+    background-color: var(--cs-brand, var(--color-secondary-green, #007244));
+    /* Not a flat #fff: a light brand colour needs dark text, and which one
+       this is was measured at build time -- see readableInk() in
+       src/lib/sanity.ts. */
+    color: var(--cs-brand-ink, #fff);
+  }
+
+  /* The grid artwork is light lines (#c7c8cb at ~32% alpha) on a fully
+     transparent ground -- 88% of the file is transparent. It is already built
+     to be laid straight over a colour, so it needs no blend mode at all; the
+     only question is whether the lines want to be light or dark, and CSS
+     can't branch on a colour. The page measures the brand colour once and
+     hands down the filter and opacity. See readableInk() in
+     src/lib/sanity.ts and the wrapper in the case study page.
+
+     Dark band: the lines are already lighter than the ground, so they go on
+     as drawn. Light band: invert flips them to dark (#383734) so they read
+     against it -- and because the ground is transparent rather than white,
+     invert only touches the lines.
+
+     This used to invert on the *dark* band and then `screen`, on the belief
+     that the artwork was dark lines on near-white. Inverting made the lines
+     near-black, screening near-black onto a colour is close to a no-op, and
+     opacity 0.18 finished off whatever survived -- which is why Fanbase's
+     purple looked flat. */
+  .cs-section--brand .cs-section__grid {
+    filter: var(--cs-grid-filter, none);
+    opacity: var(--cs-grid-opacity, 0.4);
+  }
+</style>

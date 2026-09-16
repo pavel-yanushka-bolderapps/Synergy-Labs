@@ -3,12 +3,15 @@ import { createImageUrlBuilder } from "@sanity/image-url";
 import { stegaClean } from "@sanity/client/stega";
 import { loadQuery } from "./loadQuery";
 import type {
+  LocationItem,
   ServiceItem,
   ServiceFeaturesContent,
   ServiceValueCard,
   ServiceProcessContent,
   CaseStudy,
   CaseStudyFact,
+  CaseStudySection,
+  CaseStudySectionBackground,
 } from "./types";
 
 const imageBuilder = createImageUrlBuilder(sanityClient);
@@ -46,6 +49,50 @@ export async function getServices(): Promise<ServiceItem[] | null> {
     }));
   } catch (err) {
     console.error("[sanity] Failed to fetch services, falling back to static content:", err);
+    return null;
+  }
+}
+
+interface SanityLocationDoc {
+  city: string;
+  address: string;
+  isHeadquarters?: boolean;
+  image?: Record<string, unknown> | null;
+}
+
+/**
+ * Fetches the offices shown on /locations and in the homepage's Locations
+ * section (see src/sanity/schemaTypes/location.ts).
+ *
+ * Same contract as getServices() above: `null` rather than a throw when
+ * Sanity isn't configured, has no `location` documents, or the request
+ * fails, so callers fall back to the static list in src/content/home.ts and
+ * an unreachable CMS never breaks the build.
+ *
+ * The order matters more than it looks: the first two documents get the wide
+ * cards, the next three the row below, and the rest go behind the "Other
+ * locations" button -- so `order` is really "what a visitor sees before
+ * expanding". Ties fall back to creation date for a stable build.
+ */
+export async function getLocations(): Promise<LocationItem[] | null> {
+  try {
+    const docs = await loadQuery<SanityLocationDoc[]>({
+      query: `*[_type == "location"] | order(order asc, _createdAt asc){ city, address, isHeadquarters, image }`,
+    });
+
+    if (!docs || docs.length === 0) return null;
+
+    return docs.map((doc) => ({
+      city: doc.city,
+      address: doc.address,
+      isHeadquarters: doc.isHeadquarters ?? false,
+      // 1600 wide: the two top cards run half the 1280 container on desktop
+      // and the full viewport width on a phone, so the smaller default this
+      // used at 400 would have been visibly soft on both.
+      imageSrc: doc.image ? imageBuilder.image(doc.image).width(1600).url() : undefined,
+    }));
+  } catch (err) {
+    console.error("[sanity] Failed to fetch locations, falling back to static content:", err);
     return null;
   }
 }
@@ -295,6 +342,7 @@ interface SanityCaseStudyDoc {
         imageSide?: string | null;
       }[]
     | null;
+  sections?: SanitySection[] | null;
   statsEnabled?: boolean | null;
   statsIcon?: Record<string, unknown> | null;
   statsHeading?: string | null;
@@ -337,6 +385,25 @@ function toHexColor(value: string | null | undefined, fallback: string): string 
 }
 
 /**
+ * Black or white, whichever is actually readable on `hex`.
+ *
+ * Every brand band printed white text regardless, which is fine for a navy
+ * or a violet and fails outright on a yellow. The threshold is the point
+ * where white and black give equal contrast against the same background --
+ * solve (1.05)/(L+0.05) = (L+0.05)/0.05 and you get L = 0.179 -- so each
+ * colour gets whichever side of that it falls on. Luminance is the WCAG
+ * relative-luminance formula, not a plain average: the eye reads green as
+ * far brighter than blue at the same number, and averaging gets yellow badly
+ * wrong for exactly that reason.
+ */
+function readableInk(hex: string): string {
+  const channels = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const linear = channels.map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  const luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+  return luminance > 0.179 ? "#1b1b1b" : "#ffffff";
+}
+
+/**
  * The same colour at zero alpha. A gradient written `transparent -> #ff6500`
  * fades through transparent *black*, which dirties the middle of the ramp;
  * naming the faded colour explicitly keeps the whole gradient on one hue.
@@ -346,8 +413,22 @@ function withZeroAlpha(hex: string): string {
   return `rgb(${r} ${g} ${b} / 0)`;
 }
 
+// Every section type's fields in one projection. GROQ returns only the keys a
+// given object actually has, so asking for all of them across a
+// mixed-type array is fine -- each item comes back with its own `_type` and
+// whichever of these it defines.
+const SECTIONS_PROJECTION = `sections[]{
+  _type, _key, background,
+  eyebrow, heading, lead, body, bullets, image, imageSide, layout,
+  items[]{ title, description, image, value, label },
+  linkLabel, linkHref, imageSize,
+  quote, authorName, authorRole, avatar,
+  icon, subheading, bgColor, accentColor
+}`;
+
 const CASE_STUDY_PROJECTION = `{
   slug, clientName, headline, intro, logo, brandColor, heroImage, heroImages,
+  ${SECTIONS_PROJECTION},
   appStoreUrl, playStoreUrl,
   metaClient, metaYear, metaTechStack, metaCategory,
   overviewHeading, overviewBody,
@@ -357,6 +438,181 @@ const CASE_STUDY_PROJECTION = `{
   statsItems[]{ value, label },
   metaDescription
 }`;
+
+/**
+ * Raw page-builder sections as they come back from GROQ. Every field of
+ * every section type is optional here because one array holds several
+ * shapes; `_type` is what says which fields are actually meaningful.
+ */
+interface SanitySection {
+  _type: string;
+  _key: string;
+  background?: string | null;
+  eyebrow?: string | null;
+  heading?: string | null;
+  lead?: string | null;
+  body?: string | null;
+  bullets?: string[] | null;
+  image?: Record<string, unknown> | null;
+  imageSide?: string | null;
+  layout?: string | null;
+  items?:
+    | {
+        title?: string | null;
+        description?: string | null;
+        image?: Record<string, unknown> | null;
+        value?: string | null;
+        label?: string | null;
+      }[]
+    | null;
+  imageSize?: string | null;
+  linkLabel?: string | null;
+  linkHref?: string | null;
+  quote?: string | null;
+  authorName?: string | null;
+  authorRole?: string | null;
+  avatar?: Record<string, unknown> | null;
+  icon?: Record<string, unknown> | null;
+  subheading?: string | null;
+  bgColor?: string | null;
+  accentColor?: string | null;
+}
+
+// stegaClean because these are compared, not displayed -- preview mode's
+// invisible characters would make every one of them miss its match and fall
+// through to the default. Same trap as the service-page icon keys.
+function toBackground(value?: string | null): CaseStudySectionBackground {
+  const v = stegaClean(value ?? undefined);
+  return v === "tinted" || v === "brand" ? v : "default";
+}
+
+/**
+ * Turns the raw array into the discriminated union the components switch on.
+ *
+ * Anything that can't be rendered is dropped rather than passed through
+ * half-built: a section whose required field is empty would otherwise reach
+ * the page as a heading over nothing. Dropping it here means the page never
+ * has to guard, and an editor sees the section simply not appear -- which is
+ * the same signal the Studio's own validation is already giving them.
+ */
+function toSections(raw: SanitySection[] | null | undefined, brandColor: string): CaseStudySection[] {
+  const sections: CaseStudySection[] = [];
+  // Alternating counts only the text & image blocks, so dropping a feature
+  // grid between two of them doesn't flip the side of every block below.
+  let splitIndex = 0;
+
+  for (const s of raw ?? []) {
+    const type = stegaClean(s._type);
+    const background = toBackground(s.background);
+    const heading = s.heading?.trim();
+
+    if (type === "splitBlock") {
+      if (!heading) continue;
+      const side = stegaClean(s.imageSide ?? undefined);
+      sections.push({
+        _type: "splitBlock",
+        eyebrow: s.eyebrow?.trim() || undefined,
+        heading,
+        paragraphs: toParagraphs(s.body),
+        bullets: (s.bullets ?? []).map((b) => b.trim()).filter(Boolean),
+        imageSrc: s.image ? imageBuilder.image(s.image).width(900).url() : undefined,
+        imageSide:
+          side === "left" || side === "right"
+            ? side
+            : splitIndex++ % 2 === 0
+              ? "left"
+              : "right",
+        background,
+      });
+      continue;
+    }
+
+    if (type === "featureGrid") {
+      const items = (s.items ?? [])
+        .filter((item) => item.title?.trim())
+        .map((item) => ({
+          title: item.title!.trim(),
+          description: item.description?.trim() || undefined,
+          imageSrc: item.image ? imageBuilder.image(item.image).width(300).url() : undefined,
+        }));
+      if (!heading || items.length === 0) continue;
+      sections.push({
+        _type: "featureGrid",
+        eyebrow: s.eyebrow?.trim() || undefined,
+        heading,
+        lead: s.lead?.trim() || undefined,
+        layout: stegaClean(s.layout ?? undefined) === "tiles" ? "tiles" : "cards",
+        items,
+        background,
+      });
+      continue;
+    }
+
+    if (type === "showcase") {
+      if (!heading || !s.image) continue;
+      const linkLabel = s.linkLabel?.trim();
+      const linkHref = stegaClean(s.linkHref ?? undefined);
+      sections.push({
+        _type: "showcase",
+        eyebrow: s.eyebrow?.trim() || undefined,
+        heading,
+        body: s.body?.trim() || undefined,
+        imageSrc: imageBuilder.image(s.image).width(1600).url(),
+        imageSize: ((v) => (v === "small" || v === "full" ? v : "medium"))(
+          stegaClean(s.imageSize ?? undefined)
+        ),
+        // A label with no address is a dead button and an address with no
+        // label is an invisible one, so the link needs both or neither.
+        link: linkLabel && linkHref ? { label: linkLabel, href: linkHref } : undefined,
+        background,
+      });
+      continue;
+    }
+
+    if (type === "statsBand") {
+      const items = (s.items ?? [])
+        .filter((item) => item.value?.trim() && item.label?.trim())
+        .map((item) => ({
+          value: item.value!.trim(),
+          label: item.label!.trim(),
+          description: item.description?.trim() || undefined,
+        }));
+      if (items.length === 0) continue;
+      sections.push({
+        _type: "statsBand",
+        heading: heading || "Achievements and Impact",
+        subheading: s.subheading?.trim() || undefined,
+        iconSrc: s.icon ? imageBuilder.image(s.icon).width(128).url() : undefined,
+        ...((bg, accent) => ({
+          bgColor: bg,
+          bgInk: readableInk(bg),
+          accentColor: accent,
+          accentInk: readableInk(accent),
+        }))(toHexColor(s.bgColor, brandColor), toHexColor(s.accentColor, "#DAFF81")),
+        items,
+      });
+      continue;
+    }
+
+    if (type === "testimonial") {
+      const quote = s.quote?.trim();
+      if (!quote) continue;
+      sections.push({
+        _type: "testimonial",
+        quote,
+        authorName: s.authorName?.trim() || undefined,
+        authorRole: s.authorRole?.trim() || undefined,
+        avatarSrc: s.avatar ? imageBuilder.image(s.avatar).width(200).url() : undefined,
+        background,
+      });
+      continue;
+    }
+
+    console.warn(`[sanity] Unknown case study section type "${type}" -- skipping it.`);
+  }
+
+  return sections;
+}
 
 function toCaseStudy(doc: SanityCaseStudyDoc): CaseStudy {
   const facts: CaseStudyFact[] = [
@@ -384,8 +640,12 @@ function toCaseStudy(doc: SanityCaseStudyDoc): CaseStudy {
           // The band defaults to the client's own colour rather than to a
           // second hardcoded green, so a study that fills in nothing here
           // still comes out looking like the rest of its page.
-          bgColor: toHexColor(doc.statsBgColor, brandColor),
-          accentColor: toHexColor(doc.statsAccentColor, "#DAFF81"),
+          ...((bg, accent) => ({
+            bgColor: bg,
+            bgInk: readableInk(bg),
+            accentColor: accent,
+            accentInk: readableInk(accent),
+          }))(toHexColor(doc.statsBgColor, brandColor), toHexColor(doc.statsAccentColor, "#DAFF81")),
           items: statsItems,
         }
       : undefined;
@@ -398,6 +658,7 @@ function toCaseStudy(doc: SanityCaseStudyDoc): CaseStudy {
     logoSrc: doc.logo ? imageBuilder.image(doc.logo).width(400).url() : undefined,
     brandColor,
     brandColorFade: withZeroAlpha(brandColor),
+    brandInk: readableInk(brandColor),
     heroImageSrc: doc.heroImage ? imageBuilder.image(doc.heroImage).width(900).url() : undefined,
     heroImageSrcs: (doc.heroImages ?? []).map((img) =>
       imageBuilder.image(img).width(600).url()
@@ -422,6 +683,7 @@ function toCaseStudy(doc: SanityCaseStudyDoc): CaseStudy {
           side === "left" || side === "right" ? side : i % 2 === 0 ? "left" : "right",
       };
     }),
+    sections: toSections(doc.sections, brandColor),
     stats,
     metaDescription: doc.metaDescription ?? undefined,
   };

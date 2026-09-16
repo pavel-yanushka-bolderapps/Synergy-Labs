@@ -1,0 +1,72 @@
+---
+// Prose beside an image. The workhorse section -- see the note at the top of
+// src/sanity/schemaTypes/caseStudySections/splitBlock.ts for why so many
+// differently-named panels on the original site are all this one type.
+import SectionShell from "./SectionShell.astro";
+import type { CaseStudySplitBlock } from "../../../lib/types";
+
+interface Props {
+  content: CaseStudySplitBlock;
+}
+
+const { content } = Astro.props;
+const { eyebrow, heading, paragraphs, bullets, imageSrc, imageSide, background } = content;
+---
+
+<SectionShell background={background}>
+  <div
+    class:list={[
+      "grid items-center gap-10",
+      imageSrc && "md:grid-cols-2 md:gap-16",
+    ]}
+  >
+    {imageSrc && (
+      <div class:list={["min-w-0", imageSide === "right" && "md:order-2"]}>
+        <img src={imageSrc} alt="" loading="lazy" class="w-full rounded-3xl object-cover" />
+      </div>
+    )}
+
+    <div class="min-w-0">
+      {eyebrow && (
+        <p class="mb-3 text-xs font-semibold uppercase tracking-widest opacity-60">{eyebrow}</p>
+      )}
+      <h2 class="font-display text-3xl leading-tight md:text-4xl">{heading}</h2>
+
+      {paragraphs.map((p) => <p class="mt-5 opacity-70">{p}</p>)}
+
+      {bullets.length > 0 && (
+        <ul class="mt-6 space-y-4">
+          {bullets.map((bullet) => (
+            <li class="flex gap-3">
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+                class="cs-tick mt-1 h-5 w-5 shrink-0"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 1 0 0-16a8 8 0 0 0 0 16m3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79l-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089z"
+                  clip-rule="evenodd"></path>
+              </svg>
+              <span class="opacity-70">{bullet}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+</SectionShell>
+
+<style>
+  /* The tick takes the client's colour on light grounds, where it reads as
+     an accent. On the brand background it would vanish into it, so there it
+     falls back to inheriting the section's white. */
+  .cs-tick {
+    color: var(--cs-brand, var(--color-secondary-green, #007244));
+  }
+
+  :global(.cs-section--brand) .cs-tick {
+    color: currentColor;
+  }
+</style>

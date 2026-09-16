@@ -14,17 +14,21 @@ const isHome = Astro.url.pathname === "/";
 const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
 ---
 
-<header class="sticky top-0 z-50 bg-secondary/90 backdrop-blur">
-  <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
+<!-- data-nav is the layout mode. It ships as "auto" so the server-rendered
+     markup still falls back to the md breakpoint for no-JS and for the frame
+     before the script runs; the script then measures and pins it to "desktop"
+     or "compact". See the <style> and <script> at the bottom. -->
+<header class="sticky top-0 z-50 bg-secondary/90 backdrop-blur" data-nav="auto">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4" data-nav-row>
     <a href="/" class="shrink-0">
       <img src={nav.logoSrc} alt={nav.logoAlt} class="h-8 w-auto md:h-12" />
     </a>
 
-    <nav class="hidden items-center gap-8 md:flex">
+    <nav class="shrink-0 items-center gap-8" data-nav-desktop>
       {nav.links.map((link) =>
         link.children && link.children.length > 0 ? (
           <div class="group relative">
-            <span class="flex cursor-pointer items-center gap-1 text-sm font-medium text-black/80 transition hover:text-black">
+            <span class="flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm font-medium text-black/80 transition hover:text-black">
               {link.label}
               <span class="text-xs transition group-hover:rotate-180">▾</span>
             </span>
@@ -44,7 +48,7 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
         ) : (
           <a
             href={link.href}
-            class="text-sm font-medium text-black/80 transition hover:text-black"
+            class="whitespace-nowrap text-sm font-medium text-black/80 transition hover:text-black"
           >
             {link.label}
           </a>
@@ -52,20 +56,26 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
       )}
     </nav>
 
-    <div class="hidden items-center gap-6 md:flex">
-      <a href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`} class="text-xs font-medium text-black/80">
+    <div class="shrink-0 items-center gap-6" data-nav-desktop>
+      <a
+        href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`}
+        class="whitespace-nowrap text-xs font-medium text-black/80"
+      >
         {nav.phone}
       </a>
       <a
         href={ctaHref}
-        class="rounded-md bg-secondary-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-green"
+        class="whitespace-nowrap rounded-md bg-secondary-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-green"
       >
         {nav.ctaButton.label}
       </a>
     </div>
 
-    <div class="flex items-center gap-4 md:hidden">
-      <a href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`} class="text-xs font-medium text-black/80">
+    <div class="shrink-0 items-center gap-4" data-nav-compact>
+      <a
+        href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`}
+        class="whitespace-nowrap text-xs font-medium text-black/80"
+      >
         {nav.phone}
       </a>
       <button
@@ -88,7 +98,8 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
 
   <nav
     id="mobile-menu"
-    class="grid grid-rows-[0fr] overflow-hidden opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-in-out md:hidden"
+    class="grid grid-rows-[0fr] overflow-hidden opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-in-out"
+    data-nav-panel
   >
     <div class="flex flex-col gap-1 overflow-hidden border-t border-black/10 px-6 py-4">
       {nav.links.map((link) =>
@@ -119,26 +130,112 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
   </nav>
 </header>
 
+
+<style>
+  /* Which of the two headers is showing is driven by data-nav on the header,
+     not by a media query, so the switch can happen at the width where the
+     links actually stop fitting rather than at a number picked in advance.
+     See the script below for how that width is found. */
+  header[data-nav="desktop"] [data-nav-desktop] { display: flex; }
+  header[data-nav="desktop"] [data-nav-compact] { display: none; }
+  header[data-nav="desktop"] [data-nav-panel] { display: none; }
+
+  header[data-nav="compact"] [data-nav-desktop] { display: none; }
+  header[data-nav="compact"] [data-nav-compact] { display: flex; }
+
+  /* "auto" is what the server renders and what a reader without JS keeps:
+     the md breakpoint this used to switch on. */
+  header[data-nav="auto"] [data-nav-desktop] { display: none; }
+  header[data-nav="auto"] [data-nav-compact] { display: flex; }
+
+  @media (min-width: 768px) {
+    header[data-nav="auto"] [data-nav-desktop] { display: flex; }
+    header[data-nav="auto"] [data-nav-compact] { display: none; }
+    header[data-nav="auto"] [data-nav-panel] { display: none; }
+  }
+</style>
+
 <script>
   const menuButton = document.getElementById("mobile-menu-button");
   const menu = document.getElementById("mobile-menu");
   const openIcon = menuButton?.querySelector('[data-icon="open"]');
   const closeIcon = menuButton?.querySelector('[data-icon="close"]');
 
-  menuButton?.addEventListener("click", () => {
-    const isOpen = menuButton.getAttribute("aria-expanded") === "true";
-    const nowOpen = !isOpen;
-    menuButton.setAttribute("aria-expanded", String(nowOpen));
+  function setMenuOpen(open: boolean) {
+    menuButton?.setAttribute("aria-expanded", String(open));
 
     // Toggle grid-template-rows between 0fr/1fr: the panel's height animates
     // smoothly via CSS transition without needing to measure its content
     // height in JS (see the `grid grid-rows-[0fr] ... transition-[grid-template-rows,opacity]`
     // classes on #mobile-menu).
-    menu?.classList.toggle("grid-rows-[0fr]", !nowOpen);
-    menu?.classList.toggle("grid-rows-[1fr]", nowOpen);
-    menu?.classList.toggle("opacity-0", !nowOpen);
+    menu?.classList.toggle("grid-rows-[0fr]", !open);
+    menu?.classList.toggle("grid-rows-[1fr]", open);
+    menu?.classList.toggle("opacity-0", !open);
 
-    openIcon?.classList.toggle("hidden", nowOpen);
-    closeIcon?.classList.toggle("hidden", !nowOpen);
+    openIcon?.classList.toggle("hidden", open);
+    closeIcon?.classList.toggle("hidden", !open);
+  }
+
+  menuButton?.addEventListener("click", () => {
+    setMenuOpen(menuButton.getAttribute("aria-expanded") !== "true");
   });
+
+  // Collapse to the burger when the links stop fitting, not at 768px.
+  //
+  // The old md: breakpoint was a guess, and this nav outgrew it: at 712px the
+  // links were still "desktop" but had run out of room, so "Our Services" and
+  // the phone number wrapped onto two and three lines and the CTA pushed off
+  // the edge. The width where it actually stops fitting depends on the link
+  // labels, which come from the CMS, and on the font -- none of which a
+  // hard-coded breakpoint knows about.
+  //
+  // Everything in the row is now shrink-0 and whitespace-nowrap, so when it no
+  // longer fits it overflows rather than quietly squashing itself, and
+  // scrollWidth > clientWidth becomes a reliable "too tight" signal.
+  //
+  // Going the other way needs a remembered threshold: once collapsed, the
+  // desktop row is display:none and can't be measured, so record the width it
+  // gave up at and only try again above it. The retry re-measures, so the
+  // stored number self-corrects if the labels or fonts change.
+  const header = document.querySelector<HTMLElement>("header[data-nav]");
+  const row = header?.querySelector<HTMLElement>("[data-nav-row]");
+
+  if (header && row) {
+    let collapseAt = Number.POSITIVE_INFINITY;
+    let queued = false;
+
+    // Reads layout, so only ever called inside the rAF below. Flipping
+    // data-nav and measuring happen in the same frame, so a row that turns out
+    // not to fit is never painted in its overflowing state.
+    const fitsAsDesktop = () => {
+      header.dataset.nav = "desktop";
+      return row.scrollWidth <= row.clientWidth + 1;
+    };
+
+    const update = () => {
+      queued = false;
+      const available = row.clientWidth;
+
+      if (header.dataset.nav === "compact" && available <= collapseAt) return;
+
+      if (fitsAsDesktop()) {
+        setMenuOpen(false);
+      } else {
+        collapseAt = available;
+        header.dataset.nav = "compact";
+      }
+    };
+
+    const schedule = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(update);
+    };
+
+    new ResizeObserver(schedule).observe(row);
+
+    // Metric changes move the threshold, so re-measure once the real faces are
+    // in rather than leaving a decision made against the fallback font.
+    document.fonts?.ready.then(schedule);
+  }
 </script>

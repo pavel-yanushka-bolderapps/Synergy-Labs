@@ -365,8 +365,8 @@
     "clientName": "Signal",
     "logo": null,
     "brandColor": "#1F4068",
-    "headline": "Signal, a leader in tailored security solutions, partnered with us to create an app that streamlines on-site and remote assessments, boosting efficiency and precision as they grow",
-    "intro": null,
+    "headline": "Signal",
+    "intro": "Signal, a leader in tailored security solutions, partnered with us to create an app that streamlines on-site and remote assessments, boosting efficiency and precision as they grow.",
     "heroImages": [
       "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6723dcafa33e2199f4924a10_Signal_RGB_Brandmark_SignalBlue.avif",
       "https://cdn.prod.website-files.com/6682fcb4cd26b11752a185d3/6723e23381563e179122853e_Signal%20Hero%20(1).avif",
@@ -447,7 +447,7 @@
     "slug": "urban-massage",
     "clientName": "Urban Massage",
     "logo": null,
-    "brandColor": "#E8595E",
+    "brandColor": "#886F25",
     "headline": "On-Demand Massage Service App",
     "intro": null,
     "heroImages": [

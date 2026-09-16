@@ -234,7 +234,79 @@ export interface ServiceProcessContent {
   steps: ServiceProcessStep[];
 }
 
-/** One alternating image/text block in the body of a case study. */
+// --- The case-study page builder ---
+//
+// One interface per section type an editor can add to a case study, plus the
+// CaseStudySection union the renderer switches on. The `_type` values match
+// the Sanity object names in src/sanity/schemaTypes/caseStudySections/ --
+// that string is the whole contract between the CMS and the components, so
+// the two have to agree exactly.
+
+/** Where a section sits: page ground, a soft tint, or the client's colour. */
+export type CaseStudySectionBackground = "default" | "tinted" | "brand";
+
+export interface CaseStudySplitBlock {
+  _type: "splitBlock";
+  eyebrow?: string;
+  heading: string;
+  paragraphs: string[];
+  bullets: string[];
+  imageSrc?: string;
+  /** Resolved side -- "auto" is already turned into left/right by the query. */
+  imageSide: "left" | "right";
+  background: CaseStudySectionBackground;
+}
+
+export interface CaseStudyFeatureGrid {
+  _type: "featureGrid";
+  eyebrow?: string;
+  heading: string;
+  lead?: string;
+  /** "tiles" drops the descriptions and packs the items tighter. */
+  layout: "cards" | "tiles";
+  items: { title: string; description?: string; imageSrc?: string }[];
+  background: CaseStudySectionBackground;
+}
+
+export interface CaseStudyShowcase {
+  _type: "showcase";
+  eyebrow?: string;
+  heading: string;
+  body?: string;
+  imageSrc: string;
+  /** How wide the image runs from md up. Below that it always fills the column. */
+  imageSize: "small" | "medium" | "full";
+  /** Present only when the editor filled in both the label and the address. */
+  link?: CTAButton;
+  background: CaseStudySectionBackground;
+}
+
+export interface CaseStudyStatsBand extends CaseStudyStats {
+  _type: "statsBand";
+}
+
+export interface CaseStudyTestimonial {
+  _type: "testimonial";
+  quote: string;
+  authorName?: string;
+  authorRole?: string;
+  avatarSrc?: string;
+  background: CaseStudySectionBackground;
+}
+
+export type CaseStudySection =
+  | CaseStudySplitBlock
+  | CaseStudyFeatureGrid
+  | CaseStudyShowcase
+  | CaseStudyStatsBand
+  | CaseStudyTestimonial;
+
+/**
+ * One alternating image/text block in the body of a case study.
+ *
+ * @deprecated Superseded by CaseStudySplitBlock in the page builder above.
+ * Still rendered for case studies that haven't been migrated to `sections`.
+ */
 export interface CaseStudyBlock {
   heading: string;
   paragraphs: string[];
@@ -261,9 +333,13 @@ export interface CaseStudyStats {
   iconSrc?: string;
   /** The band's background. */
   bgColor: string;
+  /** Black or white, whichever is readable on bgColor. See readableInk(). */
+  bgInk: string;
   /** The colour of the number cards sitting on that background. */
   accentColor: string;
-  items: { value: string; label: string }[];
+  /** Black or white, whichever is readable on accentColor. */
+  accentInk: string;
+  items: { value: string; label: string; description?: string }[];
 }
 
 export interface CaseStudy {
@@ -285,6 +361,12 @@ export interface CaseStudy {
    * greying off towards its bottom left.
    */
   brandColorFade: string;
+  /**
+   * Black or white, whichever is readable on brandColor -- a navy band wants
+   * white text and a yellow one does not, and the page can't tell which it
+   * has without measuring.
+   */
+  brandInk: string;
   /** Fallback hero visual, used only when there are no screenshots. */
   heroImageSrc?: string;
   /** App screens for the hero carousel. */
@@ -299,8 +381,15 @@ export interface CaseStudy {
   facts: CaseStudyFact[];
   overviewHeading?: string;
   overviewParagraphs: string[];
+  /**
+   * The body of the page. When this is non-empty it is the whole body and
+   * `blocks`/`stats` are ignored; a study that hasn't been migrated yet has
+   * it empty and falls back to those two.
+   */
+  sections: CaseStudySection[];
+  /** @deprecated Fallback body for studies not yet migrated to `sections`. */
   blocks: CaseStudyBlock[];
-  /** The achievements band, or undefined when this study doesn't show one. */
+  /** @deprecated Fallback achievements band for studies not yet migrated. */
   stats?: CaseStudyStats;
   metaDescription?: string;
 }

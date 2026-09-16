@@ -1,0 +1,38 @@
+---
+// /locations -- the nav has linked here since the nav was written, but the
+// page was never built, so the link 404'd.
+//
+// Same shape as the homepage's Locations section, with one difference: the
+// offices come from Sanity (see src/sanity/schemaTypes/location.ts) rather
+// than the hardcoded array. The array stays as the fallback so the page still
+// builds with an unconfigured or unreachable CMS -- the same contract the
+// Services grid uses.
+import Layout from "../components/layout/Layout.astro";
+import LocationsGrid from "../components/sections/locations/LocationsGrid.astro";
+import ContactSection from "../components/sections/ContactSection.astro";
+import { home } from "../content/home";
+import { getLocations } from "../lib/sanity";
+
+const items = (await getLocations()) ?? home.locations.items;
+const headquarters = items.find((item) => item.isHeadquarters);
+
+const description = headquarters
+  ? `Synergy Labs has offices in ${items.length} cities worldwide, headquartered in ${headquarters.city}.`
+  : `Synergy Labs has offices in ${items.length} cities worldwide.`;
+---
+
+<Layout title="Locations | Synergy Labs" description={description}>
+  <section class="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
+    <h1 class="font-display text-4xl leading-tight md:text-5xl">
+      Our <span class="text-secondary-green">Locations</span>
+    </h1>
+    <p class="mt-6 text-lg text-black/70">{description}</p>
+  </section>
+
+  <section class="mx-auto max-w-7xl px-6 pb-20">
+    <p class="mb-6 text-xs font-semibold uppercase tracking-widest text-black/50">Headquarters</p>
+    <LocationsGrid items={items} moreLabel={home.locations.moreLocationsLabel} />
+  </section>
+
+  <ContactSection id="contact-form" />
+</Layout>
