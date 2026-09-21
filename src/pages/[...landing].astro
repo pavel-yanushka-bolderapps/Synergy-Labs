@@ -1,0 +1,102 @@
+---
+// The /top-* landing pages that Clutch and paid traffic arrive on -- 24 of
+// them, all the same template, differing only in the fields on the
+// `clutchLanding` document. See src/sanity/schemaTypes/clutchLanding.ts.
+//
+// A rest parameter rather than [landing]: one of the live URLs is
+// /top-app-developers/the-united-states, and a single-segment param cannot
+// match a slug containing a slash. That URL is indexed, so it stays as it is.
+//
+// This sits at the site root, which sounds alarming next to 392 other pages --
+// but Astro matches static routes before dynamic ones, and getStaticPaths only
+// emits the 24 slugs below, so it can neither shadow an existing page nor
+// swallow an unknown URL (those still reach 404.astro).
+import type { GetStaticPaths } from "astro";
+import LandingLayout from "../components/layout/LandingLayout.astro";
+import ContactForm from "../components/ContactForm.astro";
+import Badges from "../components/sections/Badges.astro";
+import Reviews from "../components/sections/Reviews.astro";
+import SelectedWorks from "../components/sections/SelectedWorks.astro";
+import { getClutchLandings, getClutchLandingBySlug, withExistingCaseStudies } from "../lib/sanity";
+import { home } from "../content/home";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const pages = await getClutchLandings();
+  return pages.map((page) => ({ params: { landing: page.slug } }));
+};
+
+const { landing } = Astro.params;
+const page = await getClutchLandingBySlug(landing!);
+
+if (!page) {
+  return Astro.redirect("/", 302);
+}
+
+const title = page.metaTitle || page.heading;
+const description = page.metaDescription || page.pitch;
+
+// The success stories row reuses the homepage's selected works, minus any
+// whose case study hasn't been built yet -- a dead "View case study" link on a
+// paid landing page is worse than one fewer card.
+const selectedWorks = {
+  ...home.selectedWorks,
+  heading: "Success Stories",
+  items: await withExistingCaseStudies(home.selectedWorks.items),
+};
+---
+
+<LandingLayout
+  title={title}
+  description={description}
+  canonical={page.canonicalSlug ? `/${page.canonicalSlug}` : undefined}
+  locale={page.locale}
+>
+  <section class="mx-auto max-w-7xl px-6 py-12 md:py-16">
+    <div class="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_26rem] lg:gap-16">
+      <div>
+        <h1 class="font-display text-3xl uppercase leading-tight md:text-5xl">{page.heading}</h1>
+        <p class="mt-6 max-w-2xl text-lg leading-relaxed text-black/70">{page.pitch}</p>
+      </div>
+
+      {/*
+        The form is the point of the page, so it sits in the first screen
+        rather than at the foot of it. `self-start` keeps it stickable -- a
+        stretched grid item can never stick.
+      */}
+      <div id="contact" class="lg:sticky lg:top-8 lg:self-start">
+        <div id="contact-form-wrapper" class="bg-blog-gradient rounded-3xl p-6 shadow-xl md:p-8">
+          <h2 class="font-display text-2xl leading-snug">
+            {page.ctaHeading || "Hire a top-tier agency"}
+          </h2>
+          <ContactForm class="mt-6" />
+        </div>
+
+        <div
+          id="contact-success"
+          class="bg-blog-gradient hidden flex-col items-center rounded-3xl p-8 text-center shadow-xl"
+        >
+          <div class="flex h-14 w-14 items-center justify-center rounded-full bg-secondary-green text-white">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              stroke="currentColor"
+              class="h-7 w-7"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+          </div>
+          <h2 class="mt-5 font-display text-2xl">You're booked!</h2>
+          <p class="mt-3 text-sm text-black/70">
+            We're getting prepped for your call. Our director of product will be in touch shortly.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Badges content={home.badges} />
+  <Reviews content={home.reviews} />
+  <SelectedWorks content={selectedWorks} />
+</LandingLayout>

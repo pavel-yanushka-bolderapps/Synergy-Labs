@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import vercel from '@astrojs/vercel';
+import sitemap from '@astrojs/sitemap';
 import react from '@astrojs/react';
 import sanity from '@sanity/astro';
 import { loadEnv } from 'vite';
@@ -15,12 +16,23 @@ const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET } = loadEnv(
 );
 
 export default defineConfig({
+  // The canonical origin. Everything absolute is derived from it -- the
+  // <link rel="canonical"> and Open Graph URLs in Layout.astro, and every
+  // entry @astrojs/sitemap writes. Without it Astro.site is undefined and
+  // those fall back to relative URLs, which neither canonicals nor the
+  // social scrapers accept.
+  site: 'https://www.synergylabs.co',
   // Site stays static by default (every page prerenders) except routes that
   // opt out with `export const prerender = false` -- that's the
   // contact-form API route and the embedded Sanity Studio, so it needs a
   // server adapter but the rest of the site is unaffected.
   adapter: vercel(),
   integrations: [
+    sitemap({
+      // The Studio is an application, not content, and the API routes are not
+      // pages at all.
+      filter: (page) => !page.includes('/studio'),
+    }),
     sanity({
       projectId: PUBLIC_SANITY_PROJECT_ID || 'placeholder',
       dataset: PUBLIC_SANITY_DATASET || 'production',

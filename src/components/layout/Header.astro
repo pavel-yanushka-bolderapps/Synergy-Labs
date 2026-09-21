@@ -48,9 +48,14 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
         ) : (
           <a
             href={link.href}
-            class="whitespace-nowrap text-sm font-medium text-black/80 transition hover:text-black"
+            class="flex items-center gap-1.5 whitespace-nowrap text-sm font-medium text-black/80 transition hover:text-black"
           >
             {link.label}
+            {link.badge && (
+              <span class="rounded-full bg-secondary-green px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none text-white">
+                {link.badge}
+              </span>
+            )}
           </a>
         )
       )}
@@ -115,8 +120,13 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
             </div>
           </div>
         ) : (
-          <a href={link.href} class="block px-2 py-2 text-sm font-medium text-black/80 hover:text-black">
+          <a href={link.href} class="flex items-center gap-1.5 px-2 py-2 text-sm font-medium text-black/80 hover:text-black">
             {link.label}
+            {link.badge && (
+              <span class="rounded-full bg-secondary-green px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none text-white">
+                {link.badge}
+              </span>
+            )}
           </a>
         )
       )}

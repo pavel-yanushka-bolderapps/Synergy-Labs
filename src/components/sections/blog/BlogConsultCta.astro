@@ -1,0 +1,71 @@
+---
+// The "let's have a discovery call" rail beside a blog post, transcribed from
+// the Webflow blog template's `.consult-div`.
+//
+// It wraps the shared ContactForm rather than carrying a second form of its
+// own: that form's submit script addresses elements by id, so there can only
+// be one per page. That is why the post page drops its bottom ContactSection
+// -- this rail is the page's contact form, not an extra one.
+//
+// The #contact-form-wrapper / #contact-success pair is the contract
+// ContactForm expects from whoever places it: it hides the first and reveals
+// the second on a successful send.
+import ContactForm from "../../ContactForm.astro";
+
+interface Props {
+  /** Placement classes, so the post page owns the sticky behaviour. */
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<aside class={className}>
+  <div id="contact-form-wrapper" class="bg-blog-gradient rounded-3xl p-6 shadow-xl">
+    <div class="flex items-center gap-4">
+      {/*
+        The icon is 141x101, not square, so the old `h-12 w-12` was squashing
+        it to fit rather than scaling it. Fix the height and let the width
+        follow the aspect ratio: `w-auto` alone would still let flexbox take
+        width off it, which is what `shrink-0` and the matching `min-w` are
+        for -- `shrink-0` stops the flex item shrinking, and the min-width
+        stops the replaced element's own width from resolving smaller in the
+        23rem rail.
+      */}
+      <img
+        src="/images/blog/consult-icon.avif"
+        alt=""
+        width="67"
+        height="48"
+        class="h-12 w-auto min-w-[4.1875rem] shrink-0 object-contain"
+      />
+      <p class="font-display text-lg leading-snug">
+        Let's have a discovery call for your project?
+      </p>
+    </div>
+
+    <ContactForm class="mt-6" />
+  </div>
+
+  <div
+    id="contact-success"
+    class="bg-blog-gradient hidden flex-col items-center rounded-3xl p-8 text-center shadow-xl"
+  >
+    <div class="flex h-14 w-14 items-center justify-center rounded-full bg-secondary-green text-white">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="2.5"
+        stroke="currentColor"
+        class="h-7 w-7"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+      </svg>
+    </div>
+    <h2 class="mt-5 font-display text-2xl">Thanks — we got your message!</h2>
+    <p class="mt-3 text-sm text-black/70">
+      Our director of product will reach out shortly to schedule your call.
+    </p>
+  </div>
+</aside>

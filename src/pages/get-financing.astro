@@ -1,0 +1,111 @@
+---
+// /get-financing -- Enhancify's full-page widget, which runs the whole
+// application flow (pre-qualification, lender offers, approval) inside the
+// embed. Nothing on this page posts to our own API.
+//
+// The embed is a third-party script that renders into #fullpagewidget and
+// reads its configuration from that element's data-* attributes, so both have
+// to be present and the ids/attribute names are Enhancify's, not ours.
+import Layout from "../components/layout/Layout.astro";
+import { financingPage } from "../content/financingPage";
+
+const { widget } = financingPage;
+---
+
+<Layout
+  title="Get Financing | Synergy Labs"
+  description={financingPage.description}
+>
+  <section class="mx-auto max-w-3xl px-6 py-16 text-center md:py-24">
+    <span
+      class="inline-block rounded-full bg-secondary-green px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white"
+    >
+      New
+    </span>
+    <h1 class="mt-6 font-display text-4xl leading-tight md:text-5xl">
+      {financingPage.heading}
+    </h1>
+    <p class="mt-6 text-lg text-black/70">{financingPage.description}</p>
+
+    <ul class="mt-8 flex flex-col items-center gap-3">
+      {financingPage.points.map((point) => (
+        <li class="flex items-start gap-3 text-left text-sm text-black/70">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="mt-0.5 h-5 w-5 shrink-0 text-secondary-green" aria-hidden="true">
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <span>{point}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  {/*
+    Full-bleed, with no card around it and nothing clipping it. Enhancify's
+    widget ships its own full-width banded sections with their own breakpoints;
+    boxing it into a centred, padded, `overflow-hidden` card cut the right-hand
+    side off every band ("WHY CHOOSE OUR FINANCING", the payment estimator) and
+    stopped its own responsive rules from matching the width it actually had.
+  */}
+  <section class="w-full pb-16">
+    <div
+      id="fullpagewidget"
+      class="w-full"
+      data-color1={widget.color1}
+      data-color2={widget.color2}
+      data-cobrandedcolor={widget.cobrandedColor}
+      data-page={widget.pageId}
+      data-hidelink="0"
+    >
+      {/*
+        Shown until Enhancify's script replaces the contents of this element.
+        It also covers the case where the script is blocked -- otherwise the
+        page would be a heading above an empty white box.
+      */}
+      <noscript>
+        <p class="p-8 text-center text-black/70">
+          Financing applications need JavaScript. Email
+          <a href="mailto:hello@synergylabs.co" class="text-secondary-green underline">
+            hello@synergylabs.co
+          </a>
+          and we'll send your options over.
+        </p>
+      </noscript>
+    </div>
+
+    <p class="mx-auto mt-10 max-w-3xl px-6 text-center text-xs text-black/50">
+      Financing is provided by Enhancify and its lending partners. Synergy Labs is not a lender and
+      does not make credit decisions.
+    </p>
+  </section>
+
+  {/*
+    The widget is third-party markup injected at runtime, so Astro's scoped
+    styles never reach it -- these have to be global, and are namespaced under
+    its own id so nothing leaks. Only two rules, both guard rails rather than
+    restyling: stop any fixed-width child from pushing a horizontal scrollbar
+    onto the page, and let its tables scroll inside themselves on a phone.
+  */}
+  <style is:global>
+    #fullpagewidget {
+      overflow-x: hidden;
+    }
+
+    #fullpagewidget img,
+    #fullpagewidget table {
+      max-width: 100%;
+    }
+  </style>
+
+  {/*
+    is:inline keeps Astro from trying to bundle this -- it is a third-party
+    script that has to run from Enhancify's own origin. Loaded at the end of
+    the body (which is where Astro puts it) so the widget element it renders
+    into already exists.
+  */}
+  <script is:inline src="https://www.enhancify.com/fullpagewidget/"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Sans:300,300i,400,400i,500,600,700" />
+</Layout>

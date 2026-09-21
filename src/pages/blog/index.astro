@@ -1,0 +1,23 @@
+---
+// /blog -- page 1 of the archive. Pages 2..n live at /blog/page/[page], so
+// that /blog/[slug] stays free for the posts themselves.
+import Layout from "../../components/layout/Layout.astro";
+import BlogList from "../../components/sections/blog/BlogList.astro";
+import ContactSection from "../../components/sections/ContactSection.astro";
+import { blogPage } from "../../content/blogPage";
+import { getBlogPosts } from "../../lib/sanity";
+
+const posts = await getBlogPosts();
+const totalPages = Math.max(1, Math.ceil(posts.length / blogPage.pageSize));
+---
+
+<Layout title="Blog | Synergy Labs" description={blogPage.subheading}>
+  <section class="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
+    <h1 class="font-display text-4xl leading-tight md:text-5xl">{blogPage.heading}</h1>
+    <p class="mt-6 text-lg text-black/70">{blogPage.subheading}</p>
+  </section>
+
+  <BlogList posts={posts.slice(0, blogPage.pageSize)} currentPage={1} totalPages={totalPages} />
+
+  <ContactSection id="contact-form" />
+</Layout>

@@ -5,14 +5,41 @@ import { VisualEditing } from "@sanity/astro/visual-editing";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
 import { previewEnabled } from "../../lib/loadQuery";
+import { canonicalUrl, assetUrl } from "../../lib/seo";
 import "../../styles/global.css";
 
 interface Props {
   title: string;
   description?: string;
+  /**
+   * Absolute or site-relative share image. 1200x630 is what the networks
+   * crop to; anything much smaller renders as a thumbnail instead of a card.
+   */
+  ogImage?: string;
+  /** "article" on blog posts, so they can carry a byline and dates. */
+  ogType?: "website" | "article";
+  /** Published/modified dates, only meaningful when ogType is "article". */
+  publishedTime?: string;
+  /** Overrides the canonical, for pages that are a variant of another URL. */
+  canonical?: string;
+  /** Keeps a page out of the index without removing it from the site. */
+  noindex?: boolean;
 }
 
-const { title, description = "Synergy Labs — AI + Mobile App Development Agency" } = Astro.props;
+const {
+  title,
+  description = "Synergy Labs — AI + Mobile App Development Agency",
+  ogImage = "/images/og-default.webp",
+  ogType = "website",
+  publishedTime,
+  canonical,
+  noindex = false,
+} = Astro.props;
+
+// Both go through src/lib/seo.ts so the canonical here always has the same
+// shape as the URL @astrojs/sitemap writes for the same page.
+const pageUrl = canonicalUrl(canonical ?? Astro.url.pathname, Astro.site);
+const ogImageUrl = assetUrl(ogImage, Astro.site);
 ---
 
 <!doctype html>
@@ -23,10 +50,28 @@ const { title, description = "Synergy Labs — AI + Mobile App Development Agenc
     <link rel="icon" type="image/png" href="/images/favicon.png" />
     <title>{title}</title>
     <meta name="description" content={description} />
+
+    <link rel="canonical" href={pageUrl} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <meta property="og:site_name" content="Synergy Labs" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
   </head>
   <body class="min-h-screen">
     <Header nav={nav} />
-    <main>
+    <main id="main">
       <slot />
     </main>
     <Footer footer={footer} />

@@ -54,11 +54,34 @@
     "contactHeading": "Start Your Miami App Project",
     "contactDescription": "<p>Ready to start your custom mobile app or web platform? Talk to our Miami team about your project. Whether you need mobile app development Miami expertise, a web development agency Miami partner, or a full-service team for both, we're here to help.</p><p><strong>Synergy Labs</strong><br>78 SW 7th St, Miami, FL 33130<br>Phone: (645) 444-1069<br>Hours: Monday - Friday, 9am - 6pm</p><p>Book a free discovery call or send us your project details. We'll review your requirements and get back to you within one business day with a preliminary scope and timeline.</p>",
     "caseStudiesHeading": "Case Studies from Miami Clients",
-    "caseStudyOneTitle": "Fanbase — Social Platform",
-    "caseStudyOneBody": "<p>Fanbase came to us with an ambitious vision for a social platform and a tight timeline. We built the full application — iOS, Android, and web — using cross-platform development to maximize speed without sacrificing quality. The project went from concept to launch in 16 weeks, and Fanbase has since surpassed 100,000 downloads. The app handles real-time content feeds, user profiles, messaging, and content monetization features at scale.</p>",
-    "caseStudyTwoTitle": "Signal — Security Application",
-    "caseStudyTwoBody": "<p>Signal needed a security reporting application that could dramatically speed up their existing workflow. We delivered a custom mobile app in just 4 weeks that transformed their report generation process, achieving 10x faster report generation compared to their previous system. The app handles secure data collection, automated report assembly, and role-based access controls — all built with security-first architecture.</p>",
-    "order": 10
+    "order": 10,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform",
+        "body": "<p>Fanbase came to us with an ambitious vision for a social platform and a tight timeline. We built the full application — iOS, Android, and web — using cross-platform development to maximize speed without sacrificing quality. The project went from concept to launch in 16 weeks, and Fanbase has since surpassed 100,000 downloads. The app handles real-time content feeds, user profiles, messaging, and content monetization features at scale.</p>"
+      },
+      {
+        "title": "Signal — Security Application",
+        "body": "<p>Signal needed a security reporting application that could dramatically speed up their existing workflow. We delivered a custom mobile app in just 4 weeks that transformed their report generation process, achieving 10x faster report generation compared to their previous system. The app handles secure data collection, automated report assembly, and role-based access controls — all built with security-first architecture.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-miami",
+      "android-app-development-miami",
+      "cross-platform-app-development-miami",
+      "web-development-services-miami"
+    ],
+    "industryRefs": [
+      "fintech-miami",
+      "healthcare-miami",
+      "real-estate-miami",
+      "ecommerce-miami",
+      "hospitality-miami"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "dubai",
@@ -91,11 +114,13 @@
     "contactHeading": null,
     "contactDescription": null,
     "caseStudiesHeading": null,
-    "caseStudyOneTitle": null,
-    "caseStudyOneBody": null,
-    "caseStudyTwoTitle": null,
-    "caseStudyTwoBody": null,
-    "order": 20
+    "order": 20,
+    "serviceRefs": [],
+    "industryRefs": [],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "san-francisco",
@@ -157,11 +182,40 @@
     "contactHeading": "Ready to Build? Let’s Talk.",
     "contactDescription": "<p>Whether you are launching a new mobile app, rebuilding an outdated web platform, or scaling an existing product to enterprise levels, Synergy Labs is the San Francisco mobile app development and web development company that gets it done — on time, on budget, and built to last.</p><p>Schedule a free consultation to discuss your project. We will scope your requirements, recommend the right tech stack, and give you a clear timeline and estimate — no obligation, no pressure.</p><p><strong>Call us:</strong> (645) 444-1069<br><strong>Visit us:</strong> 650 California St, San Francisco, CA 94108<br><strong>Hours:</strong> Monday - Friday, 9am - 6pm PT</p>",
     "caseStudiesHeading": "Case Studies from San Francisco Clients",
-    "caseStudyOneTitle": "Fanbase — Social Platform (iOS & Android)",
-    "caseStudyOneBody": "<p>Fanbase came to us with an ambitious vision: a social platform that lets creators monetize their content directly. We built native iOS and Android apps over a 16-week engagement, handling everything from UI/UX design and backend architecture to app store submission. The result: 100,000+ downloads and a thriving creator community. The project required scalable real-time messaging, content feeds, and payment processing.</p>",
-    "caseStudyTwoTitle": "Signal — Security Application (Web & Mobile)",
-    "caseStudyTwoBody": "<p>Signal needed a reporting tool that could process security incident data 10x faster than their existing system. We delivered a cross-platform web and mobile solution in just 4 weeks, combining a React web dashboard with mobile access for field teams.</p>",
-    "order": 30
+    "order": 30,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform (iOS & Android)",
+        "body": "<p>Fanbase came to us with an ambitious vision: a social platform that lets creators monetize their content directly. We built native iOS and Android apps over a 16-week engagement, handling everything from UI/UX design and backend architecture to app store submission. The result: 100,000+ downloads and a thriving creator community. The project required scalable real-time messaging, content feeds, and payment processing.</p>"
+      },
+      {
+        "title": "Signal — Security Application (Web & Mobile)",
+        "body": "<p>Signal needed a reporting tool that could process security incident data 10x faster than their existing system. We delivered a cross-platform web and mobile solution in just 4 weeks, combining a React web dashboard with mobile access for field teams.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-sf",
+      "android-app-development-sf",
+      "cross-platform-app-development-sf"
+    ],
+    "industryRefs": [
+      "fintech-sf",
+      "healthcare-sf",
+      "ecommerce-sf",
+      "ai-machine-learning"
+    ],
+    "technologyRefs": [
+      "mobile",
+      "frontend-web",
+      "backend",
+      "cloud-infrastructure",
+      "devops",
+      "databases",
+      "integrations"
+    ],
+    "techStack": "<h4>Mobile</h4><p>Swift, SwiftUI (iOS), Kotlin, Jetpack Compose (Android), React Native, Flutter (cross-platform)</p><h4>Frontend Web</h4><p>React, Next.js, Vue.js, TypeScript</p><h4>Backend</h4><p>Node.js, Python, Go, Laravel</p><h4>Cloud &amp; Infrastructure</h4><p>AWS, Google Cloud Platform, Firebase, Azure</p><h4>DevOps</h4><p>Docker, Kubernetes, CI/CD pipelines, GitHub Actions</p><h4>Databases</h4><p>PostgreSQL, MongoDB, Redis, DynamoDB</p><h4>Integrations</h4><p>Stripe, Twilio, SendGrid, Salesforce, custom API integration</p>",
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "new-york-city",
@@ -228,11 +282,43 @@
     "contactHeading": "Book a Free Strategy Call With Our New York Team",
     "contactDescription": "<p>Ready to build your mobile app or web application? Our NYC team is here to help.</p><p><strong>Visit us:</strong> 445 Park Ave, New York, NY 10022<br><strong>Call us:</strong> (645) 444-1069<br><strong>Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM</p><p>Book a free strategy call and we will walk through your project requirements, provide a timeline estimate, and outline a clear path from concept to launch. No obligations, no pressure — just a straightforward conversation about what it takes to bring your idea to life in New York City.</p>",
     "caseStudiesHeading": "Featured New York Projects & Case Studies",
-    "caseStudyOneTitle": "Fanbase — Social Platform (16 Weeks)",
-    "caseStudyOneBody": "<p>We built Fanbase, a social content platform, from concept to App Store in 16 weeks. The app has surpassed 100,000 downloads. This project demanded scalable architecture, real-time features, and a polished mobile experience — exactly the kind of complex mobile app development work we do best.</p>",
-    "caseStudyTwoTitle": "Signal — Security Application (4 Weeks)",
-    "caseStudyTwoBody": "<p>We delivered Signal, a security reporting app, in just four weeks. The result: 10x faster incident reports for the client’s field teams. This project demonstrated our ability to move from discovery to deployment on an aggressive timeline without sacrificing quality.</p>",
-    "order": 40
+    "order": 40,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform (16 Weeks)",
+        "body": "<p>We built Fanbase, a social content platform, from concept to App Store in 16 weeks. The app has surpassed 100,000 downloads. This project demanded scalable architecture, real-time features, and a polished mobile experience — exactly the kind of complex mobile app development work we do best.</p>"
+      },
+      {
+        "title": "Signal — Security Application (4 Weeks)",
+        "body": "<p>We delivered Signal, a security reporting app, in just four weeks. The result: 10x faster incident reports for the client’s field teams. This project demonstrated our ability to move from discovery to deployment on an aggressive timeline without sacrificing quality.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-nyc",
+      "android-app-development-nyc",
+      "cross-platform-app-development-nyc",
+      "web-development-services-nyc"
+    ],
+    "industryRefs": [
+      "fintech-nyc",
+      "healthcare-nyc",
+      "retail-ecommerce-nyc",
+      "media-entertainment-nyc",
+      "real-estate-nyc",
+      "logistics-nyc"
+    ],
+    "technologyRefs": [
+      "mobile",
+      "frontend-web",
+      "backend",
+      "cloud-infrastructure",
+      "devops",
+      "databases",
+      "integrations"
+    ],
+    "techStack": "<h4>Mobile</h4><p>Swift (iOS), Kotlin (Android), React Native, Flutter</p><h4>Frontend Web</h4><p>React, Next.js</p><h4>Backend</h4><p>Node.js, Laravel</p><h4>Cloud &amp; Infrastructure</h4><p>AWS, Google Cloud, Firebase, Azure, Docker</p><h4>Databases</h4><p>PostgreSQL, MongoDB, Redis</p><h4>CI/CD &amp; DevOps</h4><p>GitHub Actions, automated testing pipelines</p>",
+    "pricingHeading": "App & Web Development Pricing in New York",
+    "pricingTable": "<p><strong>Mobile App Development:</strong> $50,000–$250,000+ depending on complexity, platform, and feature scope.</p><p><strong>Custom Web Application Development:</strong> $10,000–$100,000+ based on functionality, integrations, and scale.</p><p><strong>Hourly Development Rates:</strong> $150–$250/hour for dedicated team members.</p><p>Every project starts with a free strategy call where we scope requirements and provide a detailed estimate — no obligation, no pressure.</p>"
   },
   {
     "slug": "dallas",
@@ -303,11 +389,46 @@
     "contactHeading": "Book a Free Strategy Call With Our Dallas Team",
     "contactDescription": "<p>Ready to start your mobile app development Dallas project or launch a new web platform? Our Dallas, TX team is here to help you move from idea to launch.</p><p><strong>Call us:</strong> (645) 444-1069<br><strong>Visit us:</strong> 6900 Dallas Pkwy, Plano, TX 75024 (Dallas-Fort Worth metro)<br><strong>Hours:</strong> Monday through Friday, 9am to 6pm</p><p>Every project starts with a free strategy call where we discuss your goals, recommend a technical approach, and provide a transparent cost estimate. No pressure, no obligations — just a clear path forward.</p>",
     "caseStudiesHeading": "Featured Dallas Projects",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>A Dallas-area social platform needed a cross-platform custom mobile app that could handle rapid user growth. We built Fanbase using React Native with a Node.js backend, delivering the full product in 16 weeks. The app has surpassed 100,000 downloads on iOS and Android, with a scalable architecture that supports continued growth.</p>",
-    "caseStudyTwoTitle": "Signal — Security Reporting App",
-    "caseStudyTwoBody": "<p>A security operations company needed to replace a slow, paper-based incident reporting process. We built Signal as a native mobile app with real-time syncing and offline capability, shipping the MVP in just 4 weeks. The result: 10x faster incident reports and a system that field teams actually use.</p>",
-    "order": 50
+    "order": 50,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>A Dallas-area social platform needed a cross-platform custom mobile app that could handle rapid user growth. We built Fanbase using React Native with a Node.js backend, delivering the full product in 16 weeks. The app has surpassed 100,000 downloads on iOS and Android, with a scalable architecture that supports continued growth.</p>"
+      },
+      {
+        "title": "Signal — Security Reporting App",
+        "body": "<p>A security operations company needed to replace a slow, paper-based incident reporting process. We built Signal as a native mobile app with real-time syncing and offline capability, shipping the MVP in just 4 weeks. The result: 10x faster incident reports and a system that field teams actually use.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-dallas",
+      "android-app-development-dallas",
+      "cross-platform-app-development-dallas",
+      "web-development-services-dallas",
+      "ui-ux-design-product-strategy",
+      "custom-software-development-enterprise"
+    ],
+    "industryRefs": [
+      "fintech-dallas",
+      "healthcare-dallas",
+      "real-estate-dallas",
+      "retail-dallas",
+      "oil-gas-energy",
+      "on-demand-logistics",
+      "education"
+    ],
+    "technologyRefs": [
+      "mobile",
+      "frontend-web",
+      "backend",
+      "cloud-infrastructure",
+      "devops",
+      "databases",
+      "integrations"
+    ],
+    "techStack": "<h4>Native Mobile</h4><p>Swift (iOS), Kotlin (Android), Java (Android)</p><h4>Cross-Platform</h4><p>React Native, Flutter</p><h4>Web</h4><p>React, Next.js, Node.js, Laravel, Python</p><h4>Cloud &amp; Infrastructure</h4><p>AWS, Azure, Google Cloud Platform, Firebase</p><h4>AI/ML Integration</h4><p>Claude API, TensorFlow, custom model deployment</p><h4>Databases</h4><p>PostgreSQL, MongoDB, Redis, Firebase Realtime Database</p>",
+    "pricingHeading": "Mobile App Development Cost in Dallas",
+    "pricingTable": "<p><strong>Basic App</strong> — $5,000–$15,000: Single platform, core features, simple UI, 4–6 week build.</p><p><strong>Mid-Level App</strong> — $15,000–$35,000: Both platforms, custom UI/UX design, API integrations, 6–10 week build.</p><p><strong>Complex / Enterprise App</strong> — $40,000+: Advanced features, third-party integrations, admin panels, AI/ML, 10–16+ week build.</p>"
   },
   {
     "slug": "atlanta",
@@ -371,11 +492,34 @@
     "contactHeading": "Start Your Atlanta App Project",
     "contactDescription": "<p>Ready to start your mobile app development Atlanta project with a trusted local partner? Synergy Labs delivers production-ready software in as few as six weeks — backed by six-plus years of experience and a team of U.S.-based senior engineers.</p><p><strong>Visit our Atlanta office:</strong> 1275 Peachtree St NE, Atlanta, GA 30361<br><strong>Call us:</strong> (645) 444-1069</p><p>Get a free project estimate — schedule a discovery call or email us to discuss your project. We sign NDAs on first contact and provide a transparent scope and timeline before any commitment.</p>",
     "caseStudiesHeading": "Case Studies from Atlanta Clients",
-    "caseStudyOneTitle": "Fanbase — Social Platform (16 Weeks, 100K+ Downloads)",
-    "caseStudyOneBody": "<p>A social media startup came to us with an ambitious vision and a tight runway. We built their cross-platform mobile app from scratch — handling UI/UX design, backend architecture, and deployment — in 16 weeks. The app surpassed 100,000 downloads after launch.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool (4 Weeks, 10x Faster)",
-    "caseStudyTwoBody": "<p>An enterprise client needed to replace a slow, manual reporting workflow with a modern web application. Our team delivered a production-ready solution in just four weeks that made report generation 10x faster.</p>",
-    "order": 60
+    "order": 60,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform (16 Weeks, 100K+ Downloads)",
+        "body": "<p>A social media startup came to us with an ambitious vision and a tight runway. We built their cross-platform mobile app from scratch — handling UI/UX design, backend architecture, and deployment — in 16 weeks. The app surpassed 100,000 downloads after launch.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool (4 Weeks, 10x Faster)",
+        "body": "<p>An enterprise client needed to replace a slow, manual reporting workflow with a modern web application. Our team delivered a production-ready solution in just four weeks that made report generation 10x faster.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-atlanta",
+      "android-app-development-atlanta",
+      "cross-platform-app-development-atlanta",
+      "web-development-services-atlanta"
+    ],
+    "industryRefs": [
+      "fintech-payments-atlanta",
+      "healthcare-atlanta",
+      "logistics-atlanta",
+      "film-entertainment-atlanta",
+      "ecommerce-saas-atlanta"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "austin",
@@ -438,11 +582,33 @@
     "contactHeading": "Start Your Austin App Project",
     "contactDescription": "<p>If you’re ready to talk about mobile app development Austin, TX requires — or a custom mobile app, a web build, or enterprise software — the fastest path is a 30-minute discovery call. We’ll walk through your goals, suggest a realistic scope, and give you a fixed quote within a few days.</p><p><strong>Synergy Labs</strong><br>600 N Congress Ave, Austin, TX 78701<br>(645) 444-1069<br>Monday-Friday, 9am-6pm CT</p><p>Call, email, or drop by the Congress Avenue office.</p>",
     "caseStudiesHeading": "Case Studies from Austin Clients",
-    "caseStudyOneTitle": "Fanbase — Social Platform (16 Weeks, 100K+ Downloads)",
-    "caseStudyOneBody": "<p>We built Fanbase as a full social platform with user-generated content, creator monetization, and live features. The app shipped in 16 weeks and crossed 100,000 downloads, with infrastructure built to handle the traffic spikes that come with creator-driven growth.</p>",
-    "caseStudyTwoTitle": "Signal — Security Reporting App (4 Weeks, 10x Faster)",
-    "caseStudyTwoBody": "<p>Signal’s team came to us needing a mobile app that would cut incident reporting time dramatically. We shipped the first production build in 4 weeks, and field users now file reports 10x faster than the legacy workflow. The app is still in daily use.</p>",
-    "order": 70
+    "order": 70,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform (16 Weeks, 100K+ Downloads)",
+        "body": "<p>We built Fanbase as a full social platform with user-generated content, creator monetization, and live features. The app shipped in 16 weeks and crossed 100,000 downloads, with infrastructure built to handle the traffic spikes that come with creator-driven growth.</p>"
+      },
+      {
+        "title": "Signal — Security Reporting App (4 Weeks, 10x Faster)",
+        "body": "<p>Signal’s team came to us needing a mobile app that would cut incident reporting time dramatically. We shipped the first production build in 4 weeks, and field users now file reports 10x faster than the legacy workflow. The app is still in daily use.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-austin",
+      "android-app-development-austin",
+      "cross-platform-app-development-austin",
+      "web-development-services-austin"
+    ],
+    "industryRefs": [
+      "fintech-austin",
+      "saas-austin",
+      "healthcare-austin",
+      "enterprise-austin"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "boston",
@@ -511,11 +677,35 @@
     "contactHeading": "Start Your Boston App or Web Project",
     "contactDescription": "<p>Ready to build? Our Boston team is here.</p><p><strong>Visit us:</strong> 55 Court St Floor 2, Boston, MA 02108<br><strong>Call us:</strong> (645) 444-1069<br><strong>Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM</p><p>We offer free discovery calls and in-person consultations at our Downtown Boston office near Government Center. Whether you need mobile app development, a custom web platform, or a full-stack MVP, the first conversation is on us.</p>",
     "caseStudiesHeading": "Boston App Development Portfolio & Case Studies",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>We built Fanbase from concept to launch over 16 weeks. The cross-platform app reached 100,000+ downloads with real-time messaging, content feeds, creator monetization, and AWS cloud infrastructure.</p>",
-    "caseStudyTwoTitle": "Signal — Security Reporting App",
-    "caseStudyTwoBody": "<p>We delivered a mobile and web application in 4 weeks that made field reporting 10x faster. The app includes offline data entry, GPS tagging, photo capture, and secure cloud sync.</p>",
-    "order": 80
+    "order": 80,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>We built Fanbase from concept to launch over 16 weeks. The cross-platform app reached 100,000+ downloads with real-time messaging, content feeds, creator monetization, and AWS cloud infrastructure.</p>"
+      },
+      {
+        "title": "Signal — Security Reporting App",
+        "body": "<p>We delivered a mobile and web application in 4 weeks that made field reporting 10x faster. The app includes offline data entry, GPS tagging, photo capture, and secure cloud sync.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-boston",
+      "android-app-development-boston",
+      "cross-platform-app-development-boston",
+      "web-development-services-boston"
+    ],
+    "industryRefs": [
+      "healthtech-boston",
+      "fintech-boston",
+      "biotech-boston",
+      "edtech-boston",
+      "retail-boston",
+      "saas-startups"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": "Mobile App Development Cost & Timelines in Boston",
+    "pricingTable": "<p><strong>Basic MVP:</strong> from $40,000</p><p><strong>Mid-complexity apps</strong> with custom integrations: $100,000+</p><p><strong>Complex enterprise applications</strong> (AI, HIPAA, multi-platform): $200,000+</p><p>Most projects take 3–6 months using agile sprints. Simple MVPs can launch in 6–8 weeks.</p>"
   },
   {
     "slug": "chicago",
@@ -581,11 +771,36 @@
     "contactHeading": "Ready to Build Your App? Let’s Talk",
     "contactDescription": "<p>Synergy Labs is a mobile app development and web development agency with a proven track record in Chicago, Illinois. Whether you need a custom mobile app, a scalable web application, or an MVP to validate your next idea, our River North team is ready to start.</p><p><strong>Synergy Labs</strong><br>515 N State St, Chicago, IL 60654<br>Phone: (645) 444-1069</p><p>Free project consultation — no commitment required. NDA signed before the first call on request. 1-business-day response guarantee.</p>",
     "caseStudiesHeading": "Portfolio & Case Studies",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>We built Fanbase using React Native for cross-platform mobile delivery. The project ran 16 weeks from kickoff to App Store and Google Play launch. Fanbase reached 100,000+ downloads within its first growth cycle. Our team handled UI/UX design, backend architecture, API development, and deployment.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool",
-    "caseStudyTwoBody": "<p>Signal needed a web application that could replace a manual reporting workflow costing their team hours every week. We delivered a custom web application in 4 weeks using React and Node.js. Reports that previously took hours now generate in minutes — a 10x improvement.</p>",
-    "order": 90
+    "order": 90,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>We built Fanbase using React Native for cross-platform mobile delivery. The project ran 16 weeks from kickoff to App Store and Google Play launch. Fanbase reached 100,000+ downloads within its first growth cycle. Our team handled UI/UX design, backend architecture, API development, and deployment.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool",
+        "body": "<p>Signal needed a web application that could replace a manual reporting workflow costing their team hours every week. We delivered a custom web application in 4 weeks using React and Node.js. Reports that previously took hours now generate in minutes — a 10x improvement.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-chicago",
+      "android-app-development-chicago",
+      "cross-platform-app-development-chicago",
+      "web-development-services-chicago"
+    ],
+    "industryRefs": [
+      "fintech-chicago",
+      "healthcare-chicago",
+      "logistics-chicago",
+      "ecommerce-chicago",
+      "real-estate-chicago",
+      "education-chicago",
+      "manufacturing-chicago"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "circleville",
@@ -654,11 +869,36 @@
     "contactHeading": "Start Your Circleville App or Website Project",
     "contactDescription": "<p>Ready to build a custom mobile app or website for your Circleville, Ohio business? We would like to hear about your project.</p><p><strong>Synergy Labs</strong><br>357 Maumee Dr, Circleville, OH 43113<br>Phone: (645) 444-1069<br>Hours: Monday - Friday, 9:00 AM - 6:00 PM</p><p>Call us or book a free discovery call. We will walk through your goals, answer your questions, and give you a fixed-price estimate — no obligation.</p>",
     "caseStudiesHeading": "Circleville App & Web Development Portfolio",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>Native iOS and Android apps with real-time messaging, content feeds, and creator monetization. Built over 16 weeks; surpassed 100,000 downloads.</p>",
-    "caseStudyTwoTitle": "Signal — Security Reporting App",
-    "caseStudyTwoBody": "<p>Mobile-first responsive design with offline capability and GPS tagging. Delivered in 4 weeks; incident reporting became 10x faster.</p>",
-    "order": 100
+    "order": 100,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>Native iOS and Android apps with real-time messaging, content feeds, and creator monetization. Built over 16 weeks; surpassed 100,000 downloads.</p>"
+      },
+      {
+        "title": "Signal — Security Reporting App",
+        "body": "<p>Mobile-first responsive design with offline capability and GPS tagging. Delivered in 4 weeks; incident reporting became 10x faster.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-circleville",
+      "android-app-development-circleville",
+      "cross-platform-app-development-circleville",
+      "web-development-services-circleville"
+    ],
+    "industryRefs": [
+      "manufacturing",
+      "agriculture",
+      "healthcare-telehealth",
+      "professional-services",
+      "contractors-service-companies",
+      "retail-ecommerce",
+      "nonprofit"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "hartford",
@@ -722,11 +962,35 @@
     "contactHeading": "Start Your Hartford App or Web Project",
     "contactDescription": "<p>Ready to start your mobile app development Hartford project or web development Hartford engagement? Synergy Labs is your local app development agency with a proven track record, fixed pricing, and 6-8 week delivery.</p><p><strong>Call us:</strong> (645) 444-1069<br><strong>Visit us:</strong> 350 Constitution Plaza, Hartford, CT 06103</p><p>Fill out our contact form for a free project consultation. Let’s turn your idea into a scalable product that serves Hartford, Connecticut, and beyond.</p>",
     "caseStudiesHeading": "Case Studies from Hartford Clients",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>We built Fanbase from concept to launch in 16 weeks. The cross-platform app reached 100,000+ downloads with real-time messaging, content feeds, and creator monetization features.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool",
-    "caseStudyTwoBody": "<p>We delivered Signal, a custom reporting tool, in just 4 weeks — resulting in reports generated 10x faster than the previous system. Signal’s team has been on our maintenance plan since launch.</p>",
-    "order": 110
+    "order": 110,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>We built Fanbase from concept to launch in 16 weeks. The cross-platform app reached 100,000+ downloads with real-time messaging, content feeds, and creator monetization features.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool",
+        "body": "<p>We delivered Signal, a custom reporting tool, in just 4 weeks — resulting in reports generated 10x faster than the previous system. Signal’s team has been on our maintenance plan since launch.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-hartford",
+      "android-app-development-hartford",
+      "cross-platform-app-development-hartford",
+      "web-development-services-hartford",
+      "wordpress-cms-hartford"
+    ],
+    "industryRefs": [
+      "insurance-insurtech-hartford",
+      "financial-services-hartford",
+      "healthcare-hartford",
+      "manufacturing-hartford",
+      "nonprofits-education-hartford"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "houston",
@@ -791,11 +1055,35 @@
     "contactHeading": "Start Your Houston App Project",
     "contactDescription": "<p>Ready to start your mobile app development Houston project? Our web development agency Houston team is here to help you move from idea to launch.</p><p><strong>Synergy Labs</strong><br>2720 Post Oak Blvd, Houston, TX 77056<br>Phone: (645) 444-1069<br>Hours: Monday - Friday, 9:00 AM - 6:00 PM</p><p>Call us today or request a free project estimate through our website. We respond to every inquiry within one business day, and we offer NDA protection from first contact.</p>",
     "caseStudiesHeading": "Case Studies from Houston Clients",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>We built Fanbase from concept to launch in 16 weeks using React Native for cross-platform development and Node.js on the backend. The app surpassed 100,000 downloads within its first year. Our team handled UI/UX design, real-time messaging architecture, content feed algorithms, and App Store / Google Play submission.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Dashboard",
-    "caseStudyTwoBody": "<p>Signal needed a web application that could consolidate data from multiple sources into a single executive dashboard. We delivered the project in just four weeks using React on the frontend and AWS on the backend. Reports that previously took hours now generate 10x faster.</p>",
-    "order": 120
+    "order": 120,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>We built Fanbase from concept to launch in 16 weeks using React Native for cross-platform development and Node.js on the backend. The app surpassed 100,000 downloads within its first year. Our team handled UI/UX design, real-time messaging architecture, content feed algorithms, and App Store / Google Play submission.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Dashboard",
+        "body": "<p>Signal needed a web application that could consolidate data from multiple sources into a single executive dashboard. We delivered the project in just four weeks using React on the frontend and AWS on the backend. Reports that previously took hours now generate 10x faster.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-houston",
+      "android-app-development-houston",
+      "cross-platform-app-development-houston",
+      "web-development-services-houston",
+      "enterprise-app-development-houston"
+    ],
+    "industryRefs": [
+      "oil-gas-energy-houston",
+      "healthcare-houston",
+      "fintech-houston",
+      "real-estate-houston",
+      "ecommerce-houston"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": "Mobile App Development Cost in Houston",
+    "pricingTable": "<p><strong>Simple</strong> — $5,000–$20,000: Single platform, core features, basic UI, 4–6 weeks.</p><p><strong>Medium</strong> — $30,000–$80,000: Both platforms, API integrations, custom UI/UX design, 8–12 weeks.</p><p><strong>Complex</strong> — $80,000–$120,000+: Enterprise-grade, advanced integrations, scalable architecture, 12–20 weeks.</p>"
   },
   {
     "slug": "jackson",
@@ -858,11 +1146,33 @@
     "contactHeading": "Ready to Build? Let’s Talk",
     "contactDescription": "<p>Your business deserves a mobile app or website built by people who understand this market. Call us at (645) 444-1069 or stop by our office at 1421 S Broadway Ave #25, Jackson, WY 83001 for a free project estimate.</p><p>We respond to every inquiry within 48 hours and can typically kick off new projects within two weeks. No pressure, no generic pitch — just a straightforward conversation about what you need and what it will take to build it.</p>",
     "caseStudiesHeading": "Case Studies & Client Results",
-    "caseStudyOneTitle": "Fanbase — Social Platform Launch",
-    "caseStudyOneBody": "<p>We built and launched the Fanbase social platform from concept to App Store in 16 weeks. The app reached 100,000+ downloads, with custom apps for both iOS and Android. Our team handled UI/UX design, backend architecture on AWS, and full deployment.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool",
-    "caseStudyTwoBody": "<p>We delivered a custom reporting dashboard for Signal in just 4 weeks. The result: 10x faster report generation compared to their legacy system. Built with React and Node.js, the platform integrated with existing data pipelines and scaled across the organization.</p>",
-    "order": 130
+    "order": 130,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform Launch",
+        "body": "<p>We built and launched the Fanbase social platform from concept to App Store in 16 weeks. The app reached 100,000+ downloads, with custom apps for both iOS and Android. Our team handled UI/UX design, backend architecture on AWS, and full deployment.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool",
+        "body": "<p>We delivered a custom reporting dashboard for Signal in just 4 weeks. The result: 10x faster report generation compared to their legacy system. Built with React and Node.js, the platform integrated with existing data pipelines and scaled across the organization.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-jackson",
+      "android-app-development-jackson",
+      "cross-platform-app-development-jackson",
+      "web-design-development-jackson",
+      "ecommerce-booking-jackson"
+    ],
+    "industryRefs": [
+      "outdoor-recreation-jackson",
+      "real-estate-proptech",
+      "retail-ecommerce"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "jacksonville",
@@ -928,11 +1238,44 @@
     "contactHeading": "Start Your Jacksonville App or Web Project",
     "contactDescription": "<p>Ready to build your mobile app or web application with a Jacksonville, FL development team that delivers on time and on budget? Contact Synergy Labs for a free discovery consultation.</p><p><strong>Visit us:</strong> 13475 Atlantic Blvd Unit 8, Jacksonville, FL 32225<br><strong>Call us:</strong> (645) 444-1069</p><p>Our senior developers are ready to scope your project, provide a fixed-price proposal, and get your build started within days. Let us put six years of mobile app development Jacksonville expertise to work for your business.</p>",
     "caseStudiesHeading": "Case Studies from Jacksonville Clients",
-    "caseStudyOneTitle": "Fanbase — Social Platform Launch",
-    "caseStudyOneBody": "<p>We built and launched the Fanbase social platform from concept to App Store in 16 weeks. The app reached 100,000+ downloads, with custom apps for both iOS and Android. Our team handled UI/UX design, backend architecture on AWS, and full deployment.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool",
-    "caseStudyTwoBody": "<p>We delivered a custom reporting dashboard for Signal in just 4 weeks. The result: 10x faster report generation compared to their legacy system. Built with React and Node.js, the platform integrated with existing data pipelines.</p>",
-    "order": 140
+    "order": 140,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform Launch",
+        "body": "<p>We built and launched the Fanbase social platform from concept to App Store in 16 weeks. The app reached 100,000+ downloads, with custom apps for both iOS and Android. Our team handled UI/UX design, backend architecture on AWS, and full deployment.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool",
+        "body": "<p>We delivered a custom reporting dashboard for Signal in just 4 weeks. The result: 10x faster report generation compared to their legacy system. Built with React and Node.js, the platform integrated with existing data pipelines.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-jacksonville",
+      "android-app-development-jacksonville",
+      "cross-platform-app-development-jacksonville",
+      "web-development-services-jacksonville",
+      "responsive-website-design-jacksonville"
+    ],
+    "industryRefs": [
+      "healthcare-jacksonville",
+      "fintech-jacksonville",
+      "ecommerce-jacksonville",
+      "logistics-jacksonville",
+      "real-estate-jacksonville",
+      "professional-services-jacksonville"
+    ],
+    "technologyRefs": [
+      "mobile",
+      "frontend-web",
+      "backend",
+      "cloud-infrastructure",
+      "devops",
+      "databases",
+      "integrations"
+    ],
+    "techStack": "<h4>Mobile Native</h4><p>Swift (iOS), Kotlin (Android)</p><h4>Cross-Platform</h4><p>React Native, Flutter</p><h4>Frontend Web</h4><p>React</p><h4>Backend</h4><p>Node.js, Laravel</p><h4>Cloud &amp; Infrastructure</h4><p>AWS, Firebase, Azure</p><h4>Integrations</h4><p>REST APIs, third-party SDKs, payment gateways, analytics platforms</p>",
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "london",
@@ -965,11 +1308,13 @@
     "contactHeading": null,
     "contactDescription": null,
     "caseStudiesHeading": null,
-    "caseStudyOneTitle": null,
-    "caseStudyOneBody": null,
-    "caseStudyTwoTitle": null,
-    "caseStudyTwoBody": null,
-    "order": 150
+    "order": 150,
+    "serviceRefs": [],
+    "industryRefs": [],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "los-angeles",
@@ -1035,11 +1380,36 @@
     "contactHeading": "Start Your Los Angeles App Project",
     "contactDescription": "<p>Ready to build? Synergy Labs is the mobile app development Los Angeles agency that ships on time, on budget, and without the runaround. Whether you are a Venice startup with a napkin sketch or a Burbank enterprise with a 40-page requirements doc, we will get you to launch.</p><p><strong>Call us today:</strong> (645) 444-1069<br><strong>Visit our office:</strong> 12130 Millennium Dr #300, Los Angeles, CA 90094<br><strong>Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM PT</p><p>Schedule a free discovery call and get a fixed-scope estimate within 48 hours. We will sign an NDA before your first meeting if you need one.</p>",
     "caseStudiesHeading": "Case Studies from Los Angeles Clients",
-    "caseStudyOneTitle": "Fanbase — Social Platform (16 Weeks, 100K+ Downloads)",
-    "caseStudyOneBody": "<p>Fanbase came to us with an ambitious vision: a social platform that gives creators direct monetization tools. We built the iOS and Android apps using React Native, integrated secure payment processing, and implemented real-time content feeds. The project launched in 16 weeks and surpassed 100,000 downloads.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool (4 Weeks, 10x Faster)",
-    "caseStudyTwoBody": "<p>Signal needed to replace a legacy reporting system. We built a custom web application using React and Node.js that automated data ingestion, visualization, and PDF export. The project shipped in four weeks — analysts now generate reports 10x faster.</p>",
-    "order": 160
+    "order": 160,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform (16 Weeks, 100K+ Downloads)",
+        "body": "<p>Fanbase came to us with an ambitious vision: a social platform that gives creators direct monetization tools. We built the iOS and Android apps using React Native, integrated secure payment processing, and implemented real-time content feeds. The project launched in 16 weeks and surpassed 100,000 downloads.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool (4 Weeks, 10x Faster)",
+        "body": "<p>Signal needed to replace a legacy reporting system. We built a custom web application using React and Node.js that automated data ingestion, visualization, and PDF export. The project shipped in four weeks — analysts now generate reports 10x faster.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-la",
+      "android-app-development-la",
+      "cross-platform-app-development-la",
+      "web-development-services-la",
+      "ai-powered-development-la"
+    ],
+    "industryRefs": [
+      "entertainment-media-la",
+      "healthcare-la",
+      "ecommerce-la",
+      "real-estate-la",
+      "fintech-la",
+      "tech-startups-la"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "orlando",
@@ -1103,11 +1473,34 @@
     "contactHeading": "Start Your Orlando App Project",
     "contactDescription": "<p>Ready to build your next mobile app or web application in Orlando, FL? Synergy Labs has the local expertise, senior U.S.-based talent, and proven track record to bring your project to life.</p><p><strong>Visit our office:</strong> 20 N Orange Ave Suite 1100, Orlando, FL 32801<br><strong>Call us:</strong> (645) 444-1069<br><strong>Hours:</strong> Monday – Friday, 9:00 AM – 6:00 PM</p><p>Contact us today for a free project discovery call. We will sign an NDA on first contact and deliver a detailed proposal within five business days.</p>",
     "caseStudiesHeading": "Case Studies from Orlando Clients",
-    "caseStudyOneTitle": "Fanbase — Social Platform Launch",
-    "caseStudyOneBody": "<p>We partnered with Fanbase to design and develop their social media application from concept to App Store release. The project spanned 16 weeks and involved native iOS and Android builds, real-time messaging infrastructure, and a scalable backend on AWS. Within months of launch, Fanbase surpassed 100,000 downloads.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool",
-    "caseStudyTwoBody": "<p>Signal needed a faster way to generate and distribute internal reports. We rebuilt their reporting pipeline and delivered a custom web application in just four weeks. Report generation times dropped by 10x, saving their operations team hours every week.</p>",
-    "order": 170
+    "order": 170,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform Launch",
+        "body": "<p>We partnered with Fanbase to design and develop their social media application from concept to App Store release. The project spanned 16 weeks and involved native iOS and Android builds, real-time messaging infrastructure, and a scalable backend on AWS. Within months of launch, Fanbase surpassed 100,000 downloads.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool",
+        "body": "<p>Signal needed a faster way to generate and distribute internal reports. We rebuilt their reporting pipeline and delivered a custom web application in just four weeks. Report generation times dropped by 10x, saving their operations team hours every week.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-orlando",
+      "android-app-development-orlando",
+      "cross-platform-app-development-orlando",
+      "web-development-services-orlando"
+    ],
+    "industryRefs": [
+      "tourism-hospitality-orlando",
+      "healthcare-orlando",
+      "simulation-defense-orlando",
+      "ecommerce-orlando",
+      "real-estate-orlando"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "philadelphia",
@@ -1171,11 +1564,34 @@
     "contactHeading": "Start Your Philadelphia App Project",
     "contactDescription": "<p>Ready to build your next mobile app or web application with a team that knows Philadelphia? Contact Synergy Labs today for a free project consultation. Our app developers in Philadelphia will scope your idea, recommend a technology approach, and provide a transparent estimate — no obligations, and we are happy to sign an NDA on first contact.</p><p><strong>Synergy Labs</strong><br>1900 Market St, Philadelphia, PA 19103<br>Phone: (645) 444-1069<br>Email: hello@synergylabs.co</p>",
     "caseStudiesHeading": "Case Studies from Philadelphia Clients",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>We built and launched Fanbase, a full-featured social media application, in 16 weeks from discovery through deployment. The platform includes real-time messaging, content feeds, creator monetization tools, and push notifications. Fanbase surpassed 100,000 downloads within its first year.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool",
-    "caseStudyTwoBody": "<p>Signal needed a web application that could replace a slow, manual reporting workflow. Our engineers delivered a custom dashboard built with React and Node.js in just four weeks. Reports that previously took hours now generate 10x faster.</p>",
-    "order": 180
+    "order": 180,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>We built and launched Fanbase, a full-featured social media application, in 16 weeks from discovery through deployment. The platform includes real-time messaging, content feeds, creator monetization tools, and push notifications. Fanbase surpassed 100,000 downloads within its first year.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool",
+        "body": "<p>Signal needed a web application that could replace a slow, manual reporting workflow. Our engineers delivered a custom dashboard built with React and Node.js in just four weeks. Reports that previously took hours now generate 10x faster.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-philadelphia",
+      "android-app-development-philadelphia",
+      "cross-platform-app-development-philadelphia",
+      "web-development-services-philadelphia"
+    ],
+    "industryRefs": [
+      "healthcare-life-sciences-philadelphia",
+      "financial-services-philadelphia",
+      "higher-education-philadelphia",
+      "ecommerce-retail-philadelphia",
+      "startups-philadelphia"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "phoenix",
@@ -1241,11 +1657,36 @@
     "contactHeading": "Start Your Phoenix App Project",
     "contactDescription": "<p>Ready to build your next mobile app or web platform with a trusted Phoenix development partner? Contact us today for a free discovery call. We will scope your project, recommend the right technology stack, and provide a detailed timeline and estimate — no commitment required. NDA available on first contact.</p><p><strong>Visit us:</strong> 515 E Grant St, Phoenix, AZ 85004<br><strong>Call us:</strong> (645) 444-1069<br><strong>Hours:</strong> Monday through Friday, 9:00 AM - 6:00 PM MST</p>",
     "caseStudiesHeading": "Case Studies from Phoenix Clients",
-    "caseStudyOneTitle": "Fanbase — Social Platform Launch",
-    "caseStudyOneBody": "<p>We partnered with the Fanbase team to design and develop a full-featured social media platform from the ground up. The project spanned 16 weeks from discovery through App Store and Google Play launch. Within the first year, Fanbase surpassed 100,000 downloads, driven by a scalable architecture built on React Native and cloud-based infrastructure.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool",
-    "caseStudyTwoBody": "<p>Signal needed a reporting dashboard that replaced a sluggish legacy system. Our team delivered a complete rebuild in just four weeks using React on the frontend and Node.js on the backend. The result: reports that generated 10x faster than the previous system.</p>",
-    "order": 190
+    "order": 190,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform Launch",
+        "body": "<p>We partnered with the Fanbase team to design and develop a full-featured social media platform from the ground up. The project spanned 16 weeks from discovery through App Store and Google Play launch. Within the first year, Fanbase surpassed 100,000 downloads, driven by a scalable architecture built on React Native and cloud-based infrastructure.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool",
+        "body": "<p>Signal needed a reporting dashboard that replaced a sluggish legacy system. Our team delivered a complete rebuild in just four weeks using React on the frontend and Node.js on the backend. The result: reports that generated 10x faster than the previous system.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-phoenix",
+      "android-app-development-phoenix",
+      "cross-platform-app-development-phoenix",
+      "web-development-services-phoenix",
+      "custom-software-development-phoenix",
+      "ui-ux-design-product-strategy"
+    ],
+    "industryRefs": [
+      "healthcare-phoenix",
+      "financial-services-phoenix",
+      "logistics-phoenix",
+      "real-estate-phoenix",
+      "startups-phoenix"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "qatar",
@@ -1278,11 +1719,13 @@
     "contactHeading": null,
     "contactDescription": null,
     "caseStudiesHeading": null,
-    "caseStudyOneTitle": null,
-    "caseStudyOneBody": null,
-    "caseStudyTwoTitle": null,
-    "caseStudyTwoBody": null,
-    "order": 200
+    "order": 200,
+    "serviceRefs": [],
+    "industryRefs": [],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "riyadh",
@@ -1315,11 +1758,13 @@
     "contactHeading": null,
     "contactDescription": null,
     "caseStudiesHeading": null,
-    "caseStudyOneTitle": null,
-    "caseStudyOneBody": null,
-    "caseStudyTwoTitle": null,
-    "caseStudyTwoBody": null,
-    "order": 210
+    "order": 210,
+    "serviceRefs": [],
+    "industryRefs": [],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "san-antonio",
@@ -1383,11 +1828,33 @@
     "contactHeading": "Start Your San Antonio App Project",
     "contactDescription": "<p>Ready to build your next mobile app or web platform? Synergy Labs is the mobile app development San Antonio partner that ships real products on real timelines. Call us, fill out our contact form, or stop by our San Antonio, TX office to start a conversation.</p><p><strong>Synergy Labs</strong><br>10127 Morocco St #195, San Antonio, TX 78209<br><strong>Phone:</strong> (645) 444-1069<br><strong>Web:</strong> synergylabs.co</p><p>We offer a free discovery call, NDA on first contact, and transparent fixed-cost pricing for every engagement.</p>",
     "caseStudiesHeading": "Case Studies from San Antonio Clients",
-    "caseStudyOneTitle": "Fanbase — Social Platform Launch",
-    "caseStudyOneBody": "<p>We built a cross-platform social media application from concept to App Store and Google Play release in 16 weeks. The app surpassed 100,000 downloads, driven by a custom mobile app architecture that supported real-time messaging, content feeds, and push notifications at scale. Technologies used: React Native, Node.js, AWS.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool",
-    "caseStudyTwoBody": "<p>A data-heavy reporting platform needed a ground-up rebuild. We delivered the new web application in just 4 weeks, resulting in reports that generated 10x faster than the legacy system. The project used React on the frontend with a Node.js API layer, deployed on AWS with automated CI/CD pipelines.</p>",
-    "order": 220
+    "order": 220,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Platform Launch",
+        "body": "<p>We built a cross-platform social media application from concept to App Store and Google Play release in 16 weeks. The app surpassed 100,000 downloads, driven by a custom mobile app architecture that supported real-time messaging, content feeds, and push notifications at scale. Technologies used: React Native, Node.js, AWS.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool",
+        "body": "<p>A data-heavy reporting platform needed a ground-up rebuild. We delivered the new web application in just 4 weeks, resulting in reports that generated 10x faster than the legacy system. The project used React on the frontend with a Node.js API layer, deployed on AWS with automated CI/CD pipelines.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-san-antonio",
+      "android-app-development-san-antonio",
+      "cross-platform-app-development-san-antonio",
+      "web-development-services-san-antonio"
+    ],
+    "industryRefs": [
+      "healthcare-san-antonio",
+      "military-government",
+      "hospitality-san-antonio",
+      "real-estate-san-antonio"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "san-diego",
@@ -1452,11 +1919,34 @@
     "contactHeading": "Start Your San Diego App Project",
     "contactDescription": "<p>Ready to build your mobile app or web platform? Synergy Labs is your mobile app development San Diego partner, ready to take your project from concept to launch.</p><p><strong>Visit us:</strong> 3919 30th St, San Diego, CA 92104<br><strong>Call us:</strong> (645) 444-1069<br><strong>Hours:</strong> Monday – Friday, 9:00 AM – 6:00 PM PT</p><p>Contact us today for a free project consultation and estimate. We will scope your requirements, recommend the right technology stack, and deliver a detailed timeline — typically within 48 hours of your first call.</p>",
     "caseStudiesHeading": "Case Studies from San Diego Clients",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>Fanbase came to us with a vision for a creator-first social network. Our team delivered a cross-platform mobile app built with React Native in 16 weeks. The app reached 100,000+ downloads within its first year. We handled everything from UI/UX design and API architecture to App Store and Google Play submission.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Dashboard",
-    "caseStudyTwoBody": "<p>Signal needed to replace a legacy reporting system that took analysts hours to generate a single report. We built a custom web application using React and Node.js that automated data aggregation and visualization. The result: reports that previously took hours now generate in minutes — a 10x improvement. The project shipped in just four weeks.</p>",
-    "order": 230
+    "order": 230,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>Fanbase came to us with a vision for a creator-first social network. Our team delivered a cross-platform mobile app built with React Native in 16 weeks. The app reached 100,000+ downloads within its first year. We handled everything from UI/UX design and API architecture to App Store and Google Play submission.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Dashboard",
+        "body": "<p>Signal needed to replace a legacy reporting system that took analysts hours to generate a single report. We built a custom web application using React and Node.js that automated data aggregation and visualization. The result: reports that previously took hours now generate in minutes — a 10x improvement. The project shipped in just four weeks.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-san-diego",
+      "android-app-development-san-diego",
+      "cross-platform-app-development-san-diego",
+      "web-development-services-san-diego"
+    ],
+    "industryRefs": [
+      "biotech-life-sciences-san-diego",
+      "defense-aerospace-san-diego",
+      "tourism-hospitality-san-diego",
+      "healthcare-san-diego",
+      "saas-startups-san-diego"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "singapore",
@@ -1489,11 +1979,13 @@
     "contactHeading": null,
     "contactDescription": null,
     "caseStudiesHeading": null,
-    "caseStudyOneTitle": null,
-    "caseStudyOneBody": null,
-    "caseStudyTwoTitle": null,
-    "caseStudyTwoBody": null,
-    "order": 240
+    "order": 240,
+    "serviceRefs": [],
+    "industryRefs": [],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "springfield",
@@ -1558,11 +2050,35 @@
     "contactHeading": "Start Your Springfield App or Website Project",
     "contactDescription": "<p>Ready to build? Our Springfield, MA team is here.</p><p><strong>Visit us:</strong> 75 Market St, Springfield, MA 01103<br><strong>Call us:</strong> (645) 444-1069<br><strong>Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM</p><p>We offer free consultations in person at our Springfield office, anywhere in the Pioneer Valley, or by video call. Whether you need mobile app development, a custom website, or a full digital strategy for your Western Massachusetts business, the first conversation is on us.</p>",
     "caseStudiesHeading": "Springfield App & Web Development Portfolio",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>Native iOS and Android apps with real-time messaging, content feeds, and creator monetization. Built over 16 weeks; surpassed 100,000 downloads.</p>",
-    "caseStudyTwoTitle": "Signal — Security Reporting App",
-    "caseStudyTwoBody": "<p>Mobile-first responsive design with offline capability and GPS tagging. Delivered in 4 weeks; incident reporting became 10x faster.</p>",
-    "order": 250
+    "order": 250,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>Native iOS and Android apps with real-time messaging, content feeds, and creator monetization. Built over 16 weeks; surpassed 100,000 downloads.</p>"
+      },
+      {
+        "title": "Signal — Security Reporting App",
+        "body": "<p>Mobile-first responsive design with offline capability and GPS tagging. Delivered in 4 weeks; incident reporting became 10x faster.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-springfield",
+      "android-app-development-springfield",
+      "cross-platform-app-development-springfield",
+      "web-development-services-springfield"
+    ],
+    "industryRefs": [
+      "insurance-financial-services",
+      "healthcare-telehealth",
+      "education-higher-ed",
+      "nonprofit",
+      "hospitality-tourism",
+      "retail-ecommerce"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   },
   {
     "slug": "tampa",
@@ -1630,10 +2146,36 @@
     "contactHeading": "Start Your Tampa App or Web Project Today",
     "contactDescription": "<p>Ready to build your mobile app or web platform? Schedule a free discovery call with our Tampa team and get a detailed project roadmap and fixed-price quote within one week.</p><p><strong>Synergy Labs — Tampa Office</strong><br>503 S Kennedy Blvd #100, Tampa, FL 33602<br>Phone: (645) 444-1069<br>Hours: Monday - Friday, 9:00 AM - 6:00 PM</p><p>We respond to every inquiry within one business day. Let us show you why businesses across the area trust Synergy Labs for app and web development that delivers real results.</p>",
     "caseStudiesHeading": "Featured Tampa Mobile App & Web Development Projects",
-    "caseStudyOneTitle": "Fanbase — Social Media Platform",
-    "caseStudyOneBody": "<p>We built Fanbase from concept to launch in 16 weeks. The custom mobile app hit 100,000+ downloads within its first year, with a custom content feed, real-time messaging, and a creator monetization engine. Stack: React Native, Node.js, AWS.</p>",
-    "caseStudyTwoTitle": "Signal — Enterprise Reporting Tool",
-    "caseStudyTwoBody": "<p>Signal needed to replace a legacy reporting system that took analysts hours to generate a single report. We delivered a custom web application in 4 weeks that made report generation 10x faster. Stack: React, Node.js, Firebase.</p>",
-    "order": 260
+    "order": 260,
+    "caseStudies": [
+      {
+        "title": "Fanbase — Social Media Platform",
+        "body": "<p>We built Fanbase from concept to launch in 16 weeks. The custom mobile app hit 100,000+ downloads within its first year, with a custom content feed, real-time messaging, and a creator monetization engine. Stack: React Native, Node.js, AWS.</p>"
+      },
+      {
+        "title": "Signal — Enterprise Reporting Tool",
+        "body": "<p>Signal needed to replace a legacy reporting system that took analysts hours to generate a single report. We delivered a custom web application in 4 weeks that made report generation 10x faster. Stack: React, Node.js, Firebase.</p>"
+      }
+    ],
+    "serviceRefs": [
+      "custom-ios-app-development-tampa",
+      "android-app-development-tampa",
+      "cross-platform-app-development-tampa",
+      "web-development-services-tampa",
+      "ui-ux-design-product-strategy---tampa"
+    ],
+    "industryRefs": [
+      "healthcare-telehealth",
+      "fintech-banking",
+      "retail-ecommerce",
+      "hospitality-tourism",
+      "logistics-tampa",
+      "professional-services",
+      "real-estate-proptech"
+    ],
+    "technologyRefs": [],
+    "techStack": null,
+    "pricingHeading": null,
+    "pricingTable": null
   }
 ]

@@ -1,0 +1,62 @@
+---
+// Astro serves this for any unmatched path. Without it the visitor gets the
+// host's bare default page, with no nav back into the site.
+import Layout from "../components/layout/Layout.astro";
+import { getBlogPosts } from "../lib/sanity";
+import BlogCard from "../components/sections/blog/BlogCard.astro";
+
+const posts = (await getBlogPosts()).slice(0, 3);
+
+const destinations = [
+  { label: "Our services", href: "/our-services" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "Locations", href: "/locations" },
+  { label: "Blog", href: "/blog" },
+];
+---
+
+<Layout
+  title="Page not found | Synergy Labs"
+  description="That page doesn't exist. Here's the way back to the rest of the site."
+  noindex
+>
+  <section class="mx-auto max-w-3xl px-6 py-24 text-center md:py-32">
+    <p class="font-display text-6xl text-secondary-green md:text-7xl">404</p>
+    <h1 class="mt-6 font-display text-3xl leading-tight md:text-4xl">
+      We couldn't find that page
+    </h1>
+    <p class="mt-6 text-lg text-black/70">
+      It may have moved, or the link that brought you here may be out of date.
+    </p>
+
+    <nav class="mt-10 flex flex-wrap justify-center gap-3" aria-label="Popular pages">
+      {destinations.map((destination) => (
+        <a
+          href={destination.href}
+          class="rounded-md border border-black/20 px-5 py-3 text-sm font-semibold transition hover:border-black"
+        >
+          {destination.label}
+        </a>
+      ))}
+      <a
+        href="/contact"
+        class="rounded-md bg-secondary-green px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-green"
+      >
+        Talk to us
+      </a>
+    </nav>
+  </section>
+
+  {posts.length > 0 && (
+    <section class="mx-auto max-w-7xl px-6 pb-24">
+      <h2 class="font-display text-2xl md:text-3xl">Latest from the blog</h2>
+      <ul class="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post) => (
+          <li>
+            <BlogCard post={post} headingLevel="h3" />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</Layout>

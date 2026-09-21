@@ -1,0 +1,42 @@
+---
+// /about-us -- linked from the nav since the nav was written, never built.
+//
+// Only the hero is specific to this page. Everything under it is the same
+// component the homepage renders, reading the same `home` content, so the two
+// pages stay in step by construction rather than by copy.
+import Layout from "../components/layout/Layout.astro";
+import AboutHero from "../components/sections/AboutHero.astro";
+import WhyUs from "../components/sections/WhyUs.astro";
+import HowWeWork from "../components/sections/HowWeWork.astro";
+import Team from "../components/sections/Team.astro";
+import SelectedWorks from "../components/sections/SelectedWorks.astro";
+import Badges from "../components/sections/Badges.astro";
+import ContactSection from "../components/sections/ContactSection.astro";
+import { aboutPage } from "../content/aboutPage";
+import { home } from "../content/home";
+import { withExistingCaseStudies } from "../lib/sanity";
+
+// Same as the homepage grid: only link projects that actually have a page.
+const selectedWorks = {
+  ...home.selectedWorks,
+  items: await withExistingCaseStudies(home.selectedWorks.items),
+};
+
+// The homepage's Team/CTA buttons point at "#cta", the anchor its contact
+// section uses. This page's contact section is "#contact-form", so retarget
+// the one button that would otherwise scroll nowhere.
+const team = {
+  ...home.team,
+  ctaButton: { ...home.team.ctaButton, href: "#contact-form" },
+};
+---
+
+<Layout title="About Us | Synergy Labs" description={aboutPage.hero.body}>
+  <AboutHero content={aboutPage.hero} />
+  <WhyUs content={home.whyUs} />
+  <HowWeWork content={home.howWeWork} />
+  <Team content={team} />
+  <SelectedWorks content={selectedWorks} />
+  <Badges content={home.badges} />
+  <ContactSection id="contact-form" />
+</Layout>

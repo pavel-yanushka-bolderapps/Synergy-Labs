@@ -1,0 +1,18 @@
+---
+// /podcast -- The Appsurd Show. Linked from the nav's Insights dropdown.
+import Layout from "../components/layout/Layout.astro";
+import PodcastGrid from "../components/sections/PodcastGrid.astro";
+import ContactSection from "../components/sections/ContactSection.astro";
+import { podcastPage } from "../content/podcastPage";
+---
+
+<Layout title="The Appsurd Show | Synergy Labs" description={podcastPage.description}>
+  <section class="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
+    <h1 class="font-display text-4xl leading-tight md:text-5xl">{podcastPage.heading}</h1>
+    <p class="mt-6 text-lg text-black/70">{podcastPage.description}</p>
+  </section>
+
+  <PodcastGrid episodes={podcastPage.episodes} />
+
+  <ContactSection id="contact-form" />
+</Layout>

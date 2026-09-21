@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "andrew-abbey",
+    "name": "Andrew Abbey",
+    "image": "/images/blog/authors/andrew-abbey.webp"
+  },
+  {
+    "slug": "brian-a",
+    "name": "Brian A",
+    "image": "/images/blog/authors/brian-a.webp"
+  },
+  {
+    "slug": "jhaymes-clark-n-caracuel",
+    "name": "Jhaymes Clark N. Caracuel",
+    "image": "/images/blog/authors/jhaymes-clark-n-caracuel.webp"
+  },
+  {
+    "slug": "jon-knight",
+    "name": "Jon Knight",
+    "image": "/images/blog/authors/jon-knight.webp"
+  },
+  {
+    "slug": "lily-kelce",
+    "name": "Lily Kelce",
+    "image": "/images/blog/authors/lily-kelce.webp"
+  },
+  {
+    "slug": "sardor-akhmedov",
+    "name": "Sardor Akhmedov",
+    "image": "/images/blog/authors/sardor-akhmedov.webp"
+  }
+]

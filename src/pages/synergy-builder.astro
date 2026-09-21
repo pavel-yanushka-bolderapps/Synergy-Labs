@@ -1,0 +1,407 @@
+---
+// /synergy-builder -- "convert your website to a mobile app". Transcribed from
+// the Webflow page: hero form, the "is your site mobile friendly?" gate after
+// submitting, and a row of recent posts underneath.
+//
+// The one deliberate change from Webflow: that form submitted nowhere, so
+// every lead entered on it was lost. Ours posts to /api/builder.
+import Layout from "../components/layout/Layout.astro";
+import BlogCard from "../components/sections/blog/BlogCard.astro";
+import ContactSection from "../components/sections/ContactSection.astro";
+import { builderPage } from "../content/builderPage";
+import { getBlogPosts } from "../lib/sanity";
+
+const { popup } = builderPage;
+const posts = (await getBlogPosts()).slice(0, 3);
+
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY ?? "";
+// Same local-testing escape hatch the contact form uses -- the widget, the
+// client check and the server verification all read this one flag.
+const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
+
+const inputClass =
+  "w-full rounded-md border border-black/20 bg-white px-4 py-3.5 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none";
+---
+
+<Layout
+  title="Synergy Builder — turn your website into a mobile app | Synergy Labs"
+  description={builderPage.description}
+>
+  <section class="relative overflow-hidden">
+    <img
+      src="/images/builder/hero-bg.svg"
+      alt=""
+      class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60"
+    />
+
+    <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-16 md:py-24 lg:grid-cols-2">
+      <div>
+        <div class="font-display text-4xl leading-[1.1] md:text-6xl">
+          {/*
+            Three separate lines with the middle one greyed, as on the Webflow
+            page. They are one sentence, so only the first is an <h1> -- the
+            other two were h2/h3 in Webflow purely to get the styling, which
+            gave the page a heading outline that made no sense.
+          */}
+          <h1 class="inline">{builderPage.headingLines[0]}</h1>
+          <span class="text-black/40"> {builderPage.headingLines[1]} </span>
+          <span>{builderPage.headingLines[2]}</span>
+        </div>
+
+        <p class="mt-6 max-w-lg text-lg text-black/70">{builderPage.description}</p>
+
+        <form id="builder-form" class="mt-8 flex max-w-lg flex-col gap-4" novalidate>
+          <div>
+            <label for="builder-email" class="sr-only">Your email</label>
+            <input
+              id="builder-email"
+              name="email"
+              type="email"
+              required
+              placeholder={builderPage.emailPlaceholder}
+              autocomplete="email"
+              class={inputClass}
+            />
+          </div>
+
+          <div>
+            <label for="builder-domain" class="sr-only">Your domain name</label>
+            <input
+              id="builder-domain"
+              name="domain"
+              type="text"
+              required
+              placeholder={builderPage.domainPlaceholder}
+              autocomplete="url"
+              inputmode="url"
+              class={inputClass}
+            />
+          </div>
+
+          <!-- Honeypot: hidden from real visitors and from screen readers, but
+               a bot that fills every input trips it and the API silently drops
+               the submission. Same field name as the contact form. -->
+          <div class="hidden" aria-hidden="true">
+            <label for="builder-website">Website</label>
+            <input id="builder-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          {!recaptchaDisabled && (
+            <div class="g-recaptcha" data-sitekey={recaptchaSiteKey}></div>
+          )}
+
+          <p id="builder-error" class="hidden text-sm font-semibold text-red-600"></p>
+
+          <button
+            id="builder-submit"
+            type="submit"
+            class="rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {builderPage.submitLabel}
+          </button>
+
+          <p class="text-xs text-black/60">
+            By submitting this form you consent to be contacted by Synergy Labs, and acknowledge our
+            {" "}
+            <a href="/privacy-policy" class="text-secondary-green underline">Privacy Policy</a>.
+          </p>
+        </form>
+      </div>
+
+      <img
+        src="/images/builder/hero-illustration.svg"
+        alt="Two people assembling a mobile app from blocks of code"
+        class="mx-auto w-full max-w-xl"
+      />
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-7xl px-6 py-20">
+    <h2 class="font-display text-3xl md:text-4xl">{builderPage.newsHeading}</h2>
+    <ul class="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {posts.map((post) => (
+        <li>
+          <BlogCard post={post} headingLevel="h3" />
+        </li>
+      ))}
+    </ul>
+    <a
+      href="/blog"
+      class="mt-10 inline-block rounded-md border border-black/20 px-6 py-3 text-sm font-semibold transition hover:border-black"
+    >
+      Read more
+    </a>
+  </section>
+
+  <ContactSection id="contact-form" />
+
+  <!-- The mobile-friendly gate. Rendered up front and toggled, rather than
+       built in JS, so the copy stays in the template with the rest of the
+       page. `hidden` on the dialog keeps it out of the tab order until it
+       is opened. -->
+  <div
+    id="builder-popup"
+    class="fixed inset-0 z-[60] hidden items-center justify-center p-6"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="builder-popup-heading"
+  >
+    <div id="builder-popup-backdrop" class="absolute inset-0 bg-black/60"></div>
+
+    <div class="relative w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl md:p-10">
+      <button
+        id="builder-popup-close"
+        type="button"
+        class="absolute right-4 top-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-black/40 transition hover:bg-light-grey hover:text-black"
+        aria-label="Close"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5" aria-hidden="true">
+          <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+
+      <div id="builder-popup-question" class="flex flex-col items-center gap-6">
+        <img src="/images/builder/icon-question.avif" alt="" width="56" height="56" class="h-14 w-14" />
+        <h2 id="builder-popup-heading" class="font-display text-xl leading-snug">{popup.question}</h2>
+        <div class="flex w-full gap-3">
+          <button
+            id="builder-answer-yes"
+            type="button"
+            class="flex-1 cursor-pointer rounded-md bg-secondary-green px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-green disabled:opacity-60"
+          >
+            {popup.yesLabel}
+          </button>
+          <button
+            id="builder-answer-no"
+            type="button"
+            class="flex-1 cursor-pointer rounded-md border border-black/20 px-6 py-3 text-sm font-semibold transition hover:border-black disabled:opacity-60"
+          >
+            {popup.noLabel}
+          </button>
+        </div>
+        <p id="builder-popup-error" class="hidden text-sm font-semibold text-red-600"></p>
+      </div>
+
+      <div id="builder-popup-success" class="hidden flex-col items-center gap-6">
+        <img src="/images/builder/icon-success.avif" alt="" width="56" height="56" class="h-14 w-14" />
+        <h2 class="font-display text-xl leading-snug">{popup.successHeading}</h2>
+        <a
+          href={popup.successCta.href}
+          class="rounded-md bg-secondary-green px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-green"
+        >
+          {popup.successCta.label}
+        </a>
+      </div>
+
+      <div id="builder-popup-rejected" class="hidden flex-col items-center gap-6">
+        <img src="/images/builder/icon-error.avif" alt="" width="56" height="56" class="h-14 w-14" />
+        <h2 class="font-display text-xl leading-snug">{popup.errorHeading}</h2>
+        <a
+          href={popup.errorCta.href}
+          class="rounded-md bg-secondary-green px-6 py-3 text-sm font-semibold text-white transition hover:bg-primary-green"
+        >
+          {popup.errorCta.label}
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+{!recaptchaDisabled && (
+  <script src="https://www.google.com/recaptcha/api.js" async defer is:inline></script>
+)}
+
+<script>
+  declare global {
+    interface Window {
+      grecaptcha?: {
+        getResponse: (widgetId?: number) => string;
+        reset: (widgetId?: number) => void;
+      };
+    }
+  }
+
+  const form = document.getElementById("builder-form") as HTMLFormElement | null;
+  const emailInput = document.getElementById("builder-email") as HTMLInputElement | null;
+  const domainInput = document.getElementById("builder-domain") as HTMLInputElement | null;
+  const honeypot = document.getElementById("builder-website") as HTMLInputElement | null;
+  const submitButton = document.getElementById("builder-submit") as HTMLButtonElement | null;
+  const formError = document.getElementById("builder-error");
+
+  const popup = document.getElementById("builder-popup");
+  const popupBackdrop = document.getElementById("builder-popup-backdrop");
+  const popupClose = document.getElementById("builder-popup-close");
+  const questionBlock = document.getElementById("builder-popup-question");
+  const successBlock = document.getElementById("builder-popup-success");
+  const rejectedBlock = document.getElementById("builder-popup-rejected");
+  const popupError = document.getElementById("builder-popup-error");
+  const yesButton = document.getElementById("builder-answer-yes") as HTMLButtonElement | null;
+  const noButton = document.getElementById("builder-answer-no") as HTMLButtonElement | null;
+
+  if (form && emailInput && domainInput) {
+    const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    // "example.com", "sub.example.co.uk" -- no scheme and no path, which is
+    // what the Webflow page enforced and what /api/builder re-checks.
+    const DOMAIN_PATTERN =
+      /^(?=.{4,253}$)[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+
+    const formLoadedAt = Date.now();
+
+    /**
+     * The submission held between pressing Generate and answering the gate.
+     * Non-null means "captured but not yet sent", which is what the unload
+     * handler at the bottom watches for.
+     */
+    let pending: Record<string, unknown> | null = null;
+    let sent = false;
+
+    function showError(message: string) {
+      if (!formError) return;
+      formError.textContent = message;
+      formError.classList.remove("hidden");
+    }
+
+    function openPopup() {
+      popup?.classList.remove("hidden");
+      popup?.classList.add("flex");
+      document.body.style.overflow = "hidden";
+      yesButton?.focus();
+    }
+
+    function closePopup() {
+      popup?.classList.add("hidden");
+      popup?.classList.remove("flex");
+      document.body.style.overflow = "";
+    }
+
+    function showPanel(panel: HTMLElement | null) {
+      for (const block of [questionBlock, successBlock, rejectedBlock]) {
+        block?.classList.add("hidden");
+        block?.classList.remove("flex");
+      }
+      panel?.classList.remove("hidden");
+      panel?.classList.add("flex");
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      formError?.classList.add("hidden");
+
+      const email = emailInput!.value.trim();
+      // People paste "https://example.com/" out of the address bar far more
+      // often than they type a bare domain, so normalise rather than reject.
+      const domain = domainInput!.value
+        .trim()
+        .replace(/^[a-z]+:\/\//i, "")
+        .replace(/^www\./i, "")
+        .replace(/[/?#].*$/, "")
+        .toLowerCase();
+
+      if (!EMAIL_PATTERN.test(email)) {
+        showError("Please enter a valid email address.");
+        emailInput!.focus();
+        return;
+      }
+
+      if (!DOMAIN_PATTERN.test(domain)) {
+        showError("Please enter a domain in the format example.com.");
+        domainInput!.focus();
+        return;
+      }
+
+      // Read the reCAPTCHA response now, while the form is still on screen.
+      // The token is single-use and lasts two minutes, and exactly one POST
+      // follows per submission, so carrying it into the popup is safe.
+      const recaptchaWidget = document.querySelector(".g-recaptcha");
+      let recaptchaToken = "";
+      if (recaptchaWidget) {
+        recaptchaToken = window.grecaptcha?.getResponse() ?? "";
+        if (!recaptchaToken) {
+          showError("Please confirm you're not a robot.");
+          return;
+        }
+      }
+
+      domainInput!.value = domain;
+      pending = {
+        email,
+        domain,
+        mobileFriendly: null,
+        recaptchaToken,
+        website: honeypot?.value ?? "",
+        formLoadedAt,
+      };
+
+      showPanel(questionBlock);
+      popupError?.classList.add("hidden");
+      openPopup();
+    });
+
+    async function send(mobileFriendly: boolean) {
+      if (!pending || sent) return true;
+
+      for (const button of [yesButton, noButton]) if (button) button.disabled = true;
+
+      try {
+        const res = await fetch("/api/builder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...pending, mobileFriendly }),
+        });
+        const data = (await res.json()) as { success?: boolean; error?: string };
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Could not send your request.");
+        }
+
+        sent = true;
+        pending = null;
+        return true;
+      } catch (err) {
+        if (popupError) {
+          popupError.textContent =
+            err instanceof Error ? err.message : "Could not send your request. Please try again.";
+          popupError.classList.remove("hidden");
+        }
+        // The token is spent either way once Google has seen it, so make the
+        // visitor tick a fresh box rather than retry with a dead one.
+        window.grecaptcha?.reset();
+        return false;
+      } finally {
+        for (const button of [yesButton, noButton]) if (button) button.disabled = false;
+      }
+    }
+
+    yesButton?.addEventListener("click", async () => {
+      if (await send(true)) showPanel(successBlock);
+    });
+
+    noButton?.addEventListener("click", async () => {
+      // Sent even though the answer disqualifies them: they still want an app,
+      // and the reply is a mobile-optimization pitch rather than nothing.
+      if (await send(false)) showPanel(rejectedBlock);
+    });
+
+    popupClose?.addEventListener("click", closePopup);
+    popupBackdrop?.addEventListener("click", closePopup);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !popup?.classList.contains("hidden")) closePopup();
+    });
+
+    // Closing the popup without answering would otherwise throw away a lead
+    // that has already given us an email and a domain. `pagehide` fires on
+    // navigation and on tab close, where `fetch` is cancelled but a beacon is
+    // still delivered -- so the lead arrives with an unanswered gate rather
+    // than not at all.
+    window.addEventListener("pagehide", () => {
+      if (!pending || sent) return;
+      navigator.sendBeacon?.(
+        "/api/builder",
+        new Blob([JSON.stringify({ ...pending, mobileFriendly: null })], {
+          type: "application/json",
+        })
+      );
+      pending = null;
+    });
+  }
+</script>

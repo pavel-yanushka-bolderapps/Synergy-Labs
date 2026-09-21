@@ -40,7 +40,9 @@ if (dryRun) {
       loc.processHeading && "process",
       loc.whyChooseUsHeading && "why-us",
       loc.serviceAreaHeading && "service-area",
-      loc.caseStudyOneTitle && "case-studies",
+      loc.caseStudies?.length && "case-studies",
+      loc.serviceRefs?.length && `${loc.serviceRefs.length} services`,
+      loc.industryRefs?.length && `${loc.industryRefs.length} industries`,
       loc.mapCode && "map",
       loc.jsonLd && "json-ld",
     ].filter(Boolean);
@@ -51,6 +53,35 @@ if (dryRun) {
   process.exit(0);
 }
 
+// Fields that carry straight through from the JSON to the document. Listed
+// rather than spread so a stray key in the data file can't invent a field, and
+// so it is obvious here what the seeder owns.
+const PAGE_FIELDS = [
+  "mainHeading",
+  "mainDescription",
+  "description",
+  "mapCode",
+  "jsonLd",
+  "servicesHeading",
+  "servicesDescription",
+  "industriesHeading",
+  "industriesDescription",
+  "processHeading",
+  "processDescription",
+  "whyChooseUsHeading",
+  "whyChooseUsDescription",
+  "serviceAreaHeading",
+  "serviceAreaDescription",
+  "faqHeading",
+  "technologiesHeading",
+  "contactHeading",
+  "contactDescription",
+  "caseStudiesHeading",
+  "techStack",
+  "pricingHeading",
+  "pricingTable",
+];
+
 const mutations = [];
 for (const loc of locations) {
   const assetId = loc.imageSrc ? await uploadImage(loc.imageSrc) : null;
@@ -60,12 +91,30 @@ for (const loc of locations) {
     if (loc[key]) page[key] = loc[key];
   }
 
-  const caseStudies = [
-    { title: loc.caseStudyOneTitle, body: loc.caseStudyOneBody },
-    { title: loc.caseStudyTwoTitle, body: loc.caseStudyTwoBody },
-  ]
+  const caseStudies = (loc.caseStudies ?? [])
     .filter((cs) => cs.title && cs.body)
-    .map((cs, i) => ({ _key: `case-${i}`, _type: "object", ...cs }));
+    .map((cs, i) => ({ _key: `case-${i}`, _type: "object", title: cs.title, body: cs.body }));
+
+  // References into the shared catalogues -- run seed-location-catalogues.mjs
+  // first, or these point at documents that do not exist yet. No overrides are
+  // written: the catalogue copy is the default, and an override is something an
+  // editor adds in Studio for a city that needs different wording.
+  const pick = (slugs, idPrefix, field) =>
+    (slugs ?? []).map((slug, i) => ({
+      _key: `${field}-${i}`,
+      _type: "object",
+      [field]: { _type: "reference", _ref: `${idPrefix}-${slug}` },
+    }));
+
+  const services = pick(loc.serviceRefs, "location-service", "service");
+  const industries = pick(loc.industryRefs, "location-industry", "industry");
+  // A plain reference array rather than objects: the stack categories are
+  // shared verbatim, so there is nothing to override per office.
+  const technologies = (loc.technologyRefs ?? []).map((slug, i) => ({
+    _key: `technology-${i}`,
+    _type: "reference",
+    _ref: `location-technology-${slug}`,
+  }));
 
   mutations.push({
     createOrReplace: {
@@ -80,12 +129,19 @@ for (const loc of locations) {
       order: loc.order,
       ...page,
       ...(caseStudies.length > 0 ? { caseStudies } : {}),
+      ...(services.length > 0 ? { services } : {}),
+      ...(industries.length > 0 ? { industries } : {}),
+      ...(technologies.length > 0 ? { technologies } : {}),
       ...(assetId ? { image: { _type: "image", asset: { _type: "reference", _ref: assetId } } } : {}),
     },
   });
 
   const filled = Object.keys(page).length + caseStudies.length;
-  console.log(`  prepared ${loc.city.padEnd(16)} ${filled} page field(s)${assetId ? "" : ", no image"}`);
+  console.log(
+    `  prepared ${loc.city.padEnd(16)} ${String(filled).padStart(2)} field(s), ` +
+      `${services.length} service(s), ${industries.length} industr${industries.length === 1 ? "y" : "ies"}` +
+      `${assetId ? "" : ", no image"}`
+  );
 }
 
 const res = await fetch(

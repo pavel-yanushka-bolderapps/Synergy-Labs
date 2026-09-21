@@ -22,8 +22,13 @@ const { footer } = Astro.props;
 
       <nav class="flex flex-col gap-3">
         {footer.links.map((link) => (
-          <a href={link.href} class="text-sm text-white/80 transition hover:text-white">
+          <a href={link.href} class="flex w-fit items-center gap-1.5 text-sm text-white/80 transition hover:text-white">
             {link.label}
+            {link.badge && (
+              <span class="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none text-white">
+                {link.badge}
+              </span>
+            )}
           </a>
         ))}
       </nav>

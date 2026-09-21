@@ -110,6 +110,33 @@ export interface LocationDetail extends LocationItem {
 
   caseStudiesHeading?: string;
   caseStudies?: LocationCaseStudy[];
+  /** The "Our services" cards this office offers. */
+  services?: LocationServiceCard[];
+  /** The "Industries we serve" rows this office serves. */
+  industries?: LocationServiceCard[];
+  /** Shared stack categories, used when `techStack` is empty. */
+  technologies?: LocationTechnologyGroup[];
+  /** This office's own stack, as rich text. Takes over from `technologies`. */
+  techStack?: string;
+  pricingHeading?: string;
+  /** Rich text: one paragraph per pricing tier. */
+  pricingTable?: string;
+}
+
+/**
+ * One card in a location page's "Our services" row or "Industries we serve"
+ * list, after the office's overrides have been applied over the catalogue.
+ */
+export interface LocationServiceCard {
+  title: string;
+  description: string;
+  imageSrc?: string;
+}
+
+/** One category in the "Technologies we work with" list. */
+export interface LocationTechnologyGroup {
+  title: string;
+  technologies: string;
 }
 
 export interface LocationCaseStudy {
@@ -127,6 +154,8 @@ export interface NavLink {
   label: string;
   href: string;
   children?: NavLink[];
+  /** Small pill drawn beside the label, e.g. "New" on Get Financing. */
+  badge?: string;
 }
 
 export interface SiteNavigation {
@@ -233,6 +262,93 @@ export interface ServicesPageContent {
   heading: string;
   subheading: string;
   items: ServiceItem[];
+}
+
+/**
+ * The one section of /about-us that isn't shared with the homepage. Everything
+ * below it -- Why us, How we work, Team, Selected Works, the badge marquee --
+ * is the same component the homepage renders, reading the same `home` content,
+ * so the two pages can't drift apart.
+ */
+export interface AboutPageContent {
+  hero: {
+    heading: string;
+    body: string;
+    ctaButton: CTAButton;
+    imageSrc: string;
+    imageAlt: string;
+    bgImageSrc: string;
+  };
+}
+
+/** One person credited on a podcast episode. */
+export interface PodcastAuthor {
+  name: string;
+  imageSrc: string;
+}
+
+/**
+ * One bullet in an episode's "what's covered" list. The source copy writes
+ * these as "Topic: what we say about it", so the lead-in is split out rather
+ * than stored as markup -- that keeps the content plain data and lets the
+ * card style the lead-in itself.
+ */
+export interface PodcastHighlight {
+  label?: string;
+  text: string;
+}
+
+export interface PodcastEpisode {
+  title: string;
+  /** YouTube video id -- the embed and the poster frame are both built from it. */
+  youtubeId: string;
+  posterSrc: string;
+  summary: string;
+  highlights: PodcastHighlight[];
+  authors: PodcastAuthor[];
+}
+
+export interface PodcastPageContent {
+  heading: string;
+  description: string;
+  episodes: PodcastEpisode[];
+}
+
+export interface AwardItem {
+  /** Who gave it -- "Clutch 2025", "The Manifest". */
+  organization: string;
+  title: string;
+  imageSrc: string;
+}
+
+/**
+ * One badge orbiting the ring in the awards hero. `orbit` picks which of the
+ * two rings it rides; `angle` is its starting position in degrees, so the four
+ * outer badges can be spread evenly without hardcoding coordinates.
+ */
+export interface AwardOrbitBadge {
+  imageSrc: string;
+  orbit: "outer" | "inner";
+  angle: number;
+  /** Diameter, in rem, matching the original design's per-badge sizes. */
+  size: number;
+  rounded?: boolean;
+}
+
+export interface AwardsPageContent {
+  breadcrumbLabel: string;
+  heading: string;
+  subheading: string;
+  ctaButton: CTAButton;
+  /** Logo in the middle of the inner ring. */
+  orbitCenterSrc: string;
+  orbitBadges: AwardOrbitBadge[];
+  awards: AwardItem[];
+}
+
+export interface BlogPageContent {
+  heading: string;
+  subheading: string;
 }
 
 export interface RatingBadgeContent {
@@ -471,4 +587,101 @@ export interface HomePageContent {
   badges: HomeBadgesContent;
   team: HomeTeamContent;
   faq: HomeFAQContent;
+}
+
+// --- Blog ----------------------------------------------------------------
+
+export interface BlogAuthor {
+  slug: string;
+  name: string;
+  /** Square headshot, rendered as a circle. */
+  imageSrc?: string;
+  role?: string;
+}
+
+/**
+ * A post as the listing cards and the homepage need it -- everything except
+ * the article body, which is measured in tens of kilobytes each and is only
+ * ever read by the post's own page.
+ */
+export interface BlogPostSummary {
+  slug: string;
+  title: string;
+  /** ISO `YYYY-MM-DD`. The listing sorts on this, newest first. */
+  date: string;
+  author?: BlogAuthor;
+  previewText?: string;
+  /** Drawn over the card artwork. Falls back to the title when absent. */
+  previewImageText?: string;
+  /** `template-1` .. `template-7`, matching public/images/blog/. */
+  template?: string;
+  readingMinutes?: number;
+}
+
+/** A post with its body, for /blog/[slug]. */
+export interface BlogPost extends BlogPostSummary {
+  /**
+   * The article, as HTML, rendered with `set:html`. See the note on
+   * `articleHtml` in src/sanity/schemaTypes/blogPost.ts for why the archive is
+   * stored this way rather than as Portable Text.
+   */
+  articleHtml: string;
+}
+
+export interface BlogPageContent {
+  heading: string;
+  subheading: string;
+  /** Posts per page on /blog and /blog/page/[page]. */
+  pageSize: number;
+}
+
+// --- Builder + financing -------------------------------------------------
+
+export interface BuilderPageContent {
+  /** Three lines: the middle one is drawn grey, as on the Webflow page. */
+  headingLines: [string, string, string];
+  description: string;
+  emailPlaceholder: string;
+  domainPlaceholder: string;
+  submitLabel: string;
+  /** The "is your site mobile friendly?" gate shown after a submission. */
+  popup: {
+    question: string;
+    yesLabel: string;
+    noLabel: string;
+    successHeading: string;
+    successCta: CTAButton;
+    errorHeading: string;
+    errorCta: CTAButton;
+  };
+  newsHeading: string;
+}
+
+export interface FinancingPageContent {
+  heading: string;
+  description: string;
+  /** Bullet points above the widget. */
+  points: string[];
+  /** Enhancify's full-page widget configuration. */
+  widget: {
+    pageId: string;
+    color1: string;
+    color2: string;
+    cobrandedColor: string;
+  };
+}
+
+// --- Clutch landing pages (/top-*) ---------------------------------------
+
+export interface ClutchLanding {
+  slug: string;
+  heading: string;
+  pitch: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  ctaHeading?: string;
+  /** Set on a page that duplicates another; points at the one that should rank. */
+  canonicalSlug?: string;
+  /** "en" or "ar" -- drives <html lang> and text direction. */
+  locale?: string;
 }

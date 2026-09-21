@@ -1,0 +1,106 @@
+---
+// The shell for the /top-* landing pages. Deliberately not Layout.astro: these
+// are conversion pages that Clutch and paid traffic land on, and the Webflow
+// originals carried no site nav at all -- logo, phone, and one CTA. Dropping
+// a full nav onto them would give the visitor nine ways to leave before they
+// reach the form.
+//
+// It still owns the same head that Layout.astro does, because the SEO tags are
+// not optional on the pages most likely to be a first impression.
+import { nav } from "../../content/nav";
+import { footer } from "../../content/footer";
+import { VisualEditing } from "@sanity/astro/visual-editing";
+import { previewEnabled } from "../../lib/loadQuery";
+import { canonicalUrl, assetUrl } from "../../lib/seo";
+import "../../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Slug of the page that should rank, when this one duplicates it. */
+  canonical?: string;
+  /** "en" or "ar" -- one of these pages is Arabic. */
+  locale?: string;
+}
+
+const { title, description, canonical, locale = "en" } = Astro.props;
+
+const pageUrl = canonicalUrl(canonical ?? Astro.url.pathname, Astro.site);
+const ogImageUrl = assetUrl("/images/og-default.webp", Astro.site);
+const telHref = `tel:${nav.phone.replace(/[^+\d]/g, "")}`;
+// Arabic needs the whole document flipped, not just the text aligned.
+const dir = locale === "ar" ? "rtl" : "ltr";
+---
+
+<!doctype html>
+<html lang={locale} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <link rel="canonical" href={pageUrl} />
+
+    <meta property="og:site_name" content="Synergy Labs" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+  </head>
+
+  <body class="min-h-screen">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-secondary-green focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+    >
+      Skip to content
+    </a>
+
+    <header class="border-b border-black/10 bg-secondary">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
+        <a href="/" aria-label="Synergy Labs home">
+          <img src={nav.logoSrc} alt={nav.logoAlt} class="h-8 w-auto md:h-11" />
+        </a>
+
+        <div class="flex items-center gap-4 md:gap-6">
+          <a href={telHref} class="whitespace-nowrap text-xs font-medium text-black/80 md:text-sm">
+            {nav.phone}
+          </a>
+          <a
+            href="#contact"
+            class="whitespace-nowrap rounded-md bg-secondary-green px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-green md:px-5"
+          >
+            {nav.ctaButton.label}
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="border-t border-black/10 bg-secondary py-10">
+      <div class="mx-auto flex max-w-7xl flex-col items-center gap-3 px-6 text-center text-xs text-black/60">
+        <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          <a href={`mailto:${footer.email}`} class="hover:text-black">{footer.email}</a>
+          <a href={telHref} class="hover:text-black">{footer.phone}</a>
+          <span>{footer.address}</span>
+        </div>
+        <span>{footer.copyright}</span>
+      </div>
+    </footer>
+
+    <VisualEditing enabled={previewEnabled} />
+  </body>
+</html>

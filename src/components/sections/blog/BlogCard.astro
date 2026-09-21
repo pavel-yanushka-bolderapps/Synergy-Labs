@@ -1,0 +1,83 @@
+---
+// One post on a listing. Used by /blog, its paginated pages, and the "News &
+// Insights" row on /synergy-builder.
+//
+// The artwork is one of seven shared background templates rather than a
+// per-post image -- that is how the Webflow collection was set up, and the
+// title is drawn over it. `previewImageText` overrides that title where an
+// editor wanted the card to read differently from the post.
+import type { BlogPostSummary } from "../../../lib/types";
+import { formatPostDate } from "../../../lib/blog";
+
+interface Props {
+  post: BlogPostSummary;
+  /** `h2` on the listing, `h3` where the row sits under a section heading. */
+  headingLevel?: "h2" | "h3";
+}
+
+const { post, headingLevel = "h2" } = Astro.props;
+const Heading = headingLevel;
+
+const cardTitle = post.previewImageText || post.title;
+---
+
+<article class="h-full">
+  <a
+    href={`/blog/${post.slug}`}
+    class="group flex h-full flex-col overflow-hidden rounded-3xl bg-white shadow-xl transition hover:shadow-2xl"
+  >
+    {/*
+      The gradient is the backstop, not decoration: the Webflow project only
+      ever published six of its seven templates (template-6 has no asset), so
+      those posts would otherwise get a flat box. Dropping a template-6.avif
+      into public/images/blog/ is all it takes to cover it.
+    */}
+    <div class="bg-blog-gradient relative aspect-[16/10] overflow-hidden">
+      {post.template && (
+        <img
+          src={`/images/blog/${post.template}.avif`}
+          alt=""
+          loading="lazy"
+          class="absolute inset-0 h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+        />
+      )}
+      <Heading
+        class="absolute inset-0 flex items-end p-6 font-display text-xl leading-snug text-white drop-shadow md:text-2xl"
+      >
+        {cardTitle}
+      </Heading>
+    </div>
+
+    <div class="flex flex-1 flex-col gap-2.5 p-6">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-black/50">
+        <time datetime={post.date}>{formatPostDate(post.date)}</time>
+        {post.readingMinutes && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>{post.readingMinutes} min read</span>
+          </>
+        )}
+      </div>
+
+      {post.previewText && (
+        <p class="text-sm leading-relaxed text-black/70">{post.previewText}</p>
+      )}
+
+      {post.author && (
+        <div class="mt-auto flex items-center gap-2.5 pt-4">
+          {post.author.imageSrc && (
+            <img
+              src={post.author.imageSrc}
+              alt=""
+              loading="lazy"
+              width="32"
+              height="32"
+              class="h-8 w-8 shrink-0 rounded-full object-cover"
+            />
+          )}
+          <span class="text-xs font-medium text-black/70">{post.author.name}</span>
+        </div>
+      )}
+    </div>
+  </a>
+</article>

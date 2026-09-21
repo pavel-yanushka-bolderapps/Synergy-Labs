@@ -3,8 +3,16 @@ import { createImageUrlBuilder } from "@sanity/image-url";
 import { stegaClean } from "@sanity/client/stega";
 import { loadQuery } from "./loadQuery";
 import locationsData from "../../scripts/data/locations.json";
+import locationServicesData from "../../scripts/data/location-services.json";
+import locationIndustriesData from "../../scripts/data/location-industries.json";
+import locationTechnologiesData from "../../scripts/data/location-technologies.json";
+import blogPostsData from "../../scripts/data/blog-posts.json";
+import blogAuthorsData from "../../scripts/data/blog-authors.json";
+import clutchLandingsData from "../../scripts/data/clutch-landings.json";
 import type {
   LocationDetail,
+  LocationServiceCard,
+  LocationTechnologyGroup,
   LocationItem,
   ServiceItem,
   ServiceFeaturesContent,
@@ -14,6 +22,10 @@ import type {
   CaseStudyFact,
   CaseStudySection,
   CaseStudySectionBackground,
+  BlogAuthor,
+  BlogPost,
+  BlogPostSummary,
+  ClutchLanding,
 } from "./types";
 
 const imageBuilder = createImageUrlBuilder(sanityClient);
@@ -131,6 +143,35 @@ interface SanityLocationPageDoc extends SanityLocationDoc {
   contactDescription?: string;
   caseStudiesHeading?: string;
   caseStudies?: { title?: string; body?: string }[];
+  services?: LocationPickDoc<"service">[];
+  industries?: LocationPickDoc<"industry">[];
+  technologies?: { title?: string; technologies?: string }[];
+  techStack?: string;
+  pricingHeading?: string;
+  pricingTable?: string;
+}
+
+/** An office's pick from a shared catalogue, plus its optional overrides. */
+type LocationPickDoc<K extends string> = {
+  titleOverride?: string;
+  descriptionOverride?: string;
+} & {
+  [P in K]?: { title?: string; description?: string; image?: Record<string, unknown> | null };
+};
+
+/** Collapses one such pick to a card, or null when the catalogue entry is gone. */
+function resolvePick(
+  pick: { titleOverride?: string; descriptionOverride?: string },
+  entry: { title?: string; description?: string; image?: Record<string, unknown> | null } | undefined
+): LocationServiceCard | null {
+  const title = pick.titleOverride?.trim() || entry?.title;
+  const description = pick.descriptionOverride?.trim() || entry?.description;
+  if (!title || !description) return null;
+  return {
+    title,
+    description,
+    imageSrc: entry?.image ? imageBuilder.image(entry.image).width(1200).url() : undefined,
+  };
 }
 
 const LOCATION_PAGE_FIELDS = `
@@ -143,12 +184,49 @@ const LOCATION_PAGE_FIELDS = `
   serviceAreaHeading, serviceAreaDescription,
   faqHeading, technologiesHeading,
   contactHeading, contactDescription,
-  caseStudiesHeading, caseStudies[]{ title, body }
+  caseStudiesHeading, caseStudies[]{ title, body },
+  services[]{ titleOverride, descriptionOverride, service->{ title, description, image } },
+  industries[]{ titleOverride, descriptionOverride, industry->{ title, description, image } },
+  technologies[]->{ title, technologies },
+  techStack, pricingHeading, pricingTable
 `;
 
 /** Every office that should get a page, Sanity's merged over the repo copy. */
 export async function getLocationDetails(): Promise<LocationDetail[]> {
-  const fallback = locationsData as LocationDetail[];
+  // The repo copy stores picks as the slugs the Webflow export used, which the
+  // catalogue files are keyed by exactly -- resolve them to the same shape the
+  // Sanity path returns.
+  type CatalogueEntry = { slug: string; title: string; description: string; image?: string };
+  const byslug = (rows: CatalogueEntry[]) =>
+    new Map(rows.map((row) => [row.slug, { title: row.title, description: row.description, imageSrc: row.image }]));
+
+  const serviceCatalogue = byslug(locationServicesData as CatalogueEntry[]);
+  const industryCatalogue = byslug(locationIndustriesData as CatalogueEntry[]);
+  const technologyCatalogue = new Map(
+    (locationTechnologiesData as { slug: string; title: string; technologies: string }[]).map((row) => [
+      row.slug,
+      { title: row.title, technologies: row.technologies },
+    ])
+  );
+  const pick = (slugs: string[] | undefined, catalogue: Map<string, LocationServiceCard>) =>
+    (slugs ?? [])
+      .map((slug) => catalogue.get(slug))
+      .filter((card): card is LocationServiceCard => card !== undefined);
+
+  const fallback = (
+    locationsData as (LocationDetail & {
+      serviceRefs?: string[];
+      industryRefs?: string[];
+      technologyRefs?: string[];
+    })[]
+  ).map((loc) => ({
+    ...loc,
+    services: pick(loc.serviceRefs, serviceCatalogue),
+    industries: pick(loc.industryRefs, industryCatalogue),
+    technologies: (loc.technologyRefs ?? [])
+      .map((slug) => technologyCatalogue.get(slug))
+      .filter((group): group is LocationTechnologyGroup => group !== undefined),
+  }));
 
   let docs: SanityLocationPageDoc[] | null = null;
   try {
@@ -175,9 +253,25 @@ export async function getLocationDetails(): Promise<LocationDetail[]> {
       Object.entries({
         ...doc,
         imageSrc: doc.image ? imageBuilder.image(doc.image).width(1600).url() : undefined,
+        // Visual editing encodes an invisible provenance marker into every
+        // string it returns. Harmless in prose, fatal here: the markers land
+        // inside the JSON and JSON.parse rejects it, so the page drops the
+        // structured data entirely. This field is machine-read, never edited
+        // in place, so strip them.
+        jsonLd: doc.jsonLd ? stegaClean(doc.jsonLd) : undefined,
         caseStudies: doc.caseStudies
           ?.filter((cs): cs is { title: string; body: string } => Boolean(cs?.title && cs?.body))
           .map((cs) => ({ title: cs.title, body: cs.body })),
+        // An office picks from the shared catalogues and may override the title
+        // or body where the copy has to name the city.
+        services: doc.services
+          ?.map((pick) => resolvePick(pick, pick.service))
+          .filter((card): card is LocationServiceCard => card !== null),
+        industries: doc.industries
+          ?.map((pick) => resolvePick(pick, pick.industry))
+          .filter((card): card is LocationServiceCard => card !== null),
+        technologies: doc.technologies
+          ?.filter((t): t is LocationTechnologyGroup => Boolean(t?.title && t?.technologies)),
         image: undefined,
       }).filter(([, value]) => value !== undefined && value !== null && value !== "")
     );
@@ -833,4 +927,257 @@ export async function withExistingCaseStudies<T extends { caseStudyHref?: string
     const slug = item.caseStudyHref?.replace(/^\/projects\/casestudy\//, "").replace(/\/$/, "");
     return slug && slugs.has(slug) ? item : { ...item, caseStudyHref: undefined };
   });
+}
+
+// --- Blog (src/pages/blog/, src/pages/blog/[slug].astro) ------------------
+//
+// Same arrangement as the location pages above: scripts/data/blog-posts.json
+// is the transcription of the Webflow Blogs collection, and is both the
+// seeder's input and the build-time fallback, so /blog works before anyone
+// runs scripts/seed-blog.mjs and switches over to Studio once they have. A
+// `blogPost` document always wins where one exists, matched on slug.
+//
+// The article bodies live in a separate file (scripts/data/blog-articles.json,
+// ~6 MB) that is imported lazily, below, so the listing pages and the homepage
+// never pull the whole archive into their module graph to render a card.
+
+// Both projections below flatten `slug` to `slug.current`, so these are plain
+// strings here -- unlike the location docs above, which project the object.
+interface SanityBlogAuthorDoc {
+  name?: string;
+  slug?: string;
+  role?: string;
+  image?: Record<string, unknown> | null;
+}
+
+interface SanityBlogPostDoc {
+  title?: string;
+  slug?: string;
+  date?: string;
+  previewText?: string;
+  previewImageText?: string;
+  template?: string;
+  readingMinutes?: number;
+  articleHtml?: string;
+  author?: SanityBlogAuthorDoc | null;
+}
+
+const BLOG_POST_FIELDS = `
+  title,
+  "slug": slug.current,
+  date,
+  previewText,
+  previewImageText,
+  template,
+  readingMinutes,
+  author->{ name, "slug": slug.current, role, image }
+`;
+
+/** 225 words a minute, matching scripts/extract-blog-csv.mjs. */
+function estimateReadingMinutes(html: string): number {
+  const words = html.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 225));
+}
+
+function toAuthor(doc: SanityBlogAuthorDoc | null | undefined): BlogAuthor | undefined {
+  if (!doc?.name) return undefined;
+  return {
+    // stegaClean: the slug is compared, not displayed, so preview mode's
+    // invisible characters would make every lookup miss. Same trap as the
+    // service-page icon keys above.
+    slug: stegaClean(doc.slug ?? "") as string,
+    name: doc.name,
+    role: doc.role,
+    imageSrc: doc.image ? imageBuilder.image(doc.image).width(160).url() : undefined,
+  };
+}
+
+/** The repo copy, with author slugs resolved against blog-authors.json. */
+function fallbackPosts(): BlogPostSummary[] {
+  const authors = new Map(
+    (blogAuthorsData as { slug: string; name: string; image?: string }[]).map((a) => [
+      a.slug,
+      { slug: a.slug, name: a.name, imageSrc: a.image },
+    ])
+  );
+
+  return (blogPostsData as (Omit<BlogPostSummary, "author"> & { author?: string | null })[]).map(
+    (post) => ({
+      ...post,
+      author: post.author ? authors.get(post.author) : undefined,
+      previewText: post.previewText || undefined,
+      previewImageText: post.previewImageText || undefined,
+      template: post.template || undefined,
+    })
+  );
+}
+
+/**
+ * Every published post, newest first -- what /blog paginates over, and what
+ * the homepage and /synergy-builder take the top three of.
+ *
+ * Bodies are deliberately not included; see getBlogPostBySlug() for those.
+ */
+let blogPostsPromise: Promise<BlogPostSummary[]> | null = null;
+
+export function getBlogPosts(): Promise<BlogPostSummary[]> {
+  // Every one of the 316 post pages needs the full list (for its slug, and
+  // again for the "More from the blog" row), as do /blog and its 26 pager
+  // pages. Without this the build makes the same query some 700 times.
+  // Cached as the promise rather than the result so concurrent page builds
+  // share one request instead of racing to start their own.
+  blogPostsPromise ??= fetchBlogPosts();
+  return blogPostsPromise;
+}
+
+async function fetchBlogPosts(): Promise<BlogPostSummary[]> {
+  const fallback = fallbackPosts();
+
+  let docs: SanityBlogPostDoc[] | null = null;
+  try {
+    docs = await loadQuery<SanityBlogPostDoc[]>({
+      query: `*[_type == "blogPost" && defined(slug.current)] | order(date desc){${BLOG_POST_FIELDS}}`,
+    });
+  } catch (err) {
+    console.error("[sanity] Failed to fetch blog posts, using the repo copy:", err);
+  }
+
+  if (!docs || docs.length === 0) return fallback;
+
+  const bySlug = new Map(fallback.map((post) => [post.slug, post]));
+
+  for (const doc of docs) {
+    const slug = stegaClean(doc.slug ?? "") as string;
+    if (!slug || !doc.title) continue;
+
+    // Drop the keys Sanity left empty so a half-filled document adds to the
+    // repo copy rather than replacing it with holes -- as on the office pages.
+    const fromSanity = Object.fromEntries(
+      Object.entries({
+        slug,
+        title: doc.title,
+        date: doc.date,
+        previewText: doc.previewText,
+        previewImageText: doc.previewImageText,
+        template: doc.template ? (stegaClean(doc.template) as string) : undefined,
+        readingMinutes: doc.readingMinutes,
+        author: toAuthor(doc.author),
+      }).filter(([, value]) => value !== undefined && value !== null && value !== "")
+    );
+
+    bySlug.set(slug, { ...(bySlug.get(slug) ?? { slug }), ...fromSanity } as BlogPostSummary);
+  }
+
+  return [...bySlug.values()].sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+}
+
+export async function getBlogPostSlugs(): Promise<string[]> {
+  return (await getBlogPosts()).map((post) => post.slug);
+}
+
+/**
+ * One post with its body. The 6 MB archive is behind a dynamic import so it
+ * only lands in the bundle for the route that actually renders an article --
+ * a static `import` here would put it in every page that touches this module.
+ */
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  const summary = (await getBlogPosts()).find((post) => post.slug === slug);
+  if (!summary) return null;
+
+  let articleHtml: string | undefined;
+
+  try {
+    const doc = await loadQuery<SanityBlogPostDoc | null>({
+      query: `*[_type == "blogPost" && slug.current == $slug][0]{ articleHtml }`,
+      params: { slug },
+    });
+    // stegaClean: the body goes through `set:html`, where the invisible
+    // markers would be injected into attribute values and tag names rather
+    // than into text -- that is malformed HTML, not a click-to-edit overlay.
+    if (doc?.articleHtml) articleHtml = stegaClean(doc.articleHtml) as string;
+  } catch (err) {
+    console.error(`[sanity] Failed to fetch the body for /blog/${slug}, using the repo copy:`, err);
+  }
+
+  if (!articleHtml) {
+    const { default: articles } = await import("../../scripts/data/blog-articles.json");
+    articleHtml = (articles as Record<string, string>)[slug];
+  }
+
+  if (!articleHtml) return null;
+
+  return {
+    ...summary,
+    articleHtml,
+    readingMinutes: summary.readingMinutes || estimateReadingMinutes(articleHtml),
+  };
+}
+
+
+// --- Clutch landing pages (src/pages/[...landing].astro) ------------------
+//
+// Same arrangement as the offices and the blog: scripts/data/clutch-landings.json
+// is the transcription of the 24 /top-* pages from the Webflow site, and is
+// both the seeder's input and the build-time fallback. A `clutchLanding`
+// document wins where one exists, matched on slug.
+
+interface SanityClutchLandingDoc {
+  slug?: string;
+  heading?: string;
+  pitch?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  ctaHeading?: string;
+  canonicalSlug?: string;
+  locale?: string;
+}
+
+export async function getClutchLandings(): Promise<ClutchLanding[]> {
+  const fallback = clutchLandingsData as ClutchLanding[];
+
+  let docs: SanityClutchLandingDoc[] | null = null;
+  try {
+    docs = await loadQuery<SanityClutchLandingDoc[]>({
+      query: `*[_type == "clutchLanding" && defined(slug.current)]{
+        "slug": slug.current, heading, pitch, metaTitle, metaDescription,
+        ctaHeading, canonicalSlug, locale
+      }`,
+    });
+  } catch (err) {
+    console.error("[sanity] Failed to fetch Clutch landing pages, using the repo copy:", err);
+  }
+
+  if (!docs || docs.length === 0) return fallback;
+
+  const bySlug = new Map(fallback.map((page) => [page.slug, page]));
+
+  for (const doc of docs) {
+    // stegaClean on every value that is compared or written into an
+    // attribute rather than rendered as prose -- the slug is matched against
+    // the URL, and locale lands in <html lang>, where the invisible markers
+    // would make both miss.
+    const slug = stegaClean(doc.slug ?? "") as string;
+    if (!slug || !doc.heading) continue;
+
+    const fromSanity = Object.fromEntries(
+      Object.entries({
+        slug,
+        heading: doc.heading,
+        pitch: doc.pitch,
+        metaTitle: doc.metaTitle,
+        metaDescription: doc.metaDescription,
+        ctaHeading: doc.ctaHeading,
+        canonicalSlug: doc.canonicalSlug ? (stegaClean(doc.canonicalSlug) as string) : undefined,
+        locale: doc.locale ? (stegaClean(doc.locale) as string) : undefined,
+      }).filter(([, value]) => value !== undefined && value !== null && value !== "")
+    );
+
+    bySlug.set(slug, { ...(bySlug.get(slug) ?? { slug }), ...fromSanity } as ClutchLanding);
+  }
+
+  return [...bySlug.values()];
+}
+
+export async function getClutchLandingBySlug(slug: string): Promise<ClutchLanding | null> {
+  return (await getClutchLandings()).find((page) => page.slug === slug) ?? null;
 }

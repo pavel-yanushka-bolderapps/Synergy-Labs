@@ -1,0 +1,276 @@
+---
+// /blog/[slug] -- one article. The body is Webflow rich-text HTML rendered
+// with set:html; see the note on `articleHtml` in
+// src/sanity/schemaTypes/blogPost.ts for why it is stored that way.
+import type { GetStaticPaths } from "astro";
+import Layout from "../../components/layout/Layout.astro";
+import BlogCard from "../../components/sections/blog/BlogCard.astro";
+import BlogConsultCta from "../../components/sections/blog/BlogConsultCta.astro";
+import FAQ from "../../components/sections/FAQ.astro";
+import { getBlogPosts, getBlogPostBySlug } from "../../lib/sanity";
+import { formatPostDate, metaTitle, metaDescription } from "../../lib/blog";
+import { home } from "../../content/home";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getBlogPosts();
+  return posts.map((post) => ({ params: { slug: post.slug } }));
+};
+
+const { slug } = Astro.params;
+const post = await getBlogPostBySlug(slug!);
+
+if (!post) {
+  return Astro.redirect("/blog", 302);
+}
+
+// Trimmed to what search results actually show, and topped up from the
+// article for the handful that came across with a thin or empty Preview Text.
+const description = metaDescription(post.previewText, post.articleHtml);
+
+// Three more to read, nearest in date to this one -- the archive is ordered by
+// date, so the posts either side of it are the closest thing to "related"
+// without a topic field to match on.
+const all = await getBlogPosts();
+const index = all.findIndex((p) => p.slug === post.slug);
+const more = [...all.slice(Math.max(0, index - 3), index), ...all.slice(index + 1)]
+  .filter((p) => p.slug !== post.slug)
+  .slice(0, 3);
+---
+
+<Layout
+  title={metaTitle(post.title)}
+  description={description}
+  ogType="article"
+  publishedTime={post.date}
+  ogImage={post.template ? `/images/blog/${post.template}.avif` : undefined}
+>
+  {/*
+    Two columns: the article on the left, the discovery-call form on the right.
+    The rail is `self-start` so it only takes the height it needs -- a grid item
+    stretches to the row height by default, and a full-height item can never
+    stick. It collapses under the article below `lg`.
+  */}
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 pb-16 pt-12 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-16">
+    <article class="min-w-0">
+      <header>
+        <a href="/blog" class="text-sm font-medium text-secondary-green hover:underline">
+          ← All posts
+        </a>
+
+        <h1 class="mt-6 font-display text-3xl leading-tight md:text-5xl">{post.title}</h1>
+
+        {post.previewText && (
+          <p class="mt-6 text-lg leading-relaxed text-black/70">{post.previewText}</p>
+        )}
+
+        <div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3 border-y border-black/10 py-6">
+          {post.author?.imageSrc && (
+            <img
+              src={post.author.imageSrc}
+              alt=""
+              width="44"
+              height="44"
+              class="h-11 w-11 shrink-0 rounded-full object-cover"
+            />
+          )}
+          <div class="flex flex-col">
+            {post.author && <span class="text-sm font-semibold">{post.author.name}</span>}
+            <span class="text-xs text-black/50">
+              <time datetime={post.date}>{formatPostDate(post.date)}</time>
+              {post.readingMinutes && <> · {post.readingMinutes} min read</>}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/*
+        No card artwork here. The seven templates are abstract background
+        panels sized for a small listing card -- blown up to the width of the
+        article they read as a blank green block above the text.
+      */}
+      <div class="article-body pt-10" set:html={post.articleHtml} />
+    </article>
+
+    {/* top-24 clears the sticky site header. */}
+    <BlogConsultCta class="lg:sticky lg:top-24 lg:self-start" />
+  </div>
+
+  <FAQ content={home.faq} />
+
+  {more.length > 0 && (
+    <section class="mx-auto max-w-7xl px-6 pb-20">
+      <h2 class="font-display text-2xl md:text-3xl">More from the blog</h2>
+      <ul class="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {more.map((item) => (
+          <li>
+            <BlogCard post={item} headingLevel="h3" />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</Layout>
+
+<!--
+  The article body is injected with set:html, so Astro's scoped styles -- which
+  work by stamping a data attribute onto elements in the template -- never
+  reach it. These have to be global, and are therefore namespaced under
+  .article-body so they cannot leak into the rest of the site.
+-->
+<style is:global>
+  .article-body {
+    color: color-mix(in srgb, var(--color-black) 80%, transparent);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+
+  .article-body > :first-child {
+    margin-top: 0;
+  }
+
+  .article-body h2,
+  .article-body h3,
+  .article-body h4 {
+    color: var(--color-black);
+    font-family: var(--font-display);
+    line-height: 1.25;
+  }
+
+  .article-body h2 {
+    font-size: 1.875rem;
+    margin: 2.75rem 0 1rem;
+  }
+
+  .article-body h3 {
+    font-size: 1.5rem;
+    margin: 2.25rem 0 0.75rem;
+  }
+
+  .article-body h4 {
+    font-size: 1.25rem;
+    margin: 1.75rem 0 0.5rem;
+  }
+
+  /* Webflow wraps most headings in <strong>, which would otherwise render the
+     display face at bold weight over an already-heavy heading. */
+  .article-body h2 strong,
+  .article-body h3 strong,
+  .article-body h4 strong {
+    font-weight: inherit;
+  }
+
+  .article-body p {
+    margin: 1.25rem 0;
+  }
+
+  .article-body strong {
+    color: var(--color-black);
+    font-weight: 600;
+  }
+
+  .article-body a {
+    color: var(--color-secondary-green);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .article-body a:hover {
+    color: var(--color-primary-green);
+  }
+
+  .article-body ul,
+  .article-body ol {
+    margin: 1.25rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .article-body ul {
+    list-style: disc;
+  }
+
+  .article-body ol {
+    list-style: decimal;
+  }
+
+  .article-body li {
+    margin: 0.5rem 0;
+  }
+
+  /* The export is full of `<li><strong>Item<br><br></strong></li>`, where the
+     breaks were doing the spacing that list-item margins now do. Left alone
+     they open a two-line gap inside every bullet. */
+  .article-body li > strong > br {
+    display: none;
+  }
+
+  .article-body img {
+    border-radius: 1rem;
+    height: auto;
+    max-width: 100%;
+  }
+
+  .article-body figure {
+    margin: 2rem 0;
+  }
+
+  .article-body figcaption {
+    color: color-mix(in srgb, var(--color-black) 55%, transparent);
+    font-size: 0.875rem;
+    margin-top: 0.75rem;
+    text-align: center;
+  }
+
+  .article-body blockquote {
+    border-left: 3px solid var(--color-secondary-green);
+    font-style: italic;
+    margin: 2rem 0;
+    padding-left: 1.25rem;
+  }
+
+  .article-body code {
+    background: var(--color-light-grey);
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+    padding: 0.15em 0.4em;
+  }
+
+  .article-body pre {
+    background: var(--color-primary-green);
+    border-radius: 1rem;
+    color: #fff;
+    margin: 2rem 0;
+    overflow-x: auto;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .article-body pre code {
+    background: none;
+    color: inherit;
+    font-size: 0.875rem;
+    padding: 0;
+  }
+
+  /* Tables are wider than the 3xl prose column on a phone, so let the table
+     scroll inside its own box rather than the whole page. */
+  .article-body table {
+    border-collapse: collapse;
+    display: block;
+    margin: 2rem 0;
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .article-body th,
+  .article-body td {
+    border: 1px solid color-mix(in srgb, var(--color-black) 12%, transparent);
+    padding: 0.625rem 0.875rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .article-body th {
+    background: var(--color-green-50);
+    color: var(--color-black);
+    font-weight: 600;
+  }
+</style>

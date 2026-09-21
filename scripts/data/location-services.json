@@ -1,0 +1,646 @@
+[
+  {
+    "slug": "custom-ios-app-development-atlanta",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development team builds native Swift applications optimized for iPhone and iPad. We handle everything from UI/UX design through App Store submission and approval, ensuring your app meets Apple's guidelines and performs flawlessly across devices. Atlanta businesses in regulated industries trust us for secure, compliant iOS builds.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-austin",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development work uses Swift for production-grade iPhone and iPad apps. We handle App Store submission, Apple review feedback, and backend integrations. Most of our iOS app development clients in Austin are startups and product-led SaaS teams who need a polished, performant app that feels native.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-boston",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS engineers build native apps in Swift that meet Apple's Human Interface Guidelines. We optimize for iPhone, iPad, and Apple Watch performance and handle App Store submission. iOS app development Boston teams trust us for pixel-perfect, approval-ready builds.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-chicago",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development team builds native applications using Swift for iPhone and iPad. Every iOS app we deliver goes through rigorous QA before App Store submission. Local Chicago businesses in healthcare, finance, and professional services rely on our native iOS expertise to reach their customers on the devices they already carry.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-circleville",
+    "title": "Custom iOS App Development",
+    "description": "We build native iOS apps in Swift, native Android apps in Kotlin, and cross-platform apps using React Native and Flutter. Need an MVP to test a concept with local customers? We scope a lean first release and expand from there. Our mobile app development in Circleville and Columbus, Ohio covers everything from concept through App Store and Google Play submission.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-dallas",
+    "title": "Custom iOS App Development",
+    "description": "We build native iOS apps using Swift, optimized for iPhone and iPad. Every app goes through rigorous testing before we handle your App Store submission and approval process. From consumer-facing products to internal business tools, our iOS app development team delivers polished, high-performance applications that meet Apple's guidelines on the first submission.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-hartford",
+    "title": "Custom iOS App Development",
+    "description": "We build native iOS apps using Swift, optimized for the latest Apple devices and OS versions. From concept through App Store submission, our Hartford, CT team handles the entire lifecycle so you can focus on your business.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-houston",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development team builds with Swift and SwiftUI, targeting iPhone and iPad. Houston startups and enterprises rely on our iOS expertise to reach Apple's ecosystem with fast, reliable applications. We handle everything from concept validation and UI/UX design through App Store submission and post-launch optimization.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-jackson",
+    "title": "Custom iOS App Development",
+    "description": "We build native iOS apps using Swift and Xcode, optimized for iPhone and iPad. Native Apple development is ideal for businesses targeting the Apple-heavy demographic common in resort and luxury markets. From UI/UX design through App Store submission, our team handles the full lifecycle.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-jacksonville",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development Jacksonville team builds native applications using Swift and SwiftUI that meet every Apple App Store requirement. We design for the full Apple ecosystem — iPhone, iPad, and Apple Watch — with a focus on performance, accessibility, and clean architecture.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-la",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development practice uses Swift and SwiftUI to build performant, App Store-ready applications. We follow Apple's Human Interface Guidelines from day one, designing for iPhone, iPad, and Apple Watch. For LA entertainment and media companies that need polished consumer experiences, native iOS development delivers the frame-rate precision and device integration that cross-platform tools cannot always guarantee.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-miami",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development team builds native applications using Swift and SwiftUI. Native iOS development gives you the best performance, tightest integration with Apple's ecosystem, and access to the latest platform features the day they launch. We've built iOS apps for clients ranging from early-stage startups shipping their first MVP to established Miami businesses expanding into mobile. For companies that need the highest-quality iOS app development experience, a native Swift app is the fastest path to a smooth, reliable product.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-nyc",
+    "title": "Custom iOS App Development",
+    "description": "Our NYC iOS team builds native Swift applications aligned with Apple's Human Interface Guidelines. From initial concept through App Store submission, we handle architecture, development, testing, and launch support. If your audience skews toward iPhone and iPad users -- and in NYC, it often does -- native iOS gives you the best performance and tightest platform integration.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-orlando",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development team builds Swift-based applications optimized for the Apple ecosystem. Every iOS project follows Apple's Human Interface Guidelines and ships to the App Store with full compliance. Orlando startups and established companies alike rely on our iOS app development expertise to reach iPhone and iPad users.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-philadelphia",
+    "title": "Custom iOS App Development",
+    "description": "We use Swift and SwiftUI to build native iOS applications that take full advantage of Apple's ecosystem. Our iOS app development process covers everything from initial wireframes through App Store submission. Philadelphia businesses in healthcare, fintech, and higher education rely on our iOS expertise to reach patients, customers, and students on the devices they already carry.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-phoenix",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development team builds with Swift and SwiftUI, targeting iPhone and iPad. From concept through App Store submission, we handle architecture, UI/UX design, API integrations, and performance optimization. Whether you are launching an MVP or scaling an established product, we deliver native iOS experiences that meet Apple's latest guidelines.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-san-antonio",
+    "title": "Custom iOS App Development",
+    "description": "We build native iOS applications using Swift, delivering smooth performance, tight Apple ecosystem integration, and App Store compliance from day one. Our iOS app development process covers UI/UX design, API integration, push notifications, in-app purchases, and analytics. San Antonio healthcare providers, hospitality brands, and government contractors rely on our iOS app development expertise to reach their audiences on iPhone and iPad.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-san-diego",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development practice uses Swift and SwiftUI to build applications optimized for the Apple ecosystem. We architect apps that take full advantage of iOS capabilities including ARKit, HealthKit, Core ML, and Apple Pay integration. For San Diego biotech firms in the Torrey Pines corridor and healthcare organizations, we build HIPAA-aware iOS applications that meet strict compliance requirements.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-sf",
+    "title": "Custom iOS App Development",
+    "description": "Our San Francisco iOS app development team builds with Swift and SwiftUI to create fast, polished experiences across iPhone and iPad. We handle everything from App Store submission to push notification architecture, and we optimize for the performance standards that San Francisco users expect. Every iOS app development project includes accessibility audits and device testing so your app works flawlessly from day one.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-springfield",
+    "title": "Custom iOS App Development",
+    "description": "Our Springfield team builds native iOS apps in Swift that feel fast and intuitive on iPhone and iPad. We handle concept, wireframing, development, and App Store submission, ensuring your app meets Apple's latest guidelines. Whether you are a Pioneer Valley healthcare provider or a local retailer, we build iOS app development projects that scale with your business.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "custom-ios-app-development-tampa",
+    "title": "Custom iOS App Development",
+    "description": "Our iOS app development team builds with Swift and SwiftUI, delivering native performance that meets Apple's strict App Store guidelines. We handle everything from HealthKit integrations for Tampa's growing healthcare sector to ARKit features for real estate and hospitality apps. Every iOS app ships with accessibility baked in and performance benchmarks validated on current-generation devices.",
+    "image": "/images/Locations/services/ios.webp",
+    "order": 1
+  },
+  {
+    "slug": "android-app-development-atlanta",
+    "title": "Android App Development",
+    "description": "We build Android app development solutions in Kotlin that account for the full range of device fragmentation across the Android ecosystem. Our apps are optimized for Google Play distribution, with attention to performance across screen sizes, OS versions, and hardware configurations common among Atlanta users.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-austin",
+    "title": "Android App Development",
+    "description": "For Android app development in Austin, we build with Kotlin and target the full device range. Google Play submission, Android App Bundle optimization, and Material Design 3 are standard. If your audience skews Android — common in fleet, field service, and enterprise work across Central Texas — Android app development is where we start.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-boston",
+    "title": "Android App Development",
+    "description": "We build Android apps in Kotlin with Material Design at their core. Our Android app development Boston practice covers phones, tablets, and Wear OS -- from Google Play optimization to enterprise deployment.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-chicago",
+    "title": "Android App Development",
+    "description": "We build native Android apps using Kotlin, targeting the full range of devices your customers actually use. From Google Play optimization to Material Design implementation, our Android app development process covers the entire lifecycle. Established companies in logistics, manufacturing, and e-commerce choose native Android when performance and device integration matter most.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-circleville",
+    "title": "Android App Development",
+    "description": "Our Android app development builds with Kotlin for the full range of Android devices. iOS app development and Android app development share a unified design system so your brand stays consistent across platforms. Web development in Circleville does not mean settling for a template; we build custom solutions matched to how your business operates.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-dallas",
+    "title": "Android App Development",
+    "description": "Our Android app development team builds with Kotlin and Java to cover the full range of Android devices. We handle Google Play submission, optimize for fragmented screen sizes, and ensure your app performs well on budget devices and flagships alike. If your Dallas business needs to reach the majority of U.S. smartphone users, Android app development is where you start.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-hartford",
+    "title": "Android App Development",
+    "description": "Our Kotlin-based Android development covers the full Google Play ecosystem. We follow Material Design guidelines and build for the fragmented Android device landscape, ensuring your app runs smoothly from budget phones to flagship devices across Hartford and beyond.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-houston",
+    "title": "Android App Development",
+    "description": "We deliver Android app development using Kotlin and Jetpack Compose. Our Android engineers build apps that run smoothly across the full device spectrum, from budget handsets to enterprise tablets used in the field. For Houston businesses serving diverse customer bases, broad Android compatibility is essential.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-jackson",
+    "title": "Android App Development",
+    "description": "Our developers work in Kotlin to deliver fast, reliable apps deployed to the Google Play Store. We build solutions for local business owners who need to reach the broadest possible audience — including seasonal visitors searching for outfitters, dining, and activities around Grand Teton National Park.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-jacksonville",
+    "title": "Android App Development",
+    "description": "Android app development Jacksonville starts with Kotlin-first engineering. We build native Android applications optimized for the full range of devices on the Google Play Store, covering everything from budget handsets to flagship tablets. With Android holding the majority of mobile market share, our Jacksonville team helps you reach the widest possible audience across Duval County and St. Johns County.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-la",
+    "title": "Android App Development",
+    "description": "Android app development at Synergy Labs runs on Kotlin and Jetpack Compose. We build for the full Android device spectrum, from flagship Pixels to budget hardware your field teams actually carry. For Los Angeles businesses targeting broad consumer reach — ride-share drivers, delivery couriers, warehouse staff — Android-first development often makes strategic sense.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-miami",
+    "title": "Android App Development",
+    "description": "Android holds roughly half of the U.S. smartphone market and an even larger share globally. Our Android app development team uses Kotlin and Jetpack Compose to build apps that perform well across the full range of Android devices. We handle the fragmentation so you don't have to -- testing across screen sizes, OS versions, and hardware configurations to make sure your app works everywhere your users are. For Miami businesses targeting the broadest possible audience, Android app development is essential.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-nyc",
+    "title": "Android App Development",
+    "description": "For businesses targeting the broader NYC market, our Android app development services cover Kotlin-based native builds with Jetpack Compose for modern, responsive interfaces. We manage Google Play submission, device fragmentation testing, and post-launch optimization. Android app development in New York requires careful attention to the sheer diversity of devices your users carry -- we account for that from day one.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-orlando",
+    "title": "Android App Development",
+    "description": "We deliver Android app development using Kotlin, producing applications that run smoothly across the fragmented Android device landscape. Our Android team handles everything from Material Design implementation to Play Store optimization, giving your Orlando business access to the platform's massive user base.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-philadelphia",
+    "title": "Android App Development",
+    "description": "Our Android app development team builds with Kotlin and Jetpack Compose, producing clean, testable code that scales across the full range of Android devices. From enterprise workforce tools in King of Prussia to consumer-facing apps targeting the broader Pennsylvania market, our Android developers deliver reliable, polished products.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-phoenix",
+    "title": "Android App Development",
+    "description": "Our Android app development services cover the full device ecosystem using Kotlin and Jetpack Compose. We build for phones, tablets, and wearables with a focus on Material Design, offline capability, and seamless integration with Android-specific hardware and services.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-san-antonio",
+    "title": "Android App Development",
+    "description": "Kotlin is our primary language for Android app development in San Antonio. We build for phones, tablets, and wearables, and we handle everything from Google Play submission to ongoing maintenance. For San Antonio enterprises managing field teams along the I-35 corridor, our Android solutions deliver reliable performance across every device class.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-san-diego",
+    "title": "Android App Development",
+    "description": "We build Android applications using Kotlin and Jetpack Compose, targeting the full range of Android devices and screen sizes. For San Diego defense contractors and enterprise clients, we deliver Android apps with advanced security layers, certificate pinning, and MDM compatibility. Our team tests across 40+ device configurations before every release.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-sf",
+    "title": "Android App Development",
+    "description": "We build Android apps using Kotlin and Jetpack Compose, targeting the full range of devices your users carry. Our Android app development process includes Google Play submission, deep linking, and performance profiling. For San Francisco businesses reaching national or global audiences, Android app development gives you access to the platform's massive install base with native-quality UI/UX design.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-springfield",
+    "title": "Android App Development",
+    "description": "We develop native Android apps in Kotlin, optimized for the devices your Springfield, MA customers actually use. From Google Play publishing to payment integrations, our Android app development process applies the same quality standards we bring to iOS. Businesses across Western Massachusetts rely on us for Android apps that perform reliably and convert users.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "android-app-development-tampa",
+    "title": "Android App Development",
+    "description": "We build Android apps in Kotlin, targeting the full range of devices your customers across the Bay area actually use. Our Android app development process accounts for device fragmentation, varying screen densities, and Google Play policies from the start. The result is a stable, performant app that works on budget phones and flagships alike.",
+    "image": "/images/Locations/services/android.webp",
+    "order": 2
+  },
+  {
+    "slug": "cross-platform-app-development-atlanta",
+    "title": "Cross-Platform App Development",
+    "description": "For teams that need to reach both iOS and Android audiences without doubling their budget, cross-platform development is the practical choice. We use Flutter and React Native to ship a single codebase to both platforms, cutting development time and cost. Cross-platform development is especially popular among Atlanta startups looking to validate an MVP quickly.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-austin",
+    "title": "Cross-Platform App Development",
+    "description": "For teams that need both iOS and Android without doubling the budget, cross-platform development with Flutter or React Native ships one codebase to both stores. We use this approach for MVPs, internal tools, and scalable products where time to market matters more than platform-specific edge cases. Cross-platform development typically cuts build time 30-40%.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-boston",
+    "title": "Cross-Platform App Development",
+    "description": "Our cross-platform team builds with React Native and Flutter to ship a single codebase to both iOS and Android in as little as 6-8 weeks. Native-feeling performance, faster time-to-market, and lower maintenance costs -- the reason most Boston startups choose this path.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-chicago",
+    "title": "Cross-Platform App Development",
+    "description": "When speed-to-market matters more than platform-specific features, a shared-codebase approach is the right call. We build with both React Native and Flutter. A single codebase means faster delivery, lower cost, and consistent behavior across iOS and Android. These apps ship in as few as 6 weeks, fully tested and production-ready.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-circleville",
+    "title": "Cross-Platform App Development",
+    "description": "For Circleville and Columbus, Ohio businesses that need both iOS and Android without doubling the budget, cross-platform apps using React Native and Flutter let us ship a single codebase to both platforms, cutting development time by 30-40%. A strong fit for MVPs and internal tools.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-dallas",
+    "title": "Cross-Platform App Development",
+    "description": "For companies that need both iOS and Android without doubling the budget, we build cross-platform apps using React Native and Flutter. These frameworks let us ship a single codebase to both platforms, cutting development time by 30-40% compared to dual native builds. Cross-platform development is a strong fit for MVPs, internal tools, and apps where speed to market matters more than platform-specific features.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-hartford",
+    "title": "Cross-Platform App Development",
+    "description": "React Native and Flutter let us ship a single codebase to both app stores. This is the fastest path to market for Hartford, CT startups and lean teams looking for a scalable MVP without doubling their mobile development budget.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-houston",
+    "title": "Cross-Platform App Development",
+    "description": "When budget or timeline demands a single codebase for both iOS and Android, our cross-platform development team builds with Flutter and React Native. Cross-platform development is especially popular with Houston startups looking to validate an MVP before committing to separate native builds.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-jackson",
+    "title": "Cross-Platform App Development",
+    "description": "For small businesses watching their budget, cross-platform development with React Native or Flutter delivers apps for both major platforms from a single codebase. You get native performance at a lower cost, with faster time-to-market — typically launching in 6 to 8 weeks.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-jacksonville",
+    "title": "Cross-Platform App Development",
+    "description": "For Jacksonville businesses that need to reach both iOS and Android users without doubling their budget, we offer cross-platform app development using React Native and Flutter. A single shared codebase means faster launches and lower maintenance costs — especially well-suited for MVPs, internal tools, and startups looking to validate quickly.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-la",
+    "title": "Cross-Platform App Development",
+    "description": "When budget or timeline pressure calls for a single codebase, we build cross-platform development solutions in React Native and Flutter. React Native gives teams already invested in JavaScript a natural migration path, while Flutter delivers pixel-identical UI across iOS and Android. Cross-platform cuts build time by roughly 30-40% compared to dual-native projects.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-miami",
+    "title": "Cross-Platform App Development",
+    "description": "When you need to reach both iOS and Android users without doubling your budget, cross-platform development is the practical choice. We build cross-platform apps using Flutter and React Native, two frameworks that let us ship a single codebase to both platforms with near-native performance. Cross-platform development typically cuts 30-40% off the timeline compared to building two separate native apps. For many Miami businesses -- especially startups watching their runway -- that tradeoff makes sense.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-nyc",
+    "title": "Cross-Platform App Development",
+    "description": "When budget or timeline demands a single codebase for both iOS and Android, we build cross-platform apps using React Native and Flutter. These frameworks let you reach both app stores with shared components, cutting development time without sacrificing quality. For NYC startups watching their runway, cross-platform development is often the smartest first move.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-orlando",
+    "title": "Cross-Platform App Development",
+    "description": "For businesses that need to reach both iOS and Android without doubling their budget, we offer cross-platform development using Flutter and React Native. Cross-platform development cuts timelines by 30 to 40 percent, making it the right choice for Orlando startups building their MVP or established companies launching a new product line.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-philadelphia",
+    "title": "Cross-Platform App Development",
+    "description": "When budget or timeline demands a single codebase for both platforms, we build with Flutter and React Native to ship iOS and Android apps simultaneously. Cross-platform development cuts time-to-market significantly, which matters when you are competing in the Philly startup scene and need to validate an MVP fast.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-phoenix",
+    "title": "Cross-Platform App Development",
+    "description": "For teams that need to reach both iOS and Android users with a single codebase, we offer cross-platform development using Flutter and React Native. This approach reduces mobile app development Phoenix timelines and cost while maintaining near-native performance.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-san-antonio",
+    "title": "Cross-Platform App Development",
+    "description": "When budget or timeline calls for a single codebase across iOS and Android, we use Flutter and React Native for cross-platform development. React Native works well for apps with complex UI states, while Flutter excels at animation-heavy interfaces and rapid prototyping. Our app developers in San Antonio help you choose the right framework based on your use case, not on what is trending.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-san-diego",
+    "title": "Cross-Platform App Development",
+    "description": "When budget and timeline matter, cross-platform development using Flutter or React Native lets you ship on iOS and Android simultaneously from a single codebase, cutting development time by up to 40%. Flutter's widget system and React Native's bridge architecture each have strengths; we recommend the right framework based on your app's specific requirements.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-sf",
+    "title": "Cross-Platform App Development",
+    "description": "When time-to-market matters more than platform-specific polish, cross-platform development saves weeks and budget. We build with both React Native and Flutter, choosing the framework that fits your product requirements. Either way, you get a shared codebase that ships to iOS and Android simultaneously -- cutting mobile app development timelines by 30-40% compared to building two native apps.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-springfield",
+    "title": "Cross-Platform App Development",
+    "description": "We build cross-platform mobile apps with React Native and Flutter, letting Springfield businesses reach iOS and Android users from one codebase -- often cutting development time by 30-40%. Our React-based web applications deliver responsive design, scalable cloud APIs, and app-like speed ideal for startups along the I-91 corridor.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "cross-platform-app-development-tampa",
+    "title": "Cross-Platform App Development",
+    "description": "When speed to market matters more than platform-specific features, a cross-platform approach is the right call. We build with both React Native and Flutter, choosing the framework that fits your product requirements. A shared codebase across iOS and Android cuts development time and cost without sacrificing user experience.",
+    "image": "/images/Locations/services/cross.webp",
+    "order": 3
+  },
+  {
+    "slug": "web-design-development-jackson",
+    "title": "Web Design & Development",
+    "description": "Our team builds custom websites, WordPress sites, and e-commerce platforms for businesses across the region. Every site we deliver is mobile-friendly, SEO-ready, and built to convert visitors into customers. We work with outfitters, resorts, restaurants, real estate agencies, and retail shops — businesses whose customers are searching on their phones while exploring the Snow King area, browsing Town Square, or planning trips from out of state.\nWe handle hosting, maintenance and support, and ongoing optimization so your site stays fast and secure long after launch.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-atlanta",
+    "title": "Web Development Services",
+    "description": "Our web development agency Atlanta team builds custom web applications, progressive web apps, and scalable SaaS platforms using React and Next.js on the frontend, with Node.js, Laravel, and .NET on the backend. We deploy on AWS, Firebase, and Azure. Whether you are building an internal tool for your Buckhead headquarters or a customer-facing platform serving users nationwide, we architect for scale from day one.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-austin",
+    "title": "Web Development Services",
+    "description": "As a full web development agency Austin businesses can rely on end to end, we build with React and Next.js on the frontend and Node.js or Laravel on the backend, with AWS, Firebase, or Azure handling infrastructure. Typical projects include customer portals for FinTech clients, SaaS dashboards for Austin startups, HIPAA-aware web apps for healthcare, and public-facing marketing sites that rank.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-boston",
+    "title": "Web Development Services",
+    "description": "We build custom web applications using React, Node.js, and Laravel -- SaaS dashboards, progressive web apps, and back-end APIs. Our web development Boston team architects scalable systems on AWS, Firebase, and Azure that handle real traffic from day one.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-chicago",
+    "title": "Web Development Services",
+    "description": "We build custom web applications using React on the frontend and Node.js or Laravel on the backend, deployed to AWS, Firebase, or Azure. Our web development work includes SaaS platforms, internal dashboards, ERP integrations, and data-heavy reporting tools. Local fintech and logistics companies trust us with web applications that process thousands of transactions daily.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-circleville",
+    "title": "Web Development Services",
+    "description": "From marketing websites and SaaS platforms to e-commerce storefronts, our web development team builds with React, Node.js, and Laravel. Every site ships with responsive design and conversion-focused layouts. Web development in Circleville does not mean settling for a template; we build custom solutions matched to how your business operates.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-dallas",
+    "title": "Web Development Services",
+    "description": "We build responsive web applications using React, Next.js, Node.js, and Laravel. Whether you need a customer portal, an internal dashboard, or a progressive web app that works offline, our web development Dallas team architects solutions that are fast, accessible, and built to handle growth. Every project includes mobile-responsive design and performance optimization out of the box.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-hartford",
+    "title": "Web Development Services",
+    "description": "Our web development Hartford CT team builds custom web applications, responsive websites, and API integrations using React, Node.js, and Laravel. We deploy on AWS, Firebase, or Azure. Whether you need a headless CMS, a customer portal, or an internal dashboard connecting to legacy systems, we architect solutions that grow with your business.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-houston",
+    "title": "Web Development Services",
+    "description": "Our web development agency Houston team builds custom web applications using React, Angular, Node.js, and Laravel. We architect cloud-native backends on AWS, Firebase, and Azure. Houston businesses in oil and gas, logistics, and healthcare often need web apps that integrate with legacy systems — our backend engineers build secure middleware layers that connect modern frontends to existing infrastructure.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-jacksonville",
+    "title": "Web Development Services",
+    "description": "Our web development agency in Jacksonville builds custom web applications using React, Node.js, and Laravel. We architect scalable, secure platforms — from customer portals and SaaS dashboards to complex data-driven tools. Every application is built with API integration in mind, connecting to the services and databases your business already relies on.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-la",
+    "title": "Web Development Services",
+    "description": "Our web development agency Los Angeles practice builds custom web applications, progressive web apps, and responsive marketing platforms. Frontend work runs on React and Next.js for fast, SEO-friendly interfaces. Backend systems use Node.js, Python, or Laravel. We deploy on AWS, Firebase, and Azure with CI/CD pipelines that keep your Los Angeles team shipping weekly.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-miami",
+    "title": "Web Development Services",
+    "description": "Mobile apps don't exist in a vacuum. Most of our Miami clients also need web applications, admin dashboards, APIs, or customer-facing websites that tie into their mobile products. As a web development agency Miami companies rely on, we build custom web applications using React on the frontend and Node.js or Laravel on the backend. We deploy to AWS, Firebase, and Azure depending on your scale and compliance requirements.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-nyc",
+    "title": "Web Development Services",
+    "description": "Our web development team builds scalable web applications using React, Next.js, Node.js, and Laravel. We architect for growth -- whether that means handling thousands of concurrent users on launch day or meeting SOC 2 and GDPR compliance requirements. Custom web app development in NYC demands reliability at scale, and we engineer for exactly that.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-orlando",
+    "title": "Web Development Services",
+    "description": "Our web development agency Orlando team builds custom web applications using React on the frontend and Node.js or Laravel on the backend. We deploy to AWS, Firebase, and Azure. Whether you need a booking platform for the Orlando hospitality industry, an internal dashboard, or a customer portal, our web development stack handles it.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-philadelphia",
+    "title": "Web Development Services",
+    "description": "Our web development agency Philadelphia team builds custom web applications using React on the frontend and Node.js or Laravel on the backend. We deploy to AWS, Firebase, and Azure. We also build progressive web apps and integrate with existing CRMs, ERPs, and payment gateways used by Philadelphia enterprises.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-phoenix",
+    "title": "Web Development Services",
+    "description": "Our web development agency Phoenix team builds custom web applications using React on the frontend and Node.js, Laravel, and .NET on the backend. Cloud hosting and deployment run on AWS, Azure, or Firebase. From internal dashboards to customer-facing platforms, we build scalable web solutions that integrate with your existing systems.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-san-antonio",
+    "title": "Web Development Services",
+    "description": "Synergy Labs is a web development agency San Antonio businesses choose for custom web applications, responsive marketing sites, and complex SaaS platforms. Our frontend team works in React, with Node.js and Laravel on the backend. We also develop on Shopify and BigCommerce with custom integrations, and build CMS-driven sites on WordPress and headless CMS architectures for content-heavy organizations.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-san-diego",
+    "title": "Web Development Services",
+    "description": "Our web development San Diego practice builds custom web applications using React, Next.js, and Vue.js on the frontend, with Node.js, Laravel, or Python on the backend. We deploy to AWS, Firebase, and Azure with CI/CD pipelines, auto-scaling, and infrastructure-as-code from day one. Whether you need an internal dashboard, a customer-facing SaaS platform, or an API layer connecting legacy systems, we deliver production-grade solutions built for scale.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-springfield",
+    "title": "Web Development Services",
+    "description": "We design and build responsive, SEO-ready custom websites using React, Node.js, Laravel, and WordPress -- tailored to your goals, not a template. Our web design process starts with your Springfield, MA audience, then moves through wireframes, visual design, development, and testing. Every custom website is mobile-first, fast-loading, and built to rank.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "web-development-services-tampa",
+    "title": "Web Development Services",
+    "description": "Our web development Tampa team builds custom web applications, e-commerce platforms, and marketing websites using React, Node.js, and Laravel. We build progressive web apps, headless commerce solutions, and integrate with your existing tools — CRMs, ERPs, payment processors — so your team works in one ecosystem, not five.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "ai-powered-development-la",
+    "title": "AI-Powered Development",
+    "description": "The LA tech scene runs on AI, and we build it into products from the architecture layer up. Our AI-powered development practice integrates large language models, recommendation engines, computer vision, and conversational AI into mobile and web applications. Every AI integration follows responsible development practices — bias testing, data privacy guardrails, and transparent model documentation.",
+    "image": "/images/Locations/services/ai.webp",
+    "order": 5
+  },
+  {
+    "slug": "custom-software-development-phoenix",
+    "title": "Custom Software Development",
+    "description": "Off-the-shelf SaaS does not always fit. Our custom software development team in Phoenix builds tailored solutions that map to your exact workflows, data models, and security requirements. We handle enterprise integrations, legacy system modernization, and cloud-based architecture on Microsoft Azure, AWS, and Firebase.",
+    "image": "/images/Locations/services/solutions.webp",
+    "order": 5
+  },
+  {
+    "slug": "ecommerce-booking-jackson",
+    "title": "E-Commerce & Booking Integrations",
+    "description": "The valley runs on reservations. We integrate e-commerce and booking platforms — Shopify, WooCommerce, FareHarbor, Checkfront — so your customers can book river trips, reserve lodge rooms, or purchase gear directly from your website. These integrations are built for reliability during peak tourist season.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 5
+  },
+  {
+    "slug": "enterprise-app-development-houston",
+    "title": "Enterprise App Development",
+    "description": "Large organizations across Houston need secure, scalable mobile apps that integrate with existing systems. We build enterprise-grade applications with role-based access, SSO integration, offline-first architecture, and compliance-ready data handling, including HIPAA for healthcare clients near the Texas Medical Center.",
+    "image": "/images/Locations/services/solutions.webp",
+    "order": 5
+  },
+  {
+    "slug": "responsive-website-design-jacksonville",
+    "title": "Responsive Website Design",
+    "description": "Mobile-first responsive website design is a baseline requirement for any Jacksonville, FL business. We build fast, accessible sites that perform across every device and screen size. Responsive design improves SEO rankings, reduces bounce rates, and ensures a consistent experience from desktop to smartphone.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 5
+  },
+  {
+    "slug": "ui-ux-design-product-strategy",
+    "title": "UI/UX Design & Product Strategy",
+    "description": "Good design is not decoration -- it is strategy. Our UI/UX design process starts with discovery: understanding your users, mapping their journeys, and prototyping solutions before a single line of code is written. We run user research sessions, create interactive wireframes, and build design systems that keep your product consistent as it grows.",
+    "image": "/images/Locations/services/ux.webp",
+    "order": 5
+  },
+  {
+    "slug": "ui-ux-design-product-strategy---tampa",
+    "title": "UI/UX Design & Product Strategy",
+    "description": "Good design is invisible. Our UI/UX process starts with user research and stakeholder interviews, moves through wireframes and interactive prototypes, and ends with a polished design system your development team can build against. We prioritize accessibility (WCAG 2.1 AA) and design for the way real users behave, not how we assume they will.\nThe result is measurable: higher engagement, longer sessions, and better retention. For Tampa businesses competing in crowded verticals, that edge matters.",
+    "image": "/images/Locations/services/ux.webp",
+    "order": 5
+  },
+  {
+    "slug": "wordpress-cms-hartford",
+    "title": "WordPress & CMS Development",
+    "description": "For content-driven sites, we deliver WordPress and headless CMS solutions with custom themes, plugin development, and performance optimization. Hartford, CT businesses get a site that their marketing team can actually manage without calling a developer every week.",
+    "image": "/images/Locations/services/web-1.webp",
+    "order": 5
+  },
+  {
+    "slug": "custom-software-development-enterprise",
+    "title": "Custom Software Development & Enterprise Solutions",
+    "description": "For larger organizations, our custom software development practice delivers back-office systems, workflow automation, system integrations, and API-first architectures. This work focuses on reducing manual processes and connecting the tools your teams already use, and it pairs naturally with our mobile app development engagements when a client needs both a customer-facing app and the internal platforms that power it.",
+    "image": "/images/Locations/services/solutions.webp",
+    "order": 7
+  }
+]

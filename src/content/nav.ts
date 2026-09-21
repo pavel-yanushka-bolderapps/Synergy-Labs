@@ -11,7 +11,11 @@ export const nav: SiteNavigation = {
     { label: "Insights", href: "/insights", children: [
       {label: "Podcast", href:"/podcast"},
     ] },
+    { label: "Builder", href: "/synergy-builder" },
     { label: "About Us", href: "/about-us" },
+    // Get Financing lives in the footer only -- the header already runs to the
+    // width where it collapses to the compact layout, and an eighth link tips
+    // it over on common laptop widths.
   ],
   phone: "(645) 444-1069",
   ctaButton: { label: "Free Quote", href: "/contact" },

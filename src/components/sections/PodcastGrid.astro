@@ -1,0 +1,101 @@
+---
+import type { PodcastPageContent } from "../../lib/types";
+
+interface Props {
+  episodes: PodcastPageContent["episodes"];
+}
+
+const { episodes } = Astro.props;
+---
+
+<section class="mx-auto max-w-7xl px-6 pb-20">
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+    {episodes.map((episode) => (
+      <article class="flex flex-col overflow-hidden rounded-3xl bg-white shadow-xl">
+        {/*
+          A facade rather than an iframe: the poster is a local still and the
+          player is only injected on click. Six autoloading YouTube embeds
+          would pull well over a megabyte of third-party script before anyone
+          presses play, and they set cookies on a page that otherwise sets
+          none.
+        */}
+        <button
+          type="button"
+          class="youtube-facade group relative block w-full cursor-pointer overflow-hidden bg-black"
+          data-youtube-id={episode.youtubeId}
+          aria-label={`Play: ${episode.title}`}
+        >
+          <img
+            src={episode.posterSrc}
+            alt=""
+            loading="lazy"
+            width="1280"
+            height="720"
+            class="aspect-video w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+          />
+          <span
+            class="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 transition group-hover:bg-secondary-green"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" class="ml-1 h-7 w-7 text-white" aria-hidden="true">
+              <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.3-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z" />
+            </svg>
+          </span>
+        </button>
+
+        <div class="flex flex-1 flex-col p-8 md:p-10">
+          <h2 class="font-display text-2xl leading-tight md:text-[1.75rem]">{episode.title}</h2>
+
+          <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+            {episode.authors.map((author) => (
+              <span class="flex items-center gap-2.5">
+                <img
+                  src={author.imageSrc}
+                  alt=""
+                  loading="lazy"
+                  class="h-10 w-10 shrink-0 rounded-full object-cover"
+                />
+                <span class="text-sm italic text-black/70">{author.name}</span>
+              </span>
+            ))}
+          </div>
+
+          <p class="mt-6 font-semibold text-primary-green">{episode.summary}</p>
+
+          <ul class="mt-6 flex flex-col gap-3">
+            {episode.highlights.map((highlight) => (
+              <li class="flex gap-3 text-sm leading-relaxed text-black/70">
+                <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-secondary-green"></span>
+                <span>
+                  {highlight.label && <strong class="font-semibold text-black">{highlight.label}: </strong>}
+                  {highlight.text}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  // One delegated listener for every card on the page: on click, swap the
+  // poster button for the real player with autoplay, so the click that opened
+  // it also starts it.
+  document.addEventListener("click", (event) => {
+    const facade = (event.target as HTMLElement | null)?.closest<HTMLElement>(".youtube-facade");
+    if (!facade) return;
+
+    const videoId = facade.dataset.youtubeId;
+    if (!videoId) return;
+
+    const frame = document.createElement("iframe");
+    frame.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+    frame.title = facade.getAttribute("aria-label") ?? "YouTube video player";
+    frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture";
+    frame.allowFullscreen = true;
+    frame.className = "aspect-video w-full border-0";
+
+    facade.replaceWith(frame);
+  });
+</script>

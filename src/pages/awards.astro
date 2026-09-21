@@ -1,0 +1,14 @@
+---
+// /awards -- linked from the footer since the footer was written, never built.
+import Layout from "../components/layout/Layout.astro";
+import AwardsHero from "../components/sections/AwardsHero.astro";
+import AwardsGrid from "../components/sections/AwardsGrid.astro";
+import ContactSection from "../components/sections/ContactSection.astro";
+import { awardsPage } from "../content/awardsPage";
+---
+
+<Layout title="Awards | Synergy Labs" description={awardsPage.subheading}>
+  <AwardsHero content={awardsPage} />
+  <AwardsGrid items={awardsPage.awards} />
+  <ContactSection id="contact-form" />
+</Layout>

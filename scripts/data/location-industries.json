@@ -1,0 +1,730 @@
+[
+  {
+    "slug": "fintech-dallas",
+    "title": "Fintech & Banking",
+    "description": "With major financial institutions headquartered in the Dallas-Fort Worth metro, we develop secure mobile banking apps, payment processing platforms, and financial dashboards that meet compliance requirements.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 1
+  },
+  {
+    "slug": "fintech-miami",
+    "title": "FinTech",
+    "description": "Miami has become a serious FinTech hub. We build secure, compliant financial applications -- payment platforms, banking interfaces, and investment tools -- that handle sensitive data responsibly and meet regulatory requirements.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 1
+  },
+  {
+    "slug": "fintech-nyc",
+    "title": "Fintech & Banking",
+    "description": "New York is the financial capital of the world. We build secure mobile and web applications for fintech startups and established financial institutions, with deep experience in PCI DSS and SOC 2 compliance. From mobile banking interfaces to trading dashboards, our fintech work is built for the regulatory scrutiny that comes with operating on or near Wall Street.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 1
+  },
+  {
+    "slug": "fintech-sf",
+    "title": "Fintech & Banking",
+    "description": "The Bay Area's fintech ecosystem demands apps that are fast, secure, and compliant. We build payment platforms, trading dashboards, and financial tools with enterprise-grade security for San Francisco fintech companies.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 1
+  },
+  {
+    "slug": "healthcare-san-antonio",
+    "title": "Healthcare & Bioscience",
+    "description": "San Antonio is home to the South Texas Medical Center, UT Health San Antonio, and University Health System. We build HIPAA-compliant patient portals, telehealth platforms, and clinical workflow apps that integrate with existing EHR systems.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 1
+  },
+  {
+    "slug": "healthtech-boston",
+    "title": "HealthTech",
+    "description": "The Longwood Medical Area anchors Boston's healthcare innovation. We build HIPAA-compliant apps for telehealth, patient engagement, and clinical trial management.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 1
+  },
+  {
+    "slug": "fintech-boston",
+    "title": "FinTech",
+    "description": "From the Financial District to the Seaport, Boston's financial sector demands secure, scalable applications. We build trading platforms, payment integrations, and regulatory-compliant dashboards.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 2
+  },
+  {
+    "slug": "healthcare-dallas",
+    "title": "Healthcare",
+    "description": "Dallas is home to one of the largest medical districts in the country. We build HIPAA-compliant patient portals, telehealth platforms, and clinical workflow apps for healthcare providers across DFW, combining custom mobile app builds with secure web portals.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 2
+  },
+  {
+    "slug": "healthcare-miami",
+    "title": "Healthcare",
+    "description": "From telehealth platforms to patient intake apps, we build healthcare software for Miami that prioritizes usability and data security. If your project involves protected health information, we build with HIPAA considerations from day one.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 2
+  },
+  {
+    "slug": "healthcare-nyc",
+    "title": "Healthcare & Telehealth",
+    "description": "We develop HIPAA-compliant healthcare applications including telehealth platforms, patient portals, and EHR integrations. NYC's dense healthcare network -- from Mount Sinai to neighborhood clinics -- demands reliable, secure digital tools that patients and providers can trust.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 2
+  },
+  {
+    "slug": "healthcare-sf",
+    "title": "Healthcare",
+    "description": "For San Francisco healthtech companies, we develop HIPAA-compliant mobile app development solutions and web development platforms -- from patient portals to telehealth apps -- with encrypted data handling and audit-ready architecture.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 2
+  },
+  {
+    "slug": "hospitality-san-antonio",
+    "title": "Hospitality & Tourism",
+    "description": "The River Walk, the Alamo, and the Pearl District draw millions of visitors annually. We build booking platforms, loyalty apps, and visitor experience tools for San Antonio's hospitality brands. Mobile app development includes offline-capable features and real-time inventory sync.",
+    "image": "/images/Locations/industries/booking.webp",
+    "order": 2
+  },
+  {
+    "slug": "biotech-boston",
+    "title": "BioTech & Life Sciences",
+    "description": "Kendall Square is the biotech capital of the world. We develop lab management tools and research collaboration apps for Boston-area companies scaling from Series A through IPO.",
+    "image": "/images/Locations/industries/science.webp",
+    "order": 3
+  },
+  {
+    "slug": "ecommerce-sf",
+    "title": "E-Commerce & Marketplace",
+    "description": "We build scalable marketplace platforms and e-commerce apps with real-time inventory, payment processing, and AI-powered recommendation engines for San Francisco's e-commerce and marketplace sector.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 3
+  },
+  {
+    "slug": "real-estate-dallas",
+    "title": "Real Estate",
+    "description": "The DFW real estate market is one of the most active in the country. We build property search apps, agent platforms, and virtual tour integrations for brokerages and proptech startups.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 3
+  },
+  {
+    "slug": "real-estate-miami",
+    "title": "Real Estate",
+    "description": "Miami's real estate market moves fast. We've built property search apps, agent tools, and transaction platforms that help real estate professionals close deals faster and give buyers a better experience.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 3
+  },
+  {
+    "slug": "real-estate-san-antonio",
+    "title": "Real Estate & PropTech",
+    "description": "San Antonio's real estate market continues to expand across Southtown, the Dominion, and the Northwest Side. We build property search apps, virtual tour integrations, and CRM-connected lead management platforms for brokerages and property managers.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 3
+  },
+  {
+    "slug": "retail-ecommerce-nyc",
+    "title": "Retail & E-commerce",
+    "description": "For NYC's retail sector, we build mobile commerce apps and e-commerce platforms with Shopify and Magento integrations, checkout optimization, and inventory management. Whether you operate storefronts in SoHo or sell exclusively online, we build for conversion.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 3
+  },
+  {
+    "slug": "ecommerce-miami",
+    "title": "E-commerce",
+    "description": "Whether you're selling online, managing inventory across locations, or building a marketplace, we develop e-commerce solutions that scale with your business. Mobile commerce is where Miami shoppers are headed, and we build for that.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 4
+  },
+  {
+    "slug": "edtech-boston",
+    "title": "EdTech",
+    "description": "With MIT, Harvard, and dozens of universities nearby, Boston is an EdTech hub. We build learning management systems and AI-powered tutoring platforms for Boston's education sector.",
+    "image": "/images/Locations/industries/education-1.webp",
+    "order": 4
+  },
+  {
+    "slug": "media-entertainment-nyc",
+    "title": "Media & Entertainment",
+    "description": "New York is a global media hub. We build streaming platforms, live content delivery systems, and membership-based digital products for media companies, content creators, and entertainment brands operating out of Midtown, Chelsea, and beyond.",
+    "image": "/images/Locations/industries/entertainment.webp",
+    "order": 4
+  },
+  {
+    "slug": "retail-dallas",
+    "title": "Retail & E-Commerce",
+    "description": "From NorthPark Center boutiques to omnichannel brands, we build custom e-commerce platforms, inventory management systems, and mobile shopping apps that drive revenue.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 4
+  },
+  {
+    "slug": "hospitality-miami",
+    "title": "Hospitality",
+    "description": "Miami's hospitality industry needs technology that keeps up with guest expectations. We build booking systems, loyalty apps, and operational tools for hotels, restaurants, and entertainment venues across South Florida.",
+    "image": "/images/Locations/industries/booking.webp",
+    "order": 5
+  },
+  {
+    "slug": "real-estate-nyc",
+    "title": "Real Estate & PropTech",
+    "description": "In one of the world's hottest real estate markets, we build property search apps, virtual tour platforms, and tenant management portals. NYC real estate moves fast -- your technology needs to move faster.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 5
+  },
+  {
+    "slug": "retail-boston",
+    "title": "Retail & eCommerce",
+    "description": "From Back Bay boutiques to enterprise retailers, we build mobile commerce apps and omnichannel customer experiences for Boston's retail sector.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 5
+  },
+  {
+    "slug": "logistics-nyc",
+    "title": "On-Demand & Logistics",
+    "description": "From delivery services to fleet management, we build on-demand booking apps and logistics platforms tailored to the operational complexity of serving New York City's five boroughs.",
+    "image": "/images/Locations/industries/logistics.webp",
+    "order": 6
+  },
+  {
+    "slug": "saas-startups",
+    "title": "SaaS & Startups",
+    "description": "We help early-stage companies and growing startups build MVPs through mobile app and web development that attract funding and scale to product-market fit. Our lean process gets you to market fast without sacrificing code quality.",
+    "image": "/images/Locations/industries/startup.webp",
+    "order": 6
+  },
+  {
+    "slug": "ai-machine-learning",
+    "title": "AI & Machine Learning",
+    "description": "San Francisco leads the world in AI. We integrate machine learning models into mobile app development projects and web apps, building AI-powered features like natural language search, image recognition, and predictive analytics.",
+    "image": "/images/Locations/services/ai.webp",
+    "order": 7
+  },
+  {
+    "slug": "fintech-banking",
+    "title": "Fintech & Banking",
+    "description": "We build secure mobile and web applications for fintech startups and established financial institutions, with deep experience in PCI DSS and SOC 2 compliance. From mobile banking interfaces to trading dashboards, our fintech development is built for regulatory scrutiny.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 9
+  },
+  {
+    "slug": "healthcare-telehealth",
+    "title": "Healthcare & Telehealth",
+    "description": "We develop HIPAA-compliant healthcare applications including telehealth platforms, patient portals, and EHR integrations. Our healthcare clients need reliable, secure digital tools that patients and providers can trust, and we build with those standards from day one.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 10
+  },
+  {
+    "slug": "retail-ecommerce",
+    "title": "Retail & E-commerce",
+    "description": "We build mobile commerce apps and e-commerce platforms with custom integrations, checkout optimization, and inventory management. Whether you operate storefronts or sell exclusively online, we build for conversion and scale.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 11
+  },
+  {
+    "slug": "real-estate-proptech",
+    "title": "Real Estate & PropTech",
+    "description": "We build property search apps, virtual tour platforms, and tenant management portals for one of the most competitive real estate markets in the country. Your technology needs to move as fast as the market does.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 13
+  },
+  {
+    "slug": "on-demand-logistics",
+    "title": "On-Demand & Logistics",
+    "description": "From delivery services to fleet management, we build on-demand booking apps and logistics platforms tailored to the operational complexity of businesses serving large, distributed customer bases.",
+    "image": "/images/Locations/industries/logistics.webp",
+    "order": 14
+  },
+  {
+    "slug": "oil-gas-energy",
+    "title": "Oil & Gas / Energy",
+    "description": "Dallas has long been a hub for the energy sector. We build field operations apps, asset tracking systems, and data dashboards for oil and gas companies managing distributed operations.",
+    "image": "/images/Locations/industries/energy.webp",
+    "order": 15
+  },
+  {
+    "slug": "education",
+    "title": "Education",
+    "description": "We develop learning management systems, student engagement platforms, and administrative tools for schools and edtech companies across Texas.",
+    "image": "/images/Locations/industries/education-1.webp",
+    "order": 16
+  },
+  {
+    "slug": "insurance-financial-services",
+    "title": "Insurance & Financial Services",
+    "description": "Springfield is home to MassMutual. We build secure, compliant digital tools for insurance and financial services firms across Western Massachusetts.",
+    "image": "/images/Locations/industries/insuarance.webp",
+    "order": 17
+  },
+  {
+    "slug": "education-higher-ed",
+    "title": "Education & Higher Ed",
+    "description": "We build custom web platforms, learning management systems, and apps for UMass Amherst, Smith College, Amherst College, and local institutions across Western Massachusetts.",
+    "image": "/images/Locations/industries/education-1.webp",
+    "order": 18
+  },
+  {
+    "slug": "nonprofit",
+    "title": "Nonprofit",
+    "description": "Competitive pricing and flexible engagement models for nonprofits. We help organizations build donor management tools, event registration platforms, and volunteer coordination apps that extend their mission.",
+    "image": "/images/Locations/industries/nonprofit.webp",
+    "order": 19
+  },
+  {
+    "slug": "hospitality-tourism",
+    "title": "Hospitality & Tourism",
+    "description": "We build booking platforms, loyalty apps, mobile ticketing, and visitor experience tools for hospitality brands, hotels, restaurants, and entertainment venues.",
+    "image": "/images/Locations/industries/booking.webp",
+    "order": 20
+  },
+  {
+    "slug": "agriculture",
+    "title": "Agriculture",
+    "description": "We build field tracking apps, equipment maintenance platforms, and supply chain portals for agricultural businesses across Pickaway County and surrounding Ohio farming communities.",
+    "image": null,
+    "order": 22
+  },
+  {
+    "slug": "contractors-service-companies",
+    "title": "Contractors & Service Companies",
+    "description": "Estimate builders, job tracking tools, and customer communication apps for contractors and service companies. We build the operational software that keeps field teams and clients connected.",
+    "image": null,
+    "order": 23
+  },
+  {
+    "slug": "professional-services",
+    "title": "Professional Services",
+    "description": "Client portals, CRM integrations, and billing tools for professional services firms. We build the back-office software that reduces manual work and keeps your client relationships organized.",
+    "image": null,
+    "order": 24
+  },
+  {
+    "slug": "manufacturing",
+    "title": "Manufacturing",
+    "description": "Production dashboards, inventory management systems, and scheduling tools for manufacturing companies. We build the operational software that keeps production floors running efficiently.",
+    "image": null,
+    "order": 25
+  },
+  {
+    "slug": "military-government",
+    "title": "Military & Government",
+    "description": "Military City USA is anchored by Joint Base San Antonio. We develop secure, scalable applications for defense contractors and government agencies that require controlled access, audit logging, and data encryption at rest and in transit.",
+    "image": null,
+    "order": 28
+  },
+  {
+    "slug": "logistics-tampa",
+    "title": "Logistics",
+    "description": "From the Port Tampa Bay logistics corridor to the I-4 corridor, we build fleet tracking apps, warehouse management systems, and supply chain visibility platforms tailored to Tampa's logistics sector.",
+    "image": "/images/Locations/industries/logistics.webp",
+    "order": 29
+  },
+  {
+    "slug": "biotech-life-sciences-san-diego",
+    "title": "Biotech & Life Sciences",
+    "description": "The Torrey Pines and Sorrento Valley corridor is home to hundreds of biotech firms. We build lab data management platforms, patient-facing trial apps, and regulatory-compliant software for life sciences companies across San Diego.",
+    "image": "/images/Locations/industries/science.webp",
+    "order": 30
+  },
+  {
+    "slug": "defense-aerospace-san-diego",
+    "title": "Defense & Aerospace",
+    "description": "Point Loma and the broader San Diego defense corridor house major contractors and DoD operations. Our team builds secure mobile applications, field-data collection tools, and classified-network-adjacent systems with the security posture these clients require.",
+    "image": "/images/Locations/industries/airspace.webp",
+    "order": 31
+  },
+  {
+    "slug": "tourism-hospitality-san-diego",
+    "title": "Tourism & Hospitality",
+    "description": "From the Gaslamp Quarter to La Jolla Cove, San Diego's tourism sector needs booking platforms, guest experience apps, and operational tools that handle seasonal surges. We build mobile and web solutions that integrate with POS, PMS, and channel management systems.",
+    "image": "/images/Locations/industries/booking.webp",
+    "order": 32
+  },
+  {
+    "slug": "healthcare-san-diego",
+    "title": "Healthcare",
+    "description": "San Diego's healthcare network spans major hospital systems and telehealth startups. We develop HIPAA-compliant patient portals, remote monitoring apps, and clinical workflow tools for the region's growing healthcare sector.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 33
+  },
+  {
+    "slug": "saas-startups-san-diego",
+    "title": "SaaS & Startups",
+    "description": "UTC and Downtown San Diego are home to a growing startup ecosystem. We help founders build MVPs, validate product-market fit, and scale their custom mobile app or web platform from first users to Series A and beyond.",
+    "image": "/images/Locations/industries/startup.webp",
+    "order": 34
+  },
+  {
+    "slug": "logistics-phoenix",
+    "title": "Logistics & Supply Chain",
+    "description": "For logistics companies operating out of the I-10 corridor and Phoenix's major distribution hubs, we develop fleet tracking, warehouse management, and route optimization platforms that reduce operational overhead.",
+    "image": "/images/Locations/industries/logistics.webp",
+    "order": 35
+  },
+  {
+    "slug": "startups-phoenix",
+    "title": "Startups",
+    "description": "For startups emerging from ASU's innovation ecosystem in Tempe and the growing coworking spaces across Scottsdale and Downtown Phoenix, we deliver MVPs designed to attract investors and validate ideas quickly. Our lean-launch approach gets your product to market in weeks, not months.",
+    "image": "/images/Locations/industries/startup.webp",
+    "order": 36
+  },
+  {
+    "slug": "healthcare-life-sciences-philadelphia",
+    "title": "Healthcare & Life Sciences",
+    "description": "Philadelphia is home to world-class medical institutions including the University of Pennsylvania Health System and Jefferson Health. We build custom mobile apps and HIPAA-aware web platforms for patient engagement, appointment scheduling, and clinical workflows. The pharma concentration along the Route 30 corridor drives demand for apps that understand regulatory requirements.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 37
+  },
+  {
+    "slug": "higher-education-philadelphia",
+    "title": "Higher Education",
+    "description": "With over 100 colleges and universities in Greater Philadelphia, we work with institutions to build enrollment tools, campus navigation apps, alumni engagement platforms, and lab management tools. University City alone hosts multiple research universities whose departments need custom solutions.",
+    "image": "/images/Locations/industries/education-1.webp",
+    "order": 38
+  },
+  {
+    "slug": "simulation-defense-orlando",
+    "title": "Simulation & Defense",
+    "description": "Central Florida's simulation corridor near UCF and the Research Parkway is home to defense contractors and training technology firms. We build data-intensive dashboards, real-time visualization tools, and field-ready mobile applications for this sector.",
+    "image": "/images/Locations/industries/vr.webp",
+    "order": 39
+  },
+  {
+    "slug": "tourism-hospitality-orlando",
+    "title": "Tourism & Hospitality",
+    "description": "With over 75 million visitors per year, Orlando's tourism industry demands mobile-first experiences. We build custom mobile apps for hotels, attractions, tour operators, and restaurants along International Drive. From real-time booking engines to in-venue wayfinding, we help hospitality businesses convert foot traffic into revenue.",
+    "image": "/images/Locations/industries/booking.webp",
+    "order": 40
+  },
+  {
+    "slug": "entertainment-media-la",
+    "title": "Entertainment & Media",
+    "description": "Los Angeles is the entertainment capital of the world, and we build the digital products that support it. From production management apps used on Hollywood sets to fan engagement platforms for Burbank-based studios, we understand the content workflows, rights management constraints, and audience-scale demands unique to LA's media ecosystem.",
+    "image": "/images/Locations/industries/entertainment.webp",
+    "order": 41
+  },
+  {
+    "slug": "film-entertainment-atlanta",
+    "title": "Film & Entertainment Tech",
+    "description": "Atlanta's booming film industry — the largest production center outside of Los Angeles — drives demand for production management apps, talent booking platforms, and content distribution tools. Our team builds the mobile and web solutions that keep Atlanta productions running.",
+    "image": null,
+    "order": 42
+  },
+  {
+    "slug": "fintech-payments-atlanta",
+    "title": "FinTech & Payments",
+    "description": "Atlanta processes over 70% of all U.S. payment transactions, home to major players like NCR and Fiserv. We build secure, compliant mobile and web applications for fintech startups and established payment processors across the metro Atlanta corridor, from Midtown offices to the Alpharetta tech hub.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 43
+  },
+  {
+    "slug": "outdoor-recreation-jackson",
+    "title": "Outdoor Recreation & Tourism",
+    "description": "Tourism and hospitality are the backbone of the Jackson Hole economy. We build booking platforms, reservation apps, and mobile-friendly websites for outfitters, resorts, restaurants, and recreation companies. We understand FareHarbor and Checkfront integrations and the seasonal traffic patterns of Grand Teton National Park visitors.",
+    "image": "/images/Locations/industries/booking.webp",
+    "order": 44
+  },
+  {
+    "slug": "insurance-insurtech-hartford",
+    "title": "Insurance & InsurTech",
+    "description": "Hartford is the insurance capital of the United States. We build claims portals, agent dashboards, policyholder apps, and underwriting tools for insurance carriers, InsurTech startups, and brokerages across Connecticut.",
+    "image": "/images/Locations/industries/insuarance.webp",
+    "order": 45
+  },
+  {
+    "slug": "oil-gas-energy-houston",
+    "title": "Oil & Gas / Energy",
+    "description": "Houston is the energy capital of the world. We develop field operations apps, real-time pipeline monitoring dashboards, and crew scheduling platforms that help energy companies replace paper-based workflows with mobile-first solutions. Our offline-first architecture handles low-connectivity environments unique to upstream and midstream operations.",
+    "image": "/images/Locations/industries/insuarance.webp",
+    "order": 46
+  },
+  {
+    "slug": "healthcare-houston",
+    "title": "Healthcare",
+    "description": "The Texas Medical Center is the largest medical complex on Earth. We build HIPAA-compliant patient engagement apps, appointment scheduling systems, and clinical data dashboards for healthcare organizations across Greater Houston. Our apps integrate with EHR systems and support telehealth workflows.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 47
+  },
+  {
+    "slug": "fintech-houston",
+    "title": "FinTech",
+    "description": "Houston's growing financial services sector needs secure, real-time applications. We build custom mobile apps for payment processing, portfolio management, and regulatory reporting, all with bank-grade security and audit trails.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 48
+  },
+  {
+    "slug": "real-estate-houston",
+    "title": "Real Estate",
+    "description": "From residential brokerages to commercial property management firms, we build listing platforms, tenant portals, and investment analysis tools tailored to the Houston real estate market.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 49
+  },
+  {
+    "slug": "ecommerce-houston",
+    "title": "E-Commerce",
+    "description": "We develop custom e-commerce web applications and mobile storefronts that integrate with payment gateways, inventory systems, and shipping providers. Our e-commerce builds prioritize conversion optimization and mobile performance.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 50
+  },
+  {
+    "slug": "healthcare-atlanta",
+    "title": "Healthcare & HealthTech",
+    "description": "Atlanta's healthcare sector demands HIPAA-compliant mobile applications. We build patient portals, telehealth platforms, and clinical workflow tools that meet strict security and privacy requirements while delivering a modern user experience.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 51
+  },
+  {
+    "slug": "logistics-atlanta",
+    "title": "Logistics & Supply Chain",
+    "description": "With Hartsfield-Jackson as the world's busiest airport and Atlanta's position as a Southeast distribution hub, logistics companies here need real-time tracking, route optimization, and warehouse management applications. We build them.",
+    "image": "/images/Locations/industries/logistics.webp",
+    "order": 52
+  },
+  {
+    "slug": "ecommerce-saas-atlanta",
+    "title": "E-Commerce & SaaS",
+    "description": "From Decatur boutiques to enterprise SaaS companies in Tech Square, we build scalable e-commerce platforms and subscription-based applications that handle growth without breaking.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 53
+  },
+  {
+    "slug": "healthcare-phoenix",
+    "title": "Healthcare",
+    "description": "We build HIPAA-aware mobile apps for Arizona healthcare providers who need secure patient communication, appointment scheduling, and telehealth tools. Our solutions integrate with existing EHR systems and meet the compliance standards that Phoenix-area medical groups require.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 54
+  },
+  {
+    "slug": "financial-services-phoenix",
+    "title": "Financial Services",
+    "description": "Our fintech solutions serve Phoenix-area financial firms with real-time data processing, encrypted transaction handling, and regulatory-compliant dashboards. From credit unions to investment platforms, we build the secure infrastructure that Arizona's growing financial sector demands.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 55
+  },
+  {
+    "slug": "real-estate-phoenix",
+    "title": "Real Estate",
+    "description": "Phoenix's booming real estate market benefits from our custom property search apps, virtual tour integrations, and CRM-connected agent tools built for the Valley's competitive housing landscape.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 56
+  },
+  {
+    "slug": "financial-services-philadelphia",
+    "title": "Financial Services",
+    "description": "Center City hosts a concentration of financial firms that need secure, compliant digital tools. Our team builds trading dashboards, client portals, and mobile banking applications with the encryption and audit-trail capabilities Philadelphia, PA financial institutions require.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 57
+  },
+  {
+    "slug": "ecommerce-retail-philadelphia",
+    "title": "E-Commerce & Retail",
+    "description": "From Old City boutiques to King of Prussia Mall retailers, Philadelphia businesses need mobile and web experiences that convert. We build custom e-commerce platforms, inventory management systems, and loyalty apps that drive revenue.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 58
+  },
+  {
+    "slug": "startups-philadelphia",
+    "title": "Startups & Innovation",
+    "description": "The Philly startup scene continues to grow, fueled by university talent pipelines and an expanding venture capital presence. We partner with early-stage companies to build MVPs and scale products after funding.",
+    "image": "/images/Locations/industries/startup.webp",
+    "order": 59
+  },
+  {
+    "slug": "healthcare-orlando",
+    "title": "Healthcare",
+    "description": "Orlando's Lake Nona Medical City is a growing hub for health innovation. We develop HIPAA-aware patient portals, telehealth platforms, and clinical workflow tools that serve healthcare providers across Orange and Seminole counties, prioritizing patient data security and seamless EHR integration.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 60
+  },
+  {
+    "slug": "ecommerce-orlando",
+    "title": "E-Commerce & Retail",
+    "description": "From Winter Park boutiques to large Orlando-based retail operations, we build scalable e-commerce platforms and mobile shopping experiences that handle seasonal traffic spikes during Florida's peak tourist seasons.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 61
+  },
+  {
+    "slug": "real-estate-orlando",
+    "title": "Real Estate",
+    "description": "Orlando's fast-growing real estate market drives demand for property search apps, virtual tour platforms, and CRM integrations. We build custom mobile apps and web tools that help agents and brokerages close faster in the competitive Orlando, FL market.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 62
+  },
+  {
+    "slug": "healthcare-la",
+    "title": "Healthcare",
+    "description": "Southern California's healthcare corridor demands HIPAA-compliant mobile and web applications. We build patient portals, telehealth platforms, and clinical workflow tools with end-to-end encryption, audit logging, and compliance documentation baked in.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 63
+  },
+  {
+    "slug": "ecommerce-la",
+    "title": "E-Commerce & Retail",
+    "description": "LA's retail brands need custom mobile app experiences that convert. We build product discovery apps, loyalty platforms, and omnichannel ordering systems that handle Black Friday traffic without flinching.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 64
+  },
+  {
+    "slug": "real-estate-la",
+    "title": "Real Estate",
+    "description": "From Santa Monica luxury listings to DTLA commercial leasing, we build property search apps, virtual tour platforms, and CRM integrations for brokerages across Los Angeles, CA.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 65
+  },
+  {
+    "slug": "fintech-la",
+    "title": "Fintech",
+    "description": "Downtown LA's growing financial district needs secure, regulation-aware mobile and web platforms. We build payment processing apps, portfolio dashboards, and KYC onboarding flows with bank-grade security.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 66
+  },
+  {
+    "slug": "tech-startups-la",
+    "title": "Tech Startups",
+    "description": "Venice and Silicon Beach produce some of the most ambitious startups in the country. We are the app developers in Los Angeles that early-stage founders call when they need an MVP in six weeks, not six months.",
+    "image": "/images/Locations/industries/startup.webp",
+    "order": 67
+  },
+  {
+    "slug": "healthcare-jacksonville",
+    "title": "Healthcare",
+    "description": "We build custom mobile apps and web applications for healthcare providers, fintech companies, e-commerce brands, and logistics operations tied to Jacksonville's major port. HIPAA-compliant solutions for Northeast Florida's growing healthcare network.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 68
+  },
+  {
+    "slug": "fintech-jacksonville",
+    "title": "Fintech",
+    "description": "We serve fintech companies across Jacksonville with secure, compliant digital tools including payment platforms, client portals, and mobile banking applications.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 69
+  },
+  {
+    "slug": "ecommerce-jacksonville",
+    "title": "E-Commerce",
+    "description": "E-commerce brands across Jacksonville and Northeast Florida rely on us for custom storefronts, inventory management, and mobile shopping experiences built to convert.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 70
+  },
+  {
+    "slug": "logistics-jacksonville",
+    "title": "Logistics",
+    "description": "Jacksonville's major port and logistics hub means our clients need fleet tracking apps, route optimization tools, and warehouse management systems that perform at scale.",
+    "image": "/images/Locations/industries/logistics.webp",
+    "order": 71
+  },
+  {
+    "slug": "real-estate-jacksonville",
+    "title": "Real Estate",
+    "description": "Jacksonville's growing real estate market drives demand for property search apps, virtual tour platforms, and CRM integrations for brokerages and property managers.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 72
+  },
+  {
+    "slug": "professional-services-jacksonville",
+    "title": "Professional Services",
+    "description": "We serve professional services firms across Jacksonville with client portals, CRM integrations, billing tools, and the operational software that keeps client relationships organized.",
+    "image": null,
+    "order": 73
+  },
+  {
+    "slug": "financial-services-hartford",
+    "title": "Financial Services",
+    "description": "Hartford's financial services sector needs secure, compliant digital tools. Our team builds trading dashboards, client portals, and compliance reporting platforms with the encryption and audit-trail capabilities Connecticut financial institutions require.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 74
+  },
+  {
+    "slug": "healthcare-hartford",
+    "title": "Healthcare",
+    "description": "Connecticut healthcare organizations rely on us for patient-facing apps, telehealth solutions, and HIPAA-compliant data systems that meet strict security and privacy requirements.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 75
+  },
+  {
+    "slug": "manufacturing-hartford",
+    "title": "Manufacturing",
+    "description": "Illinois is the fifth-largest manufacturing state. We build inventory management systems, IoT dashboards, and supply chain visibility tools for manufacturers across the greater Hartford region.",
+    "image": null,
+    "order": 76
+  },
+  {
+    "slug": "nonprofits-education-hartford",
+    "title": "Nonprofits & Education",
+    "description": "Donor management platforms and learning applications tied to the UConn innovation ecosystem. We help Connecticut nonprofits and educational organizations build digital tools that extend their mission.",
+    "image": "/images/Locations/industries/nonprofit.webp",
+    "order": 77
+  },
+  {
+    "slug": "fintech-chicago",
+    "title": "FinTech",
+    "description": "Chicago is the nation's derivatives capital. We build trading dashboards, payment platforms, and compliance tools for financial services firms across the region.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 78
+  },
+  {
+    "slug": "healthcare-chicago",
+    "title": "Healthcare",
+    "description": "From hospital networks on the North Side to healthtech ventures near the Illinois Medical District, we develop HIPAA-aware mobile and web applications for telehealth and clinical workflows.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 79
+  },
+  {
+    "slug": "logistics-chicago",
+    "title": "Logistics & Transportation",
+    "description": "Chicago's position as a rail and freight hub makes it ground zero for logistics technology. We build fleet management apps, route optimization tools, and warehouse platforms.",
+    "image": "/images/Locations/industries/logistics.webp",
+    "order": 80
+  },
+  {
+    "slug": "ecommerce-chicago",
+    "title": "E-Commerce",
+    "description": "We develop custom e-commerce platforms and mobile shopping apps for local retailers, D2C brands, and marketplace operators across Chicago.",
+    "image": "/images/Locations/industries/ecommerce.webp",
+    "order": 81
+  },
+  {
+    "slug": "real-estate-chicago",
+    "title": "Real Estate",
+    "description": "The commercial and residential real estate market demands purpose-built technology. We create property management dashboards and tenant portals for Chicago-area brokerages and property managers.",
+    "image": "/images/Locations/industries/retail.webp",
+    "order": 82
+  },
+  {
+    "slug": "education-chicago",
+    "title": "Education",
+    "description": "From Northwestern in Evanston to UChicago on the South Side, we work with edtech companies building learning management systems and student engagement apps.",
+    "image": "/images/Locations/industries/education-1.webp",
+    "order": 83
+  },
+  {
+    "slug": "manufacturing-chicago",
+    "title": "Manufacturing",
+    "description": "Illinois is the fifth-largest manufacturing state. We build inventory management systems and IoT dashboards for manufacturers across the Chicago metro.",
+    "image": null,
+    "order": 84
+  },
+  {
+    "slug": "fintech-austin",
+    "title": "FinTech",
+    "description": "Austin's FinTech presence has grown alongside the broader Silicon Hills expansion. We build secure, compliance-aware mobile and web apps for payments, lending, and financial dashboards.",
+    "image": "/images/Locations/industries/fintech.webp",
+    "order": 85
+  },
+  {
+    "slug": "saas-austin",
+    "title": "SaaS",
+    "description": "Austin SaaS companies — from bootstrapped teams to Capital Factory alumni — come to us for B2B web apps, admin portals, and companion mobile clients that reduce churn.",
+    "image": "/images/Locations/industries/startup.webp",
+    "order": 86
+  },
+  {
+    "slug": "healthcare-austin",
+    "title": "Healthcare",
+    "description": "We build HIPAA-aware patient portals, telehealth apps, and clinical workflow tools for Austin healthcare providers and health-tech startups.",
+    "image": "/images/Locations/industries/health.webp",
+    "order": 87
+  },
+  {
+    "slug": "enterprise-austin",
+    "title": "Enterprise",
+    "description": "With Dell, Tesla, Samsung, and dozens of Fortune 500 satellites in Central Texas, we take on enterprise app development work: internal tools, field apps, and integrations with existing ERP and CRM systems.",
+    "image": "/images/Locations/services/solutions.webp",
+    "order": 88
+  }
+]

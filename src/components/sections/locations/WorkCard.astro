@@ -1,0 +1,86 @@
+---
+// A project card for the location pages' "Success stories" column.
+//
+// Same reveal-on-hover behaviour as the homepage cards: logo, name and tags
+// sit on the artwork, and the description and metrics slide up over it on
+// hover. Stacking everything permanently made each card about three screens
+// tall in this narrow column.
+import type { PortfolioItem } from "../../../lib/types";
+
+interface Props {
+  item: PortfolioItem;
+}
+
+const { item } = Astro.props;
+const dark = item.theme === "dark";
+---
+
+<article
+  class:list={[
+    "@container group relative flex min-h-[22rem] flex-col overflow-hidden rounded-3xl p-8",
+    dark ? "text-white" : "text-black",
+  ]}
+  style={{ backgroundImage: item.backgroundImage }}
+>
+  <div class="relative z-10 flex items-start justify-between gap-4">
+    <div class="flex min-w-0 flex-1 flex-col gap-3">
+      <div class="flex min-w-0 items-center gap-3">
+        <img
+          src={item.logoSrc}
+          alt={item.logoAlt}
+          loading="lazy"
+          class="h-[clamp(1.25rem,6.4cqw,2rem)] w-auto max-w-[32cqw] shrink-0 object-contain object-left"
+        />
+        <span class="min-w-0 break-words font-sans text-[clamp(1rem,4.8cqw,1.5rem)] leading-tight">
+          {item.clientName}
+        </span>
+      </div>
+
+      <div class="flex flex-row flex-wrap gap-2 transition-opacity duration-300 ease-out group-hover:opacity-0">
+        {item.tags.map((tag) => (
+          <span
+            class:list={[
+              "rounded-full px-3 py-1 text-xs font-medium",
+              dark ? "bg-white/10 text-white" : "bg-white text-black/70",
+            ]}
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+    </div>
+
+    {item.caseStudyHref && (
+      <a
+        href={item.caseStudyHref}
+        class="shrink-0 whitespace-nowrap rounded-md bg-white/80 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white"
+      >
+        Case Study
+      </a>
+    )}
+  </div>
+
+  <div class="relative z-0 flex flex-1 items-end justify-center pt-8">
+    <img
+      src={item.imageSrc}
+      alt={item.imageAlt}
+      loading="lazy"
+      class="max-h-72 w-auto object-contain transition-opacity duration-500 ease-out group-hover:opacity-0"
+    />
+  </div>
+
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex translate-y-6 flex-col gap-5 rounded-t-3xl p-8 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+    <p class:list={["text-sm leading-relaxed", dark ? "text-white/80" : "text-black/70"]}>
+      {item.description}
+    </p>
+
+    <div class="flex flex-wrap gap-x-8 gap-y-2">
+      {item.highlights.map((highlight) => (
+        <span class="flex items-center gap-2 text-sm font-semibold">
+          {highlight.iconSrc && <img src={highlight.iconSrc} alt="" loading="lazy" class="h-4 w-4" />}
+          {highlight.label}
+        </span>
+      ))}
+    </div>
+  </div>
+</article>

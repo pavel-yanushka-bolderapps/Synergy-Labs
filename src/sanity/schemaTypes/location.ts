@@ -118,8 +118,98 @@ export const location = defineType({
 
     defineField({ name: "servicesHeading", title: "Services: heading", type: "string", group: "page" }),
     defineField({ name: "servicesDescription", title: "Services: description", type: "text", rows: 4, group: "page" }),
+    defineField({
+      name: "services",
+      title: "Services: cards",
+      type: "array",
+      group: "page",
+      description:
+        "Which services this office offers. Pick from the shared catalogue; the card takes its title, image and copy from there. Fill in an override only where this city needs different wording -- naming the city inside the paragraph, say.",
+      of: [
+        {
+          type: "object",
+          fields: [
+            defineField({
+              name: "service",
+              title: "Service",
+              type: "reference",
+              to: [{ type: "locationService" }],
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: "titleOverride",
+              title: "Title (override)",
+              type: "string",
+              description: "Leave blank to use the catalogue title.",
+            }),
+            defineField({
+              name: "descriptionOverride",
+              title: "Description (override)",
+              type: "text",
+              rows: 8,
+              description: "Leave blank to use the catalogue copy.",
+            }),
+          ],
+          preview: {
+            select: { title: "service.title", override: "titleOverride", media: "service.image" },
+            prepare({ title, override, media }) {
+              return {
+                title: override || title,
+                subtitle: override ? "Title overridden for this office" : undefined,
+                media,
+              };
+            },
+          },
+        },
+      ],
+    }),
     defineField({ name: "industriesHeading", title: "Industries: heading", type: "string", group: "page" }),
     defineField({ name: "industriesDescription", title: "Industries: description", type: "text", rows: 4, group: "page" }),
+    defineField({
+      name: "industries",
+      title: "Industries: rows",
+      type: "array",
+      group: "page",
+      description:
+        "Which industries this office serves. Pick from the shared catalogue; fill in an override only where this city needs different wording.",
+      of: [
+        {
+          type: "object",
+          fields: [
+            defineField({
+              name: "industry",
+              title: "Industry",
+              type: "reference",
+              to: [{ type: "locationIndustry" }],
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: "titleOverride",
+              title: "Title (override)",
+              type: "string",
+              description: "Leave blank to use the catalogue title.",
+            }),
+            defineField({
+              name: "descriptionOverride",
+              title: "Description (override)",
+              type: "text",
+              rows: 6,
+              description: "Leave blank to use the catalogue copy.",
+            }),
+          ],
+          preview: {
+            select: { title: "industry.title", override: "titleOverride", media: "industry.image" },
+            prepare({ title, override, media }) {
+              return {
+                title: override || title,
+                subtitle: override ? "Title overridden for this office" : undefined,
+                media,
+              };
+            },
+          },
+        },
+      ],
+    }),
     defineField({ name: "processHeading", title: "Process: heading", type: "string", group: "page" }),
     defineField({ name: "processDescription", title: "Process: description", type: "text", rows: 4, group: "page" }),
     defineField({ name: "whyChooseUsHeading", title: "Why choose us: heading", type: "string", group: "page" }),
@@ -134,7 +224,54 @@ export const location = defineType({
       group: "page",
     }),
     defineField({ name: "faqHeading", title: "FAQ: heading", type: "string", group: "page" }),
-    defineField({ name: "technologiesHeading", title: "Technologies: heading", type: "string", group: "page" }),
+
+    // --- Technologies ------------------------------------------------------
+    // The section shows whichever of these two is filled in, `techStack`
+    // winning: a few offices were written their own stack rather than the
+    // shared categories. Leave both blank and the section is skipped.
+    defineField({
+      name: "technologiesHeading",
+      title: "Technologies: heading",
+      type: "string",
+      description: 'Leave blank to skip the section entirely, e.g. "Technologies We Work With".',
+      group: "page",
+    }),
+    defineField({
+      name: "technologies",
+      title: "Technologies: categories",
+      type: "array",
+      group: "page",
+      description:
+        "The shared stack categories to list. Ignored when a bespoke stack is written below.",
+      of: [{ type: "reference", to: [{ type: "locationTechnology" }] }],
+    }),
+    defineField({
+      name: "techStack",
+      title: "Technologies: bespoke stack",
+      type: "text",
+      rows: 10,
+      description:
+        "Accepts basic HTML -- h4 headings with a paragraph under each. Fill this in only when this office needs its own wording; it replaces the categories above.",
+      group: "page",
+    }),
+
+    // --- Pricing -----------------------------------------------------------
+    defineField({
+      name: "pricingHeading",
+      title: "Pricing: heading",
+      type: "string",
+      description:
+        'Leave blank to skip the section, e.g. "Mobile App Development Cost in Dallas". Only a few offices publish pricing.',
+      group: "page",
+    }),
+    defineField({
+      name: "pricingTable",
+      title: "Pricing: tiers",
+      type: "text",
+      rows: 8,
+      description: "Accepts basic HTML -- one paragraph per tier, the tier name in bold.",
+      group: "page",
+    }),
     defineField({ name: "contactHeading", title: "Contact: heading", type: "string", group: "page" }),
     defineField({
       name: "contactDescription",

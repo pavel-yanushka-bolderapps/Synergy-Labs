@@ -1,0 +1,80 @@
+---
+// The listing body shared by /blog and /blog/page/[page]: the grid plus the
+// pager under it. Page 1 lives at /blog rather than /blog/page/1, so the two
+// routes differ only in which slice of posts they hand over.
+import BlogCard from "./BlogCard.astro";
+import type { BlogPostSummary } from "../../../lib/types";
+
+interface Props {
+  posts: BlogPostSummary[];
+  currentPage: number;
+  totalPages: number;
+}
+
+const { posts, currentPage, totalPages } = Astro.props;
+
+const pageHref = (page: number) => (page === 1 ? "/blog" : `/blog/page/${page}`);
+
+/**
+ * A window of page numbers around the current one, with the first and last
+ * always present -- 27 pages of numbers would wrap onto three lines.
+ */
+const pageNumbers = (() => {
+  const window = new Set<number>([1, totalPages, currentPage]);
+  for (const offset of [-2, -1, 1, 2]) {
+    const page = currentPage + offset;
+    if (page > 1 && page < totalPages) window.add(page);
+  }
+  return [...window].sort((a, b) => a - b);
+})();
+
+const linkClass =
+  "flex h-10 min-w-10 items-center justify-center rounded-md px-3 text-sm font-medium transition";
+---
+
+<section class="mx-auto max-w-7xl px-6 pb-20">
+  <ul class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    {posts.map((post) => (
+      <li>
+        <BlogCard post={post} />
+      </li>
+    ))}
+  </ul>
+
+  {totalPages > 1 && (
+    <nav class="mt-16 flex flex-wrap items-center justify-center gap-2" aria-label="Blog pages">
+      {currentPage > 1 && (
+        <a href={pageHref(currentPage - 1)} rel="prev" class={`${linkClass} bg-white text-black/70 shadow hover:text-black`}>
+          Previous
+        </a>
+      )}
+
+      {pageNumbers.map((page, index) => (
+        <>
+          {/* A gap in the sequence means pages were elided -- say so rather
+              than running 1, 2, 14, 15 together as if they were adjacent. */}
+          {index > 0 && page - pageNumbers[index - 1] > 1 && (
+            <span class="px-1 text-sm text-black/40" aria-hidden="true">…</span>
+          )}
+          <a
+            href={pageHref(page)}
+            aria-current={page === currentPage ? "page" : undefined}
+            class={`${linkClass} ${
+              page === currentPage
+                ? "bg-secondary-green text-white"
+                : "bg-white text-black/70 shadow hover:text-black"
+            }`}
+          >
+            {page}
+          </a>
+        </>
+      ))}
+
+      {currentPage < totalPages && (
+        <a href={pageHref(currentPage + 1)} rel="next" class={`${linkClass} bg-white text-black/70 shadow hover:text-black`}>
+          Next
+        </a>
+      )}
+    </nav>
+  )}
+</section>

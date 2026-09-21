@@ -1,0 +1,53 @@
+---
+// /blog/page/2 .. /blog/page/n. Page 1 is /blog itself, so it is deliberately
+// not generated here -- two URLs serving the same posts would be a duplicate
+// for search engines and would make the pager's "Previous" link inconsistent.
+import type { GetStaticPaths } from "astro";
+import Layout from "../../../components/layout/Layout.astro";
+import BlogList from "../../../components/sections/blog/BlogList.astro";
+import ContactSection from "../../../components/sections/ContactSection.astro";
+import { blogPage } from "../../../content/blogPage";
+import { getBlogPosts } from "../../../lib/sanity";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getBlogPosts();
+  const { pageSize } = blogPage;
+  const totalPages = Math.max(1, Math.ceil(posts.length / pageSize));
+
+  return Array.from({ length: totalPages - 1 }, (_, i) => {
+    const page = i + 2;
+    return {
+      params: { page: String(page) },
+      props: {
+        posts: posts.slice((page - 1) * pageSize, page * pageSize),
+        currentPage: page,
+        totalPages,
+        totalPosts: posts.length,
+      },
+    };
+  });
+};
+
+const { posts, currentPage, totalPages, totalPosts } = Astro.props;
+
+// Spelled out in the description so each page of the archive describes a
+// different slice of it -- 26 pages sharing one sentence is 26 pages competing
+// with each other for the same query.
+const firstPost = (currentPage - 1) * blogPage.pageSize + 1;
+const lastPost = firstPost + posts.length - 1;
+---
+
+<Layout
+  title={`Blog — page ${currentPage} of ${totalPages} | Synergy Labs`}
+  description={`Page ${currentPage} of the Synergy Labs blog: posts ${firstPost}–${lastPost} of ${totalPosts} on building mobile and web products.`}
+>
+  <section class="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
+    <h1 class="font-display text-4xl leading-tight md:text-5xl">{blogPage.heading}</h1>
+    <p class="mt-6 text-lg text-black/70">{blogPage.subheading}</p>
+    <p class="mt-4 text-sm text-black/50">Page {currentPage} of {totalPages}</p>
+  </section>
+
+  <BlogList posts={posts} currentPage={currentPage} totalPages={totalPages} />
+
+  <ContactSection id="contact-form" />
+</Layout>
