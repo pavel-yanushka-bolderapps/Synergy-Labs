@@ -6,6 +6,7 @@ import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
 import { previewEnabled } from "../../lib/loadQuery";
 import { canonicalUrl, assetUrl } from "../../lib/seo";
+import { stegaClean } from "@sanity/client/stega";
 import "../../styles/global.css";
 
 interface Props {
@@ -36,10 +37,19 @@ const {
   noindex = false,
 } = Astro.props;
 
+// stegaClean on everything that ends up in <head>. When the Studio's Preview
+// tab is on, strings from Sanity carry invisible click-to-edit markers, and a
+// <meta> tag has nothing to click -- they are pure payload there. Left in,
+// a 76-character post title shipped as 1,140 characters of mostly invisible
+// junk in <title>, og:title and twitter:title. Visible page content keeps its
+// markers; only the head is cleaned.
+const metaTitle = stegaClean(title) as string;
+const metaDescription = stegaClean(description) as string;
+
 // Both go through src/lib/seo.ts so the canonical here always has the same
 // shape as the URL @astrojs/sitemap writes for the same page.
-const pageUrl = canonicalUrl(canonical ?? Astro.url.pathname, Astro.site);
-const ogImageUrl = assetUrl(ogImage, Astro.site);
+const pageUrl = canonicalUrl(stegaClean(canonical ?? Astro.url.pathname) as string, Astro.site);
+const ogImageUrl = assetUrl(stegaClean(ogImage) as string, Astro.site);
 ---
 
 <!doctype html>
@@ -48,8 +58,8 @@ const ogImageUrl = assetUrl(ogImage, Astro.site);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    <title>{metaTitle}</title>
+    <meta name="description" content={metaDescription} />
 
     <link rel="canonical" href={pageUrl} />
     {noindex && <meta name="robots" content="noindex, follow" />}
@@ -57,16 +67,16 @@ const ogImageUrl = assetUrl(ogImage, Astro.site);
     <meta property="og:site_name" content="Synergy Labs" />
     <meta property="og:type" content={ogType} />
     <meta property="og:url" content={pageUrl} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:title" content={metaTitle} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     {publishedTime && <meta property="article:published_time" content={publishedTime} />}
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:title" content={metaTitle} />
+    <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImageUrl} />
   </head>
   <body class="min-h-screen">

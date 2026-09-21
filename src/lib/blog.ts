@@ -1,3 +1,5 @@
+import { stegaClean } from "@sanity/client/stega";
+
 /**
  * Small helpers shared by the blog pages and cards. Kept out of sanity.ts so
  * components can import them without pulling in the Sanity client.
@@ -61,8 +63,13 @@ const BRAND = "Synergy Labs";
  * editorial copy, and silently cutting one would misrepresent the post.
  */
 export function metaTitle(title: string): string {
-  const withBrand = `${title} | ${BRAND}`;
-  return withBrand.length <= TITLE_LIMIT ? withBrand : title;
+  // See the note in metaDescription below: in preview mode these strings
+  // arrive carrying invisible click-to-edit markers, and `.length` counts
+  // them -- a 76-character title measured 1,140, so every single post lost
+  // its brand suffix to a limit it had not actually reached.
+  const clean = stegaClean(title) as string;
+  const withBrand = `${clean} | ${BRAND}`;
+  return withBrand.length <= TITLE_LIMIT ? withBrand : clean;
 }
 
 /**
@@ -72,7 +79,12 @@ export function metaTitle(title: string): string {
  * nothing to act on.
  */
 export function metaDescription(previewText: string | undefined, articleHtml?: string): string {
-  let text = (previewText ?? "").trim();
+  // stegaClean: when the Studio's Preview tab is on, every string from Sanity
+  // carries invisible provenance markers so the overlay knows which field to
+  // open. Useful in prose that someone might click; pure noise in a <meta>
+  // tag, where there is nothing to click -- and it breaks the length checks
+  // here, because the markers count towards `.length`.
+  let text = (stegaClean(previewText) as string | undefined ?? "").trim();
 
   if (text.length < DESCRIPTION_MIN && articleHtml) {
     const excerpt = excerptFromHtml(articleHtml, DESCRIPTION_MAX);
