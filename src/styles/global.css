@@ -66,3 +66,33 @@ h1, h2, h3, h4 {
 .bg-blog-gradient {
   background-image: linear-gradient(#94cab5, #c6e4e7);
 }
+
+/*
+ * CTA buttons that point at a section on the same page (#cta, #contact,
+ * #contact-form) landed there in a single frame, which gives no sense of
+ * having moved through the page. Animate the jump instead.
+ *
+ * Scoped to `no-preference` rather than set unconditionally and overridden:
+ * anyone who has asked their OS to reduce motion keeps the instant jump,
+ * which for a long scroll is the accessible behaviour, not a lesser one.
+ * This also picks up `scrollIntoView()` calls that pass no `behavior`.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/*
+ * The header is sticky, so a target scrolled flush to the top of the viewport
+ * ends up underneath it -- the heading you navigated to is the part that gets
+ * covered. The header is 64px on a phone and 80px from `md`, so 6rem clears
+ * it with room to spare.
+ *
+ * Applied to every id deliberately: `scroll-margin-top` has no visual effect
+ * whatsoever, it only moves where scrolling comes to rest, so there is nothing
+ * for a broad selector to break.
+ */
+[id] {
+  scroll-margin-top: 6rem;
+}
