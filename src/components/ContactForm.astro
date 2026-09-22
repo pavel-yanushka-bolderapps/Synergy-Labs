@@ -14,11 +14,8 @@ interface Props {
 
 const { class: className = "overflow-hidden rounded-3xl bg-secondary p-10 shadow-xl md:p-8" } = Astro.props;
 
-const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY ?? "";
-// Temporary local-testing escape hatch: set PUBLIC_DISABLE_RECAPTCHA=true in
-// .env to skip reCAPTCHA entirely (widget, client check, and server
-// verification all respect this same flag -- see src/pages/api/contact.ts).
-const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
+import { recaptchaConfig } from "../lib/recaptcha";
+const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConfig();
 ---
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css" />

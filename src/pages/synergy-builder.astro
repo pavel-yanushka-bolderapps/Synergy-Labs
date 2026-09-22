@@ -14,10 +14,8 @@ import { getBlogPosts } from "../lib/sanity";
 const { popup } = builderPage;
 const posts = (await getBlogPosts()).slice(0, 3);
 
-const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY ?? "";
-// Same local-testing escape hatch the contact form uses -- the widget, the
-// client check and the server verification all read this one flag.
-const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
+import { recaptchaConfig } from "../lib/recaptcha";
+const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConfig();
 
 const inputClass =
   "w-full rounded-md border border-black/20 bg-white px-4 py-3.5 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none";

@@ -15,6 +15,10 @@
 //   - `@font-face { font-display: swap }`. A workaround for Webflow's own
 //     font loading; src/styles/global.css already sets font-display on each
 //     @font-face it declares.
+//   - Identity Matrix. Its host, app.identitymatrix.ai, does not resolve --
+//     no DNS record at all, so the tag was only ever an ERR_NAME_NOT_RESOLVED
+//     in the console, on the Webflow site as much as here. Restore it with the
+//     pixel id IM_24471p2b1cp4dbcp8fc8p45ab83285850 if the account comes back.
 //   - Weglot (the /es, /ar, /fr ... subdirectory translations and the
 //     language switcher). That is a whole multilingual URL structure, not a
 //     tag -- none of those URLs exist on this site yet. See the migration
@@ -31,8 +35,6 @@ const GA_IDS = ["G-FW2DRLQJVD", "GT-WB2N5WJ5"];
 const HUBSPOT_PORTAL_ID = "244306866";
 /** RB2B / reb2b -- anonymous-visitor company identification. */
 const REB2B_KEY = "R6G5YHZD5D65";
-/** Identity Matrix -- visitor identification pixel. */
-const IDENTITY_MATRIX_PIXEL = "IM_24471p2b1cp4dbcp8fc8p45ab83285850";
 /** Linkbot. */
 const LINKBOT_PROPERTY_ID = "45799-b4c2e";
 /** Bing Webmaster Tools site verification. */
@@ -111,13 +113,6 @@ const enabled =
         })();
       });
     </script>
-
-    {/* --- Identity Matrix --- */}
-    <script
-      is:inline
-      async
-      src={`https://app.identitymatrix.ai/trackingScript.js?pixelid=${IDENTITY_MATRIX_PIXEL}`}
-    ></script>
 
     {/* --- HubSpot --- Also loads HubSpot's cookie-consent banner, which is
         the site's only consent UI. */}
