@@ -72,10 +72,9 @@ const dir = locale === "ar" ? "rtl" : "ltr";
 // PUBLIC_SANITY_VISUAL_EDITING_ENABLED in a deployment breaks that site's
 // styling, and nothing in this file can prevent it. audit-seo.mjs fails on it
 // instead.
-const VisualEditing =
-  import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === "true"
-    ? (await import("@sanity/astro/visual-editing")).VisualEditing
-    : null;
+const VisualEditing = __VISUAL_EDITING_ENABLED__
+  ? (await import("@sanity/astro/visual-editing")).VisualEditing
+  : null;
 ---
 
 <!doctype html>

@@ -27,3 +27,10 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/**
+ * Injected by `vite.define` in astro.config.mjs: whether the Studio's
+ * click-to-edit overlay is compiled in. A literal, so the branch that imports
+ * it folds away -- see the note in astro.config.mjs.
+ */
+declare const __VISUAL_EDITING_ENABLED__: boolean;

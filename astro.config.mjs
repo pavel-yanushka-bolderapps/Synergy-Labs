@@ -9,7 +9,7 @@ import { loadEnv } from 'vite';
 // astro.config.mjs runs in plain Node, not through Vite's `import.meta.env`,
 // so .env has to be read explicitly here for the values the Sanity
 // integration needs at config time.
-const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET } = loadEnv(
+const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, PUBLIC_SANITY_VISUAL_EDITING_ENABLED } = loadEnv(
   process.env.NODE_ENV ?? 'development',
   process.cwd(),
   ''
@@ -212,6 +212,27 @@ export default defineConfig({
     react(),
   ],
   vite: {
+    // Must be a real literal, not a read of `import.meta.env`.
+    //
+    // The layouts fold away their `import("@sanity/astro/visual-editing")` when
+    // visual editing is off, which is what keeps 170KB of unlayered Sanity
+    // Studio CSS off the public site. Vite only substitutes env vars it knows
+    // about: when PUBLIC_SANITY_VISUAL_EDITING_ENABLED is set to "false" the
+    // comparison inlines and Rollup drops the import, but when the variable is
+    // simply ABSENT -- which is the normal state of a deployment -- the
+    // expression survives as a runtime property lookup, nothing folds, and the
+    // Studio stylesheet ships on all 419 pages and overrides every Tailwind
+    // utility.
+    //
+    // That is exactly what happened on Vercel: every local test set the
+    // variable explicitly, so it always folded here and never there.
+    // Normalising it to a boolean literal at config time removes the
+    // difference between "false" and unset.
+    define: {
+      __VISUAL_EDITING_ENABLED__: JSON.stringify(
+        PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true'
+      ),
+    },
     plugins: [tailwindcss()],
     server: {
       watch: {
