@@ -79,6 +79,14 @@ const ogImageUrl = assetUrl(stegaClean(ogImage) as string, Astro.site);
 // `previewEnabled` does not fold, because it is computed in another module,
 // and the Studio CSS ships anyway. Both were measured: literal condition ->
 // 0 of 419 pages carry it, imported constant -> all 419 do.
+// Do not try to make this self-defending by adding
+// `&& import.meta.env.SANITY_API_READ_TOKEN`. Vite does not inline private
+// env vars as literals, so the condition stops folding and all 419 pages get
+// the Studio CSS again -- measured. Only the PUBLIC_ flag can be folded,
+// which means a build is only as safe as the environment it runs in: setting
+// PUBLIC_SANITY_VISUAL_EDITING_ENABLED in a deployment breaks that site's
+// styling, and nothing in this file can prevent it. audit-seo.mjs fails on it
+// instead.
 const VisualEditing =
   import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === "true"
     ? (await import("@sanity/astro/visual-editing")).VisualEditing
