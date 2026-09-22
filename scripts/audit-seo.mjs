@@ -97,6 +97,16 @@ for (const [route, p] of pages) {
 
   if (p.imgsNoAlt > 0) warn(route, `${p.imgsNoAlt} <img> without alt`);
 
+  // A stylesheet the site does not own must never reach a public page. The
+  // Sanity Studio's CSS is unlayered and Tailwind v4's is not, so unlayered
+  // rules won at any specificity and the Studio silently overrode every
+  // utility on all 419 pages -- the site rendered unstyled in every build
+  // that shipped. It came in through a static import of VisualEditing in the
+  // two layouts. Nothing about it was visible in the HTML except this link.
+  for (const href of [...p.html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/g)].map((m) => m[1])) {
+    if (href.includes("studio")) err(route, `links the Sanity Studio stylesheet: ${href}`);
+  }
+
   // Invisible click-to-edit markers must never reach <head>.
   const head = p.html.slice(0, p.html.indexOf("</head>"));
   if (/[​‌‍﻿⁠]|[\uDB40][\uDC00-\uDFFF]/.test(head))

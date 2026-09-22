@@ -10,7 +10,6 @@
 import Analytics from "./Analytics.astro";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
-import { VisualEditing } from "@sanity/astro/visual-editing";
 import { previewEnabled } from "../../lib/loadQuery";
 import { canonicalUrl, assetUrl } from "../../lib/seo";
 import { stegaClean } from "@sanity/client/stega";
@@ -36,6 +35,39 @@ const ogImageUrl = assetUrl("/images/og-default.webp", Astro.site);
 const telHref = `tel:${nav.phone.replace(/[^+\d]/g, "")}`;
 // Arabic needs the whole document flipped, not just the text aligned.
 const dir = locale === "ar" ? "rtl" : "ltr";
+
+// The Studio's click-to-edit overlay, pulled in only when preview mode is
+// actually on.
+//
+// This was a static `import { VisualEditing } from "@sanity/astro/visual-editing"`,
+// which put the package -- and with it 170KB of Sanity Studio CSS -- into the
+// stylesheet of all 419 public pages. Tailwind v4 emits everything inside
+// `@layer`, the Studio's CSS is unlayered, and unlayered rules beat layered
+// ones at any specificity. So the Studio silently outranked every Tailwind
+// utility on the site: the nav logo lost `h-8` and rendered at full size,
+// every section lost `mx-auto max-w-7xl px-6` and ran edge to edge. Fonts and
+// colours survived because they come from `@theme` custom properties and the
+// element rules in global.css, which is why it looked like a partial failure
+// rather than a missing stylesheet.
+//
+// It only ever showed in built output: `astro dev` serves CSS unbundled, so
+// the Studio's never reached a public page locally.
+//
+// `previewEnabled` is a build-time constant, so a production build takes the
+// null branch and the import is never evaluated. Awaiting it here is what
+// keeps its CSS out of the page's <link> tags -- a dynamic import lands in
+// its own chunk instead of the page's stylesheet.
+// The condition must be `import.meta.env.X` read directly here, not the
+// `previewEnabled` constant from loadQuery.ts. Vite inlines `import.meta.env`
+// as a literal at build time, so this whole branch folds to dead code and
+// Rollup drops the import -- and its stylesheet -- with it. Going through
+// `previewEnabled` does not fold, because it is computed in another module,
+// and the Studio CSS ships anyway. Both were measured: literal condition ->
+// 0 of 419 pages carry it, imported constant -> all 419 do.
+const VisualEditing =
+  import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === "true"
+    ? (await import("@sanity/astro/visual-editing")).VisualEditing
+    : null;
 ---
 
 <!doctype html>
@@ -109,6 +141,6 @@ const dir = locale === "ar" ? "rtl" : "ltr";
       </div>
     </footer>
 
-    <VisualEditing enabled={previewEnabled} />
+    {VisualEditing && previewEnabled && <VisualEditing enabled />}
   </body>
 </html>
