@@ -1,0 +1,58 @@
+---
+// /privacy-policy -- the notice the footer links to from every page, and the
+// one every form on the site points at above its submit button. Until now
+// none of those links resolved: the page did not exist, so the footer 404'd
+// on all 416 pages.
+//
+// Copy is in src/content/privacyPolicy.ts, transcribed verbatim from Webflow.
+import Layout from "../components/layout/Layout.astro";
+import { privacyPolicy } from "../content/privacyPolicy";
+
+const lastUpdated = new Date(privacyPolicy.lastUpdated).toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  timeZone: "UTC",
+});
+---
+
+<Layout title="Privacy Policy | Synergy Labs" description={privacyPolicy.description}>
+  <article class="mx-auto max-w-3xl px-6 py-16 md:py-24">
+    <h1 class="font-display text-4xl md:text-5xl">{privacyPolicy.heading}</h1>
+    <p class="mt-4 text-sm text-black/50">Last updated {lastUpdated}</p>
+
+    {privacyPolicy.sections.map((section) => (
+      <section class="mt-10">
+        <h2 class="font-display text-xl md:text-2xl">
+          {section.number && <span class="text-secondary-green">{section.number}.</span>}
+          {" "}
+          {section.title}
+        </h2>
+        {/*
+          set:html because the paragraphs carry <strong> and a mailto link --
+          see the note on PrivacyPolicySection in src/lib/types.ts. Author-
+          written static copy compiled into the build; no user input reaches
+          this.
+        */}
+        {section.paragraphs.map((paragraph) => (
+          <p class="mt-4 leading-relaxed text-black/80" set:html={paragraph} />
+        ))}
+      </section>
+    ))}
+
+    <!-- Carried over from Webflow: reCAPTCHA's terms have to be disclosed
+         wherever its badge is hidden, and every form on this site hides it. -->
+    <p class="mt-14 border-t border-black/10 pt-6 text-xs text-black/50">
+      This site is protected by reCAPTCHA and the Google
+      {" "}
+      <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" class="underline">
+        Privacy Policy
+      </a>
+      {" "}and{" "}
+      <a href="https://policies.google.com/terms" target="_blank" rel="noopener" class="underline">
+        Terms of Service
+      </a>
+      {" "}apply.
+    </p>
+  </article>
+</Layout>

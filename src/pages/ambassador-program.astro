@@ -1,0 +1,18 @@
+---
+// /ambassador-program -- the 10%-commission referral programme.
+//
+// noindex, as it was in Webflow: it is a page you are sent to, not one that
+// should pull search traffic, and /1-week-pilot carries the same copy.
+// "follow" is kept (see Layout.astro) so the links out of it still count.
+import Layout from "../components/layout/Layout.astro";
+import AmbassadorProgram from "../components/sections/ambassador/AmbassadorProgram.astro";
+import { ambassadorProgram } from "../content/ambassadorPage";
+---
+
+<Layout
+  title={ambassadorProgram.metaTitle}
+  description={ambassadorProgram.metaDescription}
+  noindex
+>
+  <AmbassadorProgram content={ambassadorProgram} source="/ambassador-program" />
+</Layout>

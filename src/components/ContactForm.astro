@@ -150,7 +150,21 @@ const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
   <script src="https://www.google.com/recaptcha/api.js" async defer is:inline></script>
 )}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+<!--
+  is:inline is load-bearing. Without it Astro treats this as a script to
+  process and bundle, and a remote URL it cannot resolve is dropped from the
+  output entirely -- which is what happened: `window.intlTelInput` was never
+  defined, the `iti` guard below quietly fell through to `null`, and the phone
+  field rendered as a plain text box with no flag, no country list and no
+  validation. It failed silently on every page carrying this form.
+
+  A classic (non-module, non-async) script runs before the deferred module
+  below it, so the library is always in place by the time that module runs.
+-->
+<script
+  is:inline
+  src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"
+></script>
 
 <script>
   declare global {
@@ -162,7 +176,13 @@ const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
       intlTelInput?: (input: HTMLInputElement, options: Record<string, unknown>) => {
         isValidNumber: () => boolean;
         getValidationError: () => number;
-        getNumber: () => string;
+        getNumber: (format?: number) => string;
+        setNumber: (number: string) => void;
+        promise: Promise<unknown[]>;
+      };
+      /** Published by the library's utils.js once it finishes loading. */
+      intlTelInputUtils?: {
+        numberFormat: { E164: number; INTERNATIONAL: number; NATIONAL: number };
       };
     }
   }
@@ -212,10 +232,38 @@ const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
     4: "Invalid phone number.",
   };
 
+  // Configured to match the Webflow widget this replaces, which ran with
+  // `ms-code-phone-number="us,ca,gb"`: the flag and dial code sit inside the
+  // field (not split into a separate prefix box), those three countries are
+  // pinned to the top of the list, and the country starts from the visitor's
+  // own.
   const iti = phoneInput && window.intlTelInput
     ? window.intlTelInput(phoneInput, {
-        preferredCountries: ["us", "gb", "ae"],
-        separateDialCode: true,
+        preferredCountries: ["us", "ca", "gb"],
+        // Webflow's version geo-located with a jQuery JSONP call to ipinfo.io
+        // and then called setCountry() afterwards, which overwrote the
+        // country if the visitor had already picked one while the request was
+        // in flight. initialCountry: "auto" is the library's own hook for
+        // this and only applies the result if nothing has been chosen yet.
+        initialCountry: "auto",
+        geoIpLookup: (success: (countryCode: string) => void) => {
+          // ipinfo.io's tokenless endpoint is rate limited and can fail or
+          // hang, and the field must not be unusable when it does -- so this
+          // always resolves, and falls back to US after two seconds.
+          const done = (code: string) => success(code);
+          const timer = setTimeout(() => done("us"), 2000);
+
+          fetch("https://ipinfo.io/json")
+            .then((res) => (res.ok ? res.json() : Promise.reject()))
+            .then((data: { country?: string }) => {
+              clearTimeout(timer);
+              done(data.country || "us");
+            })
+            .catch(() => {
+              clearTimeout(timer);
+              done("us");
+            });
+        },
         autoPlaceholder: "aggressive",
         formatOnDisplay: true,
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
@@ -255,8 +303,35 @@ const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
       event.preventDefault();
     }
   });
-  phoneInput?.addEventListener("blur", validatePhone);
-  phoneInput?.addEventListener("countrychange", validatePhone);
+  /**
+   * Rewrite what is in the box into the national format for the selected
+   * country -- "(201) 555-0123" rather than "2015550123".
+   *
+   * Webflow did this on every keyup. That reformats the value under the
+   * caret, so editing a digit in the middle of a number threw the cursor to
+   * the end on the next keystroke. Doing it when the field is left, and when
+   * the country changes, reaches the same formatted result without fighting
+   * the person typing.
+   */
+  function formatPhoneNational() {
+    if (!phoneInput || !iti) return;
+    if (!phoneInput.value.trim()) return;
+    if (!iti.isValidNumber()) return; // Half-typed numbers are left alone.
+
+    const national = window.intlTelInputUtils
+      ? iti.getNumber(window.intlTelInputUtils.numberFormat.NATIONAL)
+      : "";
+    if (national) phoneInput.value = national;
+  }
+
+  phoneInput?.addEventListener("blur", () => {
+    formatPhoneNational();
+    validatePhone();
+  });
+  phoneInput?.addEventListener("countrychange", () => {
+    formatPhoneNational();
+    validatePhone();
+  });
 
   // Timestamp when the form became interactive -- sent along with the
   // submission so the API route can reject anything submitted faster than a
@@ -297,10 +372,16 @@ const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
     }
 
     const data = new FormData(form);
-    // Send the phone number in normalized international (E.164) format when
-    // one was entered, so the same number is stored/emailed consistently
-    // regardless of how the visitor typed it.
-    const phoneValue = phoneInput?.value.trim() ? iti?.getNumber() ?? phoneInput.value.trim() : "";
+    // Normalise on the way out, as Webflow did, so the number in the
+    // notification email is the same shape however the visitor typed it:
+    // international ("+1 201 555 0123"), which stays readable to whoever picks
+    // the lead up. Falls back to E.164 if utils.js has not loaded, and to the
+    // raw value if the library is missing altogether.
+    const phoneValue = phoneInput?.value.trim()
+      ? (window.intlTelInputUtils
+          ? iti?.getNumber(window.intlTelInputUtils.numberFormat.INTERNATIONAL)
+          : iti?.getNumber()) || phoneInput.value.trim()
+      : "";
     const payload = {
       firstName: String(data.get("firstName") ?? ""),
       lastName: String(data.get("lastName") ?? ""),

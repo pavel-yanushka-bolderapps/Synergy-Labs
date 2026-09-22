@@ -7,7 +7,9 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "audit:seo": "node scripts/audit-seo.mjs",
+    "audit:launch": "node scripts/audit-seo.mjs --legacy"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.0",

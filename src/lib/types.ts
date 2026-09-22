@@ -685,3 +685,61 @@ export interface ClutchLanding {
   /** "en" or "ar" -- drives <html lang> and text direction. */
   locale?: string;
 }
+
+// --- Privacy policy ------------------------------------------------------
+
+export interface PrivacyPolicySection {
+  /** "1", "2", ... or undefined for the unnumbered "Contact Us" block. */
+  number?: string;
+  title: string;
+  /**
+   * Paragraph HTML. These carry `<strong>` and `<a>` because the emphasis in
+   * a privacy notice is part of the notice -- "we do **not** share or sell",
+   * "**Message and data rates may apply**" -- and flattening it would change
+   * what the document says. Rendered with `set:html`, which is safe here and
+   * only here: this is author-written static copy compiled into the build,
+   * with no user input anywhere near it.
+   */
+  paragraphs: string[];
+}
+
+export interface PrivacyPolicyContent {
+  heading: string;
+  description: string;
+  /** ISO date shown under the heading, so visitors can see the version. */
+  lastUpdated: string;
+  sections: PrivacyPolicySection[];
+}
+
+// --- Ambassador program (/ambassador-program, /1-week-pilot) -------------
+
+export interface AmbassadorIconCard {
+  iconSrc: string;
+  title: string;
+  description: string;
+}
+
+export interface AmbassadorStep {
+  numberSrc: string;
+  title: string;
+  description: string;
+}
+
+export interface AmbassadorPageContent {
+  /** Meta title + <h1>. `headingLead` is drawn in the accent colour. */
+  metaTitle: string;
+  metaDescription: string;
+  headingLead: string;
+  headingRest: string;
+  intro: string;
+  /** Hero artwork, which is the only visual difference between the two pages. */
+  heroImage: { src: string; src500: string; src800: string; alt: string };
+  formPlaceholder: string;
+  formSubmitLabel: string;
+  offer: { heading: string; body: string };
+  features: { heading: string; description: string; imageSrc: string; imageAlt: string; items: AmbassadorIconCard[] };
+  join: { heading: string; description: string; items: AmbassadorIconCard[] };
+  how: { heading: string; steps: AmbassadorStep[] };
+  ready: { heading: string; body: string; cta: CTAButton; imageSrc: string; imageAlt: string };
+  questions: { heading: string; body: string };
+}

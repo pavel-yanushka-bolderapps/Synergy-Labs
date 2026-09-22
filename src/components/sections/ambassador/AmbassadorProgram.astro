@@ -1,0 +1,280 @@
+---
+// The whole body of the ambassador page, from the hero to the closing
+// "Questions?" form. Lives in one component because two routes render it --
+// /ambassador-program and /1-week-pilot, which in Webflow were the same page
+// duplicated. Those two pages are thin wrappers that pass their own content
+// and their own <head>; everything visible is here, so the two can never
+// drift apart the way the Webflow originals were about to.
+import EmailCaptureForm from "../../EmailCaptureForm.astro";
+import type { AmbassadorPageContent } from "../../../lib/types";
+
+interface Props {
+  content: AmbassadorPageContent;
+  /** Recorded against whichever form is submitted. Validated in /api/lead. */
+  source: string;
+}
+
+const { content, source } = Astro.props;
+const { heroImage, offer, features, join, how, ready, questions } = content;
+
+const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
+---
+
+<section class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-16 md:py-24 lg:grid-cols-2">
+  <div>
+    <h1 class="font-display text-4xl leading-[1.1] md:text-5xl">
+      <span class="text-secondary-green">{content.headingLead}</span>
+      {" "}
+      {content.headingRest}
+    </h1>
+
+    <p class="mt-6 max-w-xl text-lg text-referring-hero-text">{content.intro}</p>
+
+    <EmailCaptureForm
+      inputId="ambassador-hero-email"
+      placeholder={content.formPlaceholder}
+      submitLabel={content.formSubmitLabel}
+      source={source}
+      class="mt-8 max-w-lg"
+    />
+  </div>
+
+  <img
+    src={heroImage.src}
+    srcset={`${heroImage.src500} 500w, ${heroImage.src800} 800w, ${heroImage.src} 1080w`}
+    sizes="(min-width: 1024px) 45vw, 100vw"
+    alt={heroImage.alt}
+    width="1080"
+    height="1080"
+    class="mx-auto w-full max-w-xl rounded-3xl"
+    fetchpriority="high"
+  />
+</section>
+
+<!-- "What We Offer". A banded statement rather than a section with its own
+     sub-structure, which is why it is the only full-bleed green block here. -->
+<section class="bg-secondary-green py-16 text-white md:py-20">
+  <div class="mx-auto max-w-4xl px-6 text-center">
+    <h2 class="font-display text-3xl md:text-4xl">{offer.heading}</h2>
+    <p class="mt-6 text-lg leading-relaxed text-white/90">{offer.body}</p>
+  </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-6 py-20">
+  <div class="max-w-2xl">
+    <h2 class="font-display text-3xl md:text-4xl">{features.heading}</h2>
+    <p class="mt-5 text-lg text-referring-hero-text">{features.description}</p>
+  </div>
+
+  <div class="mt-12 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+    <ul class="flex flex-col gap-8">
+      {features.items.map((item) => (
+        <li class="flex items-start gap-5">
+          <img src={item.iconSrc} alt="" width="48" height="48" class="h-12 w-12 shrink-0" />
+          <div>
+            <h3 class="font-display text-xl">{item.title}</h3>
+            <p class="mt-2 text-referring-hero-text">{item.description}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    <img
+      src={features.imageSrc}
+      srcset="/images/ambassador/features-500.webp 500w, /images/ambassador/features-800.webp 800w, /images/ambassador/features.webp 1024w"
+      sizes="(min-width: 1024px) 45vw, 100vw"
+      alt={features.imageAlt}
+      width="1024"
+      height="1024"
+      loading="lazy"
+      class="w-full rounded-3xl"
+    />
+  </div>
+</section>
+
+<section class="bg-green-50 py-20">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="max-w-2xl">
+      <h2 class="font-display text-3xl md:text-4xl">{join.heading}</h2>
+      <p class="mt-5 text-lg text-referring-hero-text">{join.description}</p>
+    </div>
+
+    <ul class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
+      {join.items.map((item) => (
+        <li class="rounded-3xl bg-white p-8 shadow-sm">
+          <img src={item.iconSrc} alt="" width="48" height="48" class="h-12 w-12" />
+          <h3 class="mt-6 font-display text-xl">{item.title}</h3>
+          <p class="mt-3 text-referring-hero-text">{item.description}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-6 py-20">
+  <h2 class="text-center font-display text-3xl md:text-4xl">{how.heading}</h2>
+
+  <!-- The step numbers are Webflow's artwork rather than text, so they sit
+       behind the copy as decoration and the running order is carried by the
+       list itself. `alt=""` for the same reason: "01" read aloud before every
+       step adds nothing an ordered list has not already said. -->
+  <ol class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
+    {how.steps.map((step) => (
+      <li class="relative overflow-hidden rounded-3xl bg-secondary p-8 pt-16 text-center">
+        <img
+          src={step.numberSrc}
+          alt=""
+          width="120"
+          height="120"
+          loading="lazy"
+          class="pointer-events-none absolute right-4 top-2 h-24 w-24 opacity-90"
+        />
+        <h3 class="relative font-display text-xl">{step.title}</h3>
+        <p class="relative mt-3 text-referring-hero-text">{step.description}</p>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<section class="bg-secondary-green py-16 text-white md:py-20">
+  <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-2">
+    <div>
+      <h2 class="font-display text-3xl md:text-4xl">{ready.heading}</h2>
+      <p class="mt-6 text-lg text-white/90">{ready.body}</p>
+      <a
+        href={ready.cta.href}
+        class="mt-8 inline-block rounded-md bg-white px-8 py-4 text-sm font-semibold text-primary-green transition hover:bg-white/90"
+      >
+        {ready.cta.label}
+      </a>
+    </div>
+
+    <img
+      src={ready.imageSrc}
+      alt={ready.imageAlt}
+      width="800"
+      height="600"
+      loading="lazy"
+      class="w-full rounded-3xl"
+    />
+  </div>
+</section>
+
+<section class="mx-auto max-w-3xl px-6 py-20 text-center">
+  <h2 class="font-display text-3xl md:text-4xl">{questions.heading}</h2>
+  <p class="mt-5 text-lg text-referring-hero-text">{questions.body}</p>
+
+  <EmailCaptureForm
+    inputId="ambassador-questions-email"
+    placeholder={content.formPlaceholder}
+    submitLabel={content.formSubmitLabel}
+    source={source}
+    class="mt-8 text-left"
+  />
+</section>
+
+{!recaptchaDisabled && (
+  <script src="https://www.google.com/recaptcha/api.js" async defer is:inline></script>
+)}
+
+<script>
+  declare global {
+    interface Window {
+      grecaptcha?: {
+        getResponse: (widgetId?: number) => string;
+        reset: (widgetId?: number) => void;
+      };
+    }
+  }
+
+  // Both forms on the page are handled here. The other forms on this site
+  // address their fields by id, which allows only one instance per page --
+  // this one queries relative to each form, so two can co-exist.
+  const forms = document.querySelectorAll<HTMLFormElement>("[data-lead-form]");
+  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const formLoadedAt = Date.now();
+
+  // reCAPTCHA's automatic rendering walks the document for `.g-recaptcha` and
+  // assigns widget ids 0, 1, ... in that order, so a form's widget id is its
+  // container's position in the same list. Without this both forms would read
+  // widget 0 and the second would always submit the first one's token.
+  const widgets = Array.from(document.querySelectorAll(".g-recaptcha"));
+
+  for (const form of forms) {
+    const emailInput = form.querySelector<HTMLInputElement>('input[name="email"]');
+    const honeypot = form.querySelector<HTMLInputElement>('input[name="website"]');
+    const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const errorEl = form.querySelector<HTMLElement>("[data-lead-error]");
+    const successEl = form.querySelector<HTMLElement>("[data-lead-success]");
+    const widgetEl = form.querySelector(".g-recaptcha");
+    const widgetId = widgetEl ? widgets.indexOf(widgetEl) : -1;
+
+    if (!emailInput) continue;
+
+    function showError(message: string) {
+      if (!errorEl) return;
+      errorEl.textContent = message;
+      errorEl.classList.remove("hidden");
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorEl?.classList.add("hidden");
+
+      const email = emailInput!.value.trim();
+      if (!EMAIL_PATTERN.test(email)) {
+        showError("Please enter a valid email address.");
+        emailInput!.focus();
+        return;
+      }
+
+      let recaptchaToken = "";
+      if (widgetId >= 0) {
+        recaptchaToken = window.grecaptcha?.getResponse(widgetId) ?? "";
+        if (!recaptchaToken) {
+          showError("Please confirm you're not a robot.");
+          return;
+        }
+      }
+
+      if (submitButton) submitButton.disabled = true;
+
+      try {
+        const res = await fetch("/api/lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            source: form.dataset.source,
+            recaptchaToken,
+            website: honeypot?.value ?? "",
+            formLoadedAt,
+          }),
+        });
+        const data = (await res.json()) as { success?: boolean; error?: string };
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Could not send your request.");
+        }
+
+        // The form is replaced by its own confirmation rather than the page
+        // navigating: the visitor is mid-page, and a reload would lose the
+        // section they were reading.
+        form.reset();
+        if (successEl) {
+          successEl.textContent = "Thanks — we'll be in touch shortly.";
+          successEl.classList.remove("hidden");
+        }
+      } catch (err) {
+        showError(
+          err instanceof Error ? err.message : "Could not send your request. Please try again."
+        );
+        // The token is spent once Google has seen it, so make the visitor tick
+        // a fresh box rather than retry with a dead one.
+        if (widgetId >= 0) window.grecaptcha?.reset(widgetId);
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
+    });
+  }
+</script>

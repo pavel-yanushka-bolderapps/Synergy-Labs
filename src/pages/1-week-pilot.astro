@@ -1,0 +1,23 @@
+---
+// /1-week-pilot -- an exact port of the Webflow page at this URL, which is a
+// duplicate of /ambassador-program: same headline, same body, same sections,
+// differing only in the hero image and a page title that matches nothing on
+// the page. It reads as a copy made to build a pilot-offer page from and
+// never rewritten.
+//
+// Ported as-is rather than quietly fixed, because writing a pilot offer is
+// the client's call, not ours. Two things make the duplication safe in the
+// meantime: both pages are noindex, as they were in Webflow, so neither
+// competes with the other in search; and the body is one component, so
+// whatever this page is eventually meant to say can be written once.
+//
+// If the pilot offer is never written, this URL is a redirect to
+// /ambassador-program rather than a page.
+import Layout from "../components/layout/Layout.astro";
+import AmbassadorProgram from "../components/sections/ambassador/AmbassadorProgram.astro";
+import { weekPilot } from "../content/ambassadorPage";
+---
+
+<Layout title={weekPilot.metaTitle} description={weekPilot.metaDescription} noindex>
+  <AmbassadorProgram content={weekPilot} source="/1-week-pilot" />
+</Layout>

@@ -4,5 +4,6 @@ import ContactSection from "../components/sections/ContactSection.astro";
 ---
 
 <Layout title="Contact Us | Synergy Labs" description="Partner with Synergy Labs -- schedule a meeting or give us a call.">
-  <ContactSection id="contact" />
+  {/* The only page where this band is the page itself, so it owns the <h1>. */}
+  <ContactSection id="contact" headingLevel="h1" />
 </Layout>

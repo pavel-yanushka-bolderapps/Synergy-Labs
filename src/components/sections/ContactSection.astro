@@ -12,9 +12,23 @@ interface Props {
   // to it.
   id?: string;
   heading?: string;
+  /**
+   * Heading level for the pitch panel. This band is appended to thirteen
+   * different page types, and it used to print its pitch as an <h1> on every
+   * one of them -- so /about-us, /awards, /blog, every blog listing page,
+   * every case study and every service page shipped two <h1> elements, the
+   * second one saying "Partner with a top-tier agency" rather than anything
+   * about the page. It is a section heading everywhere except /contact, where
+   * the band *is* the page.
+   */
+  headingLevel?: "h1" | "h2";
 }
 
-const { id = "contact", heading = "Partner with a top-tier agency" } = Astro.props;
+const {
+  id = "contact",
+  heading = "Partner with a top-tier agency",
+  headingLevel: Heading = "h2",
+} = Astro.props;
 ---
 
 <section id={id} class="mx-auto max-w-7xl px-6 py-20">
@@ -26,7 +40,7 @@ const { id = "contact", heading = "Partner with a top-tier agency" } = Astro.pro
         class="pointer-events-none absolute inset-0 h-full w-full object-cover"
       />
       <div class="relative flex h-full flex-col">
-        <h1 class="font-display text-3xl leading-tight md:text-4xl">{heading}</h1>
+        <Heading class="font-display text-3xl leading-tight md:text-4xl">{heading}</Heading>
 
         <p class="mt-8 text-white/90">Ready to get started on your project?</p>
         <p class="mt-4 text-white/90">

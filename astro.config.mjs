@@ -15,6 +15,130 @@ const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET } = loadEnv(
   ''
 );
 
+// Pages that render <meta name="robots" content="noindex">, so they are kept
+// out of the sitemap below. Both are the ambassador programme: /1-week-pilot
+// is a duplicate of /ambassador-program (see src/pages/1-week-pilot.astro).
+const NOINDEX_PATHS = ['/ambassador-program', '/1-week-pilot'];
+
+// --- Legacy URL map ------------------------------------------------------
+//
+// Every URL the Webflow site served that this site does not. Without these
+// they 404 on cutover and their rankings go with them.
+//
+// SHIPPED AS 302 ON PURPOSE. A 301 is cached by browsers more or less
+// permanently and cannot be recalled, so these stay temporary until the
+// redirects have been checked against a preview deployment and the site is
+// live and settled. Then flip REDIRECT_STATUS to 301 -- that is the only
+// change needed.
+//
+// DANGER: the Vercel adapter emits these *before* `handle: filesystem`, so a
+// source that is also a real route hides that route. Never add a source for a
+// page that exists. `npm run audit:launch` fails if one ever does.
+const REDIRECT_STATUS = 302;
+
+const to = (destination) => ({ status: REDIRECT_STATUS, destination });
+
+/**
+ * The old flat location URLs. Webflow gave every office a top-level page with
+ * the whole company name in the slug; they are /locations/<city> here.
+ * Note "phonix" -- Webflow's typo, which is a live indexed URL, so it is
+ * mapped as spelled.
+ */
+const LEGACY_LOCATIONS = {
+  'mobile-and-web-developers-agency-in-chicago': 'chicago',
+  'mobile-and-web-developers-agency-in-dubai': 'dubai',
+  'mobile-and-web-developers-agency-in-london': 'london',
+  'mobile-and-web-developers-agency-in-los-angeles': 'los-angeles',
+  'mobile-and-web-developers-agency-in-orlando': 'orlando',
+  'mobile-and-web-developers-agency-in-riyadh': 'riyadh',
+  'mobile-and-web-developers-agency-in-singapore': 'singapore',
+  'mobile-and-web-developers-agency-in-tampa': 'tampa',
+  'mobile-and-web-development-agency-in-qatar': 'qatar',
+  'mobile-app-and-web-developers-agency-in-austin': 'austin',
+  'mobile-app-and-web-developers-agency-in-hartford': 'hartford',
+  'mobile-app-and-web-development-agency-in-atlanta': 'atlanta',
+  'mobile-app-and-web-development-agency-in-houston': 'houston',
+  'mobile-app-and-web-development-agency-in-jackson': 'jackson',
+  'mobile-app-and-web-development-agency-in-jacksonville': 'jacksonville',
+  'mobile-app-and-web-development-agency-in-miami': 'miami',
+  'mobile-app-and-web-development-agency-in-new-york-city': 'new-york-city',
+  'mobile-app-and-web-development-agency-in-philadelphia': 'philadelphia',
+  'mobile-app-and-web-development-agency-in-phonix': 'phoenix',
+  'mobile-app-and-web-development-agency-in-san-diego': 'san-diego',
+  'mobile-app-and-web-development-agency-in-san-francisco': 'san-francisco',
+};
+
+/**
+ * The ten /top-* Clutch landings that were never seeded into Sanity, pointed
+ * at the city page for the same place.
+ *
+ * This is a stopgap, not the end state: these are paid/referral landing pages
+ * and the landing template converts better than a location page. The right
+ * fix is ten more rows in scripts/data/clutch-landings.json, at which point
+ * each entry here MUST be deleted -- a redirect left behind would shadow the
+ * page it was standing in for. Connecticut has no city page of its own;
+ * Hartford is the office there.
+ */
+const UNSEEDED_LANDINGS = {
+  'top-app-developers-in-austin': 'austin',
+  'top-app-developers-in-chicago': 'chicago',
+  'top-app-developers-in-connecticut': 'hartford',
+  'top-app-developers-in-dubai': 'dubai',
+  'top-app-developers-in-london': 'london',
+  'top-app-developers-in-miami': 'miami',
+  'top-app-developers-in-nyc': 'new-york-city',
+  'top-app-developers-in-qatar': 'qatar',
+  'top-app-developers-in-riyadh': 'riyadh',
+  'top-app-developers-in-singapore': 'singapore',
+};
+
+// Sources are written without a trailing slash. Adding "/articles/" alongside
+// "/articles" is not needed and not possible: @vercel/routing-utils normalises
+// the slash away and both compile to the same `^/articles$` pattern, so the
+// only effect is two identical entries in the route table. Confirmed against
+// .vercel/output/config.json. Worth re-checking on the preview deployment
+// that a trailing-slash request does redirect.
+const redirects = {
+  ...Object.fromEntries(
+    Object.entries(LEGACY_LOCATIONS).map(([slug, city]) => [
+      `/synergy-labs---${slug}`,
+      to(`/locations/${city}`),
+    ])
+  ),
+  ...Object.fromEntries(
+    Object.entries(UNSEEDED_LANDINGS).map(([slug, city]) => [`/${slug}`, to(`/locations/${city}`)])
+  ),
+
+  // Two offices also had a short-form URL.
+  '/locations-dallas': to('/locations/dallas'),
+  '/locations-san-antonio': to('/locations/san-antonio'),
+
+  // The service slug lost its "-service" suffix in the rebuild, and two older
+  // root-level copies of the same page predate /our-services entirely.
+  '/our-services/web-app-development-service': to('/our-services/web-app-development'),
+  '/web-app-development': to('/our-services/web-app-development'),
+  '/web-app-development-copy': to('/our-services/web-app-development'),
+
+  // A Webflow stub whose body copy was still lorem ipsum. The service page is
+  // what it was meant to become.
+  '/mobile-apps': to('/our-services/app-development-service'),
+
+  // The news-articles collection has not been migrated. Until it is, the blog
+  // is the closest thing this site has to it.
+  '/articles': to('/blog'),
+
+  // Titled "Calculator" but contains no calculator -- it is the contact form
+  // and its thank-you state, nothing else.
+  '/calculator': to('/contact'),
+
+  // TODO: decide before flipping to 301. This was a real, indexable paid
+  // landing page ("Top Mobile App Design Optimization Agency") built on the
+  // same template as /top-*, with a founder video and a PDF checklist behind
+  // the form. If Search Console shows it earning impressions, delete this
+  // entry and seed it as a clutchLanding instead. 302 keeps that door open.
+  '/mobile-app-design-optimization': to('/our-services/app-development-service'),
+};
+
 export default defineConfig({
   // The canonical origin. Everything absolute is derived from it -- the
   // <link rel="canonical"> and Open Graph URLs in Layout.astro, and every
@@ -27,11 +151,19 @@ export default defineConfig({
   // contact-form API route and the embedded Sanity Studio, so it needs a
   // server adapter but the rest of the site is unaffected.
   adapter: vercel(),
+  // See the legacy URL map above. The Vercel adapter turns these into real
+  // route-table entries, not meta-refresh pages.
+  redirects,
   integrations: [
     sitemap({
       // The Studio is an application, not content, and the API routes are not
-      // pages at all.
-      filter: (page) => !page.includes('/studio'),
+      // pages at all. The rest are pages that render `noindex` -- listing a
+      // URL in a sitemap asks Google to index it, so a sitemap entry for a
+      // noindex page is a contradiction Search Console reports as an error.
+      // Keep this in step with the `noindex` prop passed in src/pages.
+      filter: (page) =>
+        !page.includes('/studio') &&
+        !NOINDEX_PATHS.some((path) => page.endsWith(path) || page.endsWith(`${path}/`)),
     }),
     sanity({
       projectId: PUBLIC_SANITY_PROJECT_ID || 'placeholder',
