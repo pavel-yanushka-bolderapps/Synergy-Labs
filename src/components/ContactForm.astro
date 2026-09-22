@@ -361,9 +361,14 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
       return;
     }
 
-    const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
-    const recaptchaToken = recaptchaDisabled ? "" : window.grecaptcha?.getResponse() ?? "";
-    if (!recaptchaDisabled && !recaptchaToken) {
+    // Whether a widget was actually rendered, rather than re-deriving it from
+    // the env var: a build with no site key renders no widget while
+    // PUBLIC_DISABLE_RECAPTCHA is still unset, and gating on the variable then
+    // demanded a token from a checkbox that is not on the page -- the form
+    // could never be submitted. The element is the only honest signal.
+    const recaptchaWidget = document.querySelector(".g-recaptcha");
+    const recaptchaToken = recaptchaWidget ? window.grecaptcha?.getResponse() ?? "" : "";
+    if (recaptchaWidget && !recaptchaToken) {
       showError("Please complete the reCAPTCHA check before submitting.");
       return;
     }

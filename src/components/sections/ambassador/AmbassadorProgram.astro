@@ -7,6 +7,7 @@
 // drift apart the way the Webflow originals were about to.
 import EmailCaptureForm from "../../EmailCaptureForm.astro";
 import type { AmbassadorPageContent } from "../../../lib/types";
+import { recaptchaConfig } from "../../../lib/recaptcha";
 
 interface Props {
   content: AmbassadorPageContent;
@@ -17,7 +18,10 @@ interface Props {
 const { content, source } = Astro.props;
 const { heroImage, offer, features, join, how, ready, questions } = content;
 
-const recaptchaDisabled = import.meta.env.PUBLIC_DISABLE_RECAPTCHA === "true";
+// Via the shared helper, so this file cannot disagree with the forms it
+// contains -- reading the env var directly here meant Google's script could
+// still be loaded on a build where EmailCaptureForm had rendered no widget.
+const { disabled: recaptchaDisabled } = recaptchaConfig();
 ---
 
 <section class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-16 md:py-24 lg:grid-cols-2">
