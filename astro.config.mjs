@@ -92,13 +92,30 @@ const UNSEEDED_LANDINGS = {
   'top-app-developers-in-singapore': 'singapore',
 };
 
-// Sources are written without a trailing slash. Adding "/articles/" alongside
-// "/articles" is not needed and not possible: @vercel/routing-utils normalises
-// the slash away and both compile to the same `^/articles$` pattern, so the
-// only effect is two identical entries in the route table. Confirmed against
-// .vercel/output/config.json. Worth re-checking on the preview deployment
-// that a trailing-slash request does redirect.
-const redirects = {
+/**
+ * Every source is registered as `<path>{/}?` so it matches with or without a
+ * trailing slash.
+ *
+ * A bare source compiles to an exact `^/articles$`, and `/articles/` then
+ * matches nothing, falls past the filesystem handle and 404s. Real pages are
+ * unaffected -- Vercel resolves /contact and /contact/ to the same file -- so
+ * this is specific to redirects, and it does not show up in the build output:
+ * both forms have to be requested against a running deployment to see it.
+ * `npm run verify:redirects <url>` does exactly that.
+ *
+ * Registering the slashed source as a second key does not work: the route
+ * normaliser strips the slash and both keys collapse to the same pattern.
+ * `/articles/?` is rejected outright as an invalid source pattern. `{/}?` is
+ * path-to-regexp's optional-group syntax and compiles to `^/articles(?:/)?$`,
+ * which is the one form that covers both.
+ *
+ * The suffix is added here rather than written into each key so the map above
+ * stays readable and no entry can be forgotten.
+ */
+const optionalTrailingSlash = (map) =>
+  Object.fromEntries(Object.entries(map).map(([source, target]) => [`${source}{/}?`, target]));
+
+const redirects = optionalTrailingSlash({
   ...Object.fromEntries(
     Object.entries(LEGACY_LOCATIONS).map(([slug, city]) => [
       `/synergy-labs---${slug}`,
@@ -137,7 +154,7 @@ const redirects = {
   // the form. If Search Console shows it earning impressions, delete this
   // entry and seed it as a clutchLanding instead. 302 keeps that door open.
   '/mobile-app-design-optimization': to('/our-services/app-development-service'),
-};
+});
 
 export default defineConfig({
   // The canonical origin. Everything absolute is derived from it -- the

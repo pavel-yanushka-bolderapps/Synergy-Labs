@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "audit:seo": "node scripts/audit-seo.mjs",
-    "audit:launch": "node scripts/audit-seo.mjs --legacy"
+    "audit:launch": "node scripts/audit-seo.mjs --legacy",
+    "verify:redirects": "node scripts/verify-redirects.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.0",

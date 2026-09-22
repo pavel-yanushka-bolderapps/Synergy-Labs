@@ -157,7 +157,9 @@ if (checkLegacy) {
   // what actually ships.
   const config = (await import("../astro.config.mjs")).default;
   const redirectMap = config.redirects ?? {};
-  const redirectSources = new Set(Object.keys(redirectMap).map((r) => r.replace(/\/$/, "")));
+/** Sources carry a `{/}?` optional-slash suffix; strip it to get the path. */
+const sourcePath = (source) => source.replace(/\{\/\}\?$/, "").replace(/\/$/, "");
+  const redirectSources = new Set(Object.keys(redirectMap).map(sourcePath));
 
   // The Vercel adapter emits redirects ahead of `handle: filesystem`, so a
   // redirect whose source is also a real route takes precedence and the page
@@ -178,9 +180,9 @@ if (checkLegacy) {
   for (const [source, target] of Object.entries(redirectMap)) {
     const dest = (typeof target === "string" ? target : target.destination).replace(/\/$/, "");
     if (redirectSources.has(dest))
-      errors.push({ page: source, msg: `redirects to another redirect: ${dest}` });
+      errors.push({ page: sourcePath(source), msg: `redirects to another redirect: ${dest}` });
     else if (!routes.has(dest))
-      errors.push({ page: source, msg: `redirects to a page that does not exist: ${dest}` });
+      errors.push({ page: sourcePath(source), msg: `redirects to a page that does not exist: ${dest}` });
   }
 
   const skip = new Set([
