@@ -411,7 +411,10 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
       heroHeading: doc.heroHeading?.trim() || doc.title,
       heroDescription: doc.heroDescription ?? undefined,
       heroImageSrc: doc.heroImage ? imageBuilder.image(doc.heroImage).width(800).url() : undefined,
-      heroLottieSrc,
+      // Served from this site rather than Sanity's CDN -- see
+      // toSameOriginLottie(). The ratio is still read from the CDN copy:
+      // that fetch runs at build time in Node, where CORS does not apply.
+      heroLottieSrc: heroLottieSrc ? toSameOriginLottie(heroLottieSrc) : undefined,
       heroLottieAspectRatio: heroLottieSrc
         ? await getLottieAspectRatio(heroLottieSrc, doc.heroLottie?.asset?.extension)
         : undefined,
@@ -499,6 +502,37 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
  * fails. A missing ratio is a cosmetic fallback, never a build failure.
  */
 const lottieAspectRatios = new Map<string, string | undefined>();
+
+/**
+ * Sanity's file CDN only answers cross-origin requests from the origins
+ * listed in the project's CORS settings. The Lottie player fetches its file
+ * from the browser, so on any origin missing from that list -- every Vercel
+ * deployment URL, for a start -- the request is blocked and the hero renders
+ * nothing. localhost is on the list, which is why it only broke once
+ * deployed.
+ *
+ * Rather than chase each deployment URL in the Sanity dashboard, the build
+ * copies each hero animation onto the site itself
+ * (src/pages/lottie/cms/[file].ts) and pages point at that copy, so the
+ * player's fetch is same-origin and CORS never comes into it.
+ */
+export function toSameOriginLottie(cdnUrl: string): string {
+  return `/lottie/cms/${cdnUrl.split("?")[0].split("/").pop()}`;
+}
+
+/** Every hero Lottie in use, as the copy's file name and its CDN source. */
+export async function getHeroLottieFiles(): Promise<{ file: string; url: string }[]> {
+  try {
+    const urls = await loadQuery<(string | null)[]>({
+      query: `*[_type == "service" && defined(heroLottie.asset)].heroLottie.asset->url`,
+    });
+    const unique = [...new Set(urls.map((url) => stegaClean(url ?? undefined)).filter(Boolean))] as string[];
+    return unique.map((url) => ({ file: toSameOriginLottie(url).split("/").pop()!, url }));
+  } catch (err) {
+    console.error("[sanity] Failed to list hero Lottie files:", err);
+    return [];
+  }
+}
 
 async function getLottieAspectRatio(
   url: string,
