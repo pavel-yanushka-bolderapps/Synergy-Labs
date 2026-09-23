@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { backgroundField } from "./shared";
+import { backgroundField, brandBandFields } from "./shared";
 
 /**
  * One large visual with a short piece of copy over it -- the "UI Showcase" /
@@ -60,6 +60,7 @@ export const showcase = defineType({
       validation: (Rule) => Rule.uri({ scheme: ["http", "https"] }),
     }),
     backgroundField,
+    ...brandBandFields,
   ],
   preview: {
     select: { title: "heading", subtitle: "eyebrow", media: "image" },

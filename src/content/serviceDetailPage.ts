@@ -36,4 +36,39 @@ export const serviceDetailPage: ServiceDetailPageContent = {
   // every service, so it stays here rather than being retyped into five
   // documents. Move it into the schema if a service ever needs its own.
   processCta: { label: "Book Your Free Consultation", href: "#contact-form" },
+
+  // The service pages have always carried their own short FAQ rather than
+  // the homepage's app-focused list -- same five questions on every
+  // service, transcribed from the original Webflow pages.
+  faq: {
+    heading: "FAQs",
+    subheading: "Find answers to common questions about our services and processes below.",
+    items: [
+      {
+        question: "What services do you offer?",
+        answer:
+          "We provide a full range of marketing services, including digital marketing, branding, and content creation. Our team is dedicated to delivering tailored solutions that meet your unique business needs. Whether you're a startup or an established company, we have the expertise to help you succeed.",
+      },
+      {
+        question: "How do you work?",
+        answer:
+          "Our process begins with understanding your goals and target audience. We then develop a customized strategy that aligns with your vision. Throughout the project, we maintain open communication to ensure that we meet your expectations.",
+      },
+      {
+        question: "What is your pricing?",
+        answer:
+          "Our pricing varies based on the specific services you require and the scope of your project. We offer competitive rates and flexible packages to accommodate different budgets. For a detailed quote, please reach out to our team.",
+      },
+      {
+        question: "How long does it take?",
+        answer:
+          "The timeline for each project depends on its complexity and your specific needs. Typically, we provide a detailed timeline during the planning phase. Our goal is to deliver high-quality results in a timely manner.",
+      },
+      {
+        question: "Can you handle revisions?",
+        answer:
+          "Absolutely! We understand that feedback is essential to achieving the best results. Our team is committed to making necessary revisions to ensure your satisfaction with the final product.",
+      },
+    ],
+  },
 };

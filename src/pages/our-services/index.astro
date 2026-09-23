@@ -18,17 +18,24 @@ const servicesContent = {
   heading: "So you just do apps? Nope, we do a lil more",
   items: sanityServices ?? ourServicesPage.items,
 };
+
+// home.cta points at "#cta", the homepage's contact anchor. The form on this
+// page is #contact-form, so without this the button scrolls nowhere.
+const cta = {
+  ...home.cta,
+  ctaButton: { ...home.cta.ctaButton, href: "#contact-form" },
+};
 ---
 
 <Layout title="Our Services | Synergy Labs" description={ourServicesPage.subheading}>
-  <section class="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
+  <section class="mx-auto max-w-3xl px-6 pt-20 text-center md:pt-28">
     <h1 class="font-display text-4xl leading-tight md:text-5xl">{ourServicesPage.heading}</h1>
     <p class="mt-6 text-lg text-black/70">{ourServicesPage.subheading}</p>
   </section>
 
-  <ServicesGrid content={servicesContent} />
+  <ServicesGrid content={servicesContent} class="pt-10 pb-20 md:pt-12" />
 
-  <CTA content={home.cta} />
+  <CTA content={cta} />
 
   <ContactSection id="contact-form" />
 </Layout>

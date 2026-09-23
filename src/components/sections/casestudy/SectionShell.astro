@@ -19,12 +19,14 @@ interface Props {
   background: CaseStudySectionBackground;
   /** Extra classes for the inner container, e.g. a different max-width. */
   innerClass?: string;
+  /** Per-section overrides of the brand-band CSS variables, if any. */
+  style?: string;
 }
 
-const { background, innerClass = "" } = Astro.props;
+const { background, innerClass = "", style } = Astro.props;
 ---
 
-<section class:list={["cs-section", `cs-section--${background}`]}>
+<section class:list={["cs-section", `cs-section--${background}`]} style={style}>
   {background !== "tinted" && (
     <img
       src="/images/Portfolio/background-secondary-portfolio.avif"

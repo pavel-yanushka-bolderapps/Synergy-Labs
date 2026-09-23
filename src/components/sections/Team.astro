@@ -42,32 +42,42 @@ const track = [...content.members, ...content.members];
     </div>
   </div>
 
-  <div class="team-carousel relative mt-16">
-    <div class="team-track flex w-max gap-6 px-6">
-      {track.map((member) => (
-        <a
-          href={member.linkedinHref ?? "#"}
-          target={member.linkedinHref ? "_blank" : undefined}
-          rel={member.linkedinHref ? "noopener noreferrer" : undefined}
-          aria-label={`${member.name} on LinkedIn`}
-          class:list={[
-            "team-card group relative h-[26rem] w-72 shrink-0 overflow-hidden rounded-3xl bg-black",
-            !member.linkedinHref && "pointer-events-none",
-          ]}
-        >
-          <img
-            src={member.imageSrc}
-            alt={member.name}
-            class="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-105 group-hover:grayscale-0"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
-          <div class="absolute inset-x-0 bottom-0 p-6 text-white">
-            <p class="text-xs font-semibold uppercase tracking-wide text-white/70">{member.title}</p>
-            <p class="mt-1 font-display text-xl">{member.name}</p>
-            <p class="mt-2 text-sm text-white/80">{member.bio}</p>
-          </div>
-        </a>
-      ))}
+  <!-- Held to the same max-w-7xl/px-6 box as the heading so the cards stop
+       at its edges instead of running off to the viewport, with a blurred
+       fade on each side for them to slide in and out of. -->
+  <div class="mx-auto mt-16 max-w-7xl px-6">
+    <div class="team-carousel relative">
+      <div class="team-fade team-fade-left" aria-hidden="true"></div>
+      <div class="team-fade team-fade-right" aria-hidden="true"></div>
+
+      <!-- pr-6 matches the gap, so the track is exactly two copies of
+           (card + gap) wide and -50% lands on a seamless repeat. -->
+      <div class="team-track flex w-max gap-6 pr-6">
+        {track.map((member) => (
+          <a
+            href={member.linkedinHref ?? "#"}
+            target={member.linkedinHref ? "_blank" : undefined}
+            rel={member.linkedinHref ? "noopener noreferrer" : undefined}
+            aria-label={`${member.name} on LinkedIn`}
+            class:list={[
+              "team-card group relative h-[26rem] w-72 shrink-0 overflow-hidden rounded-3xl bg-black",
+              !member.linkedinHref && "pointer-events-none",
+            ]}
+          >
+            <img
+              src={member.imageSrc}
+              alt={member.name}
+              class="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-105 group-hover:grayscale-0"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+            <div class="absolute inset-x-0 bottom-0 p-6 text-white">
+              <p class="text-xs font-semibold uppercase tracking-wide text-white/70">{member.title}</p>
+              <p class="mt-1 font-display text-xl">{member.name}</p>
+              <p class="mt-2 text-sm text-white/80">{member.bio}</p>
+            </div>
+          </a>
+        ))}
+      </div>
     </div>
   </div>
 </section>
@@ -75,6 +85,36 @@ const track = [...content.members, ...content.members];
 <style>
   .team-carousel {
     overflow: hidden;
+  }
+
+  .team-fade {
+    pointer-events: none;
+    position: absolute;
+    inset-block: 0;
+    z-index: 10;
+    width: 3rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  @media (min-width: 768px) {
+    .team-fade {
+      width: 6rem;
+    }
+  }
+
+  /* The blur fades out towards the middle, and the background colour fades
+     in towards the edge, so a card blurs and dissolves as it leaves. */
+  .team-fade-left {
+    left: 0;
+    background: linear-gradient(to right, var(--color-secondary), transparent);
+    mask-image: linear-gradient(to right, #000 40%, transparent);
+  }
+
+  .team-fade-right {
+    right: 0;
+    background: linear-gradient(to left, var(--color-secondary), transparent);
+    mask-image: linear-gradient(to left, #000 40%, transparent);
   }
 
   .team-track {

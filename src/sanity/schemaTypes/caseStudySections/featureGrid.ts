@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { backgroundField } from "./shared";
+import { backgroundField, brandBandFields } from "./shared";
 
 /**
  * A run of small items under one heading. This is the most-used shape on the
@@ -72,6 +72,7 @@ export const featureGrid = defineType({
       ],
     }),
     backgroundField,
+    ...brandBandFields,
   ],
   preview: {
     select: { title: "heading", items: "items", media: "items.0.image" },

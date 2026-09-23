@@ -225,6 +225,67 @@ export const service = defineType({
       ],
     }),
     defineField({
+      name: "testimonials",
+      title: "Detail page: client reviews",
+      type: "array",
+      description:
+        "Review cards with five stars, a quote and the client's name. Leave empty to skip the section. Where it sits on the page and how it is laid out are the two fields below.",
+      of: [
+        {
+          type: "object",
+          name: "testimonial",
+          fields: [
+            defineField({
+              name: "quote",
+              title: "Quote",
+              type: "text",
+              rows: 3,
+              description: "Without the quote marks -- they are added automatically.",
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({ name: "name", title: "Client name", type: "string", validation: (Rule) => Rule.required() }),
+            defineField({
+              name: "role",
+              title: "Role / company",
+              type: "string",
+              description: 'e.g. "Lead Program Manager, Zwift".',
+            }),
+            defineField({ name: "avatar", title: "Photo", type: "image", options: { hotspot: true } }),
+          ],
+          preview: { select: { title: "name", subtitle: "quote", media: "avatar" } },
+        },
+      ],
+    }),
+    defineField({
+      name: "testimonialsPlacement",
+      title: "Detail page: client reviews position",
+      type: "string",
+      initialValue: "afterWhyUs",
+      options: {
+        list: [
+          { title: 'After "How We Work"', value: "afterProcess" },
+          { title: 'After "Why Us"', value: "afterWhyUs" },
+          { title: "Just before the FAQs", value: "beforeFaq" },
+        ],
+        layout: "radio",
+      },
+    }),
+    defineField({
+      name: "testimonialsLayout",
+      title: "Detail page: client reviews layout",
+      type: "string",
+      initialValue: "stacked",
+      description:
+        "Stacked shows the reviews as full-width cards one under another. Showcase uses the first two reviews in a grid with the rating tiles and logo -- built for the marketing page.",
+      options: {
+        list: [
+          { title: "Stacked cards", value: "stacked" },
+          { title: "Showcase grid", value: "showcase" },
+        ],
+        layout: "radio",
+      },
+    }),
+    defineField({
       name: "metaDescription",
       title: "Detail page: SEO description",
       type: "text",

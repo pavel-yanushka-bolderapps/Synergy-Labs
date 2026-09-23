@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { backgroundField } from "./shared";
+import { backgroundField, brandBandFields } from "./shared";
 
 /**
  * A client quote. Only the quote itself is required -- several of the
@@ -37,6 +37,7 @@ export const testimonial = defineType({
       options: { hotspot: true },
     }),
     backgroundField,
+    ...brandBandFields,
   ],
   preview: {
     select: { title: "quote", subtitle: "authorName", media: "avatar" },

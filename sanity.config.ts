@@ -13,7 +13,8 @@ import { schemaTypes } from "./src/sanity/schemaTypes";
 export default defineConfig({
   name: "synergy-labs",
   title: "Synergy Labs",
-  projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID || "placeholder",
+  // Same fallback as astro.config.mjs -- see the note on the sanity() call there.
+  projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID || "toot3mhg",
   dataset: import.meta.env.PUBLIC_SANITY_DATASET || "production",
   plugins: [
     structureTool(),

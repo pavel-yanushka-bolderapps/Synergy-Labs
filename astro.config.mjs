@@ -15,6 +15,9 @@ const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, PUBLIC_SANITY_VISUAL_ED
   ''
 );
 
+/** The Sanity project behind the site. See the note at the sanity() call. */
+const SANITY_PROJECT_ID = 'toot3mhg';
+
 // Pages that render <meta name="robots" content="noindex">, so they are kept
 // out of the sitemap below. Both are the ambassador programme: /1-week-pilot
 // is a duplicate of /ambassador-program (see src/pages/1-week-pilot.astro).
@@ -183,7 +186,13 @@ export default defineConfig({
         !NOINDEX_PATHS.some((path) => page.endsWith(path) || page.endsWith(`${path}/`)),
     }),
     sanity({
-      projectId: PUBLIC_SANITY_PROJECT_ID || 'placeholder',
+      // Falls back to the real project rather than a placeholder. The ID is
+      // not a secret -- it is in every image URL the site serves -- and a
+      // placeholder fails quietly: a deployment built without the env var
+      // (Vercel preview builds were) gets no Sanity content at all, every
+      // page with a static fallback looks fine, and the service and case
+      // study pages, which have none, are never generated and 404.
+      projectId: PUBLIC_SANITY_PROJECT_ID || SANITY_PROJECT_ID,
       dataset: PUBLIC_SANITY_DATASET || 'production',
       // Static build -- fetch through Sanity's CDN rather than the live API.
       // (src/lib/loadQuery.ts overrides this per-request when the Studio's

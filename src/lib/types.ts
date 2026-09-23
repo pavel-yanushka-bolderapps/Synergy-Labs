@@ -174,6 +174,7 @@ export interface SiteFooter {
   address: string;
   copyright: string;
   legalLinks: NavLink[];
+  socialLinks: { label: string; href: string; iconSrc: string }[];
 }
 
 export interface HomeHeroContent {
@@ -248,6 +249,8 @@ export interface HomeTeamContent {
 
 export interface HomeFAQContent {
   heading: string;
+  /** Optional line under the heading. */
+  subheading?: string;
   items: FAQItem[];
 }
 
@@ -401,6 +404,22 @@ export interface ServiceProcessContent {
   steps: ServiceProcessStep[];
 }
 
+/** One client review card on a service detail page. */
+export interface ServiceTestimonial {
+  quote: string;
+  name: string;
+  role?: string;
+  avatarSrc?: string;
+}
+
+export type ServiceTestimonialsPlacement = "afterProcess" | "afterWhyUs" | "beforeFaq";
+
+export interface ServiceTestimonialsContent {
+  placement: ServiceTestimonialsPlacement;
+  layout: "stacked" | "showcase";
+  items: ServiceTestimonial[];
+}
+
 // --- The case-study page builder ---
 //
 // One interface per section type an editor can add to a case study, plus the
@@ -422,6 +441,8 @@ export interface CaseStudySplitBlock {
   /** Resolved side -- "auto" is already turned into left/right by the query. */
   imageSide: "left" | "right";
   background: CaseStudySectionBackground;
+  /** Inline CSS variables overriding the brand band for this section only. */
+  bandStyle?: string;
 }
 
 export interface CaseStudyFeatureGrid {
@@ -433,6 +454,8 @@ export interface CaseStudyFeatureGrid {
   layout: "cards" | "tiles";
   items: { title: string; description?: string; imageSrc?: string }[];
   background: CaseStudySectionBackground;
+  /** Inline CSS variables overriding the brand band for this section only. */
+  bandStyle?: string;
 }
 
 export interface CaseStudyShowcase {
@@ -446,6 +469,8 @@ export interface CaseStudyShowcase {
   /** Present only when the editor filled in both the label and the address. */
   link?: CTAButton;
   background: CaseStudySectionBackground;
+  /** Inline CSS variables overriding the brand band for this section only. */
+  bandStyle?: string;
 }
 
 export interface CaseStudyStatsBand extends CaseStudyStats {
@@ -459,6 +484,8 @@ export interface CaseStudyTestimonial {
   authorRole?: string;
   avatarSrc?: string;
   background: CaseStudySectionBackground;
+  /** Inline CSS variables overriding the brand band for this section only. */
+  bandStyle?: string;
 }
 
 export type CaseStudySection =
@@ -572,6 +599,8 @@ export interface ServiceDetailPageContent {
   awardBadges: { src: string; alt: string }[];
   /** Button under the "How We Work" timeline. */
   processCta: CTAButton;
+  /** The FAQ block every service page shares -- not the homepage's list. */
+  faq: HomeFAQContent;
 }
 
 export interface HomePageContent {

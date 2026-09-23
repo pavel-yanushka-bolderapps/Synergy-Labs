@@ -124,14 +124,17 @@ const { awardBadges } = serviceDetailPage;
     </div>
 
     {awardBadges.length > 0 && (
-      <ul class="mt-16 grid grid-cols-2 items-center justify-items-center gap-8 md:mt-20 md:grid-cols-4 md:gap-12">
+      <!-- Fixed 9rem badges, 1rem apart, centred as a group. Below sm the
+           four at 9rem plus gaps would overflow a phone, so each takes just
+           under half the row there and they wrap two by two. -->
+      <ul class="mt-16 flex flex-wrap items-center justify-center gap-4 md:mt-20">
         {awardBadges.map((badge) => (
-          <li>
+          <li class="w-[calc(50%-0.5rem)] max-w-36 sm:w-36">
             <img
               src={badge.src}
               alt={badge.alt}
               loading="lazy"
-              class="h-24 w-auto object-contain md:h-28 lg:h-32"
+              class="h-auto w-full object-contain"
             />
           </li>
         ))}

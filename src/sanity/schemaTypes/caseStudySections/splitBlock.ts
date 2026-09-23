@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { backgroundField } from "./shared";
+import { backgroundField, brandBandFields } from "./shared";
 
 /**
  * Prose beside an image -- the workhorse of the original case studies. Every
@@ -57,6 +57,7 @@ export const splitBlock = defineType({
         "Alternating counts only the text & image sections, so inserting a different section between two of them doesn't flip the rest of the page.",
     }),
     backgroundField,
+    ...brandBandFields,
   ],
   preview: {
     select: { title: "heading", subtitle: "body", media: "image" },

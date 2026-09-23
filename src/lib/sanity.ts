@@ -18,6 +18,7 @@ import type {
   ServiceFeaturesContent,
   ServiceValueCard,
   ServiceProcessContent,
+  ServiceTestimonialsContent,
   CaseStudy,
   CaseStudyFact,
   CaseStudySection,
@@ -325,6 +326,8 @@ export interface ServiceDetail {
    * steps -- the section is skipped rather than rendered as a bare heading.
    */
   process?: ServiceProcessContent;
+  /** Client review cards, or undefined when the service has none. */
+  testimonials?: ServiceTestimonialsContent;
   metaDescription?: string;
 }
 
@@ -343,6 +346,11 @@ interface SanityServiceDetailDoc {
   processHeading?: string | null;
   processEyebrow?: string | null;
   processSteps?: { icon?: string | null; title: string; description?: string | null }[] | null;
+  testimonials?:
+    | { quote: string; name: string; role?: string | null; avatar?: Record<string, unknown> | null }[]
+    | null;
+  testimonialsPlacement?: string | null;
+  testimonialsLayout?: string | null;
   metaDescription?: string | null;
 }
 
@@ -383,6 +391,8 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
         valueCards[]{ icon, title, description },
         processHeading, processEyebrow,
         processSteps[]{ icon, title, description },
+        testimonials[]{ quote, name, role, avatar },
+        testimonialsPlacement, testimonialsLayout,
         metaDescription
       }`,
       params: { href: `/our-services/${slug}` },
@@ -443,6 +453,24 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
               icon: stegaClean(step.icon ?? undefined) || "research",
               title: step.title,
               description: step.description ?? undefined,
+            })),
+          }
+        : undefined,
+      testimonials: doc.testimonials?.length
+        ? {
+            // stegaClean: both are compared against fixed values to pick a
+            // slot and a layout, never displayed -- same trap as the icons.
+            placement: (["afterProcess", "afterWhyUs", "beforeFaq"] as const).find(
+              (value) => value === stegaClean(doc.testimonialsPlacement ?? undefined)
+            ) ?? "afterWhyUs",
+            layout: stegaClean(doc.testimonialsLayout ?? undefined) === "showcase" ? "showcase" : "stacked",
+            items: doc.testimonials.map((item) => ({
+              quote: item.quote,
+              name: item.name,
+              role: item.role ?? undefined,
+              avatarSrc: item.avatar
+                ? imageBuilder.image(item.avatar).width(160).height(160).url()
+                : undefined,
             })),
           }
         : undefined,
@@ -597,6 +625,27 @@ function readableInk(hex: string): string {
 }
 
 /**
+ * CSS variables that re-colour one brand band, or undefined when the section
+ * overrides nothing. They shadow the page-wide ones set on the case study's
+ * wrapper, so SectionShell's brand rules pick them up unchanged. The grid
+ * filter follows the ink for the same reason the page-wide one does -- see
+ * `gridBlend` in src/pages/projects/casestudy/[slug].astro.
+ */
+function toBandStyle(color: string | null | undefined, gridOpacity: number | null | undefined) {
+  const vars: string[] = [];
+  const hex = toHexColor(color, "");
+  if (hex) {
+    const ink = readableInk(hex);
+    vars.push(`--cs-brand: ${hex}`, `--cs-brand-ink: ${ink}`);
+    vars.push(`--cs-grid-filter: ${ink === "#ffffff" ? "none" : "invert(1)"}`);
+  }
+  if (typeof gridOpacity === "number" && gridOpacity >= 0 && gridOpacity <= 1) {
+    vars.push(`--cs-grid-opacity: ${gridOpacity}`);
+  }
+  return vars.length ? vars.join("; ") : undefined;
+}
+
+/**
  * The same colour at zero alpha. A gradient written `transparent -> #ff6500`
  * fades through transparent *black*, which dirties the middle of the ramp;
  * naming the faded colour explicitly keeps the whole gradient on one hue.
@@ -611,7 +660,7 @@ function withZeroAlpha(hex: string): string {
 // mixed-type array is fine -- each item comes back with its own `_type` and
 // whichever of these it defines.
 const SECTIONS_PROJECTION = `sections[]{
-  _type, _key, background,
+  _type, _key, background, bandColor, gridOpacity,
   eyebrow, heading, lead, body, bullets, image, imageSide, layout,
   items[]{ title, description, image, value, label },
   linkLabel, linkHref, imageSize,
@@ -641,6 +690,8 @@ interface SanitySection {
   _type: string;
   _key: string;
   background?: string | null;
+  bandColor?: string | null;
+  gridOpacity?: number | null;
   eyebrow?: string | null;
   heading?: string | null;
   lead?: string | null;
@@ -697,6 +748,7 @@ function toSections(raw: SanitySection[] | null | undefined, brandColor: string)
   for (const s of raw ?? []) {
     const type = stegaClean(s._type);
     const background = toBackground(s.background);
+    const bandStyle = background === "brand" ? toBandStyle(s.bandColor, s.gridOpacity) : undefined;
     const heading = s.heading?.trim();
 
     if (type === "splitBlock") {
@@ -716,6 +768,7 @@ function toSections(raw: SanitySection[] | null | undefined, brandColor: string)
               ? "left"
               : "right",
         background,
+        bandStyle,
       });
       continue;
     }
@@ -737,6 +790,7 @@ function toSections(raw: SanitySection[] | null | undefined, brandColor: string)
         layout: stegaClean(s.layout ?? undefined) === "tiles" ? "tiles" : "cards",
         items,
         background,
+        bandStyle,
       });
       continue;
     }
@@ -758,6 +812,7 @@ function toSections(raw: SanitySection[] | null | undefined, brandColor: string)
         // label is an invisible one, so the link needs both or neither.
         link: linkLabel && linkHref ? { label: linkLabel, href: linkHref } : undefined,
         background,
+        bandStyle,
       });
       continue;
     }
@@ -797,6 +852,7 @@ function toSections(raw: SanitySection[] | null | undefined, brandColor: string)
         authorRole: s.authorRole?.trim() || undefined,
         avatarSrc: s.avatar ? imageBuilder.image(s.avatar).width(200).url() : undefined,
         background,
+        bandStyle,
       });
       continue;
     }

@@ -56,7 +56,7 @@ export const portfolioPage: PortfolioPageContent = {
       // #DAFF81 is the acid green the case study prints its number cards in
       // (see the statsBand default for clearcover) -- the card now leads with
       // the brand's secondary rather than the violet-adjacent blue it had.
-      backgroundImage: "linear-gradient(#fff, #daff818a 23%)",
+      backgroundImage: "linear-gradient(315deg, #97ca57, #fff)",
     },
     {
       slug: "spendee",
@@ -67,14 +67,14 @@ export const portfolioPage: PortfolioPageContent = {
       description:
         "Spendee teamed up with Synergy Labs to revitalize their popular budgeting app. We redesigned and enhanced the app's functionality, delivering a more intuitive and engaging experience for 3 million users.",
       highlights: [
-        { label: "16 weeks to launch", iconSrc: "/images/portfolio-black-weeks-to-launch.svg" },
-        { label: "1M downloads", iconSrc: "/images/portfolio-black-downloads.svg" },
+        { label: "16 weeks to launch", iconSrc: "/images/portfolio-white-weeks-to-launch.svg" },
+        { label: "1M downloads", iconSrc: "/images/portfolio-white-downloads.svg" },
       ],
       imageSrc: "/images/Spendee_Phones_Medium.webp",
       imageAlt: "Phones displaying the Spendee budgeting app dashboard.",
       caseStudyHref: "/projects/casestudy/spendee",
-      theme: "light",
-      backgroundImage: "linear-gradient(#fff, #c9f5da8a 23%)",
+      theme: "dark",
+      backgroundImage: "linear-gradient(#3a599c, #68799b)",
     },
     {
       slug: "fanbase",
@@ -110,7 +110,7 @@ export const portfolioPage: PortfolioPageContent = {
       imageAlt: "Joe & The Juice app ordering screens.",
       caseStudyHref: "/projects/casestudy/joe-the-juice",
       theme: "light",
-      backgroundImage: "linear-gradient(#fff, #ffe9c473 23%)",
+      backgroundImage: "linear-gradient(315deg, #ffbcf6, #fff)",
     },
     {
       slug: "urban-massage",
@@ -164,7 +164,7 @@ export const portfolioPage: PortfolioPageContent = {
       imageAlt: "Signal app showing an on-site security assessment.",
       caseStudyHref: "/projects/casestudy/signal",
       theme: "dark",
-      backgroundImage: "linear-gradient(#0b1e33, #1f4068)",
+      backgroundImage: "linear-gradient(#03329d, #add7f3)",
     },
     {
       slug: "peanut",
@@ -212,14 +212,14 @@ export const portfolioPage: PortfolioPageContent = {
       description:
         "BYLT Premium Basics partnered with us to create a seamless shopping experience for premium basics apparel. We developed an intuitive app that makes it easy for users to browse new arrivals, access exclusive offers, and enjoy a secure, smooth checkout process.",
       highlights: [
-        { label: "8 weeks to launch", iconSrc: "/images/portfolio-white-weeks-to-launch.svg" },
+        { label: "8 weeks to launch", iconSrc: "/images/portfolio-black-weeks-to-launch.svg" },
         { label: "$1.4 million in in-app revenue" },
       ],
       imageSrc: `${CDN}/67c2fb353803e214c0164f77_Frame%201.webp`,
       imageAlt: "BYLT Basics shopping app screens.",
       caseStudyHref: "/projects/casestudy/bylt-basics",
-      theme: "dark",
-      backgroundImage: "linear-gradient(#000, #262626)",
+      theme: "light",
+      backgroundImage: "linear-gradient(225deg, #e7e4e4, #fff 47%)",
     },
     {
       slug: "dose-of-colors",
@@ -230,14 +230,14 @@ export const portfolioPage: PortfolioPageContent = {
       description:
         "Dose of Colors partnered with us to bring their beauty store to mobile. We built a fast, easy-to-use app with an elegant design and simple, clean colors that match their brand. From browsing to checkout, everything feels smooth and effortless. In just 18 weeks, we turned their vision into reality.",
       highlights: [
-        { label: "18 weeks to launch", iconSrc: "/images/portfolio-black-weeks-to-launch.svg" },
+        { label: "18 weeks to launch", iconSrc: "/images/portfolio-white-weeks-to-launch.svg" },
         { label: "4.9/5 average rating" },
       ],
       imageSrc: `${CDN}/67b71160e094a9fa86d01c73_Group%2048095984.webp`,
       imageAlt: "Dose of Colors beauty shopping app screens.",
       caseStudyHref: "/projects/casestudy/dose-of-colors",
-      theme: "light",
-      backgroundImage: "radial-gradient(circle at 0 0, #f3f3f3b5 23%, #ffe1ef66 35%, #ff5fa238 78%)",
+      theme: "dark",
+      backgroundImage: "linear-gradient(#b1624e 61%, #ffdfde 87%)",
     },
     {
       slug: "taskade",
@@ -255,7 +255,7 @@ export const portfolioPage: PortfolioPageContent = {
       imageAlt: "Taskade AI agent workflow builder screens.",
       caseStudyHref: "/projects/casestudy/taskade",
       theme: "dark",
-      backgroundImage: "linear-gradient(#12121e, #2b2b52)",
+      backgroundImage: "linear-gradient(#8a273d 100%, #5c94bf)",
     },
     {
       slug: "slowly",
@@ -273,7 +273,7 @@ export const portfolioPage: PortfolioPageContent = {
       imageAlt: "Slowly app showing pen-pal letter exchange screens.",
       caseStudyHref: "/projects/casestudy/slowly",
       theme: "dark",
-      backgroundImage: "linear-gradient(#2b1d0e, #6b4a1e)",
+      backgroundImage: "linear-gradient(#22252e 17%, #454852)",
     },
     {
       slug: "open",
@@ -302,14 +302,14 @@ export const portfolioPage: PortfolioPageContent = {
       description:
         "The Lando AI team aimed to automate landing page creation. We developed AI that retrieves information and images from app stores, generating landing pages instantly.",
       highlights: [
-        { label: "6 weeks to launch", iconSrc: "/images/portfolio-white-weeks-to-launch.svg" },
+        { label: "6 weeks to launch", iconSrc: "/images/portfolio-black-weeks-to-launch.svg" },
         { label: "100K websites generated" },
       ],
       imageSrc: "/images/LandoAI_1.avif",
       imageAlt: "Lando AI landing page generator screens.",
       caseStudyHref: "/projects/casestudy/lando-ai",
-      theme: "dark",
-      backgroundImage: "linear-gradient(#101820, #26405c)",
+      theme: "light",
+      backgroundImage: "linear-gradient(#ecfdc2, #ccfd52)",
     },
   ],
 };

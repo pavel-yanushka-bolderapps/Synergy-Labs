@@ -13,7 +13,7 @@ const { content } = Astro.props;
 const { eyebrow, heading, body, imageSrc, imageSize, link, background } = content;
 ---
 
-<SectionShell background={background}>
+<SectionShell background={background} style={content.bandStyle}>
   <div class="mx-auto max-w-3xl text-center">
     {eyebrow && (
       <p class="mb-3 text-xs font-semibold uppercase tracking-widest opacity-60">{eyebrow}</p>

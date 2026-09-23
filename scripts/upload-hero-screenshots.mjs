@@ -19,9 +19,14 @@ import { extname } from "node:path";
 
 const API = "2025-08-31";
 
-// Deliberately NOT listed: clapper, clearcover and spendee already have their
+// Deliberately NOT listed: clapper and clearcover already have their
 // carousels, and peanut has no case study page to put one on.
+//
+// A folder that also holds other artwork is given as [folder, filename
+// prefix], so only the carousel shots are picked up -- the Spendee folder
+// keeps its section images alongside them.
 const FOLDERS = {
+  spendee: ["Spendee", "spendee-carousel-"],
   fanbase: "Fanbase",
   "forbes-councils": "Forbes",
   "joe-the-juice": "Joe And Juice",
@@ -50,9 +55,12 @@ if (targets.length === 0) fail(`No folder mapped for: ${only.join(", ")}. Known:
 
 const mutations = [];
 
-for (const [slug, folder] of targets) {
+for (const [slug, entry] of targets) {
+  const [folder, prefix = ""] = Array.isArray(entry) ? entry : [entry];
   const dir = new URL(`../public/images/Portfolio/${folder}/`, import.meta.url);
-  const names = (await readdir(dir).catch(() => null))?.filter((n) => IMAGE_TYPES[extname(n).toLowerCase()]);
+  const names = (await readdir(dir).catch(() => null))?.filter(
+    (n) => n.startsWith(prefix) && IMAGE_TYPES[extname(n).toLowerCase()]
+  );
 
   if (!names?.length) {
     console.warn(`\n${slug}: no images in public/images/Portfolio/${folder}/ -- skipping`);

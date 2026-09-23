@@ -12,7 +12,7 @@ const { content } = Astro.props;
 const { quote, authorName, authorRole, avatarSrc, background } = content;
 ---
 
-<SectionShell background={background}>
+<SectionShell background={background} style={content.bandStyle}>
   <figure class="mx-auto max-w-3xl text-center">
     <blockquote class="font-display text-2xl leading-snug md:text-3xl">
       {`“${quote}”`}

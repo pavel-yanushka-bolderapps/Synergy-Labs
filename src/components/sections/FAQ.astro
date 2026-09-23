@@ -10,6 +10,7 @@ const { content } = Astro.props;
 
 <section class="mx-auto max-w-4xl px-6 py-20">
   <h2 class="font-display text-3xl font-bold uppercase text-black md:text-4xl">{content.heading}</h2>
+  {content.subheading && <p class="mt-4 text-black/60">{content.subheading}</p>}
 
   <div class="mt-10 flex flex-col divide-y divide-black/10 border-t border-black/10">
     {content.items.map((item, index) => {

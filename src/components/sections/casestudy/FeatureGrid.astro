@@ -18,7 +18,7 @@ const { eyebrow, heading, lead, layout, items, background } = content;
 const columns = items.length <= 2 ? items.length : 3;
 ---
 
-<SectionShell background={background}>
+<SectionShell background={background} style={content.bandStyle}>
   <div class="max-w-3xl">
     {eyebrow && (
       <p class="mb-3 text-xs font-semibold uppercase tracking-widest opacity-60">{eyebrow}</p>
@@ -76,8 +76,11 @@ const columns = items.length <= 2 ? items.length : 3;
 
 <style>
   /* A white card on the light grounds. On the brand background a white card
-     would fight the band, so there the item becomes a translucent panel that
-     lets the client's colour through and keeps the inherited white text. */
+     would fight the band, so there the item becomes a panel a shade lighter
+     than the client's colour, keeping the inherited text colour. It is
+     opaque on purpose: the 10%-white panel this replaces let the band's grid
+     squares show through the copy (Clearcover, Fanbase), which made the
+     text hard to read. */
   .cs-feature {
     background-color: #fff;
     box-shadow:
@@ -86,7 +89,7 @@ const columns = items.length <= 2 ? items.length : 3;
   }
 
   :global(.cs-section--brand) .cs-feature {
-    background-color: rgb(255 255 255 / 0.1);
+    background-color: color-mix(in srgb, var(--cs-brand, #007244) 86%, #fff);
     box-shadow: none;
   }
 </style>

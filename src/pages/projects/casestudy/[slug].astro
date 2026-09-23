@@ -124,6 +124,21 @@ const gridBlend =
         ]}
       >
         <div class="min-w-0">
+          <!-- There is no page at /projects/casestudy, so "Case Study" is a
+               plain step in the trail rather than a link. -->
+          <nav aria-label="Breadcrumb" class="mb-8 text-lg">
+            <ol class="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <li>
+                <a href="/portfolio" class="text-secondary-green transition hover:text-primary-green hover:underline">
+                  Portfolio
+                </a>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li class="text-black/50">Case Study</li>
+              <li aria-hidden="true">/</li>
+              <li aria-current="page" class="text-xl text-black md:text-2xl">{study.clientName}</li>
+            </ol>
+          </nav>
           {study.logoSrc && (
             <img
               src={study.logoSrc}

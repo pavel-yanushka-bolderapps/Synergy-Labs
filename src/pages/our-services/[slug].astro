@@ -8,6 +8,7 @@ import ServiceProcess from "../../components/sections/ServiceProcess.astro";
 import HowWeWork from "../../components/sections/HowWeWork.astro";
 import WhyUs from "../../components/sections/WhyUs.astro";
 import Reviews from "../../components/sections/Reviews.astro";
+import ServiceTestimonials from "../../components/sections/ServiceTestimonials.astro";
 import Badges from "../../components/sections/Badges.astro";
 import FAQ from "../../components/sections/FAQ.astro";
 import ContactSection from "../../components/sections/ContactSection.astro";
@@ -43,6 +44,7 @@ const { service } = Astro.props;
 // Editors break the heading onto a second line with a plain Enter in the
 // Studio's text field, same convention as the homepage hero's heading.
 const headingLines = service.heroHeading.split("\n");
+const { testimonials } = service;
 ---
 
 <Layout title={`${service.title} | Synergy Labs`} description={service.metaDescription}>
@@ -126,10 +128,15 @@ const headingLines = service.heroHeading.split("\n");
   ) : (
     <HowWeWork content={home.howWeWork} />
   )}
+  <!-- The service's own review cards go in whichever of the three slots its
+       Sanity document picks (testimonialsPlacement). -->
+  {testimonials?.placement === "afterProcess" && <ServiceTestimonials content={testimonials} />}
   <WhyUs content={home.whyUs} />
+  {testimonials?.placement === "afterWhyUs" && <ServiceTestimonials content={testimonials} />}
   <Reviews content={home.reviews} />
   <Badges content={home.badges} />
-  <FAQ content={home.faq} />
+  {testimonials?.placement === "beforeFaq" && <ServiceTestimonials content={testimonials} />}
+  <FAQ content={serviceDetailPage.faq} />
   <ContactSection id="contact-form" />
 </Layout>
 

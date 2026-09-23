@@ -13,7 +13,7 @@ const { content } = Astro.props;
 const { eyebrow, heading, paragraphs, bullets, imageSrc, imageSide, background } = content;
 ---
 
-<SectionShell background={background}>
+<SectionShell background={background} style={content.bandStyle}>
   <div
     class:list={[
       "grid items-center gap-10",

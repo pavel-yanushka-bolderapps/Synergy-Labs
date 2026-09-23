@@ -10,9 +10,37 @@
 interface Props {
   /** Classes for the card, so each caller can place it in its own layout. */
   class?: string;
+  /**
+   * Placeholder-only fields for tight spaces like the blog's sticky rail:
+   * the labels stay in the markup for screen readers but are visually
+   * hidden, and the placeholders say what each field is instead. The budget
+   * select keeps its visible label -- a select has no placeholder to carry it.
+   */
+  compact?: boolean;
 }
 
-const { class: className = "overflow-hidden rounded-3xl bg-secondary p-10 shadow-xl md:p-8" } = Astro.props;
+const {
+  class: className = "overflow-hidden rounded-3xl bg-secondary p-5 shadow-xl md:p-8",
+  compact = false,
+} = Astro.props;
+
+const labelClass = compact ? "sr-only" : "text-sm font-semibold";
+const fieldGap = compact ? "" : "mt-2 ";
+const placeholders = compact
+  ? {
+      firstName: "First Name",
+      lastName: "Last Name",
+      email: "Your Email",
+      phone: "Your Phone number",
+      projectDetails: "Your Message",
+    }
+  : {
+      firstName: "John",
+      lastName: "Smith",
+      email: "name@example.com",
+      phone: "(201) 555-0123",
+      projectDetails: "Short description of your project",
+    };
 
 import { recaptchaConfig } from "../lib/recaptcha";
 const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConfig();
@@ -21,75 +49,78 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css" />
 
 <div class={className}>
-  <form id="contact-form" class="flex flex-col gap-6" novalidate>
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+  <form id="contact-form" class:list={["flex flex-col", compact ? "gap-4" : "gap-6"]} novalidate>
+    <div class:list={["grid grid-cols-2 gap-3", !compact && "sm:gap-6"]}>
       <div>
-        <label for="firstName" class="text-sm font-semibold">First Name</label>
+        <label for="firstName" class={labelClass}>First Name</label>
         <input
           id="firstName"
           name="firstName"
           type="text"
           required
-          placeholder="John"
-          class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+          placeholder={placeholders.firstName}
+          class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
         />
       </div>
       <div>
-        <label for="lastName" class="text-sm font-semibold">Last Name</label>
+        <label for="lastName" class={labelClass}>Last Name</label>
         <input
           id="lastName"
           name="lastName"
           type="text"
           required
-          placeholder="Smith"
-          class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+          placeholder={placeholders.lastName}
+          class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
         />
       </div>
     </div>
 
     <div>
-      <label for="email" class="text-sm font-semibold">Your Email</label>
+      <label for="email" class={labelClass}>Your Email</label>
       <input
         id="email"
         name="email"
         type="email"
         required
-        placeholder="name@example.com"
-        class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+        placeholder={placeholders.email}
+        class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
       />
       <p id="email-error" class="mt-1.5 hidden text-xs font-semibold text-red-600"></p>
     </div>
 
     <div class="phone-field">
-      <label for="phone" class="text-sm font-semibold">Your Phone number</label>
+      <label for="phone" class={labelClass}>Your Phone number</label>
       <input
         id="phone"
         name="phone"
         type="tel"
-        placeholder="(201) 555-0123"
-        class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+        data-fixed-placeholder={compact ? "" : undefined}
+        placeholder={placeholders.phone}
+        class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
       />
       <p id="phone-error" class="mt-1.5 hidden text-xs font-semibold text-red-600"></p>
     </div>
 
     <div>
-      <label for="projectDetails" class="text-sm font-semibold">What do you need help with?</label>
+      <label for="projectDetails" class={labelClass}>What do you need help with?</label>
       <textarea
         id="projectDetails"
         name="projectDetails"
         required
-        rows={3}
-        placeholder="Short description of your project"
-        class="mt-2 w-full resize-y rounded-md border border-black/20 bg-white px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none"
+        rows={compact ? 2 : 3}
+        placeholder={placeholders.projectDetails}
+        class={`${fieldGap}w-full resize-y rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
       ></textarea>
     </div>
 
     <div>
-      <label for="budgetRange" class="text-sm font-semibold">Budget Range</label>
+      <label for="budgetRange" class={compact ? "mb-1.5 block text-sm" : labelClass}>
+        {compact ? "What is your budget range?" : "Budget Range"}
+      </label>
       <select
         id="budgetRange"
         name="budgetRange"
-        class="mt-2 w-full rounded-md border border-black/20 bg-white px-4 py-3 text-sm focus:border-primary-green focus:outline-none"
+        class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm focus:border-primary-green focus:outline-none`}
       >
         <option value="">Select a range</option>
         <option value="<$25K">Less than $25K</option>
@@ -131,7 +162,7 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
     </p>
   </form>
 </div>
-  </div>
+
 <style>
   /* intl-tel-input renders its own wrapper (.iti) around the #phone input at
      runtime -- Astro's scoped styles can't reach an element the library
@@ -261,7 +292,9 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
               done("us");
             });
         },
-        autoPlaceholder: "aggressive",
+        // The compact form's placeholder names the field, so the library must
+        // not swap it for an example number.
+        autoPlaceholder: phoneInput.hasAttribute("data-fixed-placeholder") ? "off" : "aggressive",
         formatOnDisplay: true,
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
       })
