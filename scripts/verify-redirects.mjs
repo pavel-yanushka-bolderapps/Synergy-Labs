@@ -58,6 +58,18 @@ for (const [rawSource, target] of Object.entries(redirects)) {
       continue;
     }
 
+    // trailingSlash: 'never' puts Vercel's own /x/ -> /x 308 ahead of the
+    // redirect table, so the slashed variant is two hops: 308 to the bare
+    // path, then the redirect under test. Follow the one slash hop.
+    if (variant.endsWith("/") && res.status === 308) {
+      const hop = (res.headers.get("location") || "").replace(base, "");
+      if (hop !== source) {
+        failures.push(`${variant}  308 went to ${hop}, expected ${source}`);
+        continue;
+      }
+      res = await head(`${base}${source}`);
+    }
+
     if (res.status !== expected) {
       failures.push(`${variant}  expected ${expected}, got ${res.status}`);
       continue;
