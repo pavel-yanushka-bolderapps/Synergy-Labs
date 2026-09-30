@@ -1,16 +1,100 @@
 ---
+import Analytics from "./Analytics.astro";
+import Weglot from "./Weglot.astro";
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
+import { previewEnabled } from "../../lib/loadQuery";
+import { canonicalUrl, assetUrl } from "../../lib/seo";
+import { stegaClean } from "@sanity/client/stega";
+import { serialize, type JsonLd } from "../../lib/structuredData";
 import "../../styles/global.css";
 
 interface Props {
   title: string;
   description?: string;
+  /**
+   * Absolute or site-relative share image. 1200x630 is what the networks
+   * crop to; anything much smaller renders as a thumbnail instead of a card.
+   */
+  ogImage?: string;
+  /** "article" on blog posts, so they can carry a byline and dates. */
+  ogType?: "website" | "article";
+  /** Published/modified dates, only meaningful when ogType is "article". */
+  publishedTime?: string;
+  /** Overrides the canonical, for pages that are a variant of another URL. */
+  canonical?: string;
+  /** Keeps a page out of the index without removing it from the site. */
+  noindex?: boolean;
+  /** Structured data for this page; see src/lib/structuredData.ts. */
+  jsonLd?: (JsonLd | null | undefined)[];
 }
 
-const { title, description = "Synergy Labs — AI + Mobile App Development Agency" } = Astro.props;
+const {
+  title,
+  description = "Synergy Labs — AI + Mobile App Development Agency",
+  ogImage = "/images/og-default.webp",
+  ogType = "website",
+  publishedTime,
+  canonical,
+  noindex = false,
+  jsonLd = [],
+} = Astro.props;
+
+// stegaClean on everything that ends up in <head>. When the Studio's Preview
+// tab is on, strings from Sanity carry invisible click-to-edit markers, and a
+// <meta> tag has nothing to click -- they are pure payload there. Left in,
+// a 76-character post title shipped as 1,140 characters of mostly invisible
+// junk in <title>, og:title and twitter:title. Visible page content keeps its
+// markers; only the head is cleaned.
+const metaTitle = stegaClean(title) as string;
+const metaDescription = stegaClean(description) as string;
+
+// Both go through src/lib/seo.ts so the canonical here always has the same
+// shape as the URL @astrojs/sitemap writes for the same page.
+const pageUrl = canonicalUrl(stegaClean(canonical ?? Astro.url.pathname) as string, Astro.site);
+const ogImageUrl = assetUrl(stegaClean(ogImage) as string, Astro.site);
+
+// The Studio's click-to-edit overlay, pulled in only when preview mode is
+// actually on.
+//
+// This was a static `import { VisualEditing } from "@sanity/astro/visual-editing"`,
+// which put the package -- and with it 170KB of Sanity Studio CSS -- into the
+// stylesheet of all 419 public pages. Tailwind v4 emits everything inside
+// `@layer`, the Studio's CSS is unlayered, and unlayered rules beat layered
+// ones at any specificity. So the Studio silently outranked every Tailwind
+// utility on the site: the nav logo lost `h-8` and rendered at full size,
+// every section lost `mx-auto max-w-7xl px-6` and ran edge to edge. Fonts and
+// colours survived because they come from `@theme` custom properties and the
+// element rules in global.css, which is why it looked like a partial failure
+// rather than a missing stylesheet.
+//
+// It only ever showed in built output: `astro dev` serves CSS unbundled, so
+// the Studio's never reached a public page locally.
+//
+// `previewEnabled` is a build-time constant, so a production build takes the
+// null branch and the import is never evaluated. Awaiting it here is what
+// keeps its CSS out of the page's <link> tags -- a dynamic import lands in
+// its own chunk instead of the page's stylesheet.
+// The condition must be `import.meta.env.X` read directly here, not the
+// `previewEnabled` constant from loadQuery.ts. Vite inlines `import.meta.env`
+// as a literal at build time, so this whole branch folds to dead code and
+// Rollup drops the import -- and its stylesheet -- with it. Going through
+// `previewEnabled` does not fold, because it is computed in another module,
+// and the Studio CSS ships anyway. Both were measured: literal condition ->
+// 0 of 419 pages carry it, imported constant -> all 419 do.
+// Do not try to make this self-defending by adding
+// `&& import.meta.env.SANITY_API_READ_TOKEN`. Vite does not inline private
+// env vars as literals, so the condition stops folding and all 419 pages get
+// the Studio CSS again -- measured. Only the PUBLIC_ flag can be folded,
+// which means a build is only as safe as the environment it runs in: setting
+// PUBLIC_SANITY_VISUAL_EDITING_ENABLED in a deployment breaks that site's
+// styling, and nothing in this file can prevent it. audit-seo.mjs fails on it
+// instead.
+const VisualEditing = __VISUAL_EDITING_ENABLED__
+  ? (await import("@sanity/astro/visual-editing")).VisualEditing
+  : null;
 ---
 
 <!doctype html>
@@ -19,14 +103,69 @@ const { title, description = "Synergy Labs — AI + Mobile App Development Agenc
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    <title>{metaTitle}</title>
+    <meta name="description" content={metaDescription} />
+
+    <link rel="canonical" href={pageUrl} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <meta property="og:site_name" content="Synergy Labs" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:title" content={metaTitle} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={metaTitle} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    {jsonLd.filter(Boolean).map((block) => (
+      <script type="application/ld+json" is:inline set:html={serialize(block!)} />
+    ))}
+
+    <Analytics />
+    <Weglot />
   </head>
   <body class="min-h-screen">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-secondary-green focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+    >
+      Skip to content
+    </a>
     <Header nav={nav} />
-    <main>
+    <main id="main">
       <slot />
     </main>
     <Footer footer={footer} />
+    <!--
+      Click-to-edit overlay for the Studio's "Preview" tab. Renders nothing
+      unless queries are running in preview mode (see src/lib/loadQuery.ts),
+      so this costs the public site nothing.
+    -->
+    {VisualEditing && previewEnabled && <VisualEditing enabled />}
+    {previewEnabled && (
+      <!--
+        The overlay positions its click-to-edit boxes with absolutely
+        positioned elements that can sit past the right edge of the page,
+        which gives the document a horizontal scrollbar and makes every
+        section look like it overflows. That is an artefact of preview mode
+        only -- the overlay is not in the production build at all -- but it
+        makes local layout checks read as broken, so clip it here.
+
+        Deliberately scoped to preview mode: applying this to the public
+        site would hide real overflow bugs instead of surfacing them.
+      -->
+      <style is:inline>
+        html {
+          overflow-x: clip;
+        }
+      </style>
+    )}
   </body>
 </html>

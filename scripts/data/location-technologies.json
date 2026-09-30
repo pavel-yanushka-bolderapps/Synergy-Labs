@@ -1,0 +1,44 @@
+[
+  {
+    "slug": "mobile",
+    "title": "Mobile",
+    "technologies": "Swift, SwiftUI (iOS), Kotlin, Jetpack Compose (Android), React Native, Flutter (cross-platform)",
+    "order": 1
+  },
+  {
+    "slug": "frontend-web",
+    "title": "Frontend Web",
+    "technologies": "React, Next.js, Vue.js, TypeScript",
+    "order": 2
+  },
+  {
+    "slug": "backend",
+    "title": "Backend",
+    "technologies": "Node.js, Python, Go, Laravel",
+    "order": 3
+  },
+  {
+    "slug": "cloud-infrastructure",
+    "title": "Cloud & Infrastructure",
+    "technologies": "AWS, Google Cloud Platform, Firebase, Azure",
+    "order": 4
+  },
+  {
+    "slug": "devops",
+    "title": "DevOps",
+    "technologies": "Docker, Kubernetes, CI/CD pipelines, GitHub Actions",
+    "order": 5
+  },
+  {
+    "slug": "databases",
+    "title": "Databases",
+    "technologies": "PostgreSQL, MongoDB, Redis, DynamoDB",
+    "order": 6
+  },
+  {
+    "slug": "integrations",
+    "title": "Integrations",
+    "technologies": "Stripe, Twilio, SendGrid, Salesforce, custom API integration",
+    "order": 7
+  }
+]

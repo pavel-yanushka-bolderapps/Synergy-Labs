@@ -1,0 +1,43 @@
+---
+import type { AboutPageContent } from "../../lib/types";
+
+interface Props {
+  content: AboutPageContent["hero"];
+}
+
+const { content } = Astro.props;
+---
+
+<section class="relative overflow-hidden bg-green-50">
+  <!--
+    Same treatment as the homepage hero (Hero.astro): Hero-Bg.svg is a bespoke
+    1440x1024 desktop drawing rather than a tileable pattern, so it is scaled
+    to the section width on mobile and cover-cropped only from md up.
+  -->
+  <img
+    src={content.bgImageSrc}
+    alt=""
+    class="pointer-events-none absolute inset-0 h-full w-full object-contain opacity-40 md:object-cover"
+  />
+
+  <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:grid-cols-2 md:py-24">
+    <div class="flex flex-col items-center text-center md:items-start md:text-start">
+      <h1 class="font-display text-4xl leading-tight md:text-5xl">{content.heading}</h1>
+      <p class="mt-6 max-w-xl text-lg text-black/70">{content.body}</p>
+      <a
+        href={content.ctaButton.href}
+        class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 font-semibold text-white transition hover:bg-primary-green"
+      >
+        {content.ctaButton.label}
+      </a>
+    </div>
+
+    <div class="flex justify-center md:justify-end">
+      <img
+        src={content.imageSrc}
+        alt={content.imageAlt}
+        class="h-auto w-full max-w-[32rem] rounded-3xl object-contain"
+      />
+    </div>
+  </div>
+</section>

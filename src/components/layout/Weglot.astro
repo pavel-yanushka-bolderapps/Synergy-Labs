@@ -1,0 +1,23 @@
+---
+// Weglot's client script: the language switcher, plus client-side language
+// detection (`auto_switch`). The translated pages themselves -- /es/..., /fr/...
+// and the rest -- and the hreflang <link>s on every page are not made here.
+// Weglot's reverse proxy serves them, sitting in front of the whole domain
+// exactly as it did in front of Webflow, so no route in this project exists
+// for them. See the Weglot notes in the launch checklist for the DNS side.
+//
+// Production deployments only. On localhost or a preview URL the proxy is not
+// in front, so the script would fall back to translating pages in the browser
+// -- which spends the plan's word quota on pages nobody will visit.
+const WEGLOT_API_KEY = "wg_cebad663b76e5ef25d050b107e3e6f557";
+
+const enabled = process.env.VERCEL_ENV === "production";
+---
+
+{enabled && (
+  <script
+    is:inline
+    async
+    src={`https://cdn.weglot.com/weglot.min.js?api_key=${WEGLOT_API_KEY}`}
+  ></script>
+)}

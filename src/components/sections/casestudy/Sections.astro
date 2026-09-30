@@ -1,0 +1,38 @@
+---
+// Renders a case study's page-builder body: one component per section, in
+// whatever order the editor arranged them in Sanity.
+//
+// Adding a section type is three files -- a schema in
+// src/sanity/schemaTypes/caseStudySections/, a component beside this one,
+// and a branch below. The union in src/lib/types.ts is what ties them
+// together: add a member there and TypeScript will point at this file until
+// the new type is handled, so a section can't be added to the CMS and then
+// silently render as nothing.
+import SplitBlock from "./SplitBlock.astro";
+import FeatureGrid from "./FeatureGrid.astro";
+import Showcase from "./Showcase.astro";
+import StatsBand from "./StatsBand.astro";
+import Testimonial from "./Testimonial.astro";
+import type { CaseStudySection } from "../../../lib/types";
+
+interface Props {
+  sections: CaseStudySection[];
+}
+
+const { sections } = Astro.props;
+---
+
+{sections.map((section) => {
+  switch (section._type) {
+    case "splitBlock":
+      return <SplitBlock content={section} />;
+    case "featureGrid":
+      return <FeatureGrid content={section} />;
+    case "showcase":
+      return <Showcase content={section} />;
+    case "statsBand":
+      return <StatsBand content={section} />;
+    case "testimonial":
+      return <Testimonial content={section} />;
+  }
+})}

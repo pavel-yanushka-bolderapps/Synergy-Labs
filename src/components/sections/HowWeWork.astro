@@ -21,7 +21,7 @@ const { content } = Astro.props;
     <div class="flex flex-1 flex-col gap-10">
       {content.steps.map((step) => (
         <div class="flex flex-col gap-2 pt-8 first:border-t-0 first:pt-0 md:flex-row md:items-start md:gap-6">
-          <span class="font-display text-[4.5rem] leading-none text-white/10">{step.number}</span>
+          <span class="font-display text-[4.5rem] leading-none text-white/10 font-sans">{step.number}</span>
           <div>
             <h3 class="text-lg font-semibold">{step.title}</h3>
             <p class="mt-2 max-w-2xl text-sm text-white/70">{step.description}</p>

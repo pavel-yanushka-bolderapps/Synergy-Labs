@@ -1,4 +1,5 @@
 ---
+import { organization, website } from "../lib/structuredData";
 import Layout from "../components/layout/Layout.astro";
 import Hero from "../components/sections/Hero.astro";
 import Stats from "../components/sections/Stats.astro";
@@ -13,14 +14,25 @@ import Badges from "../components/sections/Badges.astro";
 import Team from "../components/sections/Team.astro";
 import FAQ from "../components/sections/FAQ.astro";
 import ContactSection from "../components/sections/ContactSection.astro";
+import LatestPosts from "../components/sections/LatestPosts.astro";
 import { home } from "../content/home";
-import { getServices } from "../lib/sanity";
+import { getBlogPosts, getLocationDetails, getServices, withExistingCaseStudies } from "../lib/sanity";
 
 // Services now live in Sanity (see /studio) instead of home.ts. If the CMS
 // isn't configured yet (no PUBLIC_SANITY_PROJECT_ID) or has no `service`
 // documents, getServices() returns null and this falls back to the static
 // list in content/home.ts so the site never renders an empty grid.
 const sanityServices = await getServices();
+// The offices are shared with /locations and with each office's own page, so
+// they come from one place rather than a copy in home.ts.
+const locationItems = await getLocationDetails();
+// Hide "View case study" on projects that have no case study page.
+const selectedWorks = {
+  ...home.selectedWorks,
+  items: await withExistingCaseStudies(home.selectedWorks.items),
+};
+// Newest first, same as /blog.
+const latestPosts = (await getBlogPosts()).slice(0, 3);
 const servicesContent = {
   heading: home.services.heading,
   items: sanityServices ?? home.services.items,
@@ -28,18 +40,23 @@ const servicesContent = {
 
 ---
 
-<Layout title="AI + Mobile App Development Agency | Synergy Labs">
+<Layout
+  title="AI + Mobile App Development Agency | Synergy Labs"
+  description="Our boutique app development company offers tailor-made solutions based on your unique requirements. Our team of experts works closely with you to understand your vision and bring it to life."
+  jsonLd={[organization(), website()]}
+>
   <Hero content={home.hero} />
   <Stats content={home.stats} />
-  <SelectedWorks content={home.selectedWorks} />
+  <SelectedWorks content={selectedWorks} />
   <HowWeWork content={home.howWeWork} />
   <WhyUs content={home.whyUs} />
   <Reviews content={home.reviews} />
   <ServicesGrid content={servicesContent} />
   <CTA content={home.cta} />
   <Badges content={home.badges} />
-  <Locations content={home.locations} />
+  <Locations items={locationItems} moreLabel={home.locations.moreLocationsLabel} />
   <Team content={home.team} />
   <FAQ content={home.faq} />
   <ContactSection id="cta" />
+  <LatestPosts posts={latestPosts} />
 </Layout>

@@ -12,7 +12,10 @@ export const nav: SiteNavigation = {
       {label: "Podcast", href:"/podcast"},
     ] },
     { label: "About Us", href: "/about-us" },
+    // Builder and Get Financing live in the footer only -- the header already runs to the
+    // width where it collapses to the compact layout, and an eighth link tips
+    // it over on common laptop widths.
   ],
   phone: "(645) 444-1069",
-  ctaButton: { label: "Free Quote", href: "/contact" },
+  ctaButton: { label: "Free Quote", href: "/contact#cta" },
 };

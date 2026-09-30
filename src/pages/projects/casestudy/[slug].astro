@@ -1,0 +1,350 @@
+---
+// A portfolio case study. Same static-build contract as the service pages:
+// every case study that exists in Sanity at build time gets a page, and
+// publishing a new one needs a rebuild before it appears.
+//
+// The original Webflow case studies were each laid out by hand, so this is
+// one consistent template driven by the schema rather than eight bespoke
+// designs -- see the note at the top of src/sanity/schemaTypes/projects.ts.
+import Layout from "../../../components/layout/Layout.astro";
+import ContactSection from "../../../components/sections/ContactSection.astro";
+import Badges from "../../../components/sections/Badges.astro";
+import Sections from "../../../components/sections/casestudy/Sections.astro";
+import StatsBand from "../../../components/sections/casestudy/StatsBand.astro";
+import SplitBlock from "../../../components/sections/casestudy/SplitBlock.astro";
+import { home } from "../../../content/home";
+import { getCaseStudySlugs, getCaseStudyBySlug } from "../../../lib/sanity";
+import type { CaseStudy } from "../../../lib/types";
+import { breadcrumbs } from "../../../lib/structuredData";
+import { stegaClean } from "@sanity/client/stega";
+
+export async function getStaticPaths() {
+  const slugs = await getCaseStudySlugs();
+  const studies = await Promise.all(slugs.map((slug) => getCaseStudyBySlug(slug)));
+
+  return slugs
+    .map((slug, i) => ({ params: { slug }, props: { study: studies[i] } }))
+    .filter((entry): entry is { params: { slug: string }; props: { study: CaseStudy } } =>
+      entry.props.study !== null
+    );
+}
+
+const { study } = Astro.props;
+const headingLines = study.headline.split("\n");
+
+// The hero carousel runs as a seamless loop: the rail is the screens over
+// again, and it slides exactly one copy's width before snapping back to the
+// start, which reads as continuous motion. Two things fall out of that.
+//
+// First, the loop only works if a single copy is wider than the column --
+// otherwise the rail runs out of images mid-travel and the strip visibly
+// empties. A study with one or two screenshots would do exactly that, so
+// repeat the set until there are enough to fill a wide column before
+// doubling it.
+//
+// Second, the pass has to take longer when there is more to show, or a
+// six-screen study would whip past at three times the speed of a two-screen
+// one. Deriving the duration from the count keeps the pixels-per-second
+// constant however many screens a study has.
+const screens = study.heroImageSrcs.length
+  ? study.heroImageSrcs
+  : study.heroImageSrc
+    ? [study.heroImageSrc]
+    : [];
+
+const MIN_RAIL_SCREENS = 6;
+const SECONDS_PER_SCREEN = 4;
+
+const copy =
+  screens.length > 0
+    ? Array.from({ length: Math.ceil(MIN_RAIL_SCREENS / screens.length) }, () => screens).flat()
+    : [];
+const rail = [...copy, ...copy];
+const railDuration = `${copy.length * SECONDS_PER_SCREEN}s`;
+
+// The store badges are fixed artwork, so they live in /public rather than
+// being uploaded per case study -- Sanity only supplies the two addresses.
+// Widths are the artwork's own aspect ratio at the 48px height they render
+// at, so the browser reserves the right box before the image loads.
+const storeLinks = [
+  {
+    href: study.appStoreUrl,
+    src: "/images/Mobile-app-store-badge.avif",
+    alt: "Download on the App Store",
+    width: 142,
+  },
+  {
+    href: study.playStoreUrl,
+    src: "/images/Mobile-app-store-badge-1.avif",
+    alt: "Get it on Google Play",
+    width: 160,
+  },
+].filter((link): link is typeof link & { href: string } => Boolean(link.href));
+
+// How the grid decoration sits on a brand-coloured band. CSS can't ask
+// whether a colour is dark, but readableInk() already answered that question
+// to pick the text colour, so reuse its answer: white ink means a dark band,
+// where the artwork's light lines read as drawn. Dark ink means a light band,
+// where they have to be inverted to dark to be seen at all. The light band
+// gets the lower opacity because dark-on-light carries further than
+// light-on-dark. See the note in SectionShell.astro.
+const gridBlend =
+  study.brandInk === "#ffffff"
+    ? { filter: "none", opacity: "0.4" }
+    : { filter: "invert(1)", opacity: "0.35" };
+---
+
+<Layout
+  title={study.metaTitle || `${study.clientName} Case Study | Synergy Labs`}
+  jsonLd={[
+    breadcrumbs([
+      { name: "Portfolio", path: "/portfolio" },
+      { name: stegaClean(study.clientName) as string, path: `/projects/casestudy/${study.slug}` },
+    ]),
+  ]}
+  description={study.metaDescription}
+>
+  <!-- The client's colour is set once here rather than on the hero alone, so
+       every section down the page -- including the page-builder ones, which
+       are separate components -- can reach it through inheritance instead of
+       being handed it as a prop. -->
+  <div
+    style={[
+      `--cs-brand: ${study.brandColor}`,
+      `--cs-brand-fade: ${study.brandColorFade}`,
+      `--cs-brand-ink: ${study.brandInk}`,
+      `--cs-grid-filter: ${gridBlend.filter}`,
+      `--cs-grid-opacity: ${gridBlend.opacity}`,
+    ].join("; ")}
+  >
+  <section class="cs-hero relative overflow-hidden bg-secondary">
+    <img
+      src="/images/Hero-Bg.svg"
+      alt=""
+      class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+    />
+
+    <div class="relative mx-auto max-w-7xl px-6 py-20 md:py-24">
+      <div
+        class:list={[
+          "grid items-center gap-12",
+          screens.length > 0 && "md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:gap-16",
+        ]}
+      >
+        <div class="min-w-0">
+          <!-- There is no page at /projects/casestudy, so "Case Study" is a
+               plain step in the trail rather than a link. -->
+          <nav aria-label="Breadcrumb" class="mb-8 text-lg">
+            <ol class="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <li>
+                <a href="/portfolio" class="text-secondary-green transition hover:text-primary-green hover:underline">
+                  Portfolio
+                </a>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li class="text-black/50">Case Study</li>
+              <li aria-hidden="true">/</li>
+              <li aria-current="page" class="text-xl text-black md:text-2xl">{study.clientName}</li>
+            </ol>
+          </nav>
+          {study.logoSrc && (
+            <img
+              src={study.logoSrc}
+              alt={study.clientName}
+              class="h-10 w-auto object-contain object-left md:h-12"
+            />
+          )}
+          <h1 class="mt-8 max-w-3xl font-display text-4xl leading-tight md:text-6xl">
+            {headingLines.map((line, i) => (
+              <>
+                {line}
+                {i < headingLines.length - 1 && <br />}
+              </>
+            ))}
+          </h1>
+          {study.intro && <p class="mt-6 max-w-2xl text-lg text-black/70">{study.intro}</p>}
+
+          {storeLinks.length > 0 && (
+            <ul class="mt-10 flex flex-wrap items-center gap-4">
+              {storeLinks.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-block rounded-lg transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
+                  >
+                    <img src={link.src} alt={link.alt} width={link.width} height="48" class="h-12 w-auto" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {screens.length > 0 && (
+          <div
+            class="cs-ticker min-w-0"
+            role="img"
+            aria-label={`Screens from the ${study.clientName} app`}
+          >
+            <div class="cs-ticker__rail" style={`--cs-ticker-duration: ${railDuration};`}>
+              {rail.map((src, i) => (
+                <img
+                  src={src}
+                  alt=""
+                  loading={i < screens.length ? "eager" : "lazy"}
+                  class="cs-ticker__image"
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  {(study.overviewParagraphs.length > 0 || study.facts.length > 0) && (
+    <section class="border-y border-black/5 bg-secondary">
+      <!-- max-content on the facts column, not a fraction: the labels and
+           values are short, fixed strings, so a 1fr share left a wide band of
+           dead space between the prose and the facts and pushed them away
+           from the right edge. Sizing the column to its longest line instead
+           pins it to the right of the container and stops it collapsing when
+           space gets tight, and hands every remaining pixel to the prose. The
+           text inside both columns stays left-aligned.
+
+           The gap climbs 3rem -> 4rem -> 6rem rather than sitting at 6rem
+           everywhere. Below md the grid is a single column, so the gap is the
+           vertical space between the prose and the facts, where 6rem reads as
+           a section break rather than as two halves of one section; and at md
+           itself the facts column is already at its widest relative to the
+           page, so a 6rem gutter there is what starts squeezing the prose. -->
+      <div
+        class="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-[minmax(0,1fr)_max-content] md:gap-16 md:py-20 lg:gap-24"
+      >
+        <div>
+          {study.overviewHeading && (
+            <h2 class="font-display text-3xl md:text-4xl">{study.overviewHeading}</h2>
+          )}
+          {study.overviewParagraphs.map((p) => (
+            <p class="mt-5 text-black/70">{p}</p>
+          ))}
+        </div>
+
+        {study.facts.length > 0 && (
+          <dl class="grid gap-6 self-start sm:grid-cols-2 md:grid-cols-1">
+            {study.facts.map((fact) => (
+              <div>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-black/40">
+                  {fact.label}
+                </dt>
+                <dd class="mt-1 font-medium">{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- The body of the page. A migrated case study renders its page-builder
+       sections; one that hasn't been moved across yet falls back to the old
+       fixed contentBlocks + achievements band, so the two can coexist for as
+       long as the migration takes rather than every study having to move on
+       the same day. Both paths render the same components. -->
+  {study.sections.length > 0 ? (
+    <Sections sections={study.sections} />
+  ) : (
+    <>
+      {study.blocks.map((block) => (
+        <SplitBlock
+          content={{
+            _type: "splitBlock",
+            heading: block.heading,
+            paragraphs: block.paragraphs,
+            bullets: block.bullets,
+            imageSrc: block.imageSrc,
+            imageSide: block.imageSide,
+            background: "default",
+          }}
+        />
+      ))}
+      {study.stats && <StatsBand content={study.stats} />}
+    </>
+  )}
+
+  <Badges content={home.badges} />
+  <ContactSection />
+  </div>
+</Layout>
+
+<style>
+  /* The client's colour, laid over the section's own #fafafa. The ramp runs
+     to the top right and holds clear for the first half of its length, so
+     the colour only starts to come up around the middle of the screen and
+     the headline on the left keeps a plain, readable background behind it.
+     Both custom properties are set on the element from Sanity -- see
+     toBrandColor() in src/lib/sanity.ts for why the fully-faded colour is
+     spelled out rather than written as `transparent`. */
+  .cs-hero {
+    background-image: linear-gradient(to top right, var(--cs-brand-fade) 50%, var(--cs-brand));
+  }
+
+  .cs-ticker {
+    overflow: hidden;
+  }
+
+  /* Moving content that runs longer than a few seconds needs a way to stop
+     it; hovering the strip is that, alongside the reduced-motion rule below. */
+  .cs-ticker:hover .cs-ticker__rail {
+    animation-play-state: paused;
+  }
+
+  .cs-ticker__rail {
+    display: flex;
+    width: max-content;
+    animation: cs-ticker-scroll var(--cs-ticker-duration, 24s) linear infinite;
+    will-change: transform;
+  }
+
+  .cs-ticker__image {
+    /* margin-right rather than a flex `gap`: the rail travels exactly -50%,
+       which is one whole copy of the screens, and that only lands seamlessly
+       if the space after a copy's last image belongs to that copy. `gap`
+       puts no space after the final child, so every pass would jump by half
+       a gap. */
+    margin-right: 2.25rem;
+    flex: none;
+    height: 20rem;
+    width: auto;
+    border-radius: 1.5rem;
+    border: 1px solid rgb(0 0 0 / 0.08);
+    box-shadow: 0 1.25rem 2.5rem -1rem rgb(0 0 0 / 0.35);
+    object-fit: cover;
+  }
+
+  @media (min-width: 768px) {
+    .cs-ticker__image {
+      height: 27rem;
+    }
+  }
+
+  @keyframes cs-ticker-scroll {
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* Hand the reader the scrollbar the animation was standing in for,
+       rather than leaving them a strip they can only see the start of. */
+    .cs-ticker {
+      overflow-x: auto;
+    }
+
+    .cs-ticker__rail {
+      animation: none;
+    }
+  }
+</style>

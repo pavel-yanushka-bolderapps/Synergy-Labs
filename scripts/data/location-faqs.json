@@ -1,0 +1,440 @@
+{
+  "san-francisco": [
+    {
+      "question": "How much does it cost to build a mobile app in San Francisco?",
+      "answer": "Mobile app development costs in San Francisco typically range from $25,000 to $250,000, depending on complexity. A straightforward MVP with core features usually falls between $25,000 and $75,000. Mid-complexity apps with custom UI/UX design, API integration, and backend infrastructure run $75,000 to $150,000. Enterprise-grade apps with advanced features like real-time data, AI-powered functionality, and HIPAA compliance can reach $150,000 to $250,000. We provide detailed estimates after a free discovery session."
+    },
+    {
+      "question": "How long does app development take in San Francisco?",
+      "answer": "Simple mobile apps with focused functionality typically take 2-4 months from kickoff to app store submission. More complex apps with extensive backend systems, third-party integrations, and custom UI/UX design take 4-8 months. At Synergy Labs, most of our San Francisco projects launch in 6-8 weeks because we scope tightly and build in agile sprints."
+    },
+    {
+      "question": "Do you build native or cross-platform apps?",
+      "answer": "We build both. Native iOS app development (Swift/SwiftUI) and native Android app development (Kotlin/Jetpack Compose) deliver the best performance and platform-specific polish. Cross-platform frameworks like React Native and Flutter let you ship to both platforms from a single codebase, saving 30-40% on development time and cost. During discovery, we help you choose the right approach for your goals and budget."
+    },
+    {
+      "question": "Why hire a San Francisco agency vs. offshore?",
+      "answer": "Three reasons. First, time-zone alignment -- your San Francisco-based team works PT hours alongside you, so decisions happen in real time. Second, the Bay Area has one of the deepest talent pools in mobile app development anywhere in the world. Third, local presence builds trust -- you can visit our Financial District office, meet your developers, and hold working sessions in person."
+    }
+  ],
+  "atlanta": [
+    {
+      "question": "How much does it cost to develop an app in Atlanta?",
+      "answer": "Mobile app development Atlanta pricing varies based on complexity, platform, and timeline. A straightforward MVP typically ranges from $15,000 to $50,000, while mid-complexity apps with custom integrations run $50,000 to $150,000. Enterprise-grade applications with advanced features can exceed $150,000. We provide a detailed estimate after a free discovery call."
+    },
+    {
+      "question": "How long does it take to build a mobile app in Atlanta?",
+      "answer": "For mobile app development Atlanta timelines, most projects launch in six to eight weeks for an MVP, with more complex applications taking three to five months. Our agile process with two-week sprints means you see working software early and often."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "austin": [
+    {
+      "question": "How much does it cost to develop an app in Austin?",
+      "answer": "Most Austin app projects land between $40,000 and $150,000. A simple MVP with a focused feature set starts around $40K. A cross-platform app with backend, admin dashboard, and integrations typically runs $80K-$120K. Enterprise and regulated work can push higher. We give a fixed estimate after a discovery call."
+    },
+    {
+      "question": "How long does it take to build a mobile app in Austin?",
+      "answer": "Our standard timeline is 6-8 weeks for an MVP and 12-16 weeks for a production app with a full backend. Fanbase shipped in 16 weeks; Signal shipped in 4. The real answer depends on scope, integrations, and how quickly your team can give feedback on design reviews."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "boston": [
+    {
+      "question": "How much does it cost to build a mobile app in Boston?",
+      "answer": "Costs range from $40,000 for a basic MVP, to $100,000+ for mid-complexity apps with custom integrations, to $200,000+ for complex enterprise applications with AI, HIPAA compliance, or multi-platform requirements. We provide detailed estimates after a free discovery call."
+    },
+    {
+      "question": "How long does it take to develop a mobile app in Boston?",
+      "answer": "Most custom mobile app development Boston projects take 3-6 months using agile sprints. Simple MVPs can launch in 6-8 weeks. Our process means you see working features every two weeks."
+    },
+    {
+      "question": "What is the best app development company in Boston?",
+      "answer": "The best mobile app developers in Boston combine local presence, proven case studies, and transparent processes. Evaluate agencies on portfolio relevance, code ownership terms, and post-launch support -- not just directory rankings."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you provide ongoing support after launch?",
+      "answer": "Every project includes a minimum of four weeks of complimentary post-launch support. After that, we offer flexible retainer agreements covering security patches, OS updates, performance monitoring, and feature development. We treat app maintenance as a long-term partnership, not an afterthought."
+    },
+    {
+      "question": "Can the agency integrate AI features into my app?",
+      "answer": "Yes. We integrate generative AI, NLP, computer vision, predictive analytics, and chatbots. AI integration is one of the most requested features from our Boston app development clients."
+    },
+    {
+      "question": "Who owns the code after the app is built?",
+      "answer": "You own 100% of the code from day one. No licensing fees, no lock-in. Full source code ownership transfers to you upon project completion."
+    },
+    {
+      "question": "Do you work with startups or only enterprises?",
+      "answer": "Both. Our 6-8 week timelines fit startups building an MVP, while our compliance expertise and scalable architecture serve enterprise clients across Massachusetts."
+    }
+  ],
+  "chicago": [
+    {
+      "question": "How much does it cost to develop a mobile app in Chicago?",
+      "answer": "Mobile app development costs typically range from $30,000 for a straightforward MVP to $150,000+ for a complex large-scale application. Price depends on platform, feature complexity, backend requirements, and design scope. Synergy Labs provides a detailed fixed-bid or time-and-materials estimate after a free discovery call."
+    },
+    {
+      "question": "How long does it take to build a mobile app in Chicago?",
+      "answer": "A simple MVP takes 6 to 8 weeks. Full-featured mobile app development with custom backend, integrations, and polished UI typically takes 12 to 16 weeks. Larger applications with complex business logic can take 20+ weeks. We provide a realistic timeline during our free discovery session."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "circleville": [
+    {
+      "question": "How much does it cost to pay someone to build a mobile app?",
+      "answer": "A focused MVP typically starts around $15,000. Full-featured apps with custom integrations and multi-platform deployment range from $50,000 to $250,000+. We provide a fixed-price quote after a free discovery call."
+    },
+    {
+      "question": "How long does it take to build a mobile app?",
+      "answer": "Most of our mobile app development projects launch in six to eight weeks from kickoff. Simpler MVPs can ship faster, while complex enterprise applications with extensive integrations may take 12-16 weeks. Our agile sprint process means you'll see working software within the first two weeks, not just wireframes."
+    },
+    {
+      "question": "Do I need an LLC to start an app?",
+      "answer": "You do not need an LLC to begin development, but we recommend forming one before launch to protect your personal assets and simplify app store registration. An Ohio LLC can be filed online for around $99."
+    },
+    {
+      "question": "How to create mobile apps that make money?",
+      "answer": "Start with a validated problem and a clear monetization strategy -- subscriptions, in-app purchases, advertising, or transaction fees. We help businesses identify the right model during discovery and build the analytics to support it."
+    },
+    {
+      "question": "Do you serve businesses outside Circleville?",
+      "answer": "Yes. While our office is in Circleville, Ohio, we serve businesses throughout Pickaway County, the Columbus metro area, and across Ohio. We also work with clients nationally."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "What's the difference between native and cross-platform app development?",
+      "answer": "Native app development builds separate codebases for iOS (Swift) and Android (Kotlin), delivering the fastest performance and tightest platform integration. Cross-platform development with React Native or Flutter uses one shared codebase to ship to both app stores, cutting time-to-market and cost by roughly 30-40%. Choose native when peak performance or deep hardware integration matters most, and choose cross-platform when speed, budget, and maintaining a single team are the priorities."
+    }
+  ],
+  "dallas": [
+    {
+      "question": "How much does it cost to develop a mobile app in Dallas?",
+      "answer": "Mobile app development costs in Dallas, TX typically range from $5,000 for a basic single-platform app to $40,000+ for complex enterprise applications. The final cost depends on platform choices (iOS, Android, or cross-platform), feature complexity, design requirements, and backend infrastructure. We provide a detailed estimate after a free strategy call."
+    },
+    {
+      "question": "How long does it take to build a mobile app in Dallas?",
+      "answer": "Most of our projects launch in 6-8 weeks for a focused MVP, with more complex applications taking 10-16 weeks. Our agile development process delivers working demos every two weeks so you can track progress throughout the build."
+    },
+    {
+      "question": "What is the difference between native and cross-platform app development?",
+      "answer": "Native development (Swift for iOS, Kotlin for Android) builds separate apps for each platform, giving you maximum performance and full access to device features. Cross-platform development (React Native, Flutter) uses a single codebase for both platforms, cutting costs and development time by 30-40%. We help clients choose based on budget, timeline, and technical requirements."
+    },
+    {
+      "question": "Do Dallas app agencies work with startups as well as enterprises?",
+      "answer": "Yes. We work with early-stage startups building their first MVP and established enterprises modernizing legacy systems. Our process adapts to the scope and budget of each project, and we have delivered successful products for both ends of that spectrum across Dallas-Fort Worth."
+    },
+    {
+      "question": "Do you sign an NDA before discussing the project?",
+      "answer": "Absolutely. We follow an NDA-first policy. Before we discuss any project details, we sign a mutual non-disclosure agreement to protect your intellectual property and business plans."
+    },
+    {
+      "question": "Will you handle App Store and Google Play submission?",
+      "answer": "Yes. We manage the entire submission process for both the Apple App Store and Google Play Store, including compliance with platform guidelines, metadata optimization, and addressing any review feedback. Your app launches without you needing to navigate the submission process yourself."
+    },
+    {
+      "question": "Can I hire app developers hourly or full-time?",
+      "answer": "We primarily work on a project basis with fixed-scope engagements, which gives you predictable costs and timelines. For ongoing work, we offer monthly retainer arrangements that function similarly to dedicated full-time developers. Contact us to discuss which model fits your needs."
+    }
+  ],
+  "hartford": [
+    {
+      "question": "How much does it cost to build a mobile app in Hartford, CT?",
+      "answer": "Custom mobile app costs in Hartford, CT typically range from $25,000 to $150,000 depending on complexity, platform, and feature set. Synergy Labs offers fixed-price engagements so you know the total investment upfront. We scope every project in a free discovery call before quoting, ensuring no hidden fees."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "houston": [
+    {
+      "question": "How much does it cost to develop a mobile app in Houston?",
+      "answer": "Mobile app development Houston pricing typically ranges from $5,000 for a simple single-platform app to $120,000 or more for complex enterprise solutions. The final cost depends on the number of platforms, feature complexity, third-party integrations, and UI/UX design requirements. We provide a detailed, fixed-scope estimate after a free discovery call."
+    },
+    {
+      "question": "How long does it take to build a mobile app?",
+      "answer": "Most of our mobile app development projects launch in six to eight weeks from kickoff. Simpler MVPs can ship faster, while complex enterprise applications with extensive integrations may take 12-16 weeks. Our agile sprint process means you'll see working software within the first two weeks, not just wireframes."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "jackson": [
+    {
+      "question": "How much does it cost to build a mobile app in Jackson, WY?",
+      "answer": "Mobile app development Jackson WY projects typically range from $15,000 to $150,000 depending on complexity, features, and platform. A simple single-platform app starts at the lower end, while a full-featured cross-platform product with backend integrations lands higher. We provide a detailed, fixed-price proposal after our free discovery call."
+    },
+    {
+      "question": "How long does it take to launch a mobile app or website in Jackson?",
+      "answer": "Most projects launch within 6 to 8 weeks. Simple websites can go live in as few as 3 weeks. Complex mobile builds with backend systems and third-party integrations may take 10 to 16 weeks. We set a fixed timeline during the scoping phase and stick to it."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "jacksonville": [
+    {
+      "question": "How much does mobile app development cost in Jacksonville, FL?",
+      "answer": "Mobile app development Jacksonville pricing typically ranges from $25,000 to $250,000 depending on complexity, platform, and feature scope. A straightforward MVP might fall in the $25K to $60K range, while enterprise applications with custom integrations cost more. We provide fixed-price proposals after a free discovery consultation."
+    },
+    {
+      "question": "How long does it take to build a mobile app?",
+      "answer": "Most of our mobile app development projects launch in six to eight weeks from kickoff. Simpler MVPs can ship faster, while complex enterprise applications with extensive integrations may take 12-16 weeks. Our agile sprint process means you'll see working software within the first two weeks, not just wireframes."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "los-angeles": [
+    {
+      "question": "How much does it cost to develop an app in Los Angeles?",
+      "answer": "App development costs in Los Angeles typically range from $25,000 for a straightforward MVP to $150,000+ for a complex, multi-platform application with custom backend infrastructure. Primary cost drivers are feature complexity, platform count, third-party integrations, and design requirements. We scope every project during a discovery phase so you get a fixed estimate before committing."
+    },
+    {
+      "question": "How long does it take to build a mobile app in Los Angeles?",
+      "answer": "Most custom mobile app projects take six to eight weeks from kickoff to app store submission. Simpler apps can ship in as few as four weeks. Complex applications with AI-powered features, multiple integrations, and custom backends typically run eight to fourteen weeks. Our agile sprint model means you see working builds every two weeks."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "miami": [
+    {
+      "question": "How much does it cost to develop an app in Miami?",
+      "answer": "App development costs in Miami vary based on complexity, platform, and feature set. A straightforward MVP typically starts around $25,000-$50,000, while more complex custom mobile app projects with backend infrastructure, integrations, and multi-platform support can range from $75,000 to $200,000+. The best way to get an accurate estimate is to book a free discovery call where we scope your specific requirements. We offer transparent pricing and will give you a detailed breakdown before any work begins."
+    },
+    {
+      "question": "How long does it take to build a mobile app?",
+      "answer": "Most of our mobile app development projects launch in six to eight weeks from kickoff. Simpler MVPs can ship faster, while complex enterprise applications with extensive integrations may take 12-16 weeks. Our agile sprint process means you'll see working software within the first two weeks, not just wireframes."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "What technologies and frameworks do you use?",
+      "answer": "For mobile app development, we work with Swift (iOS), Kotlin (Android), Flutter, and React Native (cross-platform). On the web side, our stack includes React for frontend development, Node.js and Laravel for backend services, and AWS, Firebase, and Azure for cloud infrastructure. We choose the right tools for each project rather than forcing every client into the same stack."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "new-york-city": [
+    {
+      "question": "How much does it cost to hire an app development agency in New York?",
+      "answer": "Mobile app development in New York typically ranges from $50,000 to $250,000 or more, depending on complexity, features, and platform. Hourly rates for experienced NYC app developers generally fall between $150 and $250. At Synergy Labs, we provide detailed, scope-based estimates after an initial strategy call so you know exactly what you are paying for before work begins."
+    },
+    {
+      "question": "How long does it take to build a mobile app in NYC?",
+      "answer": "A minimum viable product (MVP) typically takes 8 to 12 weeks to build. A full-featured mobile app can take 3 to 6 months depending on complexity. At Synergy Labs, most of our projects launch within 6 to 8 weeks. Timeline depends on scope, platform choice, and how quickly design approvals move on your end."
+    },
+    {
+      "question": "What's the difference between native and cross-platform app development?",
+      "answer": "Native app development builds separate codebases for iOS (Swift) and Android (Kotlin), delivering the fastest performance and tightest platform integration. Cross-platform development with React Native or Flutter uses one shared codebase to ship to both app stores, cutting time-to-market and cost by roughly 30-40%. Choose native when peak performance or deep hardware integration matters most, and choose cross-platform when speed, budget, and maintaining a single team are the priorities."
+    },
+    {
+      "question": "Do you provide ongoing support after launch?",
+      "answer": "Every project includes a minimum of four weeks of complimentary post-launch support. After that, we offer flexible retainer agreements covering security patches, OS updates, performance monitoring, and feature development. We treat app maintenance as a long-term partnership, not an afterthought."
+    },
+    {
+      "question": "How do you secure our app and user data?",
+      "answer": "Security is foundational to how we build. We implement end-to-end encryption, secure authentication protocols, and follow industry-specific compliance standards including HIPAA, GDPR, SOC 2, and PCI DSS where applicable. Every engagement is protected by an NDA signed before work begins."
+    },
+    {
+      "question": "How do I choose the right mobile app development company in New York?",
+      "answer": "Look for these signals: a strong portfolio with projects similar to yours, verified reviews on platforms like Clutch, a transparent development process with regular client communication, proven expertise in your industry, and a commitment to post-launch support. Ask for references, review their case studies, and make sure you are comfortable with the team you will be working with day to day."
+    }
+  ],
+  "orlando": [
+    {
+      "question": "How much does it cost to develop an app in Orlando?",
+      "answer": "App development costs in Orlando vary based on complexity, platform, and feature set. A straightforward MVP typically starts in the $25,000 to $50,000 range, while full-featured enterprise applications can exceed $150,000. We provide a detailed estimate after a free discovery call with transparent pricing and no hidden fees."
+    },
+    {
+      "question": "How long does it take to build a mobile app in Orlando?",
+      "answer": "Most custom mobile app projects take six to eight weeks for an MVP and 12 to 20 weeks for a full-featured release. Timeline depends on complexity, platform, and integration requirements. Our agile process keeps development on track with weekly visibility into progress."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "philadelphia": [
+    {
+      "question": "How much does it cost to develop an app in Philadelphia?",
+      "answer": "Mobile app development Philadelphia projects typically range from $25,000 for a focused MVP to $150,000 or more for a complex, feature-rich application. Cost depends on platform choice, design complexity, backend infrastructure, and third-party integrations. We provide a detailed estimate after a free discovery call."
+    },
+    {
+      "question": "How long does it take to build a mobile app in Philadelphia?",
+      "answer": "Most of our mobile app development Philadelphia projects launch within six to eight weeks. A straightforward MVP can ship in as few as four weeks. Enterprise-grade applications with extensive integrations may take 12 to 16 weeks. Our Agile sprint structure means you see working software every two weeks."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "phoenix": [
+    {
+      "question": "How much does it cost to develop a mobile app in Phoenix?",
+      "answer": "Mobile app development Phoenix costs typically range from $25,000 for a straightforward MVP to $150,000 or more for complex enterprise applications. Cost depends on platform choice, feature complexity, third-party integrations, and UI/UX design requirements. We provide a detailed estimate after a free discovery call."
+    },
+    {
+      "question": "How long does it take to build a mobile app in Phoenix?",
+      "answer": "Most mobile app development Phoenix projects take six to eight weeks from kickoff to launch. Simpler MVPs can ship in as few as four weeks, while feature-rich enterprise applications may take 12 to 16 weeks. Our agile sprint process keeps timelines predictable with bi-weekly demos."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "san-antonio": [
+    {
+      "question": "How much does it cost to develop a mobile app in San Antonio?",
+      "answer": "Mobile app development San Antonio projects typically range from $25,000 to $150,000 depending on complexity, platform, and feature scope. A simple MVP starts around $25,000 to $50,000. Mid-tier apps fall in the $50,000 to $100,000 range. Enterprise applications with advanced security and compliance can exceed $100,000. We provide free project estimates with detailed scope breakdowns."
+    },
+    {
+      "question": "How long does it take to build a mobile app?",
+      "answer": "Most of our mobile app development projects launch in six to eight weeks from kickoff. Simpler MVPs can ship faster, while complex enterprise applications with extensive integrations may take 12-16 weeks. Our agile sprint process means you'll see working software within the first two weeks, not just wireframes."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "What technologies and frameworks do you use in San Antonio?",
+      "answer": "For mobile: Swift (iOS), Kotlin (Android), Flutter, and React Native. For web: React (frontend), Node.js and Laravel (backend). For cloud: AWS, Firebase, and Azure. For e-commerce: Shopify and BigCommerce. For CMS: WordPress and headless architectures. We select the right stack for each project."
+    },
+    {
+      "question": "Do you offer post-launch support and maintenance?",
+      "answer": "Absolutely. We provide ongoing post-launch support including bug fixes, performance monitoring, OS update compatibility, feature additions, and scaling assistance. Software needs care after launch, and we stay with our clients long after the initial build is complete."
+    }
+  ],
+  "san-diego": [
+    {
+      "question": "How much does it cost to develop an app in San Diego?",
+      "answer": "App development costs in San Diego typically range from $25,000 for a focused MVP to $150,000+ for a full-featured enterprise application. The final price depends on complexity, platform targets, backend requirements, and third-party integrations. We provide a detailed estimate after a free discovery call."
+    },
+    {
+      "question": "How long does it take to build a mobile app in San Diego?",
+      "answer": "Most mobile app development San Diego projects take six to eight weeks from kickoff to launch for an MVP. More complex applications with advanced features, multiple integrations, or regulatory requirements can take 12 to 16 weeks. Our agile sprint model means you see working software every two weeks."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "What technologies and frameworks do you use in San Diego?",
+      "answer": "Our mobile stack includes Swift, Kotlin, Flutter, and React Native. For web development, we use React, Next.js, Vue.js, Node.js, Laravel, and Python. Cloud infrastructure runs on AWS, Firebase, and Azure. We select the right tools for each project rather than forcing a one-size-fits-all approach."
+    },
+    {
+      "question": "Do you offer post-launch support in San Diego?",
+      "answer": "Every project includes 30 days of post-launch support covering bug fixes, performance monitoring, and minor adjustments. We also offer ongoing maintenance retainers that include OS and dependency updates, performance optimization, feature additions, and 24/7 monitoring. Most of our San Diego clients continue on a retainer after launch."
+    }
+  ],
+  "springfield": [
+    {
+      "question": "How much does it cost to build a mobile app in Springfield?",
+      "answer": "Mobile app development costs in Springfield, MA range from $15,000 for a simple MVP to $300,000+ for complex enterprise apps. Most clients invest $25,000-$80,000 for a polished, launch-ready app. We provide a detailed estimate after a free discovery session."
+    },
+    {
+      "question": "How long does it take to develop an app in Springfield?",
+      "answer": "Most projects take 8-16 weeks from kickoff to launch. Simple apps can ship in as few as 4 weeks, as we showed with Signal. We run two-week agile sprints so you see working software early and can adjust priorities without derailing timelines."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "What does a mobile app development company do?",
+      "answer": "A mobile app development company handles strategy, UI/UX design, frontend and backend development, QA testing, App Store and Google Play submission, and post-launch maintenance. At Synergy Labs, we add web development, web design, and AI integration -- a complete digital partner."
+    }
+  ],
+  "tampa": [
+    {
+      "question": "How much does it cost to build a mobile app in Tampa?",
+      "answer": "Mobile app development costs in Tampa typically range from $25,000 to $75,000 for an MVP, $75,000 to $250,000 for a mid-complexity app, and $250,000+ for enterprise-grade platforms. The final price depends on the number of platforms, feature complexity, third-party integrations, and backend requirements. We provide fixed-price quotes after a discovery session."
+    },
+    {
+      "question": "How long does it take to build a mobile app in Tampa?",
+      "answer": "Most mobile apps take 6 to 20 weeks from kickoff to launch. A focused MVP typically ships in 6 to 8 weeks. That breaks down to 1-2 weeks for discovery, 2-3 weeks for design, and 3-12 weeks for development and testing. Timeline depends on scope, platform count, and integration complexity."
+    },
+    {
+      "question": "Do you build for both iOS and Android?",
+      "answer": "Yes. We offer iOS app development using Swift, Android app development using Kotlin, and cross-platform apps using Flutter and React Native. Many clients choose cross-platform development to reach both audiences simultaneously while keeping costs and timelines manageable."
+    },
+    {
+      "question": "Do you work with startups in Tampa?",
+      "answer": "Yes. Local startups are a core part of our client base. We offer MVP-focused engagements with lean scoping, fixed pricing, and a discovery roadmap option that lets you validate your concept before committing to a full build. Our 6-8 week launch timeline is designed for founders who need to move fast."
+    },
+    {
+      "question": "Do you provide ongoing support and maintenance in Tampa?",
+      "answer": "Every project includes four weeks of complimentary post-launch support covering bug fixes, performance monitoring, and minor adjustments. After that, we offer flexible monthly retainers for ongoing maintenance, feature development, and scaling support. Most local clients stay with us well beyond launch."
+    }
+  ]
+}

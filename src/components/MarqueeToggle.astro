@@ -1,0 +1,53 @@
+---
+// Pause/play control for the auto-scrolling marquees (Team, Badges).
+//
+// WCAG 2.2.2: anything that moves on its own for more than five seconds needs
+// a way to stop it. Hover already pauses them, but that does nothing for
+// keyboard or touch users. The button sets data-paused on the nearest
+// [data-marquee], which each marquee's CSS turns into animation-play-state.
+interface Props {
+  /** What is moving, for the button's accessible name ("Pause team"). */
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<button
+  type="button"
+  data-marquee-toggle
+  aria-pressed="false"
+  aria-label={`Pause ${label}`}
+  class="absolute bottom-2 right-8 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-green md:right-10"
+>
+  <svg data-icon="pause" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+    <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />
+  </svg>
+  <svg data-icon="play" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 w-4">
+    <path d="M8 5v14l11-7z" />
+  </svg>
+</button>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-marquee-toggle]").forEach((button) => {
+    const marquee = button.closest<HTMLElement>("[data-marquee]");
+    const name = button.getAttribute("aria-label")?.replace(/^Pause /, "") ?? "";
+    button.addEventListener("click", () => {
+      const paused = marquee?.dataset.paused !== "true";
+      if (marquee) marquee.dataset.paused = String(paused);
+      button.setAttribute("aria-pressed", String(paused));
+      button.setAttribute("aria-label", `${paused ? "Play" : "Pause"} ${name}`);
+      button.querySelector('[data-icon="pause"]')?.classList.toggle("hidden", paused);
+      button.querySelector('[data-icon="play"]')?.classList.toggle("hidden", !paused);
+    });
+  });
+</script>
+
+<style>
+  /* Reduced motion already stops the marquee, so there is nothing to pause. */
+  @media (prefers-reduced-motion: reduce) {
+    [data-marquee-toggle] {
+      display: none;
+    }
+  }
+</style>

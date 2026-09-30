@@ -1,0 +1,50 @@
+{
+  "services": {
+    "/our-services/web-app-development": {
+      "metaTitle": "Custom Web App Development Services | Synergy Labs",
+      "metaDescription": "Build secure, scalable web apps tailored to your business goals. Our developers specialize in fast, user-friendly platforms that deliver real results."
+    },
+    "/our-services/ai-infusion-service": {
+      "metaTitle": "AI Integration Services for Web & Mobile Apps | Synergy Labs",
+      "metaDescription": "Future-proof your product with AI. Synergy Labs offers seamless AI infusion into your web and mobile apps to boost performance, automation, and user experience."
+    },
+    "/our-services/app-development-service": {
+      "metaTitle": "iOS & Android App Development Company | Synergy Labs",
+      "metaDescription": "Launch powerful mobile apps with Synergy Labs. We design and develop custom iOS and Android applications for startups, enterprises, and everything in between."
+    },
+    "/our-services/staff-augmentation-service": {
+      "metaTitle": "Tech Talent & Staff Augmentation Services | Synergy Labs",
+      "metaDescription": "Scale your team fast with vetted developers, designers, and PMs. Synergy Labs offers flexible staff augmentation to meet your project needs on demand."
+    },
+    "/our-services/marketing-services": {
+      "metaTitle": "Digital Marketing & Growth Services | Synergy Labs",
+      "metaDescription": "From SEO to social media, we help tech companies grow online. Synergy Labs delivers marketing strategies that drive traffic, leads, and revenue."
+    }
+  },
+  "caseStudies": {
+    "joe-the-juice": {
+      "metaTitle": "Revamping Joe & The Juice’s Mobile Experience"
+    },
+    "signal": {
+      "metaTitle": "Signal - Property Assessment Internal Application"
+    },
+    "clearcover": {
+      "metaTitle": "Clearcover Car Insurance"
+    },
+    "spendee": {
+      "metaTitle": "Spendee"
+    },
+    "fanbase": {
+      "metaTitle": "Fanbase"
+    },
+    "urban-massage": {
+      "metaTitle": "Urban Massage"
+    },
+    "clapper": {
+      "metaTitle": "Clapper"
+    },
+    "forbes-councils": {
+      "metaTitle": "Forbes Councils"
+    }
+  }
+}

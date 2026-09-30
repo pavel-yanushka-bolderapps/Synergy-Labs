@@ -7,28 +7,41 @@ interface Props {
 
 const { nav } = Astro.props;
 
-// The header's CTA is shared across every page, but the actual contact form
-// only lives inline (id="cta") on the homepage -- everywhere else it should
-// still go to the standalone /contact page.
-const isHome = Astro.url.pathname === "/";
-const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
+// Every page with a contact form anchors it at #cta, so the CTA scrolls to
+// the form on the page rather than leaving it. The few pages with no form
+// (privacy policy, 404, financing) are caught by the script at the bottom,
+// which swaps in nav.ctaButton.href.
+const ctaHref = "#cta";
 ---
 
-<header class="sticky top-0 z-50 bg-secondary/90 backdrop-blur">
-  <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
+<!-- data-nav is the layout mode. It ships as "auto" so the server-rendered
+     markup still falls back to the md breakpoint for no-JS and for the frame
+     before the script runs; the script then measures and pins it to "desktop"
+     or "compact". See the <style> and <script> at the bottom. -->
+<header class="sticky top-0 z-50 bg-secondary/90 backdrop-blur" data-nav="auto">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4" data-nav-row>
     <a href="/" class="shrink-0">
       <img src={nav.logoSrc} alt={nav.logoAlt} class="h-8 w-auto md:h-12" />
     </a>
 
-    <nav class="hidden items-center gap-8 md:flex">
+    <nav aria-label="Main" class="shrink-0 items-center gap-8" data-nav-desktop>
       {nav.links.map((link) =>
         link.children && link.children.length > 0 ? (
-          <div class="group relative">
-            <span class="flex cursor-pointer items-center gap-1 text-sm font-medium text-black/80 transition hover:text-black">
+          <div class="group relative" data-nav-dropdown>
+            {/*
+              A <button>, not a <span>, so the menu can be reached from the
+              keyboard: focus-within opens it the way hover does, and
+              aria-expanded is kept in step by the script below.
+            */}
+            <button
+              type="button"
+              aria-expanded="false"
+              class="flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm font-medium text-black/80 transition hover:text-black"
+            >
               {link.label}
-              <span class="text-xs transition group-hover:rotate-180">▾</span>
-            </span>
-            <div class="invisible absolute left-0 top-full z-50 w-max pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100">
+              <span aria-hidden="true" class="text-xs transition group-hover:rotate-180 group-focus-within:rotate-180">▾</span>
+            </button>
+            <div class="invisible absolute left-0 top-full z-50 w-max pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
               <div class="min-w-[160px] rounded-lg border border-black/10 bg-white py-2 shadow-lg">
                 {link.children.map((child) => (
                   <a
@@ -44,28 +57,40 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
         ) : (
           <a
             href={link.href}
-            class="text-sm font-medium text-black/80 transition hover:text-black"
+            class="flex items-center gap-1.5 whitespace-nowrap text-sm font-medium text-black/80 transition hover:text-black"
           >
             {link.label}
+            {link.badge && (
+              <span class="rounded-full bg-secondary-green px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none text-white">
+                {link.badge}
+              </span>
+            )}
           </a>
         )
       )}
     </nav>
 
-    <div class="hidden items-center gap-6 md:flex">
-      <a href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`} class="text-xs font-medium text-black/80">
+    <div class="shrink-0 items-center gap-6" data-nav-desktop>
+      <a
+        href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`}
+        class="whitespace-nowrap text-xs font-medium text-black/80"
+      >
         {nav.phone}
       </a>
       <a
         href={ctaHref}
-        class="rounded-md bg-secondary-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-green"
+        data-cta-fallback={nav.ctaButton.href}
+        class="whitespace-nowrap rounded-md bg-secondary-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-green"
       >
         {nav.ctaButton.label}
       </a>
     </div>
 
-    <div class="flex items-center gap-4 md:hidden">
-      <a href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`} class="text-xs font-medium text-black/80">
+    <div class="shrink-0 items-center gap-4" data-nav-compact>
+      <a
+        href={`tel:${nav.phone.replace(/[^+\d]/g, "")}`}
+        class="whitespace-nowrap text-xs font-medium text-black/80"
+      >
         {nav.phone}
       </a>
       <button
@@ -88,7 +113,10 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
 
   <nav
     id="mobile-menu"
-    class="grid grid-rows-[0fr] overflow-hidden opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-in-out md:hidden"
+    aria-label="Mobile"
+    inert
+    class="grid grid-rows-[0fr] overflow-hidden opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-in-out"
+    data-nav-panel
   >
     <div class="flex flex-col gap-1 overflow-hidden border-t border-black/10 px-6 py-4">
       {nav.links.map((link) =>
@@ -104,13 +132,19 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
             </div>
           </div>
         ) : (
-          <a href={link.href} class="block px-2 py-2 text-sm font-medium text-black/80 hover:text-black">
+          <a href={link.href} class="flex items-center gap-1.5 px-2 py-2 text-sm font-medium text-black/80 hover:text-black">
             {link.label}
+            {link.badge && (
+              <span class="rounded-full bg-secondary-green px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-none text-white">
+                {link.badge}
+              </span>
+            )}
           </a>
         )
       )}
       <a
         href={ctaHref}
+        data-cta-fallback={nav.ctaButton.href}
         class="mt-2 rounded-md bg-secondary-green px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-primary-green"
       >
         {nav.ctaButton.label}
@@ -119,26 +153,172 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
   </nav>
 </header>
 
+
+<style>
+  /* Escape on an open dropdown: held closed over the hover/focus-within that
+     opened it, until the pointer and focus have both left (see the script).
+     Unlayered, so it wins over the Tailwind utilities on the panel. */
+  [data-nav-dropdown][data-open="false"] > div {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  /* Which of the two headers is showing is driven by data-nav on the header,
+     not by a media query, so the switch can happen at the width where the
+     links actually stop fitting rather than at a number picked in advance.
+     See the script below for how that width is found. */
+  header[data-nav="desktop"] [data-nav-desktop] { display: flex; }
+  header[data-nav="desktop"] [data-nav-compact] { display: none; }
+  header[data-nav="desktop"] [data-nav-panel] { display: none; }
+
+  header[data-nav="compact"] [data-nav-desktop] { display: none; }
+  header[data-nav="compact"] [data-nav-compact] { display: flex; }
+
+  /* "auto" is what the server renders and what a reader without JS keeps:
+     the md breakpoint this used to switch on. */
+  header[data-nav="auto"] [data-nav-desktop] { display: none; }
+  header[data-nav="auto"] [data-nav-compact] { display: flex; }
+
+  @media (min-width: 768px) {
+    header[data-nav="auto"] [data-nav-desktop] { display: flex; }
+    header[data-nav="auto"] [data-nav-compact] { display: none; }
+    header[data-nav="auto"] [data-nav-panel] { display: none; }
+  }
+</style>
+
 <script>
   const menuButton = document.getElementById("mobile-menu-button");
   const menu = document.getElementById("mobile-menu");
   const openIcon = menuButton?.querySelector('[data-icon="open"]');
   const closeIcon = menuButton?.querySelector('[data-icon="close"]');
 
-  menuButton?.addEventListener("click", () => {
-    const isOpen = menuButton.getAttribute("aria-expanded") === "true";
-    const nowOpen = !isOpen;
-    menuButton.setAttribute("aria-expanded", String(nowOpen));
+  function setMenuOpen(open: boolean) {
+    menuButton?.setAttribute("aria-expanded", String(open));
 
     // Toggle grid-template-rows between 0fr/1fr: the panel's height animates
     // smoothly via CSS transition without needing to measure its content
     // height in JS (see the `grid grid-rows-[0fr] ... transition-[grid-template-rows,opacity]`
     // classes on #mobile-menu).
-    menu?.classList.toggle("grid-rows-[0fr]", !nowOpen);
-    menu?.classList.toggle("grid-rows-[1fr]", nowOpen);
-    menu?.classList.toggle("opacity-0", !nowOpen);
+    menu?.classList.toggle("grid-rows-[0fr]", !open);
+    menu?.classList.toggle("grid-rows-[1fr]", open);
+    menu?.classList.toggle("opacity-0", !open);
+    // Collapsed is only 0fr rows and opacity 0, which hides the links from the
+    // eye but not from Tab. inert takes them out of the focus order and the
+    // accessibility tree too.
+    if (menu) menu.inert = !open;
 
-    openIcon?.classList.toggle("hidden", nowOpen);
-    closeIcon?.classList.toggle("hidden", !nowOpen);
+    openIcon?.classList.toggle("hidden", open);
+    closeIcon?.classList.toggle("hidden", !open);
+  }
+
+  menuButton?.addEventListener("click", () => {
+    setMenuOpen(menuButton.getAttribute("aria-expanded") !== "true");
   });
+
+  // Escape closes whichever menu is open and returns focus to its trigger.
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (menuButton?.getAttribute("aria-expanded") === "true") {
+      setMenuOpen(false);
+      menuButton.focus();
+    }
+    const dropdown = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>("[data-nav-dropdown]");
+    if (dropdown) {
+      dropdown.dataset.open = "false";
+      dropdown.querySelector("button")?.focus();
+    }
+  });
+
+  // Desktop dropdowns: aria-expanded tracks whether the panel is showing.
+  // data-open="false" (set by Escape) holds it closed until focus or the
+  // pointer leaves, so Escape wins over the focus-within that opened it.
+  document.querySelectorAll<HTMLElement>("[data-nav-dropdown]").forEach((dropdown) => {
+    const trigger = dropdown.querySelector("button");
+    const sync = () => {
+      const open = dropdown.dataset.open !== "false" && (dropdown.matches(":hover") || dropdown.contains(document.activeElement));
+      trigger?.setAttribute("aria-expanded", String(open));
+    };
+    const reset = () => {
+      if (!dropdown.contains(document.activeElement) && !dropdown.matches(":hover")) delete dropdown.dataset.open;
+      sync();
+    };
+    dropdown.addEventListener("focusin", sync);
+    dropdown.addEventListener("focusout", () => requestAnimationFrame(reset));
+    dropdown.addEventListener("mouseenter", sync);
+    dropdown.addEventListener("mouseleave", reset);
+    // Focus has already opened it by the time a click lands, so a click only
+    // undoes an earlier Escape.
+    trigger?.addEventListener("click", () => {
+      delete dropdown.dataset.open;
+      sync();
+    });
+    dropdown.addEventListener("keydown", () => requestAnimationFrame(sync));
+  });
+
+  // No form on this page, so "#cta" would go nowhere: send the CTA to the
+  // contact page's form instead.
+  if (!document.getElementById("cta")) {
+    document.querySelectorAll<HTMLAnchorElement>("a[data-cta-fallback]").forEach((a) => {
+      a.href = a.dataset.ctaFallback!;
+    });
+  }
+
+  // Collapse to the burger when the links stop fitting, not at 768px.
+  //
+  // The old md: breakpoint was a guess, and this nav outgrew it: at 712px the
+  // links were still "desktop" but had run out of room, so "Our Services" and
+  // the phone number wrapped onto two and three lines and the CTA pushed off
+  // the edge. The width where it actually stops fitting depends on the link
+  // labels, which come from the CMS, and on the font -- none of which a
+  // hard-coded breakpoint knows about.
+  //
+  // Everything in the row is now shrink-0 and whitespace-nowrap, so when it no
+  // longer fits it overflows rather than quietly squashing itself, and
+  // scrollWidth > clientWidth becomes a reliable "too tight" signal.
+  //
+  // Going the other way needs a remembered threshold: once collapsed, the
+  // desktop row is display:none and can't be measured, so record the width it
+  // gave up at and only try again above it. The retry re-measures, so the
+  // stored number self-corrects if the labels or fonts change.
+  const header = document.querySelector<HTMLElement>("header[data-nav]");
+  const row = header?.querySelector<HTMLElement>("[data-nav-row]");
+
+  if (header && row) {
+    let collapseAt = Number.POSITIVE_INFINITY;
+    let queued = false;
+
+    // Reads layout, so only ever called inside the rAF below. Flipping
+    // data-nav and measuring happen in the same frame, so a row that turns out
+    // not to fit is never painted in its overflowing state.
+    const fitsAsDesktop = () => {
+      header.dataset.nav = "desktop";
+      return row.scrollWidth <= row.clientWidth + 1;
+    };
+
+    const update = () => {
+      queued = false;
+      const available = row.clientWidth;
+
+      if (header.dataset.nav === "compact" && available <= collapseAt) return;
+
+      if (fitsAsDesktop()) {
+        setMenuOpen(false);
+      } else {
+        collapseAt = available;
+        header.dataset.nav = "compact";
+      }
+    };
+
+    const schedule = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(update);
+    };
+
+    new ResizeObserver(schedule).observe(row);
+
+    // Metric changes move the threshold, so re-measure once the real faces are
+    // in rather than leaving a decision made against the fallback font.
+    document.fonts?.ready.then(schedule);
+  }
 </script>

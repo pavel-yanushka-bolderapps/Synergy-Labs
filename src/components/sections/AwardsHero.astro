@@ -1,0 +1,188 @@
+---
+import type { AwardsPageContent } from "../../lib/types";
+
+interface Props {
+  content: AwardsPageContent;
+}
+
+const { content } = Astro.props;
+
+// Ring diameters from the original design, in rem. They only ever appear here
+// as the denominator that turns a badge's rem size into a share of its own
+// ring -- the rings themselves are sized in % of the hero so the whole orbit
+// scales with the column instead of overflowing a phone.
+const OUTER_RING_REM = 40;
+const INNER_RING_REM = 25;
+const INNER_RING_PERCENT = (INNER_RING_REM / OUTER_RING_REM) * 100;
+// The logo in the middle was an 8rem background on the 25rem inner ring.
+const CENTER_PERCENT = (8 / INNER_RING_REM) * 100;
+
+const outerBadges = content.orbitBadges.filter((badge) => badge.orbit === "outer");
+const innerBadges = content.orbitBadges.filter((badge) => badge.orbit === "inner");
+
+const badgeSizePercent = (sizeRem: number, ringRem: number) => `${(sizeRem / ringRem) * 100}%`;
+---
+
+<section class="relative overflow-hidden bg-green-50">
+  <img
+    src="/images/Hero-Bg.svg"
+    alt=""
+    class="pointer-events-none absolute inset-0 h-full w-full object-contain opacity-40 md:object-cover"
+  />
+
+  <div class="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-16 md:py-20 lg:grid-cols-2">
+    <div>
+      <nav aria-label="Breadcrumb" class="flex items-center gap-1 text-sm font-bold">
+        <a href="/" class="text-black/45 transition hover:text-black/70">Home page</a>
+        <span class="text-black/45">/</span>
+        <span aria-current="page">{content.breadcrumbLabel}</span>
+      </nav>
+
+      <h1 class="mt-10 font-display text-4xl leading-tight md:text-5xl">{content.heading}</h1>
+      <p class="mt-6 max-w-xl text-lg text-black/70">{content.subheading}</p>
+
+      <a
+        href={content.ctaButton.href}
+        class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 font-semibold text-white transition hover:bg-primary-green"
+      >
+        {content.ctaButton.label}
+      </a>
+    </div>
+
+    <!--
+      Two dashed rings turning at different speeds, each carrying award badges.
+
+      The original drove this with requestAnimationFrame, repositioning every
+      badge with inline left/top on every frame. This is the same picture with
+      no script: the ring animates `rotate`, and each badge runs the same
+      animation reversed so it rides around while staying upright. That also
+      means it stops dead for prefers-reduced-motion, which the JS version
+      could not.
+    -->
+    <div class="flex justify-center lg:justify-end">
+      <div class="orbit relative aspect-square w-full max-w-[22rem] sm:max-w-[28rem] lg:max-w-[34rem]">
+        <div class="orbit-ring orbit-ring--outer">
+          {outerBadges.map((badge) => (
+            <span class="orbit-slot" style={`--angle:${badge.angle}deg`}>
+              <span class="orbit-badge" style={`width:${badgeSizePercent(badge.size, OUTER_RING_REM)}`}>
+                <img
+                  src={badge.imageSrc}
+                  alt=""
+                  loading="lazy"
+                  class:list={["block aspect-square w-full", badge.rounded ? "rounded-full bg-white object-cover" : "object-contain"]}
+                />
+              </span>
+            </span>
+          ))}
+        </div>
+
+        <!--
+          A sibling of the outer ring, not a child of it. Nested, the two
+          rotations would compose, and the inner badge and the logo would be
+          left slowly tumbling at whatever the outer ring's rate is -- their
+          counter-animation can only cancel their own ring.
+        -->
+        <div
+          class="orbit-ring orbit-ring--inner"
+          style={`width:${INNER_RING_PERCENT}%;height:${INNER_RING_PERCENT}%;`}
+        >
+          <img
+            src={content.orbitCenterSrc}
+            alt=""
+            class="orbit-center absolute left-1/2 top-1/2 object-contain"
+            style={`width:${CENTER_PERCENT}%`}
+          />
+
+          {innerBadges.map((badge) => (
+            <span class="orbit-slot" style={`--angle:${badge.angle}deg`}>
+              <span class="orbit-badge orbit-badge--inner" style={`width:${badgeSizePercent(badge.size, INNER_RING_REM)}`}>
+                <img
+                  src={badge.imageSrc}
+                  alt=""
+                  loading="lazy"
+                  class:list={["block aspect-square w-full", badge.rounded ? "rounded-full bg-white object-cover" : "object-contain"]}
+                />
+              </span>
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .orbit-ring {
+    position: absolute;
+    border: 2px dashed var(--color-secondary-green);
+    border-radius: 9999px;
+    /* Animating the `rotate` property rather than `transform` leaves
+       `transform` free for the slots' static positioning below. */
+    animation: orbit-spin 60s linear infinite;
+  }
+
+  .orbit-ring--outer {
+    inset: 0;
+  }
+
+  /* Centred on the hero rather than laid out by it, so its size can stay a
+     percentage of the outer ring without a wrapper. */
+  .orbit-ring--inner {
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    animation-duration: 24s;
+  }
+
+  /* A full-size overlay turned to the badge's angle: its top-centre point is
+     where the badge sits, so one rotation places a badge anywhere on the ring
+     without any trigonometry. */
+  .orbit-slot {
+    position: absolute;
+    inset: 0;
+    transform: rotate(var(--angle));
+  }
+
+  .orbit-badge {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    translate: -50% -50%;
+    /* Cancels the ring's rotation so the badge tracks the ring but never
+       turns upside down. */
+    animation: orbit-spin 60s linear infinite reverse;
+  }
+
+  .orbit-badge--inner {
+    animation-duration: 24s;
+  }
+
+  /* The logo in the middle rides the inner ring, so it needs the same
+     counter-rotation the badges get -- otherwise it turns on the spot. */
+  .orbit-center {
+    translate: -50% -50%;
+    animation: orbit-spin 24s linear infinite reverse;
+  }
+
+  /* Cancels the slot's fixed angle, for the same reason. */
+  .orbit-badge img {
+    rotate: calc(-1 * var(--angle));
+  }
+
+  @keyframes orbit-spin {
+    from {
+      rotate: 0deg;
+    }
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit-ring,
+    .orbit-badge,
+    .orbit-center {
+      animation: none;
+    }
+  }
+</style>

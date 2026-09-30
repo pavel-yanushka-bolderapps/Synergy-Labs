@@ -1,5 +1,6 @@
 ---
 import type { HomeTeamContent } from "../../lib/types";
+import MarqueeToggle from "../MarqueeToggle.astro";
 
 interface Props {
   content: HomeTeamContent;
@@ -42,32 +43,53 @@ const track = [...content.members, ...content.members];
     </div>
   </div>
 
-  <div class="team-carousel relative mt-16">
-    <div class="team-track flex w-max gap-6 px-6">
-      {track.map((member) => (
-        <a
-          href={member.linkedinHref ?? "#"}
-          target={member.linkedinHref ? "_blank" : undefined}
-          rel={member.linkedinHref ? "noopener noreferrer" : undefined}
-          aria-label={`${member.name} on LinkedIn`}
-          class:list={[
-            "team-card group relative h-[26rem] w-72 shrink-0 overflow-hidden rounded-3xl bg-black",
-            !member.linkedinHref && "pointer-events-none",
-          ]}
-        >
-          <img
-            src={member.imageSrc}
-            alt={member.name}
-            class="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-105 group-hover:grayscale-0"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
-          <div class="absolute inset-x-0 bottom-0 p-6 text-white">
-            <p class="text-xs font-semibold uppercase tracking-wide text-white/70">{member.title}</p>
-            <p class="mt-1 font-display text-xl">{member.name}</p>
-            <p class="mt-2 text-sm text-white/80">{member.bio}</p>
-          </div>
-        </a>
-      ))}
+  <!-- Held to the same max-w-7xl/px-6 box as the heading so the cards stop
+       at its edges instead of running off to the viewport, with a blurred
+       fade on each side for them to slide in and out of. -->
+  <div class="mx-auto mt-16 max-w-7xl px-6">
+    <div class="team-carousel relative pb-14" data-marquee>
+      <div class="team-fade team-fade-left" aria-hidden="true"></div>
+      <div class="team-fade team-fade-right" aria-hidden="true"></div>
+
+      <!-- pr-6 matches the gap, so the track is exactly two copies of
+           (card + gap) wide and -50% lands on a seamless repeat. -->
+      <div class="team-track flex w-max gap-6 pr-6">
+        {track.map((member, i) => {
+          // The second copy exists only to make the loop seamless: hidden
+          // from screen readers and out of the tab order, so each person is
+          // announced and focused once.
+          const isRepeat = i >= content.members.length;
+          // Only members with a public LinkedIn get a link; the rest render
+          // as a plain card rather than a dead href="#".
+          const Card = member.linkedinHref ? "a" : "div";
+          return (
+          <Card
+            aria-hidden={isRepeat ? "true" : undefined}
+            inert={isRepeat}
+            {...(member.linkedinHref && {
+              href: member.linkedinHref,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              "aria-label": `${member.name} on LinkedIn`,
+            })}
+            class="team-card group relative h-[26rem] w-72 shrink-0 overflow-hidden rounded-3xl bg-black"
+          >
+            <img
+              src={member.imageSrc}
+              alt={member.name}
+              class="h-full w-full object-cover grayscale transition duration-500 ease-out group-hover:scale-105 group-hover:grayscale-0"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+            <div class="absolute inset-x-0 bottom-0 p-6 text-white">
+              <p class="text-xs font-semibold uppercase tracking-wide text-white/70">{member.title}</p>
+              <p class="mt-1 font-display text-xl">{member.name}</p>
+              <p class="mt-2 text-sm text-white/80">{member.bio}</p>
+            </div>
+          </Card>
+          );
+        })}
+      </div>
+      <MarqueeToggle label="team" />
     </div>
   </div>
 </section>
@@ -77,11 +99,44 @@ const track = [...content.members, ...content.members];
     overflow: hidden;
   }
 
+  .team-fade {
+    pointer-events: none;
+    position: absolute;
+    inset-block: 0;
+    z-index: 10;
+    width: 3rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  @media (min-width: 768px) {
+    .team-fade {
+      width: 6rem;
+    }
+  }
+
+  /* The blur fades out towards the middle, and the background colour fades
+     in towards the edge, so a card blurs and dissolves as it leaves. */
+  .team-fade-left {
+    left: 0;
+    background: linear-gradient(to right, var(--color-secondary), transparent);
+    mask-image: linear-gradient(to right, #000 40%, transparent);
+  }
+
+  .team-fade-right {
+    right: 0;
+    background: linear-gradient(to left, var(--color-secondary), transparent);
+    mask-image: linear-gradient(to left, #000 40%, transparent);
+  }
+
   .team-track {
     animation: team-scroll 40s linear infinite;
   }
 
-  .team-carousel:hover .team-track {
+  /* Paused on hover, while a card has keyboard focus, and by the toggle. */
+  .team-carousel:hover .team-track,
+  .team-carousel:focus-within .team-track,
+  .team-carousel[data-paused="true"] .team-track {
     animation-play-state: paused;
   }
 

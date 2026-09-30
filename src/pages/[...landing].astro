@@ -1,0 +1,170 @@
+---
+// The /top-* landing pages that Clutch and paid traffic arrive on -- 24 of
+// them, all the same template, differing only in the fields on the
+// `clutchLanding` document. See src/sanity/schemaTypes/clutchLanding.ts.
+//
+// A rest parameter rather than [landing]: one of the live URLs is
+// /top-app-developers/the-united-states, and a single-segment param cannot
+// match a slug containing a slash. That URL is indexed, so it stays as it is.
+//
+// This sits at the site root, which sounds alarming next to 400 other pages --
+// but Astro matches static routes before dynamic ones, and getStaticPaths only
+// emits the 24 slugs below, so it can neither shadow an existing page nor
+// swallow an unknown URL (those still reach 404.astro).
+//
+// The layout deliberately mirrors src/pages/locations/[slug].astro: awards,
+// Clutch reviews and success stories all sit *inside* the left column rather
+// than as full-width bands, which is what keeps the form alongside them the
+// whole way down. Stats and the closing CTA then run full width underneath.
+import type { GetStaticPaths } from "astro";
+import LandingLayout from "../components/layout/LandingLayout.astro";
+import ContactForm from "../components/ContactForm.astro";
+import WorkCard from "../components/sections/locations/WorkCard.astro";
+import Stats from "../components/sections/Stats.astro";
+import CTA from "../components/sections/CTA.astro";
+import { getClutchLandings } from "../lib/sanity";
+import { home } from "../content/home";
+import { portfolioPage } from "../content/portfolio";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const pages = await getClutchLandings();
+  return pages.map((page) => ({ params: { landing: page.slug }, props: { page } }));
+};
+
+const { page } = Astro.props;
+
+const title = page.metaTitle || page.heading;
+const description = page.metaDescription || page.pitch;
+
+// The same three badges the location pages print in their hero, as opposed to
+// the seven in the "Our Humble Recognitions" marquee.
+const heroAwards = [
+  { src: "/images/carousel-badge-01.jpg", alt: "Forbes Technology Council 2025 official member" },
+  { src: "/images/Google-Certification.webp", alt: "Google Agency Program certified agency" },
+  { src: "/images/awards1_1awards1.avif", alt: "Clutch Global Fall 2024 award" },
+];
+
+// Same two projects the location pages use, from the portfolio content rather
+// than the CMS -- which keeps their copy, metrics and case-study links in one
+// place across both page types.
+const SUCCESS_STORY_SLUGS = ["fanbase", "signal"];
+const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
+  portfolioPage.items.find((item) => item.slug === slug)
+).filter((item) => item !== undefined);
+
+// `ctaHeading` is the page's own closing pitch where it has one; otherwise the
+// shared one. It used to sit above the form, but the form now matches the
+// location pages, which have no heading on theirs.
+const cta = {
+  ...home.cta,
+  heading: page.ctaHeading || home.cta.heading,
+  // home.cta points its button at #cta, which is the homepage's contact
+  // anchor and does not exist here -- the form on this page is #contact.
+  ctaButton: { ...home.cta.ctaButton, href: "#cta" },
+};
+---
+
+<LandingLayout
+  title={title}
+  description={description}
+  canonical={page.canonicalSlug ? `/${page.canonicalSlug}` : undefined}
+  locale={page.locale}
+>
+  <section class="bg-white">
+    <div class="mx-auto max-w-7xl px-6 py-12 md:py-16">
+      <!--
+        55/45, stacking below 880px rather than at `lg` -- 1024px would put the
+        form under the copy on every tablet and small laptop, which is exactly
+        where a form beside the copy is still worth having.
+      -->
+      <div class="grid gap-12 min-[880px]:grid-cols-[55fr_45fr]">
+        <div class="min-w-0">
+          <h1 class="font-sans text-4xl font-bold uppercase leading-[1.1] text-primary-green md:text-5xl">
+            {page.heading}
+          </h1>
+
+          <p class="mt-8 text-lg leading-relaxed text-black/80">{page.pitch}</p>
+
+          <div class="mt-10">
+            <p class="font-semibold">Some of our awards:</p>
+            <div class="mt-5 grid grid-cols-3 items-center gap-6">
+              {heroAwards.map((award) => (
+                <img src={award.src} alt={award.alt} loading="lazy" class="h-auto w-full object-contain" />
+              ))}
+            </div>
+          </div>
+
+          <div class="mt-16">
+            <h2 class="font-sans text-3xl font-bold uppercase text-black md:text-4xl">Reviews from Clutch</h2>
+            <!--
+              The same widget the homepage and the location pages embed. The
+              script tag below the section is what populates this div.
+            -->
+            <div
+              class="clutch-widget mt-8"
+              data-url="https://widget.clutch.co"
+              data-widget-type="12"
+              data-height="375"
+              data-nofollow="true"
+              data-expandifr="true"
+              data-scale="100"
+              data-primary-color="#007244"
+              data-secondary-color="#007244"
+              data-reviews="321740,320396,318762,312273,308672,307983,300535,299448,297518,297389,297117,295546"
+              data-clutchcompany-id="2373941"
+            >
+            </div>
+          </div>
+
+          {successStories.length > 0 && (
+            <div class="mt-16">
+              <h2 class="font-sans text-3xl font-bold uppercase text-black md:text-4xl">Success stories</h2>
+              <div class="mt-8 flex flex-col gap-8">
+                {successStories.map((item) => <WorkCard item={item} />)}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <!--
+          `self-start` is what makes the sticky work: a grid item stretches to
+          the row height by default, so there is nothing left to slide against.
+          The id is what the header's CTA button points at.
+        -->
+        <div id="cta" class="min-[880px]:sticky min-[880px]:top-24 min-[880px]:self-start">
+          <div id="contact-form-wrapper">
+            <ContactForm class="overflow-hidden rounded-3xl bg-secondary p-5 shadow-xl md:p-8" />
+          </div>
+
+          <div
+            id="contact-success"
+            class="hidden flex-col items-center rounded-3xl bg-secondary p-10 text-center shadow-xl"
+          >
+            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-secondary-green text-white">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2.5"
+                stroke="currentColor"
+                class="h-8 w-8"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+            </div>
+            <h2 class="mt-6 font-display text-2xl">You're booked!</h2>
+            <p class="mt-4 text-black/70">
+              We're getting prepped for your call. Our director of product will be in touch shortly.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline type="text/javascript" src="https://widget.clutch.co/static/js/widget.js"></script>
+
+  <Stats content={home.stats} />
+
+  <CTA content={cta} />
+</LandingLayout>

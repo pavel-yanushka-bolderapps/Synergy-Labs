@@ -145,9 +145,9 @@ export const home: HomePageContent = {
     heading: "So you just do apps? Nope, we do a lil more",
     items: [
       { title: "Web Apps", imageSrc: "/images/services-web-apps.svg", href: "/our-services/web-app-development" },
-      { title: "Mobile Apps", imageSrc: "/images/services-mobile-apps.svg", href: "/our-services/app-development" },
-      { title: "Staff Augmentation", imageSrc: "/images/services-staff-augmentation.svg", href: "/our-services/staff-augmentation" },
-      { title: "Custom Software", imageSrc: "/images/services-custom-software.webp", href: "/our-services/ai-infusion" },
+      { title: "Mobile Apps", imageSrc: "/images/services-mobile-apps.svg", href: "/our-services/app-development-service" },
+      { title: "Staff Augmentation", imageSrc: "/images/services-staff-augmentation.svg", href: "/our-services/staff-augmentation-service" },
+      { title: "Custom Software", imageSrc: "/images/services-custom-software.webp", href: "/our-services/ai-infusion-service" },
       { title: "Marketing Services", imageSrc: "/images/services-marketing-services.png", href: "/our-services/marketing-services" },
     ],
   },
@@ -199,7 +199,6 @@ export const home: HomePageContent = {
         title: "Lead Agentic Developer",
         bio: "Sets the technical bar and ships against it.",
         imageSrc: "/images/6a3c6eba049d0fb8334ea258_synergy-sean.webp",
-        linkedinHref: "https://www.linkedin.com/in/sean-weldon-genai/",
       },
       {
         name: "Tulkin Erkin",
@@ -234,18 +233,9 @@ export const home: HomePageContent = {
   locations: {
     heading: "Our Locations",
     moreLocationsLabel: "More locations",
-    items: [
-      { city: "Miami", address: "78 SW 7th St, Miami, FL 33130", isHeadquarters: true, imageSrc: "/images/FL.webp" },
-      { city: "Dubai", address: "One Central 9th Floor -Trade Centre 2 - Dubai - UAE", imageSrc: "/images/imageForEntry25-aa1_1.avif" },
-      { city: "Hartford", address: "200 Constitution Pl, Hartford, CT 06103", imageSrc: "/images/CT_1.webp" },
-      { city: "San Francisco", address: "44 Montgomery St, San Francisco, CA 94104", imageSrc: "/images/SF.webp" },
-      { city: "Qatar", address: "1st and 2nd floor, Iconoview, C Ring Rd, Doha, Qatar", imageSrc: "/images/Qatar.webp" },
-      { city: "New York City", address: "445 Park Ave, Manhattan, NY 10022", imageSrc: "/images/NY.webp" },
-      { city: "Austin", address: "600 Congress Ave. Austin, TX 78701", imageSrc: "/images/Austin-TX-Skyline_1.avif" },
-      { city: "Riyadh", address: "Building No. 44, Ibn Katheer St, King Abdul Aziz, Riyadh 13334, Saudi Arabia", imageSrc: "/images/riyadh.webp" },
-      { city: "London", address: "18 Finsbury Square, London EC2A 1AH, United Kingdom", imageSrc: "/images/London.webp" },
-      { city: "Chicago", address: "515 N State St, Chicago, IL 60654, United States", imageSrc: "/images/chicago.webp" },
-    ],
+    // The offices themselves live in scripts/data/locations.json (and, once
+    // seeded, in Sanity) -- see getLocationDetails(). They used to be a second
+    // copy here, which meant two lists to keep in step.
   },
 
   faq: {

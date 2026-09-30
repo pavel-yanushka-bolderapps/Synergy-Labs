@@ -1,0 +1,116 @@
+---
+// The office grid: two wide cards, then a row of three, then everything else
+// behind an "Other locations" button.
+//
+// Shared by the homepage section and /locations so the two can't drift. The
+// split is positional rather than a flag on each office -- whatever comes
+// first in `order` gets the prominent slots -- which keeps the arrangement
+// editable from Studio without a deploy.
+import LocationCard from "./LocationCard.astro";
+import type { LocationItem } from "../../../lib/types";
+
+interface Props {
+  items: LocationItem[];
+  /** Label for the button under the grid, e.g. "Other locations". */
+  moreLabel: string;
+  /**
+   * Where the button goes. Set it and the grid shows the first five offices
+   * and links out -- which is what the homepage wants, since dropping twenty
+   * more cards into the middle of the page buries everything below it. Leave
+   * it off and the remainder expands in place instead, which is what
+   * /locations does because there is nowhere further to send anyone.
+   */
+  moreHref?: string;
+  /** Label once expanded. Unused when `moreHref` is set. */
+  lessLabel?: string;
+}
+
+const { items, moreLabel, moreHref, lessLabel = "Hide locations" } = Astro.props;
+
+const featured = items.slice(0, 2);
+const secondary = items.slice(2, 5);
+const hidden = moreHref ? [] : items.slice(5);
+const showLink = Boolean(moreHref) && items.length > 5;
+---
+
+<div data-locations>
+  {featured.length > 0 && (
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      {featured.map((location) => <LocationCard location={location} size="wide" />)}
+    </div>
+  )}
+
+  {secondary.length > 0 && (
+    <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+      {secondary.map((location) => <LocationCard location={location} />)}
+    </div>
+  )}
+
+  {showLink && (
+    <div class="mt-10 text-center">
+      <a
+        href={moreHref}
+        class="inline-block rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
+      >
+        {moreLabel}
+      </a>
+    </div>
+  )}
+
+  {hidden.length > 0 && (
+    <>
+      {/*
+        The 0fr -> 1fr grid-template-rows transition animates to the panel's
+        natural height without measuring it in JS, the same trick the header's
+        mobile menu uses. It needs the inner wrapper: the row is what animates,
+        so the overflow has to be clipped one level in.
+      */}
+      <div
+        data-locations-panel
+        class="grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-500 ease-out motion-reduce:transition-none"
+      >
+        <div class="overflow-hidden">
+          <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {hidden.map((location) => <LocationCard location={location} />)}
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-10 text-center">
+        <button
+          type="button"
+          data-locations-toggle
+          data-more-label={moreLabel}
+          data-less-label={lessLabel}
+          aria-expanded="false"
+          class="inline-block cursor-pointer rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
+        >
+          {moreLabel}
+        </button>
+      </div>
+    </>
+  )}
+</div>
+
+<script>
+  // Scoped per instance rather than by id: Astro bundles this module once no
+  // matter how many times the component is used, and the homepage section and
+  // /locations both render one.
+  for (const root of document.querySelectorAll<HTMLElement>("[data-locations]")) {
+    const toggle = root.querySelector<HTMLButtonElement>("[data-locations-toggle]");
+    const panel = root.querySelector<HTMLElement>("[data-locations-panel]");
+    if (!toggle || !panel) continue;
+
+    toggle.addEventListener("click", () => {
+      const open = toggle.getAttribute("aria-expanded") !== "true";
+
+      toggle.setAttribute("aria-expanded", String(open));
+      panel.classList.toggle("grid-rows-[0fr]", !open);
+      panel.classList.toggle("grid-rows-[1fr]", open);
+      panel.classList.toggle("opacity-0", !open);
+
+      const { moreLabel = "", lessLabel = "" } = toggle.dataset;
+      toggle.textContent = open ? lessLabel : moreLabel;
+    });
+  }
+</script>

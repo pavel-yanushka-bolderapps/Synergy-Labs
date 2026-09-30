@@ -3,13 +3,15 @@ import type { HomeServicesContent } from "../../lib/types";
 
 interface Props {
   content: HomeServicesContent;
+  /** Vertical padding, so a page with its own intro above can close the gap. */
+  class?: string;
 }
 
-const { content } = Astro.props;
+const { content, class: padding = "py-20" } = Astro.props;
 ---
 
-<section class="mx-auto max-w-7xl px-6 py-20">
-  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+<section class:list={["mx-auto max-w-7xl px-6", padding]}>
+  <div class="grid auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     <div class="flex items-center rounded-2xl bg-secondary p-8">
       <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
     </div>
