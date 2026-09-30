@@ -131,7 +131,8 @@ export const POST: APIRoute = async ({ request }) => {
     // check alone would report a failed send to the browser as a success.
     const { error: sendError } = await resend.emails.send({
       from: fromEmail,
-      to: toEmail,
+      // CONTACT_TO_EMAIL may list several inboxes, comma-separated.
+      to: toEmail.split(",").map((address) => address.trim()).filter(Boolean),
       replyTo: email,
       subject: `App builder request: ${domain}`,
       text: [
