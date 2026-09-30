@@ -132,11 +132,12 @@ const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
   <section class="bg-white">
     <div class="mx-auto max-w-7xl px-6 py-12 md:py-16">
     <!--
-      55/45, and it only stacks below 880px. `lg:` (1024px) put the form under
+      An even split, so the form has room for its two-up name row and the
+      country picker; it only stacks below 880px. `lg:` (1024px) put the form under
       the content on every tablet and small laptop, which is exactly where a
       form beside the copy is still worth having.
     -->
-    <div class="grid gap-12 min-[880px]:grid-cols-[55fr_45fr] min-[880px]:gap-12">
+    <div class="grid gap-12 min-[880px]:grid-cols-2 min-[880px]:gap-12">
       <div class="min-w-0">
         <h1 class="font-sans text-4xl font-bold uppercase leading-[1.1] text-primary-green md:text-5xl">
           {heading}

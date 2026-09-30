@@ -140,11 +140,13 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
         name="budgetRange"
         class={`${fieldGap}${fieldClass}`}
       >
-        <option value="">Select a range</option>
-        <option value="<$25K">Less than $25K</option>
-        <option value="$25K-$50K">$25K-$50K</option>
+        {/* The Webflow form's options, verbatim: the values reach the lead email and
+            RevenueHero's router rules, which were built against them. */}
+        <option value="Less than $30K">Less than $30K</option>
+        <option value="$30K-$50K">$30K-$50K</option>
         <option value="$50K-$100K" selected>$50K-$100K</option>
-        <option value="$100K+">$100K+</option>
+        <option value="$100K-$250K">$100K-$250K</option>
+        <option value="More than $250K">More than $250K</option>
       </select>
     </div>
 
