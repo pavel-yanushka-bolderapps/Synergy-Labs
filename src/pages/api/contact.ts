@@ -84,11 +84,12 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse({ success: false, error: "Please enter a valid email address." }, 400);
   }
 
-  // Phone is optional, but if one was provided it should already be in E.164
-  // format (the client sends iti.getNumber() -- e.g. "+14155552671").
+  // Phone is optional. The client sends it in international format
+  // ("+48 512 345 678"), so separators are stripped before checking the
+  // E.164 shape -- testing the raw value rejected every valid number.
   if (phone && phone.trim()) {
     const PHONE_PATTERN = /^\+[1-9]\d{6,14}$/;
-    if (!PHONE_PATTERN.test(phone.trim())) {
+    if (!PHONE_PATTERN.test(phone.replace(/[\s().-]/g, ""))) {
       return jsonResponse({ success: false, error: "Please enter a valid phone number." }, 400);
     }
   }

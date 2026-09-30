@@ -96,3 +96,33 @@ h1, h2, h3, h4 {
 [id] {
   scroll-margin-top: 6rem;
 }
+
+/* "View case study" button (home, portfolio, locations). */
+/* A band of light that sweeps left to right across the button on hover,
+   over the colour change. It starts parked off the left edge and only
+   animates on hover, so leaving the button does not play it backwards. */
+.case-study-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.55), transparent);
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+}
+
+.case-study-btn:hover::after {
+  animation: case-study-shine 0.7s ease-out;
+}
+
+@keyframes case-study-shine {
+  to {
+    transform: translateX(300%) skewX(-20deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-study-btn:hover::after {
+    animation: none;
+  }
+}

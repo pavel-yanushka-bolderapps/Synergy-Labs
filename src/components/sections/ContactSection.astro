@@ -6,10 +6,9 @@ import ContactForm from "../ContactForm.astro";
 import { nav } from "../../content/nav";
 
 interface Props {
-  // Anchor id this section is targeted by (e.g. header/CTA buttons link to
-  // `#${id}`). The standalone /contact page uses "contact"; the section
-  // embedded on the homepage uses "cta" so on-page buttons can jump straight
-  // to it.
+  // Anchor id this section is targeted by. Every page's contact form sits
+  // under "#cta" -- the header's "Free quote" button and the in-page CTAs all
+  // link there -- so override it only for a page with a second anchor.
   id?: string;
   heading?: string;
   /**
@@ -25,13 +24,15 @@ interface Props {
 }
 
 const {
-  id = "contact",
+  id = "cta",
   heading = "Partner with a top-tier agency",
   headingLevel: Heading = "h2",
 } = Astro.props;
 ---
 
-<section id={id} class="mx-auto max-w-7xl px-6 py-20">
+<!-- Full-bleed white band so the #fafafa form card stands off it. -->
+<section id={id} class="bg-white">
+<div class="mx-auto max-w-7xl px-6 py-20">
   <div id="contact-form-wrapper" class="grid grid-cols-1 gap-6 min-[760px]:grid-cols-2">
     <div class="relative order-2 overflow-hidden rounded-3xl bg-secondary-green p-10 text-white shadow-xl min-[760px]:order-1 md:p-8">
       <img
@@ -131,5 +132,5 @@ const {
       </a>.
     </p>
   </div>
+</div>
 </section>
-

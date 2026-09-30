@@ -224,6 +224,25 @@ export const location = defineType({
       group: "page",
     }),
     defineField({ name: "faqHeading", title: "FAQ: heading", type: "string", group: "page" }),
+    defineField({
+      name: "faqs",
+      title: "FAQ: questions",
+      type: "array",
+      description:
+        "This office's own questions, in display order. Leave empty to show the site-wide FAQ from the homepage.",
+      group: "page",
+      of: [
+        {
+          type: "object",
+          name: "locationFaq",
+          fields: [
+            defineField({ name: "question", title: "Question", type: "string", validation: (rule) => rule.required() }),
+            defineField({ name: "answer", title: "Answer", type: "text", rows: 5, validation: (rule) => rule.required() }),
+          ],
+          preview: { select: { title: "question", subtitle: "answer" } },
+        },
+      ],
+    }),
 
     // --- Technologies ------------------------------------------------------
     // The section shows whichever of these two is filled in, `techStack`

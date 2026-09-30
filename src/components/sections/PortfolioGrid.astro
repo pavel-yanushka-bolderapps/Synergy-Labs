@@ -78,7 +78,7 @@ const { content } = Astro.props;
                 alt={item.logoAlt}
                 class="h-[clamp(1.25rem,6.4cqw,2rem)] w-auto max-w-[32cqw] shrink-0 object-contain object-left"
               />
-              <span class="min-w-0 break-words font-sans text-[clamp(1rem,4.8cqw,1.5rem)] leading-tight">
+              <span class="min-w-0 font-sans text-[clamp(1rem,4.8cqw,1.5rem)] leading-tight">
                 {item.clientName}
               </span>
             </div>
@@ -142,37 +142,6 @@ const { content } = Astro.props;
     Wanna see 'em all? Submit a form below and schedule a meeting
   </p>
 </section>
-
-<style>
-  /* A band of light that sweeps left to right across the button on hover,
-     over the colour change. It starts parked off the left edge and only
-     animates on hover, so leaving the button does not play it backwards. */
-  .case-study-btn::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    width: 50%;
-    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.55), transparent);
-    transform: translateX(-150%) skewX(-20deg);
-    pointer-events: none;
-  }
-
-  .case-study-btn:hover::after {
-    animation: case-study-shine 0.7s ease-out;
-  }
-
-  @keyframes case-study-shine {
-    to {
-      transform: translateX(300%) skewX(-20deg);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .case-study-btn:hover::after {
-      animation: none;
-    }
-  }
-</style>
 
 <script>
   const filterBar = document.getElementById("portfolio-filters");

@@ -1,10 +1,10 @@
 ---
+import { breadcrumbs, collectionPage } from "../../lib/structuredData";
+import { stegaClean } from "@sanity/client/stega";
 import Layout from "../../components/layout/Layout.astro";
 import ServicesGrid from "../../components/sections/ServicesGrid.astro";
-import CTA from "../../components/sections/CTA.astro";
 import ContactSection from "../../components/sections/ContactSection.astro";
 import { ourServicesPage } from "../../content/ourServicesPage";
-import { home } from "../../content/home";
 import { getServices } from "../../lib/sanity";
 
 // Same source as the homepage grid (see src/pages/index.astro). This page
@@ -19,15 +19,27 @@ const servicesContent = {
   items: sanityServices ?? ourServicesPage.items,
 };
 
-// home.cta points at "#cta", the homepage's contact anchor. The form on this
-// page is #contact-form, so without this the button scrolls nowhere.
-const cta = {
-  ...home.cta,
-  ctaButton: { ...home.cta.ctaButton, href: "#contact-form" },
-};
 ---
 
-<Layout title="Our Services | Synergy Labs" description={ourServicesPage.subheading}>
+<Layout
+  title="Custom Software, App & Web Development Services | Synergy Labs"
+  description="Explore Synergy Labs’ full range of digital services—from mobile apps and web apps to AI and marketing. Custom-built tech that scales with your business."
+  jsonLd={[
+    collectionPage({
+      name: "Custom Software, App & Web Development Services",
+      description:
+        "Explore Synergy Labs’ full range of digital services—from mobile apps and web apps to AI and marketing. Custom-built tech that scales with your business.",
+      path: "/our-services",
+      items: servicesContent.items.map((item) => ({
+        type: "Service",
+        name: stegaClean(item.title) as string,
+        path: item.href,
+        image: item.imageSrc,
+      })),
+    }),
+    breadcrumbs([{ name: "Our Services", path: "/our-services" }]),
+  ]}
+>
   <section class="mx-auto max-w-3xl px-6 pt-20 text-center md:pt-28">
     <h1 class="font-display text-4xl leading-tight md:text-5xl">{ourServicesPage.heading}</h1>
     <p class="mt-6 text-lg text-black/70">{ourServicesPage.subheading}</p>
@@ -35,7 +47,5 @@ const cta = {
 
   <ServicesGrid content={servicesContent} class="pt-10 pb-20 md:pt-12" />
 
-  <CTA content={cta} />
-
-  <ContactSection id="contact-form" />
+  <ContactSection />
 </Layout>

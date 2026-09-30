@@ -4,7 +4,7 @@ export const awardsPage: AwardsPageContent = {
   breadcrumbLabel: "Awards",
   heading: "Some of the kudos we've gotten",
   subheading: "Just saying, these organizations noticed our hard work and results.",
-  ctaButton: { label: "Book a call", href: "#contact-form" },
+  ctaButton: { label: "Book a call", href: "#cta" },
 
   orbitCenterSrc: "/images/Icon-1.avif",
   // Four badges spread evenly around the outer ring, one on the inner ring --

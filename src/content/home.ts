@@ -199,7 +199,6 @@ export const home: HomePageContent = {
         title: "Lead Agentic Developer",
         bio: "Sets the technical bar and ships against it.",
         imageSrc: "/images/6a3c6eba049d0fb8334ea258_synergy-sean.webp",
-        linkedinHref: "https://www.linkedin.com/in/sean-weldon-genai/",
       },
       {
         name: "Tulkin Erkin",

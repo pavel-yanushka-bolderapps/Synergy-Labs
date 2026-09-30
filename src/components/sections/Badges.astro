@@ -1,5 +1,6 @@
 ---
 import type { HomeBadgesContent } from "../../lib/types";
+import MarqueeToggle from "../MarqueeToggle.astro";
 
 interface Props {
   content: HomeBadgesContent;
@@ -17,7 +18,7 @@ const track = [...content.badges, ...content.badges];
     <h2 class="font-display text-3xl md:text-4xl">{content.heading}</h2>
   </div>
 
-  <div class="badges-carousel relative mt-10 max-w-7xl px-6 overflow-hidden ml-auto mr-auto">
+  <div class="badges-carousel relative mt-10 max-w-7xl px-6 pb-14 overflow-hidden ml-auto mr-auto" data-marquee>
     <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-secondary to-transparent md:w-32"></div>
     <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-secondary to-transparent md:w-32"></div>
 
@@ -26,6 +27,7 @@ const track = [...content.badges, ...content.badges];
         <img src={badge} alt="" class="h-32 w-auto shrink-0 object-contain md:h-34" />
       ))}
     </div>
+    <MarqueeToggle label="award badges" />
   </div>
 </section>
 
@@ -38,7 +40,8 @@ const track = [...content.badges, ...content.badges];
     animation: badges-scroll 30s linear infinite;
   }
 
-  .badges-carousel:hover .badges-track {
+  .badges-carousel:hover .badges-track,
+  .badges-carousel[data-paused="true"] .badges-track {
     animation-play-state: paused;
   }
 

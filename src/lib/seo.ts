@@ -4,10 +4,11 @@
  */
 
 /**
- * An absolute URL with a trailing slash, which is the shape @astrojs/sitemap
- * emits and the shape Astro's own `Astro.url.pathname` has for a directory
- * build. Mixing the two forms is the classic way to end up with a canonical
- * that does not match the URL in the sitemap, so every one goes through here.
+ * An absolute URL with no trailing slash -- the form the Webflow site served
+ * and Google indexed, and the one `trailingSlash: 'never'` in
+ * astro.config.mjs makes @astrojs/sitemap emit. Mixing the two forms is the
+ * classic way to end up with a canonical that does not match the URL in the
+ * sitemap, so every one goes through here.
  *
  * `site` comes from astro.config.mjs. It is required: without it these would
  * silently resolve to relative URLs, which neither canonicals nor the social
@@ -21,7 +22,7 @@ export function canonicalUrl(path: string, site: URL | undefined): string {
   }
 
   const url = new URL(path, site);
-  if (!url.pathname.endsWith("/")) url.pathname += "/";
+  if (url.pathname !== "/") url.pathname = url.pathname.replace(/\/+$/, "");
   return url.href;
 }
 

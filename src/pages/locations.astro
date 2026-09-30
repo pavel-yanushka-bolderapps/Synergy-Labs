@@ -7,6 +7,8 @@
 // than the hardcoded array. The array stays as the fallback so the page still
 // builds with an unconfigured or unreachable CMS -- the same contract the
 // Services grid uses.
+import { breadcrumbs, collectionPage } from "../lib/structuredData";
+import { stegaClean } from "@sanity/client/stega";
 import Layout from "../components/layout/Layout.astro";
 import LocationsGrid from "../components/sections/locations/LocationsGrid.astro";
 import ContactSection from "../components/sections/ContactSection.astro";
@@ -21,7 +23,24 @@ const description = headquarters
   : `Synergy Labs has offices in ${items.length} cities worldwide.`;
 ---
 
-<Layout title="Locations | Synergy Labs" description={description}>
+<Layout
+  title="Our locations"
+  description={description}
+  jsonLd={[
+    collectionPage({
+      name: "Our locations",
+      description,
+      path: "/locations",
+      items: items.map((item) => ({
+        type: "ProfessionalService",
+        name: `Synergy Labs - ${stegaClean(item.city)}`,
+        path: item.slug ? `/locations/${item.slug}` : undefined,
+        image: item.imageSrc,
+      })),
+    }),
+    breadcrumbs([{ name: "Locations", path: "/locations" }]),
+  ]}
+>
   <section class="mx-auto max-w-3xl px-6 py-20 text-center md:py-28">
     <h1 class="font-display text-4xl leading-tight md:text-5xl">
       Our <span class="text-secondary-green">Locations</span>
@@ -34,5 +53,5 @@ const description = headquarters
     <LocationsGrid items={items} moreLabel={home.locations.moreLocationsLabel} />
   </section>
 
-  <ContactSection id="contact-form" />
+  <ContactSection />
 </Layout>

@@ -26,6 +26,12 @@ const {
 
 const labelClass = compact ? "sr-only" : "text-sm font-semibold";
 const fieldGap = compact ? "" : "mt-2 ";
+// border-black/50 and the placeholder grey clear the 3:1 and 4.5:1 contrast
+// minimums on the #fafafa card -- the old /20 border and /40 placeholder did
+// not, and in the compact form the placeholder is the only visible label.
+const fieldClass =
+  "w-full rounded-md border border-black/50 bg-secondary px-4 py-3 text-sm placeholder:text-[#6b6b6b] focus:border-primary-green focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-green/40 aria-[invalid=true]:border-red-600";
+const errorClass = "mt-1.5 hidden text-xs font-semibold text-red-600";
 const placeholders = compact
   ? {
       firstName: "First Name",
@@ -55,23 +61,29 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
         <label for="firstName" class={labelClass}>First Name</label>
         <input
           id="firstName"
+          autocomplete="given-name"
+          aria-describedby="firstName-error"
           name="firstName"
           type="text"
           required
           placeholder={placeholders.firstName}
-          class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
+          class={`${fieldGap}${fieldClass}`}
         />
+        <p id="firstName-error" class={errorClass} aria-live="polite"></p>
       </div>
       <div>
         <label for="lastName" class={labelClass}>Last Name</label>
         <input
           id="lastName"
+          autocomplete="family-name"
+          aria-describedby="lastName-error"
           name="lastName"
           type="text"
           required
           placeholder={placeholders.lastName}
-          class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
+          class={`${fieldGap}${fieldClass}`}
         />
+        <p id="lastName-error" class={errorClass} aria-live="polite"></p>
       </div>
     </div>
 
@@ -79,38 +91,44 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
       <label for="email" class={labelClass}>Your Email</label>
       <input
         id="email"
+        autocomplete="email"
+        aria-describedby="email-error"
         name="email"
         type="email"
         required
         placeholder={placeholders.email}
-        class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
+        class={`${fieldGap}${fieldClass}`}
       />
-      <p id="email-error" class="mt-1.5 hidden text-xs font-semibold text-red-600"></p>
+      <p id="email-error" class={errorClass} aria-live="polite"></p>
     </div>
 
     <div class="phone-field">
       <label for="phone" class={labelClass}>Your Phone number</label>
       <input
         id="phone"
+        autocomplete="tel"
+        aria-describedby="phone-error"
         name="phone"
         type="tel"
         data-fixed-placeholder={compact ? "" : undefined}
         placeholder={placeholders.phone}
-        class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
+        class={`${fieldGap}${fieldClass}`}
       />
-      <p id="phone-error" class="mt-1.5 hidden text-xs font-semibold text-red-600"></p>
+      <p id="phone-error" class={errorClass} aria-live="polite"></p>
     </div>
 
     <div>
       <label for="projectDetails" class={labelClass}>What do you need help with?</label>
       <textarea
         id="projectDetails"
+        aria-describedby="projectDetails-error"
         name="projectDetails"
         required
         rows={compact ? 2 : 3}
         placeholder={placeholders.projectDetails}
-        class={`${fieldGap}w-full resize-y rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm placeholder:text-black/40 focus:border-primary-green focus:outline-none`}
+        class={`${fieldGap}resize-y ${fieldClass}`}
       ></textarea>
+      <p id="projectDetails-error" class={errorClass} aria-live="polite"></p>
     </div>
 
     <div>
@@ -120,7 +138,7 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
       <select
         id="budgetRange"
         name="budgetRange"
-        class={`${fieldGap}w-full rounded-md border border-black/20 bg-secondary px-4 py-3 text-sm focus:border-primary-green focus:outline-none`}
+        class={`${fieldGap}${fieldClass}`}
       >
         <option value="">Select a range</option>
         <option value="<$25K">Less than $25K</option>
@@ -145,7 +163,7 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
       </div>
     )}
 
-    <p id="contact-form-error" class="hidden text-sm font-semibold text-red-600"></p>
+    <p id="contact-form-error" role="alert" tabindex="-1" class="hidden text-sm font-semibold text-red-600"></p>
 
     <button
       id="contact-form-submit"
@@ -155,7 +173,7 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
       Submit
     </button>
 
-    <p class="text-xs text-black/60">
+    <p class="text-xs text-black/70">
       By submitting this form you consent to be contacted by Synergy Labs, and acknowledge our
       {" "}
       <a href="/privacy-policy" class="text-secondary-green underline">Privacy Policy</a>.
@@ -194,6 +212,20 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
   src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"
 ></script>
 
+<!--
+  RevenueHero: after a lead is accepted it opens the meeting scheduler, so the
+  visitor can book the call there and then. Same router as the Webflow site.
+  Webflow attached it with hero.schedule('#email-form'), which listens for a
+  native form submit -- this form posts with fetch, so the submit handler
+  below hands it the data through hero.submit() instead.
+-->
+<script is:inline src="https://assets.revenuehero.io/scheduler.min.js" defer></script>
+<script is:inline>
+  window.addEventListener("DOMContentLoaded", function () {
+    if (window.RevenueHero) window.hero = new window.RevenueHero({ routerId: "4617" });
+  });
+</script>
+
 <script>
   declare global {
     interface Window {
@@ -209,17 +241,58 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
         promise: Promise<unknown[]>;
       };
       /** Published by the library's utils.js once it finishes loading. */
+      /** RevenueHero scheduler, set up by the inline script above. */
+      hero?: {
+        submit: (data: Record<string, string>) => Promise<unknown>;
+        dialog: { open: (session: unknown) => void };
+      };
       intlTelInputUtils?: {
         numberFormat: { E164: number; INTERNATIONAL: number; NATIONAL: number };
       };
     }
   }
 
-  const form = document.getElementById("contact-form") as HTMLFormElement | null;
+  // Selected as a <form>, not just by id: eleven pages once gave their
+  // ContactSection the same id, getElementById returned the <section>, and
+  // `new FormData(section)` threw on every submit -- the form looked fine and
+  // sent nothing.
+  const form = document.querySelector<HTMLFormElement>("form#contact-form");
   const formWrapper = document.getElementById("contact-form-wrapper");
   const successBlock = document.getElementById("contact-success");
   const submitButton = document.getElementById("contact-form-submit") as HTMLButtonElement | null;
   const errorMessage = document.getElementById("contact-form-error");
+
+  /** Show or clear a field's message and keep aria-invalid in step with it. */
+  function setFieldError(input: HTMLElement, errorEl: HTMLElement, message: string | null) {
+    errorEl.textContent = message ?? "";
+    errorEl.classList.toggle("hidden", !message);
+    input.setAttribute("aria-invalid", String(Boolean(message)));
+  }
+
+  // --- Required text fields ----------------------------------------------------
+  const REQUIRED_FIELDS: Array<[string, string]> = [
+    ["firstName", "First name is required."],
+    ["lastName", "Last name is required."],
+    ["projectDetails", "Please tell us a little about your project."],
+  ];
+
+  function validateRequired(id: string, message: string, showEmptyError: boolean): boolean {
+    const input = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
+    const errorEl = document.getElementById(`${id}-error`);
+    if (!input || !errorEl) return true;
+    if (input.value.trim()) {
+      setFieldError(input, errorEl, null);
+      return true;
+    }
+    if (showEmptyError) setFieldError(input, errorEl, message);
+    return false;
+  }
+
+  for (const [id, message] of REQUIRED_FIELDS) {
+    const input = document.getElementById(id);
+    input?.addEventListener("input", () => validateRequired(id, message, false));
+    input?.addEventListener("blur", () => validateRequired(id, message, true));
+  }
 
   // --- Email validation ------------------------------------------------------
   const emailInput = document.getElementById("email") as HTMLInputElement | null;
@@ -231,18 +304,16 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
     const value = emailInput.value.trim();
 
     if (!value) {
-      emailError.classList.toggle("hidden", !showEmptyError);
-      if (showEmptyError) emailError.textContent = "Email is required.";
+      if (showEmptyError) setFieldError(emailInput, emailError, "Email is required.");
       return false;
     }
 
     if (!EMAIL_PATTERN.test(value)) {
-      emailError.textContent = "Please enter a valid email address.";
-      emailError.classList.remove("hidden");
+      setFieldError(emailInput, emailError, "Please enter a valid email address.");
       return false;
     }
 
-    emailError.classList.add("hidden");
+    setFieldError(emailInput, emailError, null);
     return true;
   }
 
@@ -306,20 +377,25 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
 
     // Phone is optional -- an empty field is valid, just not filled in.
     if (!value) {
-      phoneError.classList.add("hidden");
+      setFieldError(phoneInput, phoneError, null);
       return true;
     }
 
-    if (!iti) return true;
+    // Without utils.js (still loading, or blocked) isValidNumber() has
+    // nothing to check against and fails every number -- let it through and
+    // leave the shape check to the API route.
+    if (!iti || !window.intlTelInputUtils) {
+      setFieldError(phoneInput, phoneError, null);
+      return true;
+    }
 
     if (iti.isValidNumber()) {
-      phoneError.classList.add("hidden");
+      setFieldError(phoneInput, phoneError, null);
       return true;
     }
 
     const code = iti.getValidationError();
-    phoneError.textContent = PHONE_ERROR_MESSAGES[code] ?? "Please enter a valid phone number.";
-    phoneError.classList.remove("hidden");
+    setFieldError(phoneInput, phoneError, PHONE_ERROR_MESSAGES[code] ?? "Please enter a valid phone number.");
     return false;
   }
 
@@ -354,7 +430,19 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
     if (national) phoneInput.value = national;
   }
 
+  /**
+   * Point the country picker at the dial code in the box. intl-tel-input only
+   * does this on keyup, so a number that arrives without keystrokes -- pasted,
+   * or filled in by the browser's autofill -- kept the old country: "+48 512
+   * 345 678" was checked as a US number and rejected as "too short".
+   */
+  function syncCountryFromNumber() {
+    const value = phoneInput?.value.trim();
+    if (iti && value?.startsWith("+")) iti.setNumber(value);
+  }
+
   phoneInput?.addEventListener("blur", () => {
+    syncCountryFromNumber();
     formatPhoneNational();
     validatePhone();
   });
@@ -373,24 +461,51 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
     if (!errorMessage) return;
     errorMessage.textContent = message;
     errorMessage.classList.remove("hidden");
+    // role="alert" announces it; focus keeps keyboard users next to it rather
+    // than stranded on the disabled-then-re-enabled button.
+    errorMessage.focus();
   }
 
   function clearError() {
     errorMessage?.classList.add("hidden");
   }
 
+  /**
+   * Hand the accepted lead to RevenueHero to open its booking dialog. The keys
+   * are the Webflow form's field names, which router 4617's rules were built
+   * against. Never allowed to break the submission: the lead is already sent.
+   */
+  function openScheduler(payload: Record<string, unknown>) {
+    const hero = window.hero;
+    if (!hero) return;
+    const budgetSelect = document.getElementById("budgetRange") as HTMLSelectElement | null;
+    hero
+      .submit({
+        "First-Name": String(payload.firstName ?? ""),
+        "Last-Name": String(payload.lastName ?? ""),
+        Email: String(payload.email ?? ""),
+        Phone: String(payload.phone ?? ""),
+        Message: String(payload.projectDetails ?? ""),
+        Budget: budgetSelect?.selectedOptions[0]?.text ?? "",
+      })
+      .then((session) => {
+        if (session) hero.dialog.open(session);
+      })
+      .catch((err) => console.error("[revenuehero]", err));
+  }
+
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     clearError();
 
+    // Run every check (not just up to the first failure) so all the messages
+    // show at once, then put focus on the first field that needs fixing.
+    const requiredOk = REQUIRED_FIELDS.map(([id, message]) => validateRequired(id, message, true));
     const emailOk = validateEmail(true);
+    syncCountryFromNumber();
     const phoneOk = validatePhone();
-    if (!emailOk) {
-      emailInput?.focus();
-      return;
-    }
-    if (!phoneOk) {
-      phoneInput?.focus();
+    if (!requiredOk.every(Boolean) || !emailOk || !phoneOk) {
+      form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
       return;
     }
 
@@ -446,11 +561,19 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
         throw new Error(result.error || "Something went wrong. Please try again.");
       }
 
+      openScheduler(payload);
+
       // Success: swap the form card out for the success card.
       formWrapper?.classList.add("hidden");
       successBlock?.classList.remove("hidden");
       successBlock?.classList.add("flex");
       successBlock?.scrollIntoView({ behavior: "smooth", block: "start" });
+      // The form the user was in is gone; move focus to the confirmation so a
+      // screen reader announces it.
+      if (successBlock) {
+        successBlock.setAttribute("tabindex", "-1");
+        successBlock.focus({ preventScroll: true });
+      }
     } catch (err) {
       showError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       window.grecaptcha?.reset();

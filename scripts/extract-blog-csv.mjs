@@ -1,5 +1,5 @@
 // Turns the Webflow Blogs CSV export into the three JSON files the blog runs
-// on. Run it whenever a fresh export lands in public/csv/:
+// on. Run it whenever a fresh export lands in scripts/data/webflow/:
 //
 //   node scripts/extract-blog-csv.mjs
 //
@@ -20,7 +20,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 
 const CSV = new URL(
-  "../public/csv/Synergy Labs - Blogs - 66b25e37cb4087accb88e158.csv",
+  "data/webflow/Synergy Labs - Blogs - 66b25e37cb4087accb88e158.csv",
   import.meta.url
 );
 

@@ -286,6 +286,12 @@ export const service = defineType({
       },
     }),
     defineField({
+      name: "metaTitle",
+      title: "Detail page: SEO title",
+      type: "string",
+      description: "The <title> and the search result headline. Falls back to \"<Title> | Synergy Labs\".",
+    }),
+    defineField({
       name: "metaDescription",
       title: "Detail page: SEO description",
       type: "text",

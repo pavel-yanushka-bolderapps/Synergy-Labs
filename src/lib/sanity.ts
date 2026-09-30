@@ -2,6 +2,7 @@ import { sanityClient } from "sanity:client";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { stegaClean } from "@sanity/client/stega";
 import { loadQuery } from "./loadQuery";
+import { normalizeArticleLinks } from "./blog";
 import locationsData from "../../scripts/data/locations.json";
 import locationServicesData from "../../scripts/data/location-services.json";
 import locationIndustriesData from "../../scripts/data/location-industries.json";
@@ -139,6 +140,7 @@ interface SanityLocationPageDoc extends SanityLocationDoc {
   serviceAreaHeading?: string;
   serviceAreaDescription?: string;
   faqHeading?: string;
+  faqs?: Array<{ question: string; answer: string }>;
   technologiesHeading?: string;
   contactHeading?: string;
   contactDescription?: string;
@@ -183,7 +185,7 @@ const LOCATION_PAGE_FIELDS = `
   processHeading, processDescription,
   whyChooseUsHeading, whyChooseUsDescription,
   serviceAreaHeading, serviceAreaDescription,
-  faqHeading, technologiesHeading,
+  faqHeading, "faqs": faqs[]{ question, answer }, technologiesHeading,
   contactHeading, contactDescription,
   caseStudiesHeading, caseStudies[]{ title, body },
   services[]{ titleOverride, descriptionOverride, service->{ title, description, image } },
@@ -328,6 +330,7 @@ export interface ServiceDetail {
   process?: ServiceProcessContent;
   /** Client review cards, or undefined when the service has none. */
   testimonials?: ServiceTestimonialsContent;
+  metaTitle?: string;
   metaDescription?: string;
 }
 
@@ -351,6 +354,7 @@ interface SanityServiceDetailDoc {
     | null;
   testimonialsPlacement?: string | null;
   testimonialsLayout?: string | null;
+  metaTitle?: string | null;
   metaDescription?: string | null;
 }
 
@@ -393,7 +397,7 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
         processSteps[]{ icon, title, description },
         testimonials[]{ quote, name, role, avatar },
         testimonialsPlacement, testimonialsLayout,
-        metaDescription
+        metaTitle, metaDescription
       }`,
       params: { href: `/our-services/${slug}` },
     });
@@ -477,6 +481,7 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
             })),
           }
         : undefined,
+      metaTitle: doc.metaTitle ?? undefined,
       metaDescription: doc.metaDescription ?? undefined,
     };
   } catch (err) {
@@ -605,6 +610,7 @@ interface SanityCaseStudyDoc {
   statsBgColor?: string | null;
   statsAccentColor?: string | null;
   statsItems?: { value: string; label: string }[] | null;
+  metaTitle?: string | null;
   metaDescription?: string | null;
 }
 
@@ -712,7 +718,7 @@ const CASE_STUDY_PROJECTION = `{
   statsEnabled, statsIcon, statsHeading, statsSubheading,
   statsBgColor, statsAccentColor,
   statsItems[]{ value, label },
-  metaDescription
+  metaTitle, metaDescription
 }`;
 
 /**
@@ -968,6 +974,7 @@ function toCaseStudy(doc: SanityCaseStudyDoc): CaseStudy {
     }),
     sections: toSections(doc.sections, brandColor),
     stats,
+    metaTitle: doc.metaTitle ?? undefined,
     metaDescription: doc.metaDescription ?? undefined,
   };
 }
@@ -1195,6 +1202,8 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
   }
 
   if (!articleHtml) return null;
+
+  articleHtml = normalizeArticleLinks(articleHtml, new Set((await getBlogPosts()).map((post) => post.slug)));
 
   return {
     ...summary,

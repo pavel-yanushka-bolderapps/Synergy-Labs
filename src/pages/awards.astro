@@ -7,8 +7,11 @@ import ContactSection from "../components/sections/ContactSection.astro";
 import { awardsPage } from "../content/awardsPage";
 ---
 
-<Layout title="Awards | Synergy Labs" description={awardsPage.subheading}>
+<Layout
+  title="Awards | Synergy Labs"
+  description="Synergy Labs: Miami’s leading mobile app and web development agency. Specializing in cutting-edge Android, iOS, and web solutions, we craft scalable, user-friendly apps and websites tailored to your business needs. Trusted by startups and enterprises across Miami for fast and reliable development services."
+>
   <AwardsHero content={awardsPage} />
   <AwardsGrid items={awardsPage.awards} />
-  <ContactSection id="contact-form" />
+  <ContactSection />
 </Layout>

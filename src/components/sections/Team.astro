@@ -1,5 +1,6 @@
 ---
 import type { HomeTeamContent } from "../../lib/types";
+import MarqueeToggle from "../MarqueeToggle.astro";
 
 interface Props {
   content: HomeTeamContent;
@@ -46,23 +47,32 @@ const track = [...content.members, ...content.members];
        at its edges instead of running off to the viewport, with a blurred
        fade on each side for them to slide in and out of. -->
   <div class="mx-auto mt-16 max-w-7xl px-6">
-    <div class="team-carousel relative">
+    <div class="team-carousel relative pb-14" data-marquee>
       <div class="team-fade team-fade-left" aria-hidden="true"></div>
       <div class="team-fade team-fade-right" aria-hidden="true"></div>
 
       <!-- pr-6 matches the gap, so the track is exactly two copies of
            (card + gap) wide and -50% lands on a seamless repeat. -->
       <div class="team-track flex w-max gap-6 pr-6">
-        {track.map((member) => (
-          <a
-            href={member.linkedinHref ?? "#"}
-            target={member.linkedinHref ? "_blank" : undefined}
-            rel={member.linkedinHref ? "noopener noreferrer" : undefined}
-            aria-label={`${member.name} on LinkedIn`}
-            class:list={[
-              "team-card group relative h-[26rem] w-72 shrink-0 overflow-hidden rounded-3xl bg-black",
-              !member.linkedinHref && "pointer-events-none",
-            ]}
+        {track.map((member, i) => {
+          // The second copy exists only to make the loop seamless: hidden
+          // from screen readers and out of the tab order, so each person is
+          // announced and focused once.
+          const isRepeat = i >= content.members.length;
+          // Only members with a public LinkedIn get a link; the rest render
+          // as a plain card rather than a dead href="#".
+          const Card = member.linkedinHref ? "a" : "div";
+          return (
+          <Card
+            aria-hidden={isRepeat ? "true" : undefined}
+            inert={isRepeat}
+            {...(member.linkedinHref && {
+              href: member.linkedinHref,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              "aria-label": `${member.name} on LinkedIn`,
+            })}
+            class="team-card group relative h-[26rem] w-72 shrink-0 overflow-hidden rounded-3xl bg-black"
           >
             <img
               src={member.imageSrc}
@@ -75,9 +85,11 @@ const track = [...content.members, ...content.members];
               <p class="mt-1 font-display text-xl">{member.name}</p>
               <p class="mt-2 text-sm text-white/80">{member.bio}</p>
             </div>
-          </a>
-        ))}
+          </Card>
+          );
+        })}
       </div>
+      <MarqueeToggle label="team" />
     </div>
   </div>
 </section>
@@ -121,7 +133,10 @@ const track = [...content.members, ...content.members];
     animation: team-scroll 40s linear infinite;
   }
 
-  .team-carousel:hover .team-track {
+  /* Paused on hover, while a card has keyboard focus, and by the toggle. */
+  .team-carousel:hover .team-track,
+  .team-carousel:focus-within .team-track,
+  .team-carousel[data-paused="true"] .team-track {
     animation-play-state: paused;
   }
 

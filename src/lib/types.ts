@@ -103,6 +103,8 @@ export interface LocationDetail extends LocationItem {
   /** Rich text. */
   serviceAreaDescription?: string;
   faqHeading?: string;
+  /** The office's own FAQ, in display order; the homepage set when empty. */
+  faqs?: Array<{ question: string; answer: string }>;
   technologiesHeading?: string;
   contactHeading?: string;
   /** Rich text. */
@@ -585,6 +587,7 @@ export interface CaseStudy {
   blocks: CaseStudyBlock[];
   /** @deprecated Fallback achievements band for studies not yet migrated. */
   stats?: CaseStudyStats;
+  metaTitle?: string;
   metaDescription?: string;
 }
 

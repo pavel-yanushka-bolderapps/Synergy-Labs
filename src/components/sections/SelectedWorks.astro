@@ -50,7 +50,7 @@ const { content } = Astro.props;
                 alt={item.logoAlt}
                 class="h-[clamp(1.25rem,6.4cqw,2rem)] w-auto max-w-[32cqw] shrink-0 object-contain object-left"
               />
-              <span class="min-w-0 break-words font-sans text-[clamp(1rem,4.8cqw,1.5rem)] leading-tight">
+              <span class="min-w-0 font-sans text-[clamp(1rem,4.8cqw,1.5rem)] leading-tight">
                 {item.clientName}
               </span>
             </div>
@@ -71,7 +71,7 @@ const { content } = Astro.props;
           {item.caseStudyHref && (
             <a
               href={item.caseStudyHref}
-              class="shrink-0 whitespace-nowrap rounded-md bg-white/80 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white"
+              class="case-study-btn relative shrink-0 overflow-hidden whitespace-nowrap rounded-md bg-white/80 px-5 py-2.5 text-sm font-semibold text-black transition-colors duration-300 hover:bg-secondary-green hover:text-white"
             >
               View case study
             </a>

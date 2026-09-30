@@ -1,4 +1,5 @@
 import { stegaClean } from "@sanity/client/stega";
+import { redirects } from "./redirects.mjs";
 
 /**
  * Small helpers shared by the blog pages and cards. Kept out of sanity.ts so
@@ -45,56 +46,69 @@ export function excerptFromHtml(html: string, maxLength = 180): string {
   return text.slice(0, text.lastIndexOf(" ", maxLength)).trimEnd() + "…";
 }
 
-/** Google truncates the title around here; the brand suffix is what usually pushes past it. */
-const TITLE_LIMIT = 60;
-/** And the description around here. */
-const DESCRIPTION_MAX = 160;
-const DESCRIPTION_MIN = 70;
-
-const BRAND = "Synergy Labs";
-
 /**
- * A page title with the brand appended only when it still fits. Blanket
- * `${title} | Synergy Labs` pushed 114 of the 316 imported posts past the
- * limit on their own -- and a truncated title loses the brand anyway, so
- * appending it there costs the headline words and buys nothing.
+ * A post's <title>, in the pattern the Webflow blog template used for every
+ * one of the 316 posts. Kept verbatim so the titles Google has indexed do not
+ * change at the cutover.
  *
- * Titles longer than the limit before the suffix are left alone: they are
- * editorial copy, and silently cutting one would misrepresent the post.
+ * stegaClean: in the Studio's Preview tab every string from Sanity carries
+ * invisible click-to-edit markers, which are pure noise in a <meta> tag.
  */
 export function metaTitle(title: string): string {
-  // See the note in metaDescription below: in preview mode these strings
-  // arrive carrying invisible click-to-edit markers, and `.length` counts
-  // them -- a 76-character title measured 1,140, so every single post lost
-  // its brand suffix to a limit it had not actually reached.
-  const clean = stegaClean(title) as string;
-  const withBrand = `${clean} | ${BRAND}`;
-  return withBrand.length <= TITLE_LIMIT ? withBrand : clean;
+  return `Synergy Labs Blog | ${(stegaClean(title) as string).trim()}`;
+}
+
+/** A post's meta description, in the Webflow blog template's pattern. */
+export function metaDescription(title: string): string {
+  return `Check out this blog by Synergy Labs discussing ${(stegaClean(title) as string).trim()} | Synergy Labs Blog is packed with insights into mobile and web app development`;
+}
+
+const OWN_HOST = /^(?:https?:\/\/)?(?:www\.)?synergylabs\.co(?=[/?#]|$)/i;
+
+/** Legacy path -> final path, from the site's redirect map. */
+const REDIRECT_TARGETS = new Map(
+  Object.entries(redirects).map(([source, target]) => [source.replace("{/}?", ""), target.destination])
+);
+
+/** Follow the redirect map to its end (guarding against a loop). */
+function finalPath(path: string): string {
+  for (let hops = 0; hops < 5 && REDIRECT_TARGETS.has(path); hops++) path = REDIRECT_TARGETS.get(path)!;
+  return path;
 }
 
 /**
- * A description inside the length search results actually show. Long ones are
- * cut on a word boundary rather than mid-word; short or empty ones are topped
- * up from the article, since a 40-character description gives a searcher
- * nothing to act on.
+ * Repair the links inside a post body, which came across from Webflow as-is.
+ *
+ * - Links to our own domain become relative. Some were written without a
+ *   scheme (`href="synergylabs.co/blog/x"`), which a browser resolves against
+ *   the current page -- /blog/synergylabs.co/blog/x, a 404. Absolute ones
+ *   work, but a hard-coded host (often the bare apex) costs a redirect hop.
+ * - Trailing slashes are dropped: the site's URLs have none.
+ * - A link to a post that does not exist is retargeted to its re-dated
+ *   successor when there is one (Webflow re-slugged many "-2025" posts to
+ *   "-2026" without updating the links pointing at them), and otherwise
+ *   unwrapped to plain text rather than left as a link to a 404.
+ *
+ * - A link to an old URL covered by src/lib/redirects.mjs goes straight to
+ *   where that redirect lands, instead of through the hop.
  */
-export function metaDescription(previewText: string | undefined, articleHtml?: string): string {
-  // stegaClean: when the Studio's Preview tab is on, every string from Sanity
-  // carries invisible provenance markers so the overlay knows which field to
-  // open. Useful in prose that someone might click; pure noise in a <meta>
-  // tag, where there is nothing to click -- and it breaks the length checks
-  // here, because the markers count towards `.length`.
-  let text = (stegaClean(previewText) as string | undefined ?? "").trim();
+export function normalizeArticleLinks(html: string, slugs: ReadonlySet<string>): string {
+  return html.replace(/<a\b([^>]*?)\shref="([^"]*)"([^>]*)>([\s\S]*?)<\/a>/gi, (whole, before, href, after, text) => {
+    let url = href.trim();
+    if (OWN_HOST.test(url)) url = url.replace(OWN_HOST, "").replace(/^(?=[?#]|$)/, "/");
+    if (!url.startsWith("/") || url.startsWith("//")) return whole;
 
-  if (text.length < DESCRIPTION_MIN && articleHtml) {
-    const excerpt = excerptFromHtml(articleHtml, DESCRIPTION_MAX);
-    // Only swap in the excerpt if it is actually more informative -- for a few
-    // posts the article opens with a heading shorter than the standfirst.
-    if (excerpt.length > text.length) text = excerpt;
-  }
+    const [, path, suffix = ""] = url.match(/^([^?#]*)(.*)$/)!;
+    let clean = finalPath(path.length > 1 ? path.replace(/\/+$/, "") : path);
 
-  if (text.length <= DESCRIPTION_MAX) return text;
+    const post = clean.match(/^\/blog\/([^/]+)$/);
+    if (post && !slugs.has(post[1])) {
+      const successor = post[1].replace(/20(24|25)/g, "2026");
+      if (successor !== post[1] && slugs.has(successor)) clean = `/blog/${successor}`;
+      else return text;
+    }
 
-  const cut = text.lastIndexOf(" ", DESCRIPTION_MAX - 1);
-  return text.slice(0, cut > 0 ? cut : DESCRIPTION_MAX - 1).trimEnd() + "…";
+    const next = clean + suffix;
+    return next === href ? whole : `<a${before} href="${next}"${after}>${text}</a>`;
+  });
 }

@@ -15,6 +15,8 @@ import SplitBlock from "../../../components/sections/casestudy/SplitBlock.astro"
 import { home } from "../../../content/home";
 import { getCaseStudySlugs, getCaseStudyBySlug } from "../../../lib/sanity";
 import type { CaseStudy } from "../../../lib/types";
+import { breadcrumbs } from "../../../lib/structuredData";
+import { stegaClean } from "@sanity/client/stega";
 
 export async function getStaticPaths() {
   const slugs = await getCaseStudySlugs();
@@ -93,7 +95,13 @@ const gridBlend =
 ---
 
 <Layout
-  title={`${study.clientName} Case Study | Synergy Labs`}
+  title={study.metaTitle || `${study.clientName} Case Study | Synergy Labs`}
+  jsonLd={[
+    breadcrumbs([
+      { name: "Portfolio", path: "/portfolio" },
+      { name: stegaClean(study.clientName) as string, path: `/projects/casestudy/${study.slug}` },
+    ]),
+  ]}
   description={study.metaDescription}
 >
   <!-- The client's colour is set once here rather than on the hero alone, so
@@ -267,7 +275,7 @@ const gridBlend =
   )}
 
   <Badges content={home.badges} />
-  <ContactSection id="contact-form" />
+  <ContactSection />
   </div>
 </Layout>
 

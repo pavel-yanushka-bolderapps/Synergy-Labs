@@ -112,6 +112,22 @@ for (const [route, p] of pages) {
   if (/[​‌‍﻿⁠]|[\uDB40][\uDC00-\uDFFF]/.test(head))
     err(route, "stega/invisible characters in <head>");
 
+  // Structured data (src/lib/structuredData.ts). Google drops a block that
+  // does not parse, and ignores relative URLs inside one.
+  for (const [, json] of p.html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)) {
+    let data;
+    try {
+      data = JSON.parse(json);
+    } catch {
+      err(route, "JSON-LD block is not valid JSON");
+      continue;
+    }
+    if (!data["@context"] || !data["@type"]) err(route, "JSON-LD block has no @context or @type");
+    for (const [, url] of json.matchAll(/"(?:url|item|image|@id)":"([^"]*)"/g)) {
+      if (!/^https?:\/\//.test(url)) err(route, `JSON-LD has a relative URL: ${url}`);
+    }
+  }
+
   for (const href of new Set(p.links)) {
     if (href.startsWith("/_astro") || href.startsWith("/api/") || href.startsWith("/studio")) continue;
     if (/\.[a-z0-9]{2,5}$/i.test(href)) continue; // asset, not a page
@@ -188,7 +204,7 @@ const sourcePath = (source) => source.replace(/\{\/\}\?$/, "").replace(/\/$/, ""
   // A redirect that lands on a 404, or on another redirect, wastes the link
   // equity it was added to preserve.
   for (const [source, target] of Object.entries(redirectMap)) {
-    const dest = (typeof target === "string" ? target : target.destination).replace(/\/$/, "");
+    const dest = (typeof target === "string" ? target : target.destination).replace(/(.)\/$/, "$1");
     if (redirectSources.has(dest))
       errors.push({ page: sourcePath(source), msg: `redirects to another redirect: ${dest}` });
     else if (!routes.has(dest))

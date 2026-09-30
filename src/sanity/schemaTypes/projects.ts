@@ -338,6 +338,13 @@ export const projects = defineType({
     }),
 
     defineField({
+      name: "metaTitle",
+      title: "SEO title",
+      type: "string",
+      group: "seo",
+      description: 'The <title> and the search result headline. Falls back to "<Client> Case Study | Synergy Labs".',
+    }),
+    defineField({
       name: "metaDescription",
       title: "SEO description",
       type: "text",

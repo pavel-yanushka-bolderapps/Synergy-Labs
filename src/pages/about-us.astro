@@ -4,6 +4,7 @@
 // Only the hero is specific to this page. Everything under it is the same
 // component the homepage renders, reading the same `home` content, so the two
 // pages stay in step by construction rather than by copy.
+import { aboutPage as aboutPageSchema, breadcrumbs } from "../lib/structuredData";
 import Layout from "../components/layout/Layout.astro";
 import AboutHero from "../components/sections/AboutHero.astro";
 import WhyUs from "../components/sections/WhyUs.astro";
@@ -22,21 +23,18 @@ const selectedWorks = {
   items: await withExistingCaseStudies(home.selectedWorks.items),
 };
 
-// The homepage's Team/CTA buttons point at "#cta", the anchor its contact
-// section uses. This page's contact section is "#contact-form", so retarget
-// the one button that would otherwise scroll nowhere.
-const team = {
-  ...home.team,
-  ctaButton: { ...home.team.ctaButton, href: "#contact-form" },
-};
 ---
 
-<Layout title="About Us | Synergy Labs" description={aboutPage.hero.body}>
+<Layout
+  title="About Us | Synergy Labs - Top App Development Agency"
+  description="Meet the Synergy Labs team. US-based app development with 10-week timelines, scope-based budgets, and boutique approach. 5M+ users served."
+  jsonLd={[aboutPageSchema(), breadcrumbs([{ name: "About Us", path: "/about-us" }])]}
+>
   <AboutHero content={aboutPage.hero} />
   <WhyUs content={home.whyUs} />
   <HowWeWork content={home.howWeWork} />
-  <Team content={team} />
+  <Team content={home.team} />
   <SelectedWorks content={selectedWorks} />
   <Badges content={home.badges} />
-  <ContactSection id="contact-form" />
+  <ContactSection />
 </Layout>

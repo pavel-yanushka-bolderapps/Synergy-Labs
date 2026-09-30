@@ -7,11 +7,11 @@ interface Props {
 
 const { nav } = Astro.props;
 
-// The header's CTA is shared across every page, but the actual contact form
-// only lives inline (id="cta") on the homepage -- everywhere else it should
-// still go to the standalone /contact page.
-const isHome = Astro.url.pathname === "/";
-const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
+// Every page with a contact form anchors it at #cta, so the CTA scrolls to
+// the form on the page rather than leaving it. The few pages with no form
+// (privacy policy, 404, financing) are caught by the script at the bottom,
+// which swaps in nav.ctaButton.href.
+const ctaHref = "#cta";
 ---
 
 <!-- data-nav is the layout mode. It ships as "auto" so the server-rendered
@@ -24,15 +24,24 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
       <img src={nav.logoSrc} alt={nav.logoAlt} class="h-8 w-auto md:h-12" />
     </a>
 
-    <nav class="shrink-0 items-center gap-8" data-nav-desktop>
+    <nav aria-label="Main" class="shrink-0 items-center gap-8" data-nav-desktop>
       {nav.links.map((link) =>
         link.children && link.children.length > 0 ? (
-          <div class="group relative">
-            <span class="flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm font-medium text-black/80 transition hover:text-black">
+          <div class="group relative" data-nav-dropdown>
+            {/*
+              A <button>, not a <span>, so the menu can be reached from the
+              keyboard: focus-within opens it the way hover does, and
+              aria-expanded is kept in step by the script below.
+            */}
+            <button
+              type="button"
+              aria-expanded="false"
+              class="flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm font-medium text-black/80 transition hover:text-black"
+            >
               {link.label}
-              <span class="text-xs transition group-hover:rotate-180">▾</span>
-            </span>
-            <div class="invisible absolute left-0 top-full z-50 w-max pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100">
+              <span aria-hidden="true" class="text-xs transition group-hover:rotate-180 group-focus-within:rotate-180">▾</span>
+            </button>
+            <div class="invisible absolute left-0 top-full z-50 w-max pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
               <div class="min-w-[160px] rounded-lg border border-black/10 bg-white py-2 shadow-lg">
                 {link.children.map((child) => (
                   <a
@@ -70,6 +79,7 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
       </a>
       <a
         href={ctaHref}
+        data-cta-fallback={nav.ctaButton.href}
         class="whitespace-nowrap rounded-md bg-secondary-green px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-green"
       >
         {nav.ctaButton.label}
@@ -103,6 +113,8 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
 
   <nav
     id="mobile-menu"
+    aria-label="Mobile"
+    inert
     class="grid grid-rows-[0fr] overflow-hidden opacity-0 transition-[grid-template-rows,opacity] duration-300 ease-in-out"
     data-nav-panel
   >
@@ -132,6 +144,7 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
       )}
       <a
         href={ctaHref}
+        data-cta-fallback={nav.ctaButton.href}
         class="mt-2 rounded-md bg-secondary-green px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-primary-green"
       >
         {nav.ctaButton.label}
@@ -142,6 +155,14 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
 
 
 <style>
+  /* Escape on an open dropdown: held closed over the hover/focus-within that
+     opened it, until the pointer and focus have both left (see the script).
+     Unlayered, so it wins over the Tailwind utilities on the panel. */
+  [data-nav-dropdown][data-open="false"] > div {
+    visibility: hidden;
+    opacity: 0;
+  }
+
   /* Which of the two headers is showing is driven by data-nav on the header,
      not by a media query, so the switch can happen at the width where the
      links actually stop fitting rather than at a number picked in advance.
@@ -181,6 +202,10 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
     menu?.classList.toggle("grid-rows-[0fr]", !open);
     menu?.classList.toggle("grid-rows-[1fr]", open);
     menu?.classList.toggle("opacity-0", !open);
+    // Collapsed is only 0fr rows and opacity 0, which hides the links from the
+    // eye but not from Tab. inert takes them out of the focus order and the
+    // accessibility tree too.
+    if (menu) menu.inert = !open;
 
     openIcon?.classList.toggle("hidden", open);
     closeIcon?.classList.toggle("hidden", !open);
@@ -189,6 +214,54 @@ const ctaHref = isHome ? "#cta" : nav.ctaButton.href;
   menuButton?.addEventListener("click", () => {
     setMenuOpen(menuButton.getAttribute("aria-expanded") !== "true");
   });
+
+  // Escape closes whichever menu is open and returns focus to its trigger.
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (menuButton?.getAttribute("aria-expanded") === "true") {
+      setMenuOpen(false);
+      menuButton.focus();
+    }
+    const dropdown = (document.activeElement as HTMLElement | null)?.closest<HTMLElement>("[data-nav-dropdown]");
+    if (dropdown) {
+      dropdown.dataset.open = "false";
+      dropdown.querySelector("button")?.focus();
+    }
+  });
+
+  // Desktop dropdowns: aria-expanded tracks whether the panel is showing.
+  // data-open="false" (set by Escape) holds it closed until focus or the
+  // pointer leaves, so Escape wins over the focus-within that opened it.
+  document.querySelectorAll<HTMLElement>("[data-nav-dropdown]").forEach((dropdown) => {
+    const trigger = dropdown.querySelector("button");
+    const sync = () => {
+      const open = dropdown.dataset.open !== "false" && (dropdown.matches(":hover") || dropdown.contains(document.activeElement));
+      trigger?.setAttribute("aria-expanded", String(open));
+    };
+    const reset = () => {
+      if (!dropdown.contains(document.activeElement) && !dropdown.matches(":hover")) delete dropdown.dataset.open;
+      sync();
+    };
+    dropdown.addEventListener("focusin", sync);
+    dropdown.addEventListener("focusout", () => requestAnimationFrame(reset));
+    dropdown.addEventListener("mouseenter", sync);
+    dropdown.addEventListener("mouseleave", reset);
+    // Focus has already opened it by the time a click lands, so a click only
+    // undoes an earlier Escape.
+    trigger?.addEventListener("click", () => {
+      delete dropdown.dataset.open;
+      sync();
+    });
+    dropdown.addEventListener("keydown", () => requestAnimationFrame(sync));
+  });
+
+  // No form on this page, so "#cta" would go nowhere: send the CTA to the
+  // contact page's form instead.
+  if (!document.getElementById("cta")) {
+    document.querySelectorAll<HTMLAnchorElement>("a[data-cta-fallback]").forEach((a) => {
+      a.href = a.dataset.ctaFallback!;
+    });
+  }
 
   // Collapse to the burger when the links stop fitting, not at 768px.
   //

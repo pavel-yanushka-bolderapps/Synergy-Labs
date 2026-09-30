@@ -17,5 +17,5 @@ export const nav: SiteNavigation = {
     // it over on common laptop widths.
   ],
   phone: "(645) 444-1069",
-  ctaButton: { label: "Free Quote", href: "/contact" },
+  ctaButton: { label: "Free Quote", href: "/contact#cta" },
 };

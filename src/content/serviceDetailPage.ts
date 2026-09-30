@@ -35,7 +35,7 @@ export const serviceDetailPage: ServiceDetailPageContent = {
   // The timeline's button is the same call and the same on-page anchor on
   // every service, so it stays here rather than being retyped into five
   // documents. Move it into the schema if a service ever needs its own.
-  processCta: { label: "Book Your Free Consultation", href: "#contact-form" },
+  processCta: { label: "Book Your Free Consultation", href: "#cta" },
 
   // The service pages have always carried their own short FAQ rather than
   // the homepage's app-focused list -- same five questions on every

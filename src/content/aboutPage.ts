@@ -10,7 +10,7 @@ export const aboutPage: AboutPageContent = {
     heading: "About Us",
     body:
       "We are a boutique mobile app development agency. We build iOS, Android, and web products for startups and enterprises — senior engineers, fixed pricing, software that ships.",
-    ctaButton: { label: "Free quote", href: "#contact-form" },
+    ctaButton: { label: "Free quote", href: "#cta" },
     imageSrc: "/images/about-hero.webp",
     imageAlt: "Synergy Labs product work in progress",
     bgImageSrc: "/images/Hero-Bg.svg",

@@ -1,4 +1,5 @@
 ---
+import { organization, website } from "../lib/structuredData";
 import Layout from "../components/layout/Layout.astro";
 import Hero from "../components/sections/Hero.astro";
 import Stats from "../components/sections/Stats.astro";
@@ -39,7 +40,11 @@ const servicesContent = {
 
 ---
 
-<Layout title="AI + Mobile App Development Agency | Synergy Labs">
+<Layout
+  title="AI + Mobile App Development Agency | Synergy Labs"
+  description="Our boutique app development company offers tailor-made solutions based on your unique requirements. Our team of experts works closely with you to understand your vision and bring it to life."
+  jsonLd={[organization(), website()]}
+>
   <Hero content={home.hero} />
   <Stats content={home.stats} />
   <SelectedWorks content={selectedWorks} />

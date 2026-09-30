@@ -1,5 +1,6 @@
 ---
 import Analytics from "./Analytics.astro";
+import Weglot from "./Weglot.astro";
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
 import { nav } from "../../content/nav";
@@ -7,6 +8,7 @@ import { footer } from "../../content/footer";
 import { previewEnabled } from "../../lib/loadQuery";
 import { canonicalUrl, assetUrl } from "../../lib/seo";
 import { stegaClean } from "@sanity/client/stega";
+import { serialize, type JsonLd } from "../../lib/structuredData";
 import "../../styles/global.css";
 
 interface Props {
@@ -25,6 +27,8 @@ interface Props {
   canonical?: string;
   /** Keeps a page out of the index without removing it from the site. */
   noindex?: boolean;
+  /** Structured data for this page; see src/lib/structuredData.ts. */
+  jsonLd?: (JsonLd | null | undefined)[];
 }
 
 const {
@@ -35,6 +39,7 @@ const {
   publishedTime,
   canonical,
   noindex = false,
+  jsonLd = [],
 } = Astro.props;
 
 // stegaClean on everything that ends up in <head>. When the Studio's Preview
@@ -119,9 +124,20 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImageUrl} />
 
+    {jsonLd.filter(Boolean).map((block) => (
+      <script type="application/ld+json" is:inline set:html={serialize(block!)} />
+    ))}
+
     <Analytics />
+    <Weglot />
   </head>
   <body class="min-h-screen">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-secondary-green focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+    >
+      Skip to content
+    </a>
     <Header nav={nav} />
     <main id="main">
       <slot />

@@ -26,6 +26,8 @@ import { home } from "../../content/home";
 import { portfolioPage } from "../../content/portfolio";
 import { locationProcess } from "../../content/locationProcess";
 import { getLocationDetails } from "../../lib/sanity";
+import { breadcrumbs, locationPage } from "../../lib/structuredData";
+import { stegaClean } from "@sanity/client/stega";
 import type { LocationDetail } from "../../lib/types";
 
 export async function getStaticPaths() {
@@ -58,10 +60,20 @@ if (location.jsonLd) {
   }
 }
 
-// The FAQ is location-specific in Webflow, but the generic set the original
-// page also carries is the one already in home.ts -- so an office without its
-// own questions still gets an answered accordion rather than a bare heading.
-const faq = { heading: location.faqHeading?.trim() || home.faq.heading, items: home.faq.items };
+// Each office's own questions (seeded from Webflow's location-faqs collection
+// by scripts/seed-location-faqs.mjs). The six offices Webflow gave none fall
+// back to the homepage set, so they still get an answered accordion rather
+// than a bare heading.
+const faq = {
+  heading: location.faqHeading?.trim() || home.faq.heading,
+  items: location.faqs?.length ? location.faqs : home.faq.items,
+};
+
+// The <head> values the Webflow location template wrote: the title pattern
+// and the long "Description" field. Cleaned of preview-mode markers, which
+// would otherwise land inside the <meta> tags and the JSON-LD.
+const clean = (text: string | undefined) => (text ? (stegaClean(text) as string).trim() || undefined : undefined);
+const city = clean(location.city)!;
 
 // The three badges the original prints in the hero, as opposed to the seven
 // in the "Our Humble Recognitions" marquee further down.
@@ -90,8 +102,24 @@ const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
 ---
 
 <Layout
-  title={`${location.city} | Synergy Labs`}
-  description={location.mainDescription ?? `Synergy Labs' ${location.city} office: ${location.address}.`}
+  title={`Top Mobile App & Web Development Agency in ${city} | Synergy Labs`}
+  description={clean(location.description) ?? clean(location.mainDescription) ?? `Synergy Labs' ${city} office: ${location.address}.`}
+  jsonLd={[
+    locationPage({
+      slug: location.slug,
+      city,
+      heading: clean(heading)!,
+      intro: clean(location.mainDescription),
+      description: clean(location.description),
+      image: location.imageSrc,
+      address: clean(location.address),
+      faq: faq.items,
+    }),
+    breadcrumbs([
+      { name: "Locations", path: "/locations" },
+      { name: city, path: `/locations/${location.slug}` },
+    ]),
+  ]}
 >
   {structuredData && <script type="application/ld+json" is:inline set:html={structuredData} />}
 
@@ -163,8 +191,9 @@ const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
       <!--
         `self-start` is what makes the sticky work: a grid item stretches to
         the row height by default, so there is nothing left to slide against.
+        The id is what the header's CTA button points at.
       -->
-      <div class="min-[880px]:sticky min-[880px]:top-24 min-[880px]:self-start">
+      <div id="cta" class="min-[880px]:sticky min-[880px]:top-24 min-[880px]:self-start">
         <div id="contact-form-wrapper">
           <ContactForm class="overflow-hidden rounded-3xl bg-secondary p-5 shadow-xl md:p-8" />
         </div>
@@ -194,7 +223,7 @@ const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
           <h2 class="font-display text-3xl leading-tight md:text-4xl">{location.servicesHeading}</h2>
           <p class="mt-6 text-lg leading-relaxed text-black/70">{location.servicesDescription}</p>
           <a
-            href="#contact-form"
+            href="#cta"
             class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
           >
             Free quote
@@ -242,7 +271,7 @@ const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
 
       <div class="mt-12 text-center">
         <a
-          href="#contact-form"
+          href="#cta"
           class="inline-block rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
         >
           Free quote
@@ -348,7 +377,7 @@ const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
           <h2 class="font-display text-3xl leading-tight md:text-4xl">{location.serviceAreaHeading}</h2>
           <div class="cs-prose mt-6 text-black/70" set:html={location.serviceAreaDescription} />
           <a
-            href="#contact-form"
+            href="#cta"
             class="mt-8 inline-block rounded-md bg-secondary-green px-8 py-4 text-sm font-semibold text-white transition hover:bg-primary-green"
           >
             Book a free call
@@ -374,7 +403,7 @@ const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
           <p class="mt-6 leading-relaxed text-white/90">{location.whyChooseUsDescription}</p>
         )}
         <a
-          href="#contact-form"
+          href="#cta"
           class="mt-10 inline-block rounded-md border border-white px-8 py-4 text-sm font-semibold text-white transition hover:bg-white hover:text-secondary-green"
         >
           Schedule call

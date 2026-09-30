@@ -8,11 +8,13 @@
 // It still owns the same head that Layout.astro does, because the SEO tags are
 // not optional on the pages most likely to be a first impression.
 import Analytics from "./Analytics.astro";
+import Weglot from "./Weglot.astro";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
 import { previewEnabled } from "../../lib/loadQuery";
 import { canonicalUrl, assetUrl } from "../../lib/seo";
 import { stegaClean } from "@sanity/client/stega";
+import { serialize, type JsonLd } from "../../lib/structuredData";
 import "../../styles/global.css";
 
 interface Props {
@@ -22,9 +24,11 @@ interface Props {
   canonical?: string;
   /** "en" or "ar" -- one of these pages is Arabic. */
   locale?: string;
+  /** Structured data for this page; see src/lib/structuredData.ts. */
+  jsonLd?: (JsonLd | null | undefined)[];
 }
 
-const { title, description, canonical, locale = "en" } = Astro.props;
+const { title, description, canonical, locale = "en", jsonLd = [] } = Astro.props;
 
 // Same as Layout.astro: nothing in <head> keeps its click-to-edit markers.
 const metaTitle = stegaClean(title) as string;
@@ -102,7 +106,12 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImageUrl} />
 
+    {jsonLd.filter(Boolean).map((block) => (
+      <script type="application/ld+json" is:inline set:html={serialize(block!)} />
+    ))}
+
     <Analytics />
+    <Weglot />
   </head>
 
   <body class="min-h-screen">
@@ -124,7 +133,7 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
             {nav.phone}
           </a>
           <a
-            href="#contact"
+            href="#cta"
             class="whitespace-nowrap rounded-md bg-secondary-green px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-green md:px-5"
           >
             {nav.ctaButton.label}

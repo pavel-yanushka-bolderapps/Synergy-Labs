@@ -60,7 +60,7 @@ const cta = {
   heading: page.ctaHeading || home.cta.heading,
   // home.cta points its button at #cta, which is the homepage's contact
   // anchor and does not exist here -- the form on this page is #contact.
-  ctaButton: { ...home.cta.ctaButton, href: "#contact" },
+  ctaButton: { ...home.cta.ctaButton, href: "#cta" },
 };
 ---
 
@@ -131,7 +131,7 @@ const cta = {
           the row height by default, so there is nothing left to slide against.
           The id is what the header's CTA button points at.
         -->
-        <div id="contact" class="min-[880px]:sticky min-[880px]:top-24 min-[880px]:self-start">
+        <div id="cta" class="min-[880px]:sticky min-[880px]:top-24 min-[880px]:self-start">
           <div id="contact-form-wrapper">
             <ContactForm class="overflow-hidden rounded-3xl bg-secondary p-5 shadow-xl md:p-8" />
           </div>

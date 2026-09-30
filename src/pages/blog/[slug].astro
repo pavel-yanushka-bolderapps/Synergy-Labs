@@ -10,6 +10,8 @@ import FAQ from "../../components/sections/FAQ.astro";
 import { getBlogPosts, getBlogPostBySlug } from "../../lib/sanity";
 import { formatPostDate, metaTitle, metaDescription } from "../../lib/blog";
 import { home } from "../../content/home";
+import { blogPosting, breadcrumbs } from "../../lib/structuredData";
+import { stegaClean } from "@sanity/client/stega";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getBlogPosts();
@@ -23,9 +25,12 @@ if (!post) {
   return Astro.redirect("/blog", 302);
 }
 
-// Trimmed to what search results actually show, and topped up from the
-// article for the handful that came across with a thin or empty Preview Text.
-const description = metaDescription(post.previewText, post.articleHtml);
+const description = metaDescription(post.title);
+
+// Webflow never published an asset for template-6 (see BlogCard.astro), so
+// those posts fall back to the site's default share image instead of a 404.
+const postImage =
+  post.template && post.template !== "template-6" ? `/images/blog/${post.template}.avif` : undefined;
 
 // Three more to read, nearest in date to this one -- the archive is ordered by
 // date, so the posts either side of it are the closest thing to "related"
@@ -42,7 +47,21 @@ const more = [...all.slice(Math.max(0, index - 3), index), ...all.slice(index + 
   description={description}
   ogType="article"
   publishedTime={post.date}
-  ogImage={post.template ? `/images/blog/${post.template}.avif` : undefined}
+  ogImage={postImage}
+  jsonLd={[
+    blogPosting({
+      slug: post.slug,
+      title: stegaClean(post.title) as string,
+      description: (stegaClean(post.previewText) as string | undefined)?.trim() || description,
+      date: post.date,
+      image: postImage,
+      authorName: post.author?.name ? (stegaClean(post.author.name) as string) : undefined,
+    }),
+    breadcrumbs([
+      { name: "Blog", path: "/blog" },
+      { name: stegaClean(post.title) as string, path: `/blog/${post.slug}` },
+    ]),
+  ]}
 >
   {/*
     Two columns: the article on the left, the discovery-call form on the right.
