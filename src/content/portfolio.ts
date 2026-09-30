@@ -77,7 +77,7 @@ export const portfolioPage: PortfolioPageContent = {
     {
       slug: "fanbase",
       clientName: "Fanbase",
-      logoSrc: `/images/portfolio/672566666bbf3cb8419538c9_logo_white.avif`,
+      logoSrc: `/images/Portfolio/672566666bbf3cb8419538c9_logo_white.avif`,
       logoAlt: "Fanbase",
       tags: ["Social", "Video"],
       description:
@@ -86,7 +86,7 @@ export const portfolioPage: PortfolioPageContent = {
         { label: "16 weeks to launch", iconSrc: "/images/portfolio-white-weeks-to-launch.svg" },
         { label: "100K+ downloads", iconSrc: "/images/portfolio-white-downloads.svg" },
       ],
-      imageSrc: `/images/portfolio/6729333be54461fc4d7dd907_FB-Image-1-.avif`,
+      imageSrc: `/images/Portfolio/6729333be54461fc4d7dd907_FB-Image-1-.avif`,
       imageAlt: "Fanbase app screens showing the creator content feed.",
       caseStudyHref: "/projects/casestudy/fanbase",
       theme: "dark",
@@ -95,7 +95,7 @@ export const portfolioPage: PortfolioPageContent = {
     {
       slug: "joe-and-the-juice",
       clientName: "Joe & The Juice",
-      logoSrc: `/images/portfolio/6808f2b8933651ce7bfbd56b_unnamed-6-.webp`,
+      logoSrc: `/images/Portfolio/6808f2b8933651ce7bfbd56b_unnamed-6-.webp`,
       logoAlt: "Joe & The Juice",
       tags: ["Lifestyle"],
       description:
@@ -104,7 +104,7 @@ export const portfolioPage: PortfolioPageContent = {
         { label: "8 weeks to launch", iconSrc: "/images/portfolio-black-weeks-to-launch.svg" },
         { label: "150K downloads", iconSrc: "/images/portfolio-black-downloads.svg" },
       ],
-      imageSrc: `/images/portfolio/68120bf300f7f1d2652fe27d_Frame-1948753706-2.webp`,
+      imageSrc: `/images/Portfolio/68120bf300f7f1d2652fe27d_Frame-1948753706-2.webp`,
       imageAlt: "Joe & The Juice app ordering screens.",
       caseStudyHref: "/projects/casestudy/joe-the-juice",
       theme: "light",
@@ -113,7 +113,7 @@ export const portfolioPage: PortfolioPageContent = {
     {
       slug: "urban-massage",
       clientName: "Urban Massage",
-      logoSrc: `/images/portfolio/67f67cbd7e3e2e6b6d8e2eb7_t7Sg1g8SF4knGaV8UlZTCTDvUQ8UVV29dyct7GMy_cr.avif`,
+      logoSrc: `/images/Portfolio/67f67cbd7e3e2e6b6d8e2eb7_t7Sg1g8SF4knGaV8UlZTCTDvUQ8UVV29dyct7GMy_cr.avif`,
       logoAlt: "Urban Massage",
       tags: ["Lifestyle"],
       description:
@@ -122,7 +122,7 @@ export const portfolioPage: PortfolioPageContent = {
         { label: "8 weeks to launch", iconSrc: "/images/portfolio-black-weeks-to-launch.svg" },
         { label: "150K downloads", iconSrc: "/images/portfolio-black-downloads.svg" },
       ],
-      imageSrc: `/images/portfolio/68120fe97aae3e1d54cec2bb_Frame-1948753707-3.webp`,
+      imageSrc: `/images/Portfolio/68120fe97aae3e1d54cec2bb_Frame-1948753707-3.webp`,
       imageAlt: "Urban Massage app booking flow.",
       caseStudyHref: "/projects/casestudy/urban-massage",
       theme: "light",
@@ -186,7 +186,7 @@ export const portfolioPage: PortfolioPageContent = {
     {
       slug: "workit-health",
       clientName: "Workit Health",
-      logoSrc: `/images/portfolio/67ebd685dd1e7be0ff2400fe_unnamed.webp`,
+      logoSrc: `/images/Portfolio/67ebd685dd1e7be0ff2400fe_unnamed.webp`,
       logoAlt: "Workit Health",
       tags: ["Health"],
       description:
@@ -195,7 +195,7 @@ export const portfolioPage: PortfolioPageContent = {
         { label: "32,000+ patients served", iconSrc: "/images/portfolio-black-downloads.svg" },
         { label: "4.7+ star rating" },
       ],
-      imageSrc: `/images/portfolio/67ebd675593945fbfb7cbc24_Group-48095986.webp`,
+      imageSrc: `/images/Portfolio/67ebd675593945fbfb7cbc24_Group-48095986.webp`,
       imageAlt: "Workit Health telemedicine app screens.",
       caseStudyHref: "/projects/casestudy/workit-health",
       theme: "light",
@@ -213,7 +213,7 @@ export const portfolioPage: PortfolioPageContent = {
         { label: "8 weeks to launch", iconSrc: "/images/portfolio-black-weeks-to-launch.svg" },
         { label: "$1.4 million in in-app revenue" },
       ],
-      imageSrc: `/images/portfolio/67c2fb353803e214c0164f77_Frame-1.webp`,
+      imageSrc: `/images/Portfolio/67c2fb353803e214c0164f77_Frame-1.webp`,
       imageAlt: "BYLT Basics shopping app screens.",
       caseStudyHref: "/projects/casestudy/bylt-basics",
       theme: "light",
@@ -222,7 +222,7 @@ export const portfolioPage: PortfolioPageContent = {
     {
       slug: "dose-of-colors",
       clientName: "Dose of Colors",
-      logoSrc: `/images/portfolio/67b740942b5630a3f7417f4d_IMG_7048__1_-removebg-preview.avif`,
+      logoSrc: `/images/Portfolio/67b740942b5630a3f7417f4d_IMG_7048__1_-removebg-preview.avif`,
       logoAlt: "Dose of Colors",
       tags: ["Lifestyle"],
       description:
@@ -231,7 +231,7 @@ export const portfolioPage: PortfolioPageContent = {
         { label: "18 weeks to launch", iconSrc: "/images/portfolio-white-weeks-to-launch.svg" },
         { label: "4.9/5 average rating" },
       ],
-      imageSrc: `/images/portfolio/67b71160e094a9fa86d01c73_Group-48095984.webp`,
+      imageSrc: `/images/Portfolio/67b71160e094a9fa86d01c73_Group-48095984.webp`,
       imageAlt: "Dose of Colors beauty shopping app screens.",
       caseStudyHref: "/projects/casestudy/dose-of-colors",
       theme: "dark",
@@ -240,7 +240,7 @@ export const portfolioPage: PortfolioPageContent = {
     {
       slug: "taskade",
       clientName: "Taskade - AI Agents",
-      logoSrc: `/images/portfolio/67ec14a677da00daf0335ac0_Screenshot-2025-02-27-at-21.21.32.webp`,
+      logoSrc: `/images/Portfolio/67ec14a677da00daf0335ac0_Screenshot-2025-02-27-at-21.21.32.webp`,
       logoAlt: "Taskade",
       tags: ["AI", "Productivity"],
       description:
@@ -249,7 +249,7 @@ export const portfolioPage: PortfolioPageContent = {
         { label: "16 weeks to launch", iconSrc: "/images/portfolio-white-weeks-to-launch.svg" },
         { label: "4.7+ star rating" },
       ],
-      imageSrc: `/images/portfolio/67ec139c64e2e8fe57c3b5bc_Frame-1948753702.webp`,
+      imageSrc: `/images/Portfolio/67ec139c64e2e8fe57c3b5bc_Frame-1948753702.webp`,
       imageAlt: "Taskade AI agent workflow builder screens.",
       caseStudyHref: "/projects/casestudy/taskade",
       theme: "dark",
