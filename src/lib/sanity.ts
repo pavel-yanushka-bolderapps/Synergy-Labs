@@ -2,7 +2,7 @@ import { sanityClient } from "sanity:client";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { stegaClean } from "@sanity/client/stega";
 import { loadQuery } from "./loadQuery";
-import { normalizeArticleLinks } from "./blog";
+import { normalizeArticleLinks, optimizeArticleImages } from "./blog";
 import locationsData from "../../scripts/data/locations.json";
 import locationServicesData from "../../scripts/data/location-services.json";
 import locationIndustriesData from "../../scripts/data/location-industries.json";
@@ -128,6 +128,7 @@ interface SanityLocationPageDoc extends SanityLocationDoc {
   mainDescription?: string;
   description?: string;
   mapCode?: string;
+  googleMapsUrl?: string;
   jsonLd?: string;
   servicesHeading?: string;
   servicesDescription?: string;
@@ -179,7 +180,7 @@ function resolvePick(
 
 const LOCATION_PAGE_FIELDS = `
   city, address, isHeadquarters, image, "slug": slug.current,
-  mainHeading, mainDescription, description, mapCode, jsonLd,
+  mainHeading, mainDescription, description, mapCode, googleMapsUrl, jsonLd,
   servicesHeading, servicesDescription,
   industriesHeading, industriesDescription,
   processHeading, processDescription,
@@ -262,6 +263,8 @@ export async function getLocationDetails(): Promise<LocationDetail[]> {
         // structured data entirely. This field is machine-read, never edited
         // in place, so strip them.
         jsonLd: doc.jsonLd ? stegaClean(doc.jsonLd) : undefined,
+        // Machine-read as well: it becomes a URL inside the structured data.
+        googleMapsUrl: doc.googleMapsUrl ? stegaClean(doc.googleMapsUrl) : undefined,
         caseStudies: doc.caseStudies
           ?.filter((cs): cs is { title: string; body: string } => Boolean(cs?.title && cs?.body))
           .map((cs) => ({ title: cs.title, body: cs.body })),
@@ -1204,6 +1207,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
   if (!articleHtml) return null;
 
   articleHtml = normalizeArticleLinks(articleHtml, new Set((await getBlogPosts()).map((post) => post.slug)));
+  articleHtml = optimizeArticleImages(articleHtml);
 
   return {
     ...summary,

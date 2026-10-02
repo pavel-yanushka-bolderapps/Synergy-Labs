@@ -20,7 +20,7 @@ export const service = defineType({
       name: "href",
       title: "Link",
       type: "string",
-      description: 'Where this card links to, e.g. "/our-services/web-app-development".',
+      description: 'Where this card links to, e.g. "/our-services/web-app-development-service".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({

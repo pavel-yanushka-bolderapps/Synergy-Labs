@@ -1,0 +1,97 @@
+---
+// What replaces the contact form card once a lead is accepted, transcribed
+// from the Webflow form's `.w-form-done` block -- the same copy, founder video
+// and checklist download on all 125 of its forms.
+//
+// It takes the form card's place and nothing more: the caller puts it next to
+// #contact-form-wrapper inside the same column, so the pitch panel or the
+// page around it stays where it was. ContactForm.astro reveals it by id.
+interface Props {
+  /** Card classes, so it matches the form card it stands in for. */
+  class?: string;
+  /** Smaller type for the blog's narrow sticky rail. */
+  compact?: boolean;
+}
+
+const { class: className = "rounded-3xl bg-secondary p-5 shadow-xl md:p-8", compact = false } = Astro.props;
+
+const bodyText = compact ? "text-base" : "text-xl";
+---
+
+<div id="contact-success" class:list={["hidden flex-col", className]} role="region" aria-label="Form submitted">
+  <h3 class:list={["text-center font-display", compact ? "text-xl" : "text-2xl"]}>
+    You’re Booked! Here’s What Happens Next.
+  </h3>
+
+  <p class:list={["pt-4", bodyText]}>
+    We’re excited to meet you and hear all about your app idea. Our team is already getting prepped to make the
+    most of your call.
+  </p>
+
+  <p class:list={["py-4 font-semibold text-secondary-green", bodyText]}>
+    A quick hello from our founder and what to expect
+  </p>
+
+  {/* loading="lazy" keeps the player from loading while the block is still
+      hidden -- it starts fetching once the success state is shown. */}
+  <div class="relative aspect-video w-full">
+    <iframe
+      src="https://www.youtube.com/embed/HtULoVl8ByY?rel=0&controls=1&autoplay=0&mute=0&start=0"
+      title="Sardor Thank You Page Intro"
+      loading="lazy"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+      class="absolute inset-0 h-full w-full border-0"
+    ></iframe>
+  </div>
+
+  <p class:list={["py-4", bodyText]}>
+    Get our "Choose Your App Developer Agency" checklist to make sure you're asking the right questions and
+    picking the perfect team for your project.
+  </p>
+
+  <div class="flex justify-end py-2">
+    <a
+      href="/documents/Synergy_Labs_App_Developer_Checklist.pdf"
+      target="_blank"
+      rel="noopener"
+      class="group flex items-center gap-3 p-2 text-secondary-green"
+    >
+      <span class:list={["font-bold", compact ? "text-base" : "text-xl"]}>Download PDF</span>
+      <span class="rounded-full border border-secondary-green px-2">
+        <span class="relative flex overflow-hidden">
+          {/* Two arrows: the hover one slides in from the left as the
+              resting one slides out, as on the Webflow button. */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            class="absolute left-0 top-0 h-auto w-[1.2rem] -translate-x-full transition-transform duration-300 group-hover:translate-x-0"
+          >
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            class="h-auto w-[1.2rem] transition-transform duration-300 group-hover:translate-x-full"
+          >
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </span>
+      </span>
+    </a>
+  </div>
+</div>

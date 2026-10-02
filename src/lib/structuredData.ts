@@ -249,6 +249,8 @@ export function locationPage(loc: {
   description?: string;
   image?: string;
   address?: string;
+  /** The office's Google Business Profile link. */
+  mapUrl?: string;
   faq: { question: string; answer: string }[];
 }): JsonLd {
   return {
@@ -269,6 +271,7 @@ export function locationPage(loc: {
         ...(loc.address ? { streetAddress: loc.address } : {}),
       },
       telephone: PHONE,
+      ...(loc.mapUrl ? { hasMap: loc.mapUrl } : {}),
       areaServed: { "@type": "City", name: loc.city },
       priceRange: "$15,000 - $250,000+",
       parentOrganization: orgRef,

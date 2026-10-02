@@ -19,6 +19,8 @@ interface ContactPayload {
   // faster than a human could plausibly fill the form are treated as bots.
   website?: string;
   formLoadedAt?: number;
+  /** The page the form was submitted from (window.location.href). */
+  pageUrl?: string;
 }
 
 function jsonResponse(body: Record<string, unknown>, status: number) {
@@ -26,6 +28,21 @@ function jsonResponse(body: Record<string, unknown>, status: number) {
     status,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+/**
+ * The submitting page, as it goes into the email. It comes from the browser,
+ * so only a well-formed http(s) URL, capped in length, is printed -- anything
+ * posting to this route directly cannot write its own text into the message.
+ */
+function pageLabel(pageUrl: unknown): string {
+  if (typeof pageUrl !== "string" || pageUrl.length > 2000) return "(unknown)";
+  try {
+    const url = new URL(pageUrl);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : "(unknown)";
+  } catch {
+    return "(unknown)";
+  }
 }
 
 async function verifyRecaptcha(token: string, secret: string): Promise<boolean> {
@@ -52,7 +69,7 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse({ success: false, error: "Invalid request body." }, 400);
   }
 
-  const { firstName, lastName, email, phone, projectDetails, budgetRange, recaptchaToken, website, formLoadedAt } =
+  const { firstName, lastName, email, phone, projectDetails, budgetRange, recaptchaToken, website, formLoadedAt, pageUrl } =
     payload;
 
   // --- Spam protection: honeypot + minimum fill time ---------------------
@@ -71,7 +88,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // --- Required fields -----------------------------------------------------
-  if (!firstName || !lastName || !email || !projectDetails) {
+  if (!firstName || !lastName || !email || !phone?.trim() || !projectDetails) {
     return jsonResponse({ success: false, error: "Please fill in all required fields." }, 400);
   }
 
@@ -84,14 +101,12 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse({ success: false, error: "Please enter a valid email address." }, 400);
   }
 
-  // Phone is optional. The client sends it in international format
-  // ("+48 512 345 678"), so separators are stripped before checking the
-  // E.164 shape -- testing the raw value rejected every valid number.
-  if (phone && phone.trim()) {
-    const PHONE_PATTERN = /^\+[1-9]\d{6,14}$/;
-    if (!PHONE_PATTERN.test(phone.replace(/[\s().-]/g, ""))) {
-      return jsonResponse({ success: false, error: "Please enter a valid phone number." }, 400);
-    }
+  // Phone is required (checked above). The client sends it in international
+  // format ("+48 512 345 678"), so separators are stripped before checking
+  // the E.164 shape -- testing the raw value rejected every valid number.
+  const PHONE_PATTERN = /^\+[1-9]\d{6,14}$/;
+  if (!PHONE_PATTERN.test(phone.replace(/[\s().-]/g, ""))) {
+    return jsonResponse({ success: false, error: "Please enter a valid phone number." }, 400);
   }
 
   // --- reCAPTCHA (verified server-side -- a client-side-only check can be
@@ -140,8 +155,9 @@ export const POST: APIRoute = async ({ request }) => {
       text: [
         `Name: ${firstName} ${lastName}`,
         `Email: ${email}`,
-        `Phone: ${phone || "(not provided)"}`,
+        `Phone: ${phone}`,
         `Budget range: ${budgetRange || "(not provided)"}`,
+        `Submitted from: ${pageLabel(pageUrl)}`,
         "",
         "What they need help with:",
         projectDetails,

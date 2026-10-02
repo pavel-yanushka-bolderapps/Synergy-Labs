@@ -112,3 +112,53 @@ export function normalizeArticleLinks(html: string, slugs: ReadonlySet<string>):
     return next === href ? whole : `<a${before} href="${next}"${after}>${text}</a>`;
   });
 }
+
+/** A Sanity image URL: the file name carries the original size, `<hash>-<w>x<h>.<ext>`. */
+const SANITY_IMAGE = /^https:\/\/cdn\.sanity\.io\/images\/[^?#]+-(\d+)x(\d+)\.[a-z]+/i;
+/** srcset steps. The article column is about 800px wide, so 1600 covers it on a 2x screen. */
+const ARTICLE_IMAGE_WIDTHS = [480, 800, 1200, 1600];
+
+/**
+ * Serve the images in a post body resized and compressed by Sanity's image
+ * CDN instead of as the original uploads.
+ *
+ * The bodies came from Webflow as raw HTML, and their images were moved into
+ * Sanity as-is (scripts/migrate-webflow-assets.mjs) -- many are multi-megabyte
+ * camera-size JPEGs shown in an 800px column. The CDN resizes and re-encodes on
+ * request from URL parameters, so nothing is re-uploaded and the originals stay
+ * untouched: removing this call puts every post back exactly as stored.
+ *
+ * - `auto=format` hands each browser AVIF or WebP when it accepts one.
+ * - A srcset lets phones fetch the 480px version rather than the 1600px one.
+ * - The real width and height go on the tag (Webflow wrote `auto`), so the
+ *   browser reserves the space and the text does not jump as images load.
+ * - Every image but the first is lazy-loaded; the first is often the largest
+ *   thing on screen, and deferring it would slow the page's first paint.
+ *
+ * Images hosted anywhere else are left exactly as they are.
+ */
+export function optimizeArticleImages(html: string): string {
+  let index = 0;
+  return html.replace(/<img\b[^>]*>/gi, (tag) => {
+    const src = tag.match(/\ssrc="([^"]+)"/i)?.[1];
+    const size = src?.match(SANITY_IMAGE);
+    if (!src || !size) return tag;
+
+    const [, w, h] = size;
+    const width = Number(w);
+    const base = src.split("?")[0];
+    const url = (step: number) => `${base}?w=${step}&auto=format&q=75`;
+    const steps = ARTICLE_IMAGE_WIDTHS.filter((step) => step < width);
+    const srcset = [...steps.map((step) => `${url(step)} ${step}w`), `${url(Math.min(width, 2000))} ${Math.min(width, 2000)}w`];
+
+    const attrs = tag
+      .replace(/^<img\b|\/?>$/gi, "")
+      .replace(/\s(src|srcset|sizes|width|height|loading|decoding)="[^"]*"/gi, "");
+    const loading = index++ === 0 ? "eager" : "lazy";
+
+    return (
+      `<img${attrs} src="${url(Math.min(width, 1200))}" srcset="${srcset.join(", ")}"` +
+      ` sizes="(min-width: 1024px) 800px, 100vw" width="${w}" height="${h}" loading="${loading}" decoding="async">`
+    );
+  });
+}

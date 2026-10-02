@@ -1,6 +1,7 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { presentationTool, defineLocations, defineDocuments } from "sanity/presentation";
+import { media } from "sanity-plugin-media";
 import { schemaTypes } from "./src/sanity/schemaTypes";
 
 // Embedded Sanity Studio config -- served at /studio (see the `sanity()`
@@ -18,6 +19,14 @@ export default defineConfig({
   dataset: import.meta.env.PUBLIC_SANITY_DATASET || "production",
   plugins: [
     structureTool(),
+    // The "Media" tab: every uploaded image and file in one browsable grid,
+    // with search, tags, alt text and which documents use each one.
+    //
+    // Its "unused" filter only sees images referenced as image fields. The
+    // blog bodies point at theirs by URL inside articleHtml (see
+    // scripts/migrate-webflow-assets.mjs), so those show as unused while
+    // every post depends on them -- never bulk-delete from that view.
+    media(),
     // The "Preview" tab in the Studio navbar: the live site in an iframe
     // next to the document editor, with click-to-edit overlays on any text
     // that came from Sanity. Requires the <VisualEditing /> overlay in
