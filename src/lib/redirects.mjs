@@ -175,11 +175,13 @@ export const redirects = optionalTrailingSlash({
   '/locations-dallas': to('/locations/dallas'),
   '/locations-san-antonio': to('/locations/san-antonio'),
 
-  // The service slug lost its "-service" suffix in the rebuild, and two older
+  // The service keeps its live, indexed URL (with the "-service" suffix, like
+  // the other services). /our-services/web-app-development is the slug this
+  // rebuild used before matching it, so it is covered too. Two older
   // root-level copies of the same page predate /our-services entirely.
-  '/our-services/web-app-development-service': to('/our-services/web-app-development'),
-  '/web-app-development': to('/our-services/web-app-development'),
-  '/web-app-development-copy': to('/our-services/web-app-development'),
+  '/our-services/web-app-development': to('/our-services/web-app-development-service'),
+  '/web-app-development': to('/our-services/web-app-development-service'),
+  '/web-app-development-copy': to('/our-services/web-app-development-service'),
 
   // A Webflow stub whose body copy was still lorem ipsum. The service page is
   // what it was meant to become.

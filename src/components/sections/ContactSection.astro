@@ -3,6 +3,7 @@
 // shared form on the other. The form itself now lives in ContactForm.astro
 // so the location pages can reuse it in their hero.
 import ContactForm from "../ContactForm.astro";
+import ContactSuccess from "../ContactSuccess.astro";
 import { nav } from "../../content/nav";
 
 interface Props {
@@ -33,7 +34,7 @@ const {
 <!-- Full-bleed white band so the #fafafa form card stands off it. -->
 <section id={id} class="bg-white">
 <div class="mx-auto max-w-7xl px-6 py-20">
-  <div id="contact-form-wrapper" class="grid grid-cols-1 gap-6 min-[760px]:grid-cols-2">
+  <div class="grid grid-cols-1 gap-6 min-[760px]:grid-cols-2">
     <div class="relative order-2 overflow-hidden rounded-3xl bg-secondary-green p-10 text-white shadow-xl min-[760px]:order-1 md:p-8">
       <img
         src="/images/Hero-Bg.svg"
@@ -114,23 +115,14 @@ const {
     </div>
 
 
-    <ContactForm class="order-1 overflow-hidden rounded-3xl bg-secondary p-5 shadow-xl min-[760px]:order-2 md:p-8" />
-  </div>
-
-  <div id="contact-success" class="hidden flex-col items-center rounded-3xl bg-secondary p-10 text-center shadow-xl md:p-16">
-    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-secondary-green text-white">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="h-8 w-8">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-      </svg>
+    <!-- On success only this column changes: the form card is swapped for the
+         success card and the pitch panel beside it stays put. -->
+    <div class="order-1 min-[760px]:order-2">
+      <div id="contact-form-wrapper" class="h-full">
+        <ContactForm class="h-full overflow-hidden rounded-3xl bg-secondary p-5 shadow-xl md:p-8" />
+      </div>
+      <ContactSuccess class="h-full rounded-3xl bg-secondary p-5 shadow-xl md:p-8" />
     </div>
-    <h2 class="mt-6 font-display text-3xl md:text-4xl">Thanks -- we got your message!</h2>
-    <p class="mt-4 max-w-md text-black/70">
-      Our director of product will reach out shortly to schedule your call. In the meantime, feel free to give us
-      a call at {" "}
-      <a href={`tel:+1${nav.phone.replace(/[^+\d]/g, "")}`} class="font-semibold text-secondary-green">
-        +1 {nav.phone}
-      </a>.
-    </p>
   </div>
 </div>
 </section>

@@ -11,6 +11,7 @@
 // ContactForm expects from whoever places it: it hides the first and reveals
 // the second on a successful send.
 import ContactForm from "../../ContactForm.astro";
+import ContactSuccess from "../../ContactSuccess.astro";
 
 interface Props {
   /** Placement classes, so the post page owns the sticky behaviour. */
@@ -47,25 +48,5 @@ const { class: className = "" } = Astro.props;
     <ContactForm class="mt-6" compact />
   </div>
 
-  <div
-    id="contact-success"
-    class="bg-blog-gradient hidden flex-col items-center rounded-3xl p-8 text-center shadow-xl"
-  >
-    <div class="flex h-14 w-14 items-center justify-center rounded-full bg-secondary-green text-white">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="2.5"
-        stroke="currentColor"
-        class="h-7 w-7"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-      </svg>
-    </div>
-    <h2 class="mt-5 font-display text-2xl">Thanks — we got your message!</h2>
-    <p class="mt-3 text-sm text-black/70">
-      Our director of product will reach out shortly to schedule your call.
-    </p>
-  </div>
+  <ContactSuccess class="bg-blog-gradient rounded-3xl p-6 shadow-xl" compact />
 </aside>

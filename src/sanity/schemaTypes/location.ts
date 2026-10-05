@@ -107,6 +107,14 @@ export const location = defineType({
       group: "page",
     }),
     defineField({
+      name: "googleMapsUrl",
+      title: "Page: Google Business Profile link",
+      type: "url",
+      description:
+        'The office\'s Google Maps / Business Profile link (e.g. "https://g.page/r/..."). Added to the page\'s structured data so search engines tie the page to the listing.',
+      group: "page",
+    }),
+    defineField({
       name: "jsonLd",
       title: "Page: LocalBusiness structured data",
       type: "text",

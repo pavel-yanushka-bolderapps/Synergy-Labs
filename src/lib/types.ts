@@ -88,6 +88,8 @@ export interface LocationDetail extends LocationItem {
   description?: string;
   /** Google Maps embed parameters (the `pb=` value), not a full URL. */
   mapCode?: string;
+  /** The office's Google Business Profile link, emitted as `hasMap`. */
+  googleMapsUrl?: string;
   /** LocalBusiness structured data, emitted verbatim into a script tag. */
   jsonLd?: string;
 

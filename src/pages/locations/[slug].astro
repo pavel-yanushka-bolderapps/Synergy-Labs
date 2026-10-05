@@ -18,6 +18,7 @@
 // once those exports land; the copy above them is already here.
 import Layout from "../../components/layout/Layout.astro";
 import ContactForm from "../../components/ContactForm.astro";
+import ContactSuccess from "../../components/ContactSuccess.astro";
 import WorkCard from "../../components/sections/locations/WorkCard.astro";
 import Badges from "../../components/sections/Badges.astro";
 import Stats from "../../components/sections/Stats.astro";
@@ -113,6 +114,7 @@ const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
       description: clean(location.description),
       image: location.imageSrc,
       address: clean(location.address),
+      mapUrl: location.googleMapsUrl,
       faq: faq.items,
     }),
     breadcrumbs([
@@ -199,17 +201,7 @@ const successStories = SUCCESS_STORY_SLUGS.map((slug) =>
           <ContactForm class="overflow-hidden rounded-3xl bg-secondary p-5 shadow-xl md:p-8" />
         </div>
 
-        <div id="contact-success" class="hidden flex-col items-center rounded-3xl bg-secondary p-10 text-center shadow-xl">
-          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-secondary-green text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="h-8 w-8">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-            </svg>
-          </div>
-          <h2 class="mt-6 font-display text-2xl">Thanks -- we got your message!</h2>
-          <p class="mt-4 text-black/70">
-            Our director of product will reach out shortly to schedule your call.
-          </p>
-        </div>
+        <ContactSuccess class="rounded-3xl bg-secondary p-5 shadow-xl md:p-8" />
       </div>
     </div>
     </div>

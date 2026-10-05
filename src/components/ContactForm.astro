@@ -110,6 +110,7 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
         aria-describedby="phone-error"
         name="phone"
         type="tel"
+        required
         data-fixed-placeholder={compact ? "" : undefined}
         placeholder={placeholders.phone}
         class={`${fieldGap}${fieldClass}`}
@@ -373,14 +374,16 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
       })
     : null;
 
-  function validatePhone(): boolean {
+  function validatePhone(showEmptyError: boolean): boolean {
     if (!phoneInput || !phoneError) return true;
     const value = phoneInput.value.trim();
 
-    // Phone is optional -- an empty field is valid, just not filled in.
+    // Required, as on the Webflow form -- the lead is routed to a call. While
+    // typing, an emptied field just clears its message; leaving it empty or
+    // submitting is what flags it.
     if (!value) {
-      setFieldError(phoneInput, phoneError, null);
-      return true;
+      setFieldError(phoneInput, phoneError, showEmptyError ? "Phone number is required." : null);
+      return false;
     }
 
     // Without utils.js (still loading, or blocked) isValidNumber() has
@@ -404,7 +407,7 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
   phoneInput?.addEventListener("input", () => {
     // Block anything that obviously isn't part of a phone number as the user types.
     phoneInput.value = phoneInput.value.replace(/[^0-9+()\s-]/g, "");
-    validatePhone();
+    validatePhone(false);
   });
   phoneInput?.addEventListener("keypress", (event) => {
     if (!/[0-9+()\s-]/.test(event.key)) {
@@ -446,11 +449,11 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
   phoneInput?.addEventListener("blur", () => {
     syncCountryFromNumber();
     formatPhoneNational();
-    validatePhone();
+    validatePhone(true);
   });
   phoneInput?.addEventListener("countrychange", () => {
     formatPhoneNational();
-    validatePhone();
+    validatePhone(false);
   });
 
   // Timestamp when the form became interactive -- sent along with the
@@ -505,7 +508,7 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
     const requiredOk = REQUIRED_FIELDS.map(([id, message]) => validateRequired(id, message, true));
     const emailOk = validateEmail(true);
     syncCountryFromNumber();
-    const phoneOk = validatePhone();
+    const phoneOk = validatePhone(true);
     if (!requiredOk.every(Boolean) || !emailOk || !phoneOk) {
       form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
       return;
@@ -544,6 +547,10 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
       website: String(data.get("website") ?? ""),
       recaptchaToken,
       formLoadedAt,
+      // The page the form was filled in on, query string included so UTM and
+      // ad-click parameters reach the lead email -- what Webflow recorded as
+      // each submission's page. This form sits on hundreds of pages.
+      pageUrl: window.location.href,
     };
 
     if (submitButton) {

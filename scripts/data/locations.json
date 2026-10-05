@@ -9,7 +9,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app development Miami agency and web development agency Miami businesses trust to build software that ships on time. For over six years, we've helped startups, growing companies, and enterprise teams across South Florida turn ideas into production-ready products. Whether you're based in Brickell, Coral Gables, Doral, or anywhere in Miami-Dade County, our senior developers work directly with you from day one. We're not an offshore team with a Miami mailing address. We're app developers in Miami who understand the local market, take in-person meetings, and pick up the phone when you call.",
     "description": "As Miami’s top Android, iOS, and web development agency, Synergy Labs builds scalable, user-friendly apps and websites that help startups and enterprises grow in Florida’s dynamic digital landscape. Our expert U.S.-based team blends creativity, innovation, and precision to craft high-performance mobile and web solutions tailored to your business goals.Serving clients across Miami, Fort Lauderdale, Coral Gables, Doral, and West Palm Beach, we partner with ambitious brands to turn bold ideas into powerful, beautifully designed digital products. Whether you’re developing a new mobile app or enhancing your web presence, Synergy Labs delivers speed, quality, and innovation trusted throughout South Florida.",
     "mapCode": "!1m18!1m12!1m3!1d3593.1026291896205!2d-80.19739232437453!3d25.767173477348486!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b7fe93c052d5%3A0x72752af9d4304e7!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Miami!5e0!3m2!1sen!2s!4v1746005658717!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/Ca6iyAJfPB-7EAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Miami\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/Ca6iyAJfPB-7EAI/\" ] }",
     "servicesHeading": "Mobile App Development Services in Miami",
     "servicesDescription": "We build custom mobile apps for iOS, Android, and cross-platform from our Miami, FL office. Every project starts with your business goals and ends with a polished product in the App Store, Google Play, or both. As a full-service mobile app development Miami agency, we handle strategy, UI/UX design, development, QA, and post-launch support. Our app developers in Miami have shipped scalable products across industries, and we bring that experience to every engagement.",
     "serviceSlugs": [
@@ -81,7 +80,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/Ca6iyAJfPB-7EAI/"
   },
   {
     "slug": "dubai",
@@ -93,7 +93,6 @@
     "mainDescription": "Synergy Labs is a mobile app and web development agency serving businesses across Dubai, Abu Dhabi, and the wider UAE. From our One Central office in the Trade Centre District, we partner with fintech companies in DIFC, logistics operators in Jebel Ali, and enterprise teams across the Emirates to build custom iOS apps, Android apps, and scalable web platforms. We combine international engineering standards with deep understanding of the UAE's fast-moving digital economy.",
     "description": "Synergy Labs: Dubai's Leading Mobile App Development Agency – Specializing in innovative, scalable, and user-friendly mobile solutions. Based in Dubai, we deliver fast, reliable app development services for startups and enterprises across the UAE. Let’s turn your ideas into exceptional apps!",
     "mapCode": "!1m18!1m12!1m3!1d3609.861049970748!2d55.29518687560801!3d25.207907977703996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f43d2ab11f1b9%3A0x7267b87d201d9dae!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Dubai!5e0!3m2!1sen!2s!4v1746005705782!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CfI3H_26sBcHEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Dubai\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CfI3H_26sBcHEAI/\" ] }",
     "servicesHeading": null,
     "servicesDescription": null,
     "serviceSlugs": [],
@@ -120,7 +119,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/CfI3H_26sBcHEAI/"
   },
   {
     "slug": "san-francisco",
@@ -132,7 +132,6 @@
     "mainDescription": "Synergy Labs is a mobile app and web development agency serving San Francisco, the Bay Area, and beyond. From our Financial District office, we partner with SaaS startups, fintech firms, healthtech companies, and enterprise teams to build iOS apps, Android apps, and scalable web platforms. With 6+ years delivering production-ready software, we bring senior U.S.-based talent, transparent process, and NDA-first discovery to every engagement.",
     "description": "Synergy Labs: San Francisco's leading mobile app and web development agency. Specializing in cutting-edge Android, iOS, and web solutions, we craft scalable, user-friendly apps and websites tailored to your business needs. Trusted by startups and enterprises across San Francisco for fast and reliable development services.",
     "mapCode": "!1m18!1m12!1m3!1d3152.8772755257946!2d-122.40726542391835!3d37.79291577198092!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085818c31e1ce6d%3A0x78becf5649e072bf!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20San%20Francisco!5e0!3m2!1sen!2s!4v1746006063087!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.co/kgs/t6Ck59p\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"San Francisco\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.co/kgs/t6Ck59p\" ] }",
     "servicesHeading": "Our San Francisco App & Web Development Services",
     "servicesDescription": "We deliver end-to-end mobile app development and web development services tailored to the pace of the San Francisco market. Whether you need a native iOS app for your SoMa-based fintech startup or a scalable web platform serving customers from the Mission to Marin, our team handles every stage from product strategy through post-launch support.",
     "serviceSlugs": [
@@ -215,7 +214,8 @@
     ],
     "techStack": "<h4>Mobile</h4><p>Swift, SwiftUI (iOS), Kotlin, Jetpack Compose (Android), React Native, Flutter (cross-platform)</p><h4>Frontend Web</h4><p>React, Next.js, Vue.js, TypeScript</p><h4>Backend</h4><p>Node.js, Python, Go, Laravel</p><h4>Cloud &amp; Infrastructure</h4><p>AWS, Google Cloud Platform, Firebase, Azure</p><h4>DevOps</h4><p>Docker, Kubernetes, CI/CD pipelines, GitHub Actions</p><h4>Databases</h4><p>PostgreSQL, MongoDB, Redis, DynamoDB</p><h4>Integrations</h4><p>Stripe, Twilio, SendGrid, Salesforce, custom API integration</p>",
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.co/kgs/t6Ck59p"
   },
   {
     "slug": "new-york-city",
@@ -227,7 +227,6 @@
     "mainDescription": "Synergy Labs is a mobile app development and web development agency serving New York City businesses from our Midtown Manhattan office at 445 Park Ave. We work with startups, mid-market companies, and enterprise teams across all five boroughs to build custom iOS apps, Android apps, and full-stack web platforms. With over six years of experience and a U.S.-based senior team, we deliver production-ready software in 6–8 weeks.",
     "description": "As New York City’s premier mobile app and web development agency, Synergy Labs crafts innovative Android, iOS, and web solutions that empower brands to grow in one of the world’s most competitive markets. Our expert U.S.-based team designs scalable, user-focused digital products tailored to your business goals — blending strategy, design, and engineering excellence.Proudly serving startups, small businesses, and enterprises across Manhattan, Brooklyn, Queens, the Bronx, and Staten Island, we help companies transform ideas into high-performing mobile apps and websites that stand out in NYC’s fast-moving tech scene. Whether you’re building a sleek mobile app or launching a new digital platform, Synergy Labs delivers fast, reliable, and results-driven development trusted throughout New York and beyond.",
     "mapCode": "!1m18!1m12!1m3!1d3022.0423906166725!2d-73.97314162378274!3d40.761092371386326!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c2592245ed7cf7%3A0x7042c8b5c94d1106!2sSynergy%20Labs!5e0!3m2!1sen!2s!4v1746005948584!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CTqoqJLJD6_JEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"New York\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CTqoqJLJD6_JEAI/\" ] }",
     "servicesHeading": "Our App & Web Development Services in New York",
     "servicesDescription": "We offer a full spectrum of mobile app development and web development services designed for the pace and scale of New York City businesses. Our work spans startups and enterprises at every stage — from first-time founders validating an MVP to Fortune 500 teams modernizing legacy systems.",
     "serviceSlugs": [
@@ -318,7 +317,8 @@
     ],
     "techStack": "<h4>Mobile</h4><p>Swift (iOS), Kotlin (Android), React Native, Flutter</p><h4>Frontend Web</h4><p>React, Next.js</p><h4>Backend</h4><p>Node.js, Laravel</p><h4>Cloud &amp; Infrastructure</h4><p>AWS, Google Cloud, Firebase, Azure, Docker</p><h4>Databases</h4><p>PostgreSQL, MongoDB, Redis</p><h4>CI/CD &amp; DevOps</h4><p>GitHub Actions, automated testing pipelines</p>",
     "pricingHeading": "App & Web Development Pricing in New York",
-    "pricingTable": "<p><strong>Mobile App Development:</strong> $50,000–$250,000+ depending on complexity, platform, and feature scope.</p><p><strong>Custom Web Application Development:</strong> $10,000–$100,000+ based on functionality, integrations, and scale.</p><p><strong>Hourly Development Rates:</strong> $150–$250/hour for dedicated team members.</p><p>Every project starts with a free strategy call where we scope requirements and provide a detailed estimate — no obligation, no pressure.</p>"
+    "pricingTable": "<p><strong>Mobile App Development:</strong> $50,000–$250,000+ depending on complexity, platform, and feature scope.</p><p><strong>Custom Web Application Development:</strong> $10,000–$100,000+ based on functionality, integrations, and scale.</p><p><strong>Hourly Development Rates:</strong> $150–$250/hour for dedicated team members.</p><p>Every project starts with a free strategy call where we scope requirements and provide a detailed estimate — no obligation, no pressure.</p>",
+    "googleMapsUrl": "https://g.page/r/CTqoqJLJD6_JEAI/"
   },
   {
     "slug": "dallas",
@@ -330,7 +330,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app development Dallas agency with over six years of experience building custom digital products for companies across the Dallas-Fort Worth metroplex. Based at 6900 Dallas Pkwy in Plano, our senior developers serve startups, mid-market companies, and enterprise organizations throughout Downtown Dallas, Uptown, Deep Ellum, and the broader DFW metro. We deliver production-ready mobile apps and web platforms in 6–8 weeks — handling everything from strategy through App Store launch.",
     "description": "As Dallas’s trusted Android, iOS, and web development agency, Synergy Labs designs and builds scalable, reliable, and user-friendly apps and websites that help businesses thrive in today’s digital-first world. Our experienced U.S.-based team combines innovation, speed, and design excellence to deliver high-performance solutions tailored to your brand’s goals.Proudly serving clients across Dallas, Plano, Frisco, Irving, and Fort Worth, we partner with startups, small businesses, and enterprises to create powerful digital products that drive growth and engagement. Whether you need a custom mobile app, a responsive website, or a complete digital transformation, Synergy Labs delivers quality, precision, and innovation trusted throughout Texas.",
     "mapCode": "!1m18!1m12!1m3!1d3343.3835669968175!2d-96.82607142411575!3d33.072692173541476!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x864c3dae9613fc6d%3A0x4bc0808f779f989c!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Dallas!5e0!3m2!1sen!2s!4v1746006544309!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/Ce2iwTOGJfYxEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Dallas\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/Ce2iwTOGJfYxEAI/\" ] }",
     "servicesHeading": "Our Mobile App & Web Development Services",
     "servicesDescription": "We build custom mobile apps, web applications, and enterprise software for companies across Dallas, TX and beyond — handling everything from strategy through App Store launch.",
     "serviceSlugs": [
@@ -428,7 +427,8 @@
     ],
     "techStack": "<h4>Native Mobile</h4><p>Swift (iOS), Kotlin (Android), Java (Android)</p><h4>Cross-Platform</h4><p>React Native, Flutter</p><h4>Web</h4><p>React, Next.js, Node.js, Laravel, Python</p><h4>Cloud &amp; Infrastructure</h4><p>AWS, Azure, Google Cloud Platform, Firebase</p><h4>AI/ML Integration</h4><p>Claude API, TensorFlow, custom model deployment</p><h4>Databases</h4><p>PostgreSQL, MongoDB, Redis, Firebase Realtime Database</p>",
     "pricingHeading": "Mobile App Development Cost in Dallas",
-    "pricingTable": "<p><strong>Basic App</strong> — $5,000–$15,000: Single platform, core features, simple UI, 4–6 week build.</p><p><strong>Mid-Level App</strong> — $15,000–$35,000: Both platforms, custom UI/UX design, API integrations, 6–10 week build.</p><p><strong>Complex / Enterprise App</strong> — $40,000+: Advanced features, third-party integrations, admin panels, AI/ML, 10–16+ week build.</p>"
+    "pricingTable": "<p><strong>Basic App</strong> — $5,000–$15,000: Single platform, core features, simple UI, 4–6 week build.</p><p><strong>Mid-Level App</strong> — $15,000–$35,000: Both platforms, custom UI/UX design, API integrations, 6–10 week build.</p><p><strong>Complex / Enterprise App</strong> — $40,000+: Advanced features, third-party integrations, admin panels, AI/ML, 10–16+ week build.</p>",
+    "googleMapsUrl": "https://g.page/r/Ce2iwTOGJfYxEAI/"
   },
   {
     "slug": "atlanta",
@@ -440,7 +440,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based boutique mobile app development Atlanta agency and web development agency Atlanta businesses have trusted for over six years. From our Midtown office on Peachtree Street, we serve startups, mid-market companies, and enterprises across metro Atlanta — including Buckhead, Sandy Springs, Alpharetta, Decatur, and Marietta.",
     "description": "As Atlanta’s leading Android and iOS app development agency, Synergy Labs designs and builds fast, scalable, and user-friendly apps that power business growth across Georgia. Our U.S.-based team of developers and designers specializes in creating custom mobile and web solutions that blend innovation, performance, and visual excellence.Serving clients throughout Atlanta, Marietta, Alpharetta, Roswell, and Sandy Springs, we help startups, small businesses, and enterprises turn ambitious ideas into high-performing digital products. Whether you’re launching a new app or upgrading your online platform, Synergy Labs delivers reliable, results-driven development with a personal, boutique touch trusted across the Southeast.",
     "mapCode": "!1m18!1m12!1m3!1d3315.9815282549675!2d-84.38529322408739!3d33.786975173258064!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88f505ffe340224f%3A0x15c44c3cf0b5e23a!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Atlanta!5e0!3m2!1sen!2s!4v1746006315237!5m2!1sen!2s",
-    "jsonLd": "{\"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CQ0oGWU07mifEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": {\"@type\": \"PostalAddress\", \"addressLocality\": \"Atlanta\"}, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [\"https://g.page/r/CQ0oGWU07mifEAI/\"]}",
     "servicesHeading": "Mobile App Development Services in Atlanta",
     "servicesDescription": "Synergy Labs provides end-to-end mobile app development Atlanta companies need to compete — from initial concept through App Store and Google Play deployment. We build with Swift, Kotlin, React Native, and Flutter, choosing the right tool for each project.",
     "serviceSlugs": [
@@ -519,7 +518,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/CQ0oGWU07mifEAI/"
   },
   {
     "slug": "austin",
@@ -531,7 +531,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based boutique web development agency Austin founders and enterprise teams hire when they need mobile apps and custom web software shipped on time. Our team works out of 600 N Congress Ave in Downtown Austin, serving founders, product teams, and enterprises across Downtown, East Austin, The Domain, Round Rock, Cedar Park, Pflugerville, Lakeway, and Bee Cave.",
     "description": "As Austin’s leading mobile app and web development agency, Synergy Labs builds scalable, high-performance Android, iOS, and web solutions trusted by startups and enterprises alike. Our U.S.-based team combines innovation, design, and precision engineering to create user-friendly digital products that help businesses grow faster in today’s competitive landscape.Serving clients throughout Austin, Round Rock, Cedar Park, Georgetown, and the Greater Central Texas region, we partner with ambitious brands to turn creative ideas into seamless, powerful digital experiences. Whether you’re building your first mobile app or enhancing your existing platform, Synergy Labs delivers quality, speed, and innovation trusted across Texas.",
     "mapCode": "!1m18!1m12!1m3!1d3445.8923082952915!2d-97.745730524222!3d30.26864947481151!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8644b595cacf4a7b%3A0x717b0bafd1f37f2!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Austin!5e0!3m2!1sen!2s!4v1746005910319!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/Ca6dHSB9uGdyEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Austin\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/Ca6dHSB9uGdyEAI/\" ] }",
     "servicesHeading": "Mobile App Development Services in Austin",
     "servicesDescription": "We build native iOS and Android apps and cross-platform mobile apps for Austin, TX companies across every stage — from pre-seed MVPs to enterprise rollouts. We pick the stack based on your users, timeline, and budget.",
     "serviceSlugs": [
@@ -608,7 +607,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/Ca6dHSB9uGdyEAI/"
   },
   {
     "slug": "boston",
@@ -620,7 +620,6 @@
     "mainDescription": "Synergy Labs is a mobile app & web development agency in Boston, MA, serving startups and enterprises across Massachusetts since 2020. From our Downtown Boston office at 55 Court St, we partner with founders and product teams to turn ideas into production-ready mobile apps and web applications. Whether you are launching an MVP from a Cambridge coworking space or scaling an enterprise platform along the Route 128 corridor, our team delivers custom iOS, Android, and web development with the hands-on attention only a boutique agency can provide.",
     "description": "A Boston-based boutique app and web development studio, Synergy Labs brings bold digital ideas to life through creativity, code, and collaboration. In the heart of every project, our team blends innovation, design, and passion to craft custom Android, iOS, and web applications that deliver real impact for startups, enterprises, and growing businesses alike.Serving Boston and nearby areas such as Cambridge, Somerville, Quincy, and Waltham, we help New England businesses transform their visions into world-class mobile and web experiences. Whether it’s a sleek startup MVP or a complex enterprise platform, Synergy Labs delivers scalable, high-performance solutions that drive measurable success.",
     "mapCode": "!1m18!1m12!1m3!1d2948.2113818524754!2d-71.0589746!3d42.3593342!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e371c9e00e2807%3A0x745a71eac10ac3d5!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Boston!5e0!3m2!1sen!2s!4v1746446002283!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CXzv53RDSFFZEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Boston\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CXzv53RDSFFZEAI/\" ] }",
     "servicesHeading": "Our Mobile App & Web Development Services",
     "servicesDescription": "From our Downtown Boston office, we partner with founders and product teams to deliver custom iOS, Android, and web development with the hands-on attention only a boutique agency can provide.",
     "serviceSlugs": [
@@ -705,7 +704,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": "Mobile App Development Cost & Timelines in Boston",
-    "pricingTable": "<p><strong>Basic MVP:</strong> from $40,000</p><p><strong>Mid-complexity apps</strong> with custom integrations: $100,000+</p><p><strong>Complex enterprise applications</strong> (AI, HIPAA, multi-platform): $200,000+</p><p>Most projects take 3–6 months using agile sprints. Simple MVPs can launch in 6–8 weeks.</p>"
+    "pricingTable": "<p><strong>Basic MVP:</strong> from $40,000</p><p><strong>Mid-complexity apps</strong> with custom integrations: $100,000+</p><p><strong>Complex enterprise applications</strong> (AI, HIPAA, multi-platform): $200,000+</p><p>Most projects take 3–6 months using agile sprints. Simple MVPs can launch in 6–8 weeks.</p>",
+    "googleMapsUrl": "https://g.page/r/CXzv53RDSFFZEAI/"
   },
   {
     "slug": "chicago",
@@ -717,7 +717,6 @@
     "mainDescription": "Synergy Labs is a mobile app development and web development agency headquartered in River North, Chicago. From our office at 515 N State St, we build custom mobile apps and scalable web applications for businesses across Illinois. Whether you are a fintech company in the Loop or a logistics operator in Fulton Market, our team delivers production-ready software in 6 to 8 weeks.",
     "description": "In the heart of the Windy City, Synergy Labs crafts world-class Android and iOS applications that merge design, innovation, and cutting-edge technology to elevate every brand. As a trusted Chicago-based mobile and web development agency, our team builds fast, scalable, and user-friendly digital solutions tailored to your business goals.Serving companies across Chicago, Naperville, Evanston, Schaumburg, and Oak Park, we partner with startups, small businesses, and enterprises to transform visionary ideas into sleek, high-performing apps and websites. Whether you’re creating a new product or modernizing your digital experience, Synergy Labs delivers precision, creativity, and measurable results trusted throughout Illinois.",
     "mapCode": "!1m18!1m12!1m3!1d2970.066770203763!2d-87.6273487!3d41.891421099999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x880e2d58fd8f2b3d%3A0x9f68ee346519280d!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Chicago!5e0!3m2!1sen!2s!4v1745990197433!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CZfE641el49KEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Chicago\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CZfE641el49KEAI/\" ] }",
     "servicesHeading": "Our Chicago App & Web Development Services",
     "servicesDescription": "We build native iOS and Android apps, cross-platform solutions, custom web applications, and MVPs for Chicago businesses across every stage. Every project gets a dedicated team, a clear timeline, and direct access to senior engineers.",
     "serviceSlugs": [
@@ -800,7 +799,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/CZfE641el49KEAI/"
   },
   {
     "slug": "circleville",
@@ -812,7 +812,6 @@
     "mainDescription": "Synergy Labs is a mobile app and web development agency in Circleville that serves small businesses, contractors, e-commerce operators, startups, and service companies across Pickaway County and the broader Columbus, Ohio metro. We are a U.S.-based team with over six years of experience building custom mobile apps and scalable web applications. Our office at 357 Maumee Dr puts us minutes from downtown — not hours away in another time zone.",
     "description": "Hidden in the heart of charming Circleville, Ohio, Synergy Labs crafts stunning mobile apps and websites that connect people, ideas, and technology in unforgettable ways. As a trusted local development studio, we specialize in Android, iOS, and web solutions designed to help businesses thrive in today’s fast-moving digital world.Serving Circleville and nearby communities like Chillicothe, Lancaster, Grove City, and Columbus, our talented team builds scalable, user-friendly digital products that turn bold ideas into beautiful realities. Whether you’re a local startup ready to launch your first app or an established Ohio business looking to elevate your online presence, Synergy Labs delivers innovation, precision, and personal attention every step of the way.",
     "mapCode": "!1m18!1m12!1m3!1d3073.9353939824077!2d-82.92741339999999!3d39.6061378!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x884779b24c18121f%3A0xdb865e9cf1ce3509!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Circleville!5e0!3m2!1sen!2s!4v1746446233628!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.co/kgs/L9Z7kLC\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Circleville\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.co/kgs/L9Z7kLC\" ] }",
     "servicesHeading": "Our Services",
     "servicesDescription": "We offer a full-service development stack covering mobile app development, web development, UX/UI design, and post-launch support. Every engagement starts with a discovery call so we understand your business goals before a single line of code is written.",
     "serviceSlugs": [
@@ -898,7 +897,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.co/kgs/L9Z7kLC"
   },
   {
     "slug": "hartford",
@@ -910,7 +910,6 @@
     "mainDescription": "Synergy Labs is a mobile app development Hartford agency and web development Hartford CT partner serving businesses across Connecticut's capital region. From Downtown Hartford and West Hartford to Manchester, Glastonbury, and the Hartford-Springfield corridor along I-91, we build scalable digital products for startups, enterprises, and everything in between.",
     "description": "As Hartford’s leading mobile app and web development agency, Synergy Labs specializes in building innovative Android, iOS, and web solutions that drive growth for businesses across Connecticut. Our expert team designs scalable, user-friendly applications and websites that blend creativity, performance, and cutting-edge technology to help your brand stand out in the digital age.Serving clients throughout Hartford, West Hartford, New Haven, Manchester, and Springfield, we partner with startups, small businesses, and enterprises to turn ambitious ideas into sleek, high-performing digital products. Whether you need a custom mobile app, a responsive website, or a full-scale digital transformation, Synergy Labs delivers fast, reliable development services trusted across New England.",
     "mapCode": "!1m18!1m12!1m3!1d2975.815447578821!2d-72.67237102373477!3d41.76763667125416!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e6537d29b5db8b%3A0x9e6f821fd8564c7f!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Hartford!5e0!3m2!1sen!2s!4v1746005987068!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CQYRTcm1yEJwEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Hartford\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CQYRTcm1yEJwEAI/\" ] }",
     "servicesHeading": "Mobile App Development Services in Hartford",
     "servicesDescription": "Our mobile app development Hartford team builds custom iOS, Android, and cross-platform applications tailored to the industries that drive Hartford, CT and the surrounding Connecticut economy.",
     "serviceSlugs": [
@@ -990,7 +989,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/CQYRTcm1yEJwEAI/"
   },
   {
     "slug": "houston",
@@ -1002,7 +1002,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app development Houston agency with over six years of experience building custom digital products for businesses across Greater Houston. From our Galleria/Uptown office, our senior development team serves startups, mid-market companies, and enterprise organizations throughout Downtown, the Galleria, Sugar Land, The Woodlands, and the Energy Corridor.",
     "description": "As Houston’s leading Android and iOS app development agency, Synergy Labs builds fast, scalable, and user-friendly apps that power business growth across Texas. Our U.S.-based team of designers, developers, and strategists specializes in crafting custom mobile and web solutions that merge innovation, performance, and design excellence.Proudly serving clients across Houston, Sugar Land, The Woodlands, Katy, and the Greater Texas Gulf Coast region, we help startups, small businesses, and enterprises bring bold digital ideas to life. Whether you’re building a new app from scratch or modernizing an existing platform, Synergy Labs delivers precision, transparency, and quality — every time.",
     "mapCode": "!1m18!1m12!1m3!1d3464.357804604103!2d-95.46395932424115!3d29.738356275079237!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8640c1147bc3b3e1%3A0x64c3244c6613d630!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Houston!5e0!3m2!1sen!2s!4v1746006409588!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CX9MVtgfgm-eEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Houston\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CX9MVtgfgm-eEAI/\" ] }",
     "servicesHeading": "Mobile App Development Services in Houston",
     "servicesDescription": "Our mobile app development Houston practice covers every platform and use case. We build native and cross-platform applications that perform at scale, look polished on every device, and ship on time.",
     "serviceSlugs": [
@@ -1083,7 +1082,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": "Mobile App Development Cost in Houston",
-    "pricingTable": "<p><strong>Simple</strong> — $5,000–$20,000: Single platform, core features, basic UI, 4–6 weeks.</p><p><strong>Medium</strong> — $30,000–$80,000: Both platforms, API integrations, custom UI/UX design, 8–12 weeks.</p><p><strong>Complex</strong> — $80,000–$120,000+: Enterprise-grade, advanced integrations, scalable architecture, 12–20 weeks.</p>"
+    "pricingTable": "<p><strong>Simple</strong> — $5,000–$20,000: Single platform, core features, basic UI, 4–6 weeks.</p><p><strong>Medium</strong> — $30,000–$80,000: Both platforms, API integrations, custom UI/UX design, 8–12 weeks.</p><p><strong>Complex</strong> — $80,000–$120,000+: Enterprise-grade, advanced integrations, scalable architecture, 12–20 weeks.</p>",
+    "googleMapsUrl": "https://g.page/r/CX9MVtgfgm-eEAI/"
   },
   {
     "slug": "jackson",
@@ -1095,7 +1095,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app development Jackson WY agency and web development Jackson Hole studio serving businesses across Teton County. From Town Square boutiques to Teton Village resorts, we build custom apps and websites that help local business owners compete in one of the most visited destinations in the American West.",
     "description": "As Jackson Hole's leading Android and iOS app development agency, Synergy Labs designs and develops fast, scalable, and user-friendly apps that fuel business growth throughout Teton County. Our experienced U.S.-based team blends innovation, design, and precision to deliver mobile and web solutions tailored to your unique business goals. Proudly serving clients in Jackson, Teton Village, Wilson, Alta, and across the greater Jackson Hole area, we partner with startups, small businesses, and enterprises to create high-performance digital products that inspire engagement and deliver measurable results. Whether you're building your first app or scaling your digital platform, Synergy Labs brings the creativity, speed, and reliability that Jackson Hole businesses trust.",
     "mapCode": "!1m18!1m12!1m3!1d2895.1055271262962!2d-110.76242822365114!3d43.47926807111086!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x53531b4291cf91a3%3A0x4c5d5ed2a58cb1ab!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Jackson!5e0!3m2!1sen!2s!4v1746006355554!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/Cb9y4ElWz754EAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Jackson\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/Cb9y4ElWz754EAI/\" ] }",
     "servicesHeading": "Our Mobile App Development Services",
     "servicesDescription": "We offer full-spectrum mobile app development and web development Jackson WY businesses rely on — from initial concept through App Store and Play Store deployment. Our stack covers native and cross-platform frameworks, plus WordPress, e-commerce, and booking integrations.",
     "serviceSlugs": [
@@ -1172,7 +1171,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/Cb9y4ElWz754EAI/"
   },
   {
     "slug": "jacksonville",
@@ -1184,7 +1184,6 @@
     "mainDescription": "Synergy Labs is a mobile app development Jacksonville businesses rely on for custom iOS and Android applications and scalable web platforms. We serve startups, SMBs, and enterprises from Downtown Jax and Riverside to San Marco, Jacksonville Beach, St. Augustine, and Ponte Vedra across Northeast Florida.",
     "description": "As Jacksonville’s leading Android and iOS app development agency, Synergy Labs crafts fast, scalable, and user-friendly apps that empower businesses across Florida’s thriving digital landscape. Our skilled U.S.-based team combines creativity, strategy, and engineering excellence to deliver custom mobile and web solutions tailored to your brand’s goals.Proudly serving clients throughout Jacksonville, St. Augustine, Orange Park, Ponte Vedra, and the greater Northeast Florida region, we partner with startups, small businesses, and enterprises to build high-performance applications that drive measurable results. Whether you need a mobile app, a custom website, or a full-scale digital transformation, Synergy Labs brings innovation, speed, and precision to every project.",
     "mapCode": "!1m18!1m12!1m3!1d3444.0135127703943!2d-81.45617022422009!3d30.322133474784852!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88e44b23f9c3eafb%3A0xac8c1767e3c4d1cb!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Jacksonville!5e0!3m2!1sen!2s!4v1746006445138!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CecEQ52vUicHEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Jacksonville\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CecEQ52vUicHEAI/\" ] }",
     "servicesHeading": "Our Jacksonville App and Web Development Services",
     "servicesDescription": "We build iOS, Android, cross-platform, and web applications for Jacksonville, FL businesses of all sizes. Our US-based development team delivers production-ready software on fixed timelines — typically launching in 6 to 8 weeks.",
     "serviceSlugs": [
@@ -1275,7 +1274,8 @@
     ],
     "techStack": "<h4>Mobile Native</h4><p>Swift (iOS), Kotlin (Android)</p><h4>Cross-Platform</h4><p>React Native, Flutter</p><h4>Frontend Web</h4><p>React</p><h4>Backend</h4><p>Node.js, Laravel</p><h4>Cloud &amp; Infrastructure</h4><p>AWS, Firebase, Azure</p><h4>Integrations</h4><p>REST APIs, third-party SDKs, payment gateways, analytics platforms</p>",
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/CecEQ52vUicHEAI/"
   },
   {
     "slug": "london",
@@ -1287,7 +1287,6 @@
     "mainDescription": "Synergy Labs is a mobile app and web development agency serving London businesses from our Finsbury Square office in the heart of the City. We partner with fintech startups in Canary Wharf, healthtech companies in the Knowledge Quarter, and enterprise teams across Greater London to build custom iOS apps, Android apps, and scalable web platforms. With 6+ years delivering production-ready software, we bring senior talent, transparent process, and NDA-first discovery to every engagement.",
     "description": "Synergy Labs: London’s top mobile and web development agency. Specializing in cutting-edge Android, iOS, and web solutions, we design scalable, user-friendly apps and websites tailored to your needs. Trusted by startups and enterprises across London for fast and reliable development services.",
     "mapCode": "!1m18!1m12!1m3!1d2482.541050440675!2d-0.08862932322373572!3d51.52163547181649!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48761d65380ec1db%3A0x5951484374e7ef7c!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20London!5e0!3m2!1sen!2s!4v1746005744701!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.co/kgs/tQXuUWH\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"London\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.co/kgs/tQXuUWH\" ] }",
     "servicesHeading": null,
     "servicesDescription": null,
     "serviceSlugs": [],
@@ -1314,7 +1313,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.co/kgs/tQXuUWH"
   },
   {
     "slug": "los-angeles",
@@ -1326,7 +1326,6 @@
     "mainDescription": "Synergy Labs is a US-based mobile app development Los Angeles agency and web development agency Los Angeles companies trust to turn ideas into shipped software. Our senior developers work from our Playa Vista office, serving startups in Silicon Beach, production companies in Hollywood, and enterprise teams across Santa Monica, Downtown LA, Beverly Hills, and the wider Southern California region.",
     "description": "As Los Angeles’s top Android and iOS app development agency, Synergy Labs creates cutting-edge, user-friendly apps and digital experiences that help businesses thrive across California’s vibrant tech scene. Our expert team blends creativity, precision, and innovation to design scalable mobile and web solutions tailored to startups, enterprises, and local brands.Proudly serving clients across Los Angeles, Santa Monica, Pasadena, Burbank, and Long Beach, we specialize in transforming bold ideas into sleek, high-performing Android and iOS applications. Whether you’re launching a new startup or modernizing an established platform, Synergy Labs delivers speed, reliability, and world-class quality that define California innovation.",
     "mapCode": "!1m18!1m12!1m3!1d3308.4885767897513!2d-118.40893572407968!3d33.97998227318431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2b1fc3fc6f83f%3A0xc9af0fc992a8a83a!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Los%20Angeles!5e0!3m2!1sen!2s!4v1746006269970!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CXHT-EnUu3tLEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Los Angeles\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CXHT-EnUu3tLEAI/\" ] }",
     "servicesHeading": "Mobile App Development Services in Los Angeles",
     "servicesDescription": "We build native, cross-platform, and custom mobile app solutions engineered for the demands of the Los Angeles market. Our mobile app development Los Angeles team handles every layer of the stack, from initial architecture through App Store and Google Play submission.",
     "serviceSlugs": [
@@ -1409,7 +1408,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/CXHT-EnUu3tLEAI/"
   },
   {
     "slug": "orlando",
@@ -1421,7 +1421,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app development Orlando agency with over six years of experience building scalable digital products for startups and enterprises across Central Florida. From our Downtown Orlando office, we serve businesses in Winter Park, Kissimmee, Sanford, Lake Nona, and every neighborhood along the I-4 corridor.",
     "description": "As Orlando’s top Android and iOS app development agency, Synergy Labs designs and builds high-performance, user-friendly mobile and web applications that drive measurable business growth. Our talented U.S.-based team blends innovation, design, and engineering precision to create scalable digital products tailored to your brand’s goals.Proudly serving businesses across Orlando, Kissimmee, Winter Park, Sanford, and the greater Central Florida region, we help startups, enterprises, and local organizations turn bold ideas into powerful apps that deliver real impact. Whether you need a sleek mobile app, an interactive website, or a complete digital transformation, Synergy Labs brings the creativity and technical excellence that Florida businesses trust.",
     "mapCode": "!1m18!1m12!1m3!1d3504.9057509995473!2d-81.3820101242832!3d28.542552475714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88e77b0a0ab844b9%3A0xbb1f3c5f02c8a2ae!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Orlando!5e0!3m2!1sen!2s!4v1746006222770!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CTritfA8TMQVEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Orlando\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CTritfA8TMQVEAI/\" ] }",
     "servicesHeading": "Mobile App Development Services in Orlando",
     "servicesDescription": "Our mobile app development Orlando services cover every platform and use case. We build native, cross-platform, and hybrid applications designed to perform at scale for Orlando businesses of all sizes.",
     "serviceSlugs": [
@@ -1500,7 +1499,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/CTritfA8TMQVEAI/"
   },
   {
     "slug": "philadelphia",
@@ -1512,7 +1512,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app development Philadelphia agency with over six years of experience building scalable digital products for startups and enterprises across Greater Philadelphia. Our Philadelphia office at 1900 Market St puts us at the center of the city's business district.",
     "description": "As a Philadelphia-based boutique app development agency, Synergy Labs crafts high-quality Android and iOS apps that merge innovation, design, and performance. Our expert team creates scalable, user-friendly mobile and web solutions tailored to the needs of local startups, small businesses, and enterprises across Pennsylvania.Serving clients throughout Philadelphia, King of Prussia, Bala Cynwyd, Chester, and Wilmington, we help brands transform bold ideas into world-class digital products. Whether you’re launching a startup or modernizing your enterprise platform, Synergy Labs delivers fast, reliable, and beautifully designed applications that drive measurable business growth.",
     "mapCode": "!1m18!1m12!1m3!1d3058.4639589058966!2d-75.17523632382054!3d39.9533784715179!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c6c70989838599%3A0x3d6abad526ffb41e!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Philadelphia!5e0!3m2!1sen!2s!4v1746006480255!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CauxjKXSXl1MEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Philadelphia\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CauxjKXSXl1MEAI/\" ] }",
     "servicesHeading": "Mobile App Development Services in Philadelphia",
     "servicesDescription": "Our app developers in Philadelphia build native and cross-platform mobile applications tailored to your business requirements. Every custom mobile app we deliver is engineered for performance, security, and long-term maintainability.",
     "serviceSlugs": [
@@ -1591,7 +1590,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/CauxjKXSXl1MEAI/"
   },
   {
     "slug": "phoenix",
@@ -1603,7 +1603,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app development Phoenix agency delivering scalable digital products for startups, mid-market companies, and enterprise organizations across the Phoenix metro area. From Downtown Phoenix and Scottsdale to Tempe, Mesa, Chandler, and Gilbert, we bring six-plus years of hands-on experience building custom mobile apps and web platforms.",
     "description": "As a Phoenix-based boutique app development agency, Synergy Labs builds high-performance Android and iOS solutions that fuse creativity, speed, and precision. Our talented U.S.-based team designs and develops scalable mobile and web applications tailored to the unique goals of startups, small businesses, and enterprises across Arizona.Serving clients throughout Phoenix, Scottsdale, Tempe, Mesa, and Chandler, we deliver user-friendly digital products that enhance customer engagement and drive measurable business growth. Whether you’re launching a bold new startup idea or upgrading an existing platform, Synergy Labs combines design excellence, innovative engineering, and local expertise to bring your vision to life.",
     "mapCode": "!1m18!1m12!1m3!1d3329.3577068851414!2d-112.06941692410115!3d33.4399859733937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x872b11ca2decc20f%3A0xa25c0b1935f98cef!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Phoenix!5e0!3m2!1sen!2s!4v1746006634461!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.page/r/CTDWE2ZMJMNkEAI/\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Phoenix\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.page/r/CTDWE2ZMJMNkEAI/\" ] }",
     "servicesHeading": "Mobile App Development Services in Phoenix",
     "servicesDescription": "Our mobile app development Phoenix team builds native and cross-platform mobile applications designed for performance, reliability, and growth. We start every project with a clear strategy and end with a polished product ready for the App Store and Google Play.",
     "serviceSlugs": [
@@ -1686,7 +1685,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.page/r/CTDWE2ZMJMNkEAI/"
   },
   {
     "slug": "qatar",
@@ -1698,7 +1698,6 @@
     "mainDescription": "Synergy Labs is a mobile app and web development agency serving businesses across Doha, Qatar, and the wider Gulf region. From our C Ring Road office in central Doha, we partner with enterprises, government entities, and startups building digital products in one of the world's fastest-growing economies. Whether you are in The Pearl, West Bay, or anywhere across Qatar, we deliver custom iOS apps, Android apps, and scalable web platforms built to international standards.",
     "description": "Synergy Labs: Qatar’s premier mobile app development agency, specializing in Android and iOS solutions. Based in Qatar, we design innovative, scalable, and user-friendly apps to meet your business needs. Trusted by startups and enterprises for fast, reliable app development across Doha and beyond.",
     "mapCode": "!1m18!1m12!1m3!1d3608.224978867828!2d51.528807!3d25.263016200000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e45c50c939adcdd%3A0x31f6258633c1a2ed!2sSynergy%20Labs%20-%20Mobile%20and%20Web%20Development%20Agency%20in%20Qatar!5e0!3m2!1sen!2s!4v1746005596668!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.co/kgs/SpFPC5C\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Doha\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.co/kgs/SpFPC5C\" ] }",
     "servicesHeading": null,
     "servicesDescription": null,
     "serviceSlugs": [],
@@ -1725,7 +1724,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.co/kgs/SpFPC5C"
   },
   {
     "slug": "riyadh",
@@ -1737,7 +1737,6 @@
     "mainDescription": "Synergy Labs is a mobile app and web development agency serving businesses across Riyadh, Saudi Arabia, and the broader GCC region. From our King Abdul Aziz District office, we partner with enterprises, government-aligned ventures, and startups driving Vision 2030 digital transformation — building custom iOS apps, Android apps, and scalable web platforms built for the Saudi market. We bring senior development talent, NDA-first discovery, and transparent delivery to every engagement.",
     "description": "Synergy Labs: Riyadh’s leading mobile app development agency, specializing in Android and iOS solutions. Based in Riyadh, we create innovative, scalable, and user-focused apps tailored to your needs. Experience fast and reliable app development trusted by businesses across Saudi Arabia.",
     "mapCode": "!1m18!1m12!1m3!1d3624.829945107125!2d46.71835697559252!3d24.698371878035424!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e2f030e20d73a69%3A0x4a8f975e8debc497!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Riyadh!5e0!3m2!1sen!2s!4v1746005783600!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.co/kgs/CFgnSMJ\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Riyadh\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.co/kgs/CFgnSMJ\" ] }",
     "servicesHeading": null,
     "servicesDescription": null,
     "serviceSlugs": [],
@@ -1764,7 +1763,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.co/kgs/CFgnSMJ"
   },
   {
     "slug": "san-antonio",
@@ -1776,7 +1776,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app development San Antonio agency with over six years of experience delivering custom mobile app and web solutions for startups, mid-market companies, and enterprise organizations across South Texas. From Alamo Heights and Stone Oak to North Central San Antonio, New Braunfels, Boerne, and the Austin corridor, we serve clients who need senior-level talent without the risk of offshore outsourcing.",
     "description": "Based in vibrant San Antonio, Texas, Synergy Labs crafts world-class mobile apps and web experiences with a boutique touch and an unwavering commitment to quality. Our 100% U.S.-based team builds scalable, user-friendly Android, iOS, and web solutions designed to elevate local startups, small businesses, and established enterprises alike.At Synergy Labs, there’s no outsourcing — just transparent communication, realistic timelines measured in weeks (not months), and results that exceed expectations. Proudly serving San Antonio and nearby areas like New Braunfels, Boerne, Austin, and Seguin, we combine innovation, strategy, and craftsmanship to bring your digital vision to life.",
     "mapCode": "!1m18!1m12!1m3!1d3471.3534428445273!2d-98.4929138!3d29.535199700000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x865c61f31441d375%3A0xc43cbdc3b0711af6!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20San%20Antonio!5e0!3m2!1sen!2s!4v1746445716824!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.co/kgs/CPymNeN\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"San Antonio\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.co/kgs/CPymNeN\" ] }",
     "servicesHeading": "Mobile App Development Services in San Antonio",
     "servicesDescription": "Our mobile app development San Antonio practice covers every platform, every framework, and every stage from concept to post-launch support. We build custom solutions designed to scale with your business.",
     "serviceSlugs": [
@@ -1854,7 +1853,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.co/kgs/CPymNeN"
   },
   {
     "slug": "san-diego",
@@ -1866,7 +1866,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app development San Diego agency with over six years of experience building custom digital products for startups, mid-market companies, and enterprise organizations. From our North Park office, we serve businesses across Downtown San Diego, La Jolla, Carlsbad, Chula Vista, Escondido, and the broader San Diego County region.",
     "description": "As San Diego’s leading mobile app and web development agency, Synergy Labs designs and develops fast, scalable, and user-friendly Android and iOS apps that help businesses grow and thrive. Our talented U.S.-based team blends creativity, strategy, and technical expertise to deliver high-performance mobile and web solutions tailored to your goals.Proudly serving clients across San Diego, La Jolla, Carlsbad, Del Mar, and Chula Vista, we partner with startups, small businesses, and enterprises to transform big ideas into sleek, reliable digital products. Whether it’s a mobile app, custom website, or complete digital overhaul, Synergy Labs brings innovation, precision, and a boutique touch to every project.",
     "mapCode": "!1m18!1m12!1m3!1d3355.632959483814!2d-117.13233622412851!3d32.748935573675496!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80d955989ceb38cb%3A0xb1fd26da889f503f!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20San%20Diego!5e0!3m2!1sen!2s!4v1746006580092!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.co/kgs/xyQkRzj\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"San Diego\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.co/kgs/xyQkRzj\" ] }",
     "servicesHeading": "Mobile App Development Services in San Diego",
     "servicesDescription": "Our mobile app development San Diego team builds native and cross-platform applications designed for performance, scalability, and long-term maintainability. Every project follows a structured process: requirements scoping, UI/UX design, iterative development, rigorous QA, and post-launch support.",
     "serviceSlugs": [
@@ -1946,7 +1945,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.co/kgs/xyQkRzj"
   },
   {
     "slug": "singapore",
@@ -1958,7 +1958,6 @@
     "mainDescription": "Synergy Labs is a mobile app and web development agency serving businesses across Singapore and Southeast Asia. From our Jalan Besar office, we partner with fintech companies in Marina Bay, e-commerce operators across the island, and enterprise teams expanding into ASEAN markets — building custom iOS apps, Android apps, and scalable web platforms. We bring 6+ years of delivery experience, senior engineering talent, and a transparent development process to every Singapore engagement.",
     "description": "As Singapore’s top Android and iOS app development agency, Synergy Labs creates powerful, high-performance mobile and web solutions that help businesses scale fast. Our expert team blends innovation, design, and strategy to craft user-friendly apps built for growth, efficiency, and impact.Serving clients across Singapore, Malaysia, Indonesia, Thailand, and Hong Kong, we partner with startups, SMEs, and enterprises to transform ideas into seamless digital experiences. Whether you’re launching a new product or upgrading your tech stack, Synergy Labs delivers world-class mobile app development, web solutions, and custom software designed to drive success across Asia’s thriving digital economy.",
     "mapCode": "!1m18!1m12!1m3!1d3988.7703551643062!2d103.85769387521526!3d1.3132396986742978!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da19071fa446ab%3A0xde6d61e88712f116!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Singapore!5e0!3m2!1sen!2s!4v1746006184670!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.co/kgs/wj61ZGb\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Singapore\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.co/kgs/wj61ZGb\" ] }",
     "servicesHeading": null,
     "servicesDescription": null,
     "serviceSlugs": [],
@@ -1985,7 +1984,8 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.co/kgs/wj61ZGb"
   },
   {
     "slug": "springfield",
@@ -2090,7 +2090,6 @@
     "mainDescription": "Synergy Labs is a U.S.-based mobile app & web development agency serving Tampa, St. Petersburg, Clearwater, Brandon, and the greater Tampa Bay region. With over six years of experience building custom digital products, we work with startups launching their first MVP and established enterprises modernizing legacy systems. Our senior developers are based in the United States — not offshore — and every project gets a dedicated team from day one.",
     "description": "Tampa’s leading mobile app and web development studio, Synergy Labs, builds sleek, high-performance Android and iOS apps designed to help your business grow fast. Our talented U.S.-based team blends creativity, strategy, and technology to craft digital experiences that are reliable, scalable, and built to impress.Serving businesses throughout Tampa Bay, St. Petersburg, Clearwater, Brandon, and Sarasota, we partner with startups, small businesses, and enterprises to deliver innovative mobile and web solutions that drive real results. Whether you need a custom business app, an eCommerce platform, or a complete digital transformation, Synergy Labs delivers speed, precision, and unmatched quality — every time.",
     "mapCode": "!1m18!1m12!1m3!1d3524.502063630773!2d-82.45817542430346!3d27.94790637604551!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88c2c5842069e1d1%3A0x4b7bbbd449f8d371!2sSynergy%20Labs%20-%20Mobile%20App%20and%20Web%20Developers%20Agency%20in%20Tampa!5e0!3m2!1sen!2s!4v1746006131836!5m2!1sen!2s",
-    "jsonLd": "{ \"@context\": \"https://schema.org\", \"@type\": \"LocalBusiness\", \"name\": \"Synergy Labs - Mobile and Web Developers\", \"url\": \"https://g.co/kgs/M2smr35\", \"image\": \"https://www.synergylabs.co/assets/logo.png\", \"telephone\": \"+1-645-444-1069\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"\", \"addressLocality\": \"Tampa\", \"addressRegion\": \"\", \"postalCode\": \"\", \"addressCountry\": \"\" }, \"openingHours\": \"Mo-Fr 09:00-18:00\", \"priceRange\": \"$$\", \"sameAs\": [ \"https://g.co/kgs/M2smr35\" ] }",
     "servicesHeading": "Mobile App Development Services in Tampa",
     "servicesDescription": "From the Port Tampa Bay logistics corridor to the Westshore business district, our Tampa team builds native and cross-platform solutions that handle real-world conditions — real-time data syncing, offline functionality, and everything in between.",
     "serviceSlugs": [
@@ -2176,6 +2175,7 @@
     "technologyRefs": [],
     "techStack": null,
     "pricingHeading": null,
-    "pricingTable": null
+    "pricingTable": null,
+    "googleMapsUrl": "https://g.co/kgs/M2smr35"
   }
 ]
