@@ -91,6 +91,8 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     <meta name="description" content={metaDescription} />
 
     <link rel="canonical" href={pageUrl} />
+    {/* Same as Layout.astro: Vercel Preview builds (staging) stay out of search. */}
+    {process.env.VERCEL_ENV === "preview" && <meta name="robots" content="noindex, follow" />}
 
     <meta property="og:site_name" content="Synergy Labs" />
     <meta property="og:type" content="website" />
