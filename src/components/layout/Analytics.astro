@@ -40,8 +40,11 @@ const LINKBOT_PROPERTY_ID = "45799-b4c2e";
 /** Bing Webmaster Tools site verification. */
 const BING_SITE_VERIFICATION = "345C486FEB0A731338E5E8061654B647";
 
+// VERCEL_ENV, not import.meta.env.PROD: every `astro build` is PROD, including
+// Vercel previews and staging (dev.synergylabs.co). Same check as Weglot.astro.
 const enabled =
-  import.meta.env.PROD && import.meta.env.PUBLIC_DISABLE_ANALYTICS !== "true";
+  process.env.VERCEL_ENV === "production" &&
+  import.meta.env.PUBLIC_DISABLE_ANALYTICS !== "true";
 ---
 
 {/*
