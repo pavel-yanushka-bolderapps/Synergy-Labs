@@ -56,6 +56,12 @@ const metaDescription = stegaClean(description) as string;
 const pageUrl = canonicalUrl(stegaClean(canonical ?? Astro.url.pathname) as string, Astro.site);
 const ogImageUrl = assetUrl(stegaClean(ogImage) as string, Astro.site);
 
+// Vercel Preview builds -- staging (dev.synergylabs.co) and every branch URL --
+// are full copies of the site, so keep them out of search. Keyed on "preview"
+// rather than "not production" so local builds, which audit-seo.mjs reads,
+// still show each page's real indexing.
+const robotsNoindex = noindex || process.env.VERCEL_ENV === "preview";
+
 // The Studio's click-to-edit overlay, pulled in only when preview mode is
 // actually on.
 //
@@ -107,7 +113,7 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     <meta name="description" content={metaDescription} />
 
     <link rel="canonical" href={pageUrl} />
-    {noindex && <meta name="robots" content="noindex, follow" />}
+    {robotsNoindex && <meta name="robots" content="noindex, follow" />}
 
     <meta property="og:site_name" content="Synergy Labs" />
     <meta property="og:type" content={ogType} />
