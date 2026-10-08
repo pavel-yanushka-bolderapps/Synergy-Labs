@@ -14,10 +14,12 @@ const destinations = [
   { label: "Blog", href: "/blog" },
 ];
 
-// Built ahead of time even though it lists recent posts: Vercel serves this
-// file for every unmatched URL, and rendering it on demand would run a
-// function for each one. The post list catches up on the next deploy.
-export const prerender = true;
+// Rendered on demand, not built ahead of time. Pages answer an unknown slug
+// with an empty 404, which Astro fills with this page -- and for a prebuilt
+// 404 it does that by fetching /404.html over the network from inside the
+// Vercel function, which crashes it (FUNCTION_INVOCATION_FAILED, a 500 for
+// every missing URL). Rendered in-process instead, it also lists the latest
+// posts rather than the ones from the last deploy.
 ---
 
 <Layout
