@@ -8,31 +8,26 @@
 // match a slug containing a slash. That URL is indexed, so it stays as it is.
 //
 // This sits at the site root, which sounds alarming next to 400 other pages --
-// but Astro matches static routes before dynamic ones, and getStaticPaths only
-// emits the 24 slugs below, so it can neither shadow an existing page nor
-// swallow an unknown URL (those still reach 404.astro).
+// but Astro matches every other route before a root rest parameter, so it
+// cannot shadow an existing page, and a URL that is not one of the landing
+// slugs gets the 404 page from the check below.
 //
 // The layout deliberately mirrors src/pages/locations/[slug].astro: awards,
 // Clutch reviews and success stories all sit *inside* the left column rather
 // than as full-width bands, which is what keeps the form alongside them the
 // whole way down. Stats and the closing CTA then run full width underneath.
-import type { GetStaticPaths } from "astro";
 import LandingLayout from "../components/layout/LandingLayout.astro";
 import ContactForm from "../components/ContactForm.astro";
 import ContactSuccess from "../components/ContactSuccess.astro";
 import WorkCard from "../components/sections/locations/WorkCard.astro";
 import Stats from "../components/sections/Stats.astro";
 import CTA from "../components/sections/CTA.astro";
-import { getClutchLandings } from "../lib/sanity";
+import { getClutchLandingBySlug } from "../lib/sanity";
 import { home } from "../content/home";
 import { portfolioPage } from "../content/portfolio";
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const pages = await getClutchLandings();
-  return pages.map((page) => ({ params: { landing: page.slug }, props: { page } }));
-};
-
-const { page } = Astro.props;
+const page = Astro.params.landing ? await getClutchLandingBySlug(Astro.params.landing) : null;
+if (!page) return new Response(null, { status: 404 });
 
 const title = page.metaTitle || page.heading;
 const description = page.metaDescription || page.pitch;

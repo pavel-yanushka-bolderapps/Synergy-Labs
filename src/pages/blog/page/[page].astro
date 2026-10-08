@@ -1,8 +1,7 @@
 ---
-// /blog/page/2 .. /blog/page/n. Page 1 is /blog itself, so it is deliberately
-// not generated here -- two URLs serving the same posts would be a duplicate
+// /blog/page/2 .. /blog/page/n. Page 1 is /blog itself, so it deliberately
+// 404s here -- two URLs serving the same posts would be a duplicate
 // for search engines and would make the pager's "Previous" link inconsistent.
-import type { GetStaticPaths } from "astro";
 import { breadcrumbs, collectionPage } from "../../../lib/structuredData";
 import { stegaClean } from "@sanity/client/stega";
 import Layout from "../../../components/layout/Layout.astro";
@@ -11,26 +10,17 @@ import ContactSection from "../../../components/sections/ContactSection.astro";
 import { blogPage } from "../../../content/blogPage";
 import { getBlogPosts } from "../../../lib/sanity";
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = await getBlogPosts();
-  const { pageSize } = blogPage;
-  const totalPages = Math.max(1, Math.ceil(posts.length / pageSize));
+const allPosts = await getBlogPosts();
+const { pageSize } = blogPage;
+const totalPages = Math.max(1, Math.ceil(allPosts.length / pageSize));
+const totalPosts = allPosts.length;
 
-  return Array.from({ length: totalPages - 1 }, (_, i) => {
-    const page = i + 2;
-    return {
-      params: { page: String(page) },
-      props: {
-        posts: posts.slice((page - 1) * pageSize, page * pageSize),
-        currentPage: page,
-        totalPages,
-        totalPosts: posts.length,
-      },
-    };
-  });
-};
-
-const { posts, currentPage, totalPages, totalPosts } = Astro.props;
+// Only the canonical spelling of a page that exists: "2", not "02" or "1".
+const currentPage = Number(Astro.params.page);
+if (!/^[1-9]\d*$/.test(Astro.params.page ?? "") || currentPage < 2 || currentPage > totalPages) {
+  return new Response(null, { status: 404 });
+}
+const posts = allPosts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
 // Spelled out in the description so each page of the archive describes a
 // different slice of it -- 26 pages sharing one sentence is 26 pages competing

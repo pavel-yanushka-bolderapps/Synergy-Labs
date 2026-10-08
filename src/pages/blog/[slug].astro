@@ -2,7 +2,6 @@
 // /blog/[slug] -- one article. The body is Webflow rich-text HTML rendered
 // with set:html; see the note on `articleHtml` in
 // src/sanity/schemaTypes/blogPost.ts for why it is stored that way.
-import type { GetStaticPaths } from "astro";
 import Layout from "../../components/layout/Layout.astro";
 import BlogCard from "../../components/sections/blog/BlogCard.astro";
 import BlogConsultCta from "../../components/sections/blog/BlogConsultCta.astro";
@@ -13,17 +12,9 @@ import { home } from "../../content/home";
 import { blogPosting, breadcrumbs } from "../../lib/structuredData";
 import { stegaClean } from "@sanity/client/stega";
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = await getBlogPosts();
-  return posts.map((post) => ({ params: { slug: post.slug } }));
-};
-
 const { slug } = Astro.params;
-const post = await getBlogPostBySlug(slug!);
-
-if (!post) {
-  return Astro.redirect("/blog", 302);
-}
+const post = slug ? await getBlogPostBySlug(slug) : null;
+if (!post) return new Response(null, { status: 404 });
 
 const description = metaDescription(post.title);
 
