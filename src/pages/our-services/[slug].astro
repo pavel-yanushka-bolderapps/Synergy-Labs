@@ -14,35 +14,18 @@ import FAQ from "../../components/sections/FAQ.astro";
 import ContactSection from "../../components/sections/ContactSection.astro";
 import { home } from "../../content/home";
 import { serviceDetailPage } from "../../content/serviceDetailPage";
-import { getServiceSlugs, getServiceBySlug, type ServiceDetail } from "../../lib/sanity";
+import { getServiceBySlug } from "../../lib/sanity";
 import { breadcrumbs, service as serviceSchema } from "../../lib/structuredData";
 import { stegaClean } from "@sanity/client/stega";
 
-// Static-output route: every service page is generated at build time from
-// whatever "service" documents exist in Sanity right now. There is no
-// static-content fallback here (unlike the homepage Services grid) -- a
-// service only gets a page if it has a matching Sanity document when the
-// site is built. Publishing a new service in Studio requires a rebuild
-// (git push / redeploy, or a Sanity webhook -> Vercel deploy hook) before
-// its page appears live, same as everywhere else Sanity content is used.
-//
-// The same is true of `npm run dev`, which trips people up: Astro calls
-// getStaticPaths once per dev-server session and caches the result, so
-// publishing in Studio and reloading the page shows the OLD content and
-// looks like the edit didn't save. It did -- restart the dev server (or
-// save this file) to re-run the query.
-export async function getStaticPaths() {
-  const slugs = await getServiceSlugs();
-  const details = await Promise.all(slugs.map((slug) => getServiceBySlug(slug)));
-
-  return slugs
-    .map((slug, i) => ({ params: { slug }, props: { service: details[i] } }))
-    .filter((entry): entry is { params: { slug: string }; props: { service: ServiceDetail } } =>
-      entry.props.service !== null
-    );
-}
-
-const { service } = Astro.props;
+// One page per "service" document in Sanity, rendered on demand and cached
+// by Vercel (see the ISR note in astro.config.mjs). There is no static-content
+// fallback here (unlike the homepage Services grid): a slug with no matching
+// document answers 404, and a service published in Studio has a page as soon
+// as it is published.
+const { slug } = Astro.params;
+const service = slug ? await getServiceBySlug(slug) : null;
+if (!service) return new Response(null, { status: 404 });
 // Editors break the heading onto a second line with a plain Enter in the
 // Studio's text field, same convention as the homepage hero's heading.
 const headingLines = service.heroHeading.split("\n");

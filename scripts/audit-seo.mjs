@@ -1,38 +1,53 @@
-// Pre-launch SEO audit. Reads dist/client after `npm run build` and checks the
-// things that cost traffic when a site changes platform.
+// Pre-launch SEO audit. Fetches every page of a running copy of the site and
+// checks the things that cost traffic when a site changes platform.
 //
-//   npm run build && node scripts/audit-seo.mjs
-//   node scripts/audit-seo.mjs --legacy   # also check old-URL coverage
+//   npm run dev, then:  npm run audit:seo
+//   npm run audit:launch -- --url https://dev.synergylabs.co
 //
-// Exits 1 if any ERROR-level check fails, so it can gate a deploy.
+// --legacy also checks old-URL coverage. Exits 1 if any ERROR-level check
+// fails, so it can gate a deploy.
 //
-// Deliberately dependency-free and regex-based: it reads the shipped HTML, not
+// It used to read dist/client after a build, but pages showing Sanity content
+// are rendered on demand now (see the ISR note in astro.config.mjs), so the
+// build no longer contains them. The page list is the sitemap plus the pages
+// deliberately kept out of it.
+//
+// Deliberately dependency-free and regex-based: it reads the served HTML, not
 // the source, so it catches anything that goes wrong between the two -- which
 // is exactly the class of bug that makes a migration lose rankings.
 
-import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
-import { join, relative } from "node:path";
+import { readdirSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
-const DIST = "dist/client";
 const SITE = "https://www.synergylabs.co";
 const checkLegacy = process.argv.includes("--legacy");
+const urlArg = process.argv.indexOf("--url");
+// Defaults to the dev server.
+const BASE = (urlArg > -1 ? process.argv[urlArg + 1] : "http://localhost:4321").replace(/\/$/, "");
 
 const errors = [];
 const warnings = [];
 const err = (page, msg) => errors.push({ page, msg });
 const warn = (page, msg) => warnings.push({ page, msg });
 
-// --- Collect every built page ---------------------------------------------
-function walk(dir, out = []) {
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) walk(full, out);
-    else if (entry === "index.html" || entry === "404.html") out.push(full);
-  }
-  return out;
+// --- Collect every page ----------------------------------------------------
+async function get(path) {
+  const res = await fetch(BASE + path, { redirect: "manual" });
+  return { status: res.status, text: await res.text() };
 }
 
-const files = walk(DIST);
+const sitemap = await get("/sitemap-0.xml");
+const sitemapUrls = new Set(
+  [...sitemap.text.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+    (m) => m[1].replace(SITE, "").replace(/\/$/, "") || "/"
+  )
+);
+
+// Kept out of the sitemap on purpose (noindex), but still pages to audit.
+// "/404" is fetched as a URL that cannot exist.
+const OFF_SITEMAP = ["/ambassador-program", "/1-week-pilot", "/404"];
+const toFetch = [...sitemapUrls, ...OFF_SITEMAP];
+
 const pages = new Map();
 
 const pick = (html, re) => {
@@ -40,16 +55,16 @@ const pick = (html, re) => {
   return m ? m[1].trim() : null;
 };
 
-for (const file of files) {
-  const html = readFileSync(file, "utf8");
-  const rel = relative(DIST, file);
-  const route =
-    rel === "404.html" ? "/404" : "/" + rel.replace(/index\.html$/, "").replace(/\/$/, "");
+async function load(route) {
+  const { status, text: html } = await get(route === "/404" ? "/__audit-missing-page" : route);
+  if (route === "/404" ? status !== 404 : status !== 200) {
+    err(route, `answered HTTP ${status}`);
+    return;
+  }
   const head = html.slice(0, html.indexOf("</head>"));
   const body = html.slice(html.indexOf("<body"));
 
   pages.set(route, {
-    file,
     html,
     title: pick(head, /<title>([\s\S]*?)<\/title>/),
     description: pick(head, /<meta name="description" content="([^"]*)"/),
@@ -65,6 +80,14 @@ for (const file of files) {
     imgsNoAlt: [...body.matchAll(/<img(?![^>]*\balt=)[^>]*>/g)].length,
   });
 }
+
+// A few at a time: on-demand pages each run a render.
+const queue = [...toFetch];
+await Promise.all(
+  Array.from({ length: 6 }, async () => {
+    for (let route = queue.shift(); route !== undefined; route = queue.shift()) await load(route);
+  })
+);
 
 const routes = new Set(pages.keys());
 const isIndexable = (p) => !p.robots || !p.robots.includes("noindex");
@@ -162,12 +185,6 @@ for (const field of ["title", "description", "canonical"]) {
 }
 
 // --- Sitemap ---------------------------------------------------------------
-const sitemapFiles = readdirSync(DIST).filter((f) => /^sitemap-\d+\.xml$/.test(f));
-const sitemapUrls = new Set();
-for (const f of sitemapFiles)
-  for (const m of readFileSync(join(DIST, f), "utf8").matchAll(/<loc>([^<]+)<\/loc>/g))
-    sitemapUrls.add(m[1].replace(SITE, "").replace(/\/$/, "") || "/");
-
 if (sitemapUrls.size === 0) errors.push({ page: "sitemap", msg: "no sitemap entries found" });
 
 for (const [route, p] of pages) {
@@ -256,9 +273,10 @@ const print = (label, list) => {
   }
 };
 
-console.log(`Audited ${pages.size} pages in ${DIST}`);
-console.log(`  indexable: ${[...pages.values()].filter(isIndexable).length - 1}`);
-console.log(`  noindex:   ${[...pages.values()].filter((p) => !isIndexable(p)).length}`);
+console.log(`Audited ${pages.size} pages on ${BASE}`);
+const audited = [...pages].filter(([route]) => route !== "/404").map(([, p]) => p);
+console.log(`  indexable: ${audited.filter(isIndexable).length}`);
+console.log(`  noindex:   ${audited.filter((p) => !isIndexable(p)).length}`);
 console.log(`  sitemap:   ${sitemapUrls.size}`);
 
 print("WARNINGS", warnings);

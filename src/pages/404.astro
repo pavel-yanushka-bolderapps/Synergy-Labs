@@ -13,6 +13,11 @@ const destinations = [
   { label: "Locations", href: "/locations" },
   { label: "Blog", href: "/blog" },
 ];
+
+// Built ahead of time even though it lists recent posts: Vercel serves this
+// file for every unmatched URL, and rendering it on demand would run a
+// function for each one. The post list catches up on the next deploy.
+export const prerender = true;
 ---
 
 <Layout
