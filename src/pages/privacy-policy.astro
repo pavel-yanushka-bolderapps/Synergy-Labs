@@ -14,6 +14,10 @@ const lastUpdated = new Date(privacyPolicy.lastUpdated).toLocaleDateString("en-U
   day: "numeric",
   timeZone: "UTC",
 });
+
+// No CMS content, so this one is still built ahead of time rather than on
+// demand -- see the ISR note in astro.config.mjs.
+export const prerender = true;
 ---
 
 <Layout title="Privacy Policy" description={privacyPolicy.description}>

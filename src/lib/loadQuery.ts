@@ -8,9 +8,9 @@ import { sanityClient } from "sanity:client";
  *
  * Two modes:
  *
- * - Normal (default everywhere, including production builds): fetch the
- *   `published` perspective through Sanity's CDN. Identical to what
- *   `sanityClient.fetch()` did before this file existed.
+ * - Normal (default everywhere, including production): fetch the
+ *   `published` perspective from the live API. Identical to what
+ *   `sanityClient.fetch()` does.
  *
  * - Preview: fetch the `drafts` perspective, bypass the CDN, and ask Sanity
  *   for a Content Source Map so strings can be "stega"-encoded. Stega hides
@@ -116,7 +116,8 @@ async function fetchPublished<QueryResponse>(
     filterResponse: false,
     perspective: "published",
     resultSourceMap: false,
-    useCdn: true,
+    // Not the CDN: see the useCdn note on the sanity() call in astro.config.mjs.
+    useCdn: false,
     stega: false,
   });
 

@@ -1,6 +1,10 @@
 ---
 import Layout from "../components/layout/Layout.astro";
 import ContactSection from "../components/sections/ContactSection.astro";
+
+// No CMS content, so this one is still built ahead of time rather than on
+// demand -- see the ISR note in astro.config.mjs.
+export const prerender = true;
 ---
 
 <Layout title="Contact Us | Synergy Labs" description="Partner with Synergy Labs -- schedule a meeting or give us a call.">

@@ -1,7 +1,7 @@
 ---
-// A portfolio case study. Same static-build contract as the service pages:
-// every case study that exists in Sanity at build time gets a page, and
-// publishing a new one needs a rebuild before it appears.
+// A portfolio case study. Same contract as the service pages: every case
+// study in Sanity has a page as soon as it is published, and any other slug
+// answers 404.
 //
 // The original Webflow case studies were each laid out by hand, so this is
 // one consistent template driven by the schema rather than eight bespoke
@@ -13,23 +13,13 @@ import Sections from "../../../components/sections/casestudy/Sections.astro";
 import StatsBand from "../../../components/sections/casestudy/StatsBand.astro";
 import SplitBlock from "../../../components/sections/casestudy/SplitBlock.astro";
 import { home } from "../../../content/home";
-import { getCaseStudySlugs, getCaseStudyBySlug } from "../../../lib/sanity";
-import type { CaseStudy } from "../../../lib/types";
+import { getCaseStudyBySlug } from "../../../lib/sanity";
 import { breadcrumbs } from "../../../lib/structuredData";
 import { stegaClean } from "@sanity/client/stega";
 
-export async function getStaticPaths() {
-  const slugs = await getCaseStudySlugs();
-  const studies = await Promise.all(slugs.map((slug) => getCaseStudyBySlug(slug)));
-
-  return slugs
-    .map((slug, i) => ({ params: { slug }, props: { study: studies[i] } }))
-    .filter((entry): entry is { params: { slug: string }; props: { study: CaseStudy } } =>
-      entry.props.study !== null
-    );
-}
-
-const { study } = Astro.props;
+const { slug } = Astro.params;
+const study = slug ? await getCaseStudyBySlug(slug) : null;
+if (!study) return new Response(null, { status: 404 });
 const headingLines = study.headline.split("\n");
 
 // The hero carousel runs as a seamless loop: the rail is the screens over

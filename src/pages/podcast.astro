@@ -4,6 +4,10 @@ import Layout from "../components/layout/Layout.astro";
 import PodcastGrid from "../components/sections/PodcastGrid.astro";
 import ContactSection from "../components/sections/ContactSection.astro";
 import { podcastPage } from "../content/podcastPage";
+
+// No CMS content, so this one is still built ahead of time rather than on
+// demand -- see the ISR note in astro.config.mjs.
+export const prerender = true;
 ---
 
 <Layout title="Podcast" description={podcastPage.description}>

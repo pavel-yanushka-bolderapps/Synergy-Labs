@@ -1,7 +1,6 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import vercel from '@astrojs/vercel';
-import sitemap from '@astrojs/sitemap';
 import react from '@astrojs/react';
 import sanity from '@sanity/astro';
 import { loadEnv } from 'vite';
@@ -10,7 +9,12 @@ import { redirects } from './src/lib/redirects.mjs';
 // astro.config.mjs runs in plain Node, not through Vite's `import.meta.env`,
 // so .env has to be read explicitly here for the values the Sanity
 // integration needs at config time.
-const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, PUBLIC_SANITY_VISUAL_EDITING_ENABLED } = loadEnv(
+const {
+  PUBLIC_SANITY_PROJECT_ID,
+  PUBLIC_SANITY_DATASET,
+  PUBLIC_SANITY_VISUAL_EDITING_ENABLED,
+  ISR_BYPASS_TOKEN,
+} = loadEnv(
   process.env.NODE_ENV ?? 'development',
   process.cwd(),
   ''
@@ -19,18 +23,13 @@ const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, PUBLIC_SANITY_VISUAL_ED
 /** The Sanity project behind the site. See the note at the sanity() call. */
 const SANITY_PROJECT_ID = 'toot3mhg';
 
-// Pages that render <meta name="robots" content="noindex">, so they are kept
-// out of the sitemap below. Both are the ambassador programme: /1-week-pilot
-// is a duplicate of /ambassador-program (see src/pages/1-week-pilot.astro).
-const NOINDEX_PATHS = ['/ambassador-program', '/1-week-pilot'];
-
 // Legacy URL map: see src/lib/redirects.mjs.
 
 
 export default defineConfig({
   // The canonical origin. Everything absolute is derived from it -- the
   // <link rel="canonical"> and Open Graph URLs in Layout.astro, and every
-  // entry @astrojs/sitemap writes. Without it Astro.site is undefined and
+  // entry in src/pages/sitemap-0.xml.ts. Without it Astro.site is undefined and
   // those fall back to relative URLs, which neither canonicals nor the
   // social scrapers accept.
   site: 'https://www.synergylabs.co',
@@ -40,25 +39,36 @@ export default defineConfig({
   // Google treats each page as having moved -- and ignores hreflang that
   // points at a non-canonical URL. On Vercel this also 308s /x/ to /x.
   trailingSlash: 'never',
-  // Site stays static by default (every page prerenders) except routes that
-  // opt out with `export const prerender = false` -- that's the
-  // contact-form API route and the embedded Sanity Studio, so it needs a
-  // server adapter but the rest of the site is unaffected.
-  adapter: vercel(),
+  // Every page that shows Sanity content renders on demand and is cached by
+  // Vercel's ISR, so a publish in the Studio reaches the live site in seconds
+  // instead of waiting for a full rebuild:
+  //
+  //   Studio publish -> Sanity webhook -> /api/revalidate -> Vercel re-renders
+  //   just the pages that document appears on (src/lib/revalidate.ts).
+  //
+  // Between publishes every page is served from Vercel's cache, the same as
+  // the static files it replaced. Pages with no CMS content opt back into
+  // build-time rendering with `export const prerender = true`.
+  output: 'server',
+  adapter: vercel({
+    isr: {
+      // Shared secret: a request carrying it in `x-prerender-revalidate`
+      // re-renders the page and replaces the cached copy. Unset (local
+      // builds), pages are still cached, just never refreshed on demand.
+      bypassToken: ISR_BYPASS_TOKEN || undefined,
+      // Safety net if a webhook delivery is ever lost: a cached page is
+      // re-rendered in the background at most an hour after it went stale.
+      expiration: 60 * 60,
+      // POST endpoints and the revalidation hook itself must never be cached.
+      // Plain strings only -- the adapter turns a RegExp exclusion into a
+      // literal route pattern, which never matches a real URL.
+      exclude: ['/api/contact', '/api/lead', '/api/builder', '/api/revalidate'],
+    },
+  }),
   // See src/lib/redirects.mjs. The Vercel adapter turns these into real
   // route-table entries, not meta-refresh pages.
   redirects,
   integrations: [
-    sitemap({
-      // The Studio is an application, not content, and the API routes are not
-      // pages at all. The rest are pages that render `noindex` -- listing a
-      // URL in a sitemap asks Google to index it, so a sitemap entry for a
-      // noindex page is a contradiction Search Console reports as an error.
-      // Keep this in step with the `noindex` prop passed in src/pages.
-      filter: (page) =>
-        !page.includes('/studio') &&
-        !NOINDEX_PATHS.some((path) => page.endsWith(path) || page.endsWith(`${path}/`)),
-    }),
     sanity({
       // Falls back to the real project rather than a placeholder. The ID is
       // not a secret -- it is in every image URL the site serves -- and a
@@ -68,10 +78,11 @@ export default defineConfig({
       // study pages, which have none, are never generated and 404.
       projectId: PUBLIC_SANITY_PROJECT_ID || SANITY_PROJECT_ID,
       dataset: PUBLIC_SANITY_DATASET || 'production',
-      // Static build -- fetch through Sanity's CDN rather than the live API.
-      // (src/lib/loadQuery.ts overrides this per-request when the Studio's
-      // Preview tab is showing drafts, which must skip the CDN.)
-      useCdn: true,
+      // The live API, not Sanity's CDN. A page is only rendered when a publish
+      // asks for it, a moment after the change -- the CDN can still be serving
+      // the previous version then, and that stale copy would be what Vercel
+      // caches. Vercel's cache already absorbs the traffic the CDN was for.
+      useCdn: false,
       apiVersion: '2025-08-31',
       studioBasePath: '/studio',
       // Must be set explicitly. @sanity/astro only falls back to reading

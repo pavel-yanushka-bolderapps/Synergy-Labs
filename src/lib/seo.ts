@@ -5,8 +5,8 @@
 
 /**
  * An absolute URL with no trailing slash -- the form the Webflow site served
- * and Google indexed, and the one `trailingSlash: 'never'` in
- * astro.config.mjs makes @astrojs/sitemap emit. Mixing the two forms is the
+ * and Google indexed, and the one src/pages/sitemap-0.xml.ts emits (with
+ * `trailingSlash: 'never'` in astro.config.mjs). Mixing the two forms is the
  * classic way to end up with a canonical that does not match the URL in the
  * sitemap, so every one goes through here.
  *

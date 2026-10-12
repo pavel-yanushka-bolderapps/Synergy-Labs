@@ -299,9 +299,8 @@ export async function getLocationDetailBySlug(slug: string): Promise<LocationDet
 // --- Individual service detail pages (src/pages/our-services/[slug].astro) ---
 //
 // Unlike getServices() above, these pages have no static-content fallback --
-// they only exist for services that have a matching Sanity document at
-// build time. A service with no detail-page fields filled in (or missing
-// entirely from Sanity) just doesn't get a page built for it.
+// they only exist for services that have a matching Sanity document. A
+// service missing from Sanity has no page: its URL answers 404.
 
 export interface ServiceDetail {
   title: string;
@@ -363,8 +362,8 @@ interface SanityServiceDetailDoc {
 
 /**
  * Returns the URL-safe slug (the part after "/our-services/") for every
- * service document whose `href` looks like a detail-page path, so
- * getStaticPaths() knows which pages to build.
+ * service document whose `href` looks like a detail-page path -- the pages
+ * the sitemap lists.
  */
 export async function getServiceSlugs(): Promise<string[]> {
   try {
@@ -376,16 +375,18 @@ export async function getServiceSlugs(): Promise<string[]> {
       .map((href) => href.replace("/our-services/", "").replace(/\/$/, ""))
       .filter(Boolean);
   } catch (err) {
+    // Thrown rather than []: an empty list would be cached as the truth --
+    // a sitemap without these pages, or grids with every case study unlinked.
     console.error("[sanity] Failed to fetch service slugs:", err);
-    return [];
+    throw err;
   }
 }
 
 /**
  * Fetches the detail-page content for one service by its slug (matched
  * against the `href` field as "/our-services/<slug>"). Returns null if the
- * document doesn't exist or the request fails -- getStaticPaths() skips
- * building a page in that case.
+ * document doesn't exist, which the page answers with a 404; throws if the
+ * request fails.
  */
 export async function getServiceBySlug(slug: string): Promise<ServiceDetail | null> {
   try {
@@ -408,7 +409,7 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
     if (!doc) return null;
 
     // stegaClean for the same reason as in getLottieAspectRatio(): this URL
-    // is fetched at build time and handed to the player as a canvas `src`,
+    // is fetched on the server and handed to the player as a canvas `src`,
     // never rendered as text, so the invisible preview-mode characters would
     // only ever corrupt the request.
     const heroLottieSrc = stegaClean(doc.heroLottie?.asset?.url ?? undefined) ?? undefined;
@@ -420,7 +421,7 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
       heroImageSrc: doc.heroImage ? imageBuilder.image(doc.heroImage).width(800).url() : undefined,
       // Served from this site rather than Sanity's CDN -- see
       // toSameOriginLottie(). The ratio is still read from the CDN copy:
-      // that fetch runs at build time in Node, where CORS does not apply.
+      // that fetch runs on the server, where CORS does not apply.
       heroLottieSrc: heroLottieSrc ? toSameOriginLottie(heroLottieSrc) : undefined,
       heroLottieAspectRatio: heroLottieSrc
         ? await getLottieAspectRatio(heroLottieSrc, doc.heroLottie?.asset?.extension)
@@ -488,8 +489,11 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
       metaDescription: doc.metaDescription ?? undefined,
     };
   } catch (err) {
+    // Thrown, not null: null means "no such page", and the route would answer
+    // 404 -- which Vercel caches over a page that exists. An error leaves the
+    // last good copy in the cache instead.
     console.error(`[sanity] Failed to fetch service detail for "${slug}":`, err);
-    return null;
+    throw err;
   }
 }
 
@@ -500,7 +504,7 @@ export async function getServiceBySlug(slug: string): Promise<ServiceDetail | nu
  * arbitrary hardcoded height that letterboxes every animation differently).
  *
  * Lottie JSON carries the composition's `w`/`h` at the top level, so read
- * them once at build time and hand the page a CSS `aspect-ratio` value. That
+ * them once on the server and hand the page a CSS `aspect-ratio` value. That
  * reproduces the <img> behaviour: the slot is exactly as tall as the
  * animation wants to be, and it's reserved before the player boots, so there
  * is no layout shift.
@@ -537,8 +541,9 @@ export async function getHeroLottieFiles(): Promise<{ file: string; url: string 
     const unique = [...new Set(urls.map((url) => stegaClean(url ?? undefined)).filter(Boolean))] as string[];
     return unique.map((url) => ({ file: toSameOriginLottie(url).split("/").pop()!, url }));
   } catch (err) {
+    // Thrown rather than [] -- an empty list would 404 every animation.
     console.error("[sanity] Failed to list hero Lottie files:", err);
-    return [];
+    throw err;
   }
 }
 
@@ -553,8 +558,8 @@ async function getLottieAspectRatio(
   // longer equals "json" -- which silently sent every animation down the
   // square-fallback path below. Compare the cleaned value.
   if (extension && stegaClean(extension) !== "json") return undefined;
-  // Several services can share one animation, and getStaticPaths() builds
-  // every page in one process, so don't refetch a file already read.
+  // Several services can share one animation, so don't refetch a file
+  // already read.
   if (lottieAspectRatios.has(url)) return lottieAspectRatios.get(url);
 
   let ratio: string | undefined;
@@ -573,7 +578,9 @@ async function getLottieAspectRatio(
     console.warn(`[sanity] Could not read dimensions from hero Lottie ${url}:`, err);
   }
 
-  lottieAspectRatios.set(url, ratio);
+  // Sanity file URLs are content hashes, so a ratio read once stays right for
+  // the life of the function. A failure is not kept: the next render retries.
+  if (ratio) lottieAspectRatios.set(url, ratio);
   return ratio;
 }
 
@@ -982,7 +989,7 @@ function toCaseStudy(doc: SanityCaseStudyDoc): CaseStudy {
   };
 }
 
-/** Slugs for every case study that can be built, for getStaticPaths(). */
+/** Slugs for every case study with a page, for the sitemap and portfolio grids. */
 export async function getCaseStudySlugs(): Promise<string[]> {
   try {
     const slugs = await loadQuery<string[]>({
@@ -990,8 +997,10 @@ export async function getCaseStudySlugs(): Promise<string[]> {
     });
     return slugs.map((s) => stegaClean(s)).filter(Boolean);
   } catch (err) {
+    // Thrown rather than []: an empty list would be cached as the truth --
+    // a sitemap without these pages, or grids with every case study unlinked.
     console.error("[sanity] Failed to fetch case study slugs:", err);
-    return [];
+    throw err;
   }
 }
 
@@ -1003,8 +1012,11 @@ export async function getCaseStudyBySlug(slug: string): Promise<CaseStudy | null
     });
     return doc ? toCaseStudy(doc) : null;
   } catch (err) {
+    // Thrown, not null: null means "no such page", and the route would answer
+    // 404 -- which Vercel caches over a page that exists. An error leaves the
+    // last good copy in the cache instead.
     console.error(`[sanity] Failed to fetch case study "${slug}":`, err);
-    return null;
+    throw err;
   }
 }
 
@@ -1121,12 +1133,15 @@ function fallbackPosts(): BlogPostSummary[] {
 let blogPostsPromise: Promise<BlogPostSummary[]> | null = null;
 
 export function getBlogPosts(): Promise<BlogPostSummary[]> {
-  // Every one of the 316 post pages needs the full list (for its slug, and
-  // again for the "More from the blog" row), as do /blog and its 26 pager
-  // pages. Without this the build makes the same query some 700 times.
-  // Cached as the promise rather than the result so concurrent page builds
-  // share one request instead of racing to start their own.
-  blogPostsPromise ??= fetchBlogPosts();
+  // A post page asks for the full list twice (to find itself, and for the
+  // "More from the blog" row), and a publish re-renders several pages at once.
+  // Calls made while a request is already in flight share it -- but the
+  // result is dropped as soon as it settles. Pages render on demand in a
+  // long-lived function now, so a list kept any longer would be served to
+  // the next re-render after a publish, without the post just published.
+  blogPostsPromise ??= fetchBlogPosts().finally(() => {
+    blogPostsPromise = null;
+  });
   return blogPostsPromise;
 }
 

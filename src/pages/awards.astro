@@ -5,6 +5,10 @@ import AwardsHero from "../components/sections/AwardsHero.astro";
 import AwardsGrid from "../components/sections/AwardsGrid.astro";
 import ContactSection from "../components/sections/ContactSection.astro";
 import { awardsPage } from "../content/awardsPage";
+
+// No CMS content, so this one is still built ahead of time rather than on
+// demand -- see the ISR note in astro.config.mjs.
+export const prerender = true;
 ---
 
 <Layout

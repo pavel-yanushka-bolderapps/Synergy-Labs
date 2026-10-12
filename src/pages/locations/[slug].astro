@@ -26,21 +26,12 @@ import FAQ from "../../components/sections/FAQ.astro";
 import { home } from "../../content/home";
 import { portfolioPage } from "../../content/portfolio";
 import { locationProcess } from "../../content/locationProcess";
-import { getLocationDetails } from "../../lib/sanity";
+import { getLocationDetailBySlug } from "../../lib/sanity";
 import { breadcrumbs, locationPage } from "../../lib/structuredData";
 import { stegaClean } from "@sanity/client/stega";
-import type { LocationDetail } from "../../lib/types";
 
-export async function getStaticPaths() {
-  const locations = await getLocationDetails();
-  return locations.map((location) => ({ params: { slug: location.slug }, props: { location } }));
-}
-
-interface Props {
-  location: LocationDetail;
-}
-
-const { location } = Astro.props;
+const location = Astro.params.slug ? await getLocationDetailBySlug(Astro.params.slug) : null;
+if (!location) return new Response(null, { status: 404 });
 
 const heading = location.mainHeading?.trim() || `${location.city} Office`;
 
