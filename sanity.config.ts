@@ -17,6 +17,11 @@ export default defineConfig({
   // Same fallback as astro.config.mjs -- see the note on the sanity() call there.
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID || "toot3mhg",
   dataset: import.meta.env.PUBLIC_SANITY_DATASET || "production",
+  // Content Releases and Scheduled Drafts (built on releases) are paid-plan
+  // features: on this project's plan the release limit is 0, so the Studio's
+  // attempt to create one fails with 403 "releaseLimitExceededError".
+  releases: { enabled: false },
+  scheduledDrafts: { enabled: false },
   plugins: [
     structureTool(),
     // The "Media" tab: every uploaded image and file in one browsable grid,
