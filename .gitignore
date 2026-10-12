@@ -12,3 +12,7 @@ npm-debug.log*
 # Webflow export reference material (not part of the built site)
 webflow-export/
 synergylabs.webflow-home.zip
+
+# Local env files (vercel env pull writes .env.local etc.); keep the template
+.env*
+!.env.example
