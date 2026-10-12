@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { Resend } from "resend";
+import { sendToEachRecipient } from "../../lib/notify";
 
 // This route needs to run per-request (to call reCAPTCHA + Resend), so it
 // opts out of the site's default static prerendering. Every other page
@@ -146,10 +147,8 @@ export const POST: APIRoute = async ({ request }) => {
     // unverified "from" domain) -- it resolves normally with an { error }
     // field instead. Checking only for a thrown exception here previously
     // meant a failed send was reported back to the browser as a success.
-    const { error: sendError } = await resend.emails.send({
+    const { error: sendError } = await sendToEachRecipient(resend, toEmail, {
       from: fromEmail,
-      // CONTACT_TO_EMAIL may list several inboxes, comma-separated.
-      to: toEmail.split(",").map((address) => address.trim()).filter(Boolean),
       replyTo: email,
       subject: `New project inquiry from ${firstName} ${lastName}`,
       text: [
