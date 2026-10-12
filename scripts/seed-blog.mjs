@@ -5,6 +5,7 @@
 //   node scripts/extract-blog-csv.mjs      # first, if the CSV changed
 //   node scripts/seed-blog.mjs --dry-run
 //   node scripts/seed-blog.mjs
+//   node scripts/seed-blog.mjs --only slug-a,slug-b   # just these posts
 //
 // Authors are written before posts, because each post references its author by
 // id and a reference to a document that does not exist yet resolves to null.
@@ -25,6 +26,13 @@ const API_VERSION = "2025-08-31";
 const BATCH_SIZE = 25;
 
 const dryRun = process.argv.includes("--dry-run");
+// --only adds individual posts (late Webflow publishes) without re-seeding the
+// whole archive, which would overwrite edits made in the Studio since. Authors
+// are left alone too: the posts only reference them.
+const onlyArg = process.argv.find((arg) => arg.startsWith("--only"));
+const only = onlyArg
+  ? new Set((onlyArg.split("=")[1] ?? process.argv[process.argv.indexOf(onlyArg) + 1] ?? "").split(",").filter(Boolean))
+  : null;
 
 const env = await readDotEnv();
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
@@ -65,7 +73,7 @@ function boundedId(id) {
 console.log(`\nblogAuthor (${authors.length})`);
 const authorMutations = [];
 
-for (const author of authors) {
+for (const author of only ? [] : authors) {
   if (dryRun) {
     console.log(`  ${author.slug.padEnd(28)} ${author.name}`);
     continue;
@@ -93,7 +101,7 @@ console.log(`\nblogPost (${posts.length})`);
 const postMutations = [];
 const missingArticle = [];
 
-for (const post of posts) {
+for (const post of only ? posts.filter((p) => only.has(p.slug)) : posts) {
   const articleHtml = articles[post.slug];
 
   // A post with no body would build a page that is a title and nothing else,
@@ -129,7 +137,7 @@ if (dryRun) {
   process.exit(0);
 }
 
-await mutate(authorMutations, "authors");
+if (authorMutations.length) await mutate(authorMutations, "authors");
 
 for (let i = 0; i < postMutations.length; i += BATCH_SIZE) {
   const batch = postMutations.slice(i, i + BATCH_SIZE);
