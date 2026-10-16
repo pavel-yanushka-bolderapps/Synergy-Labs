@@ -576,7 +576,16 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
       formWrapper?.classList.add("hidden");
       successBlock?.classList.remove("hidden");
       successBlock?.classList.add("flex");
-      successBlock?.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Only scroll when the card's top is out of sight. On the blog's sticky
+      // rail it is already on screen, and scrolling there just nudged the
+      // article out from under the reader.
+      if (successBlock) {
+        const top = successBlock.getBoundingClientRect().top;
+        const clearance = parseFloat(getComputedStyle(successBlock).scrollMarginTop) || 0;
+        if (top < clearance || top > window.innerHeight * 0.4) {
+          successBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
       // The form the user was in is gone; move focus to the confirmation so a
       // screen reader announces it.
       if (successBlock) {

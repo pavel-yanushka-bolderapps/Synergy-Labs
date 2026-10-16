@@ -247,9 +247,9 @@ export const home: HomePageContent = {
           "Getting started is easy! Simply reach out to us by sharing your idea through our contact form. One of our team members will respond within one working day via email or phone to discuss your project in detail. We’re excited to help you turn your vision into reality!",
       },
       {
-        question: "Why should we use SynergyLabs over another agency?",
+        question: "Why should we use Synergy Labs over another agency?",
         answer:
-          "Choosing SynergyLabs means partnering with a top-tier boutique mobile app development agency that prioritizes your needs. Our team is dedicated to delivering high-quality, scalable, and cross-platform apps quickly and affordably. We focus on personalized service, ensuring that you work directly with senior talent throughout your project. Our commitment to innovation, client satisfaction, and transparent communication sets us apart from other agencies. With SynergyLabs, you can trust that your vision will be brought to life with expertise and care.",
+          "Choosing Synergy Labs means partnering with a top-tier boutique mobile app development agency that prioritizes your needs. Our team is dedicated to delivering high-quality, scalable, and cross-platform apps quickly and affordably. We focus on personalized service, ensuring that you work directly with senior talent throughout your project. Our commitment to innovation, client satisfaction, and transparent communication sets us apart from other agencies. With Synergy Labs, you can trust that your vision will be brought to life with expertise and care.",
       },
       {
         question: "How long will it take to build and launch my app?",
@@ -264,7 +264,7 @@ export const home: HomePageContent = {
       {
         question: "What programming languages and frameworks do you use?",
         answer:
-          "At SynergyLabs, we utilize a variety of programming languages and frameworks to best suit your project’s needs. For cross-platform development, we use Flutter or Flutterflow, which allows us to efficiently support web, Android, and iOS with a single codebase—ideal for projects with tight budgets. For native applications, we employ Swift for iOS and Kotlin for Android applications. For web applications, we combine frontend layout frameworks like Ant Design, or Material Design with React. On the backend, we typically use Laravel or Yii2 for monolithic projects, and Node.js for serverless architectures. Additionally, we can support various technologies, including Microsoft Azure, Google Cloud, Firebase, Amazon Web Services (AWS), React Native, Docker, NGINX, Apache, and more.",
+          "At Synergy Labs, we utilize a variety of programming languages and frameworks to best suit your project’s needs. For cross-platform development, we use Flutter or Flutterflow, which allows us to efficiently support web, Android, and iOS with a single codebase—ideal for projects with tight budgets. For native applications, we employ Swift for iOS and Kotlin for Android applications. For web applications, we combine frontend layout frameworks like Ant Design, or Material Design with React. On the backend, we typically use Laravel or Yii2 for monolithic projects, and Node.js for serverless architectures. Additionally, we can support various technologies, including Microsoft Azure, Google Cloud, Firebase, Amazon Web Services (AWS), React Native, Docker, NGINX, Apache, and more.",
       },
       {
         question: "How will I secure my app?",
