@@ -214,6 +214,39 @@ export const redirects = optionalTrailingSlash({
   '/blog/unlock-locked-phone-complete-guide-2026': to('/blog/how-do-i-unlock-my-iphone'),
   '/news-articles/mobile-developers-in-miami': to('/locations/miami'),
 
+  // Re-slugged "-2025" -> "-2026" on Webflow WITHOUT a 301 there, so they
+  // were already 404ing; Search Console still lists the old URLs (and their
+  // Weglot /{lang}/ copies) as Not found. Each target is the same article.
+  ...Object.fromEntries(
+    [
+      '5-proven-strategies-in-2025-for-building-scalable-apps-in-emerging-markets',
+      '5-reasons-you-should-care-about-top-mobile-app-gamification-features-in-2025',
+      'ai-x-affiliate-how-ai-products-are-reinventing-performance-marketing-models-in-2025',
+      'best-language-learning-apps-to-master-a-new-skill-in-2025',
+      'best-practices-for-legacy-system-modernization-in-2025',
+      'breaking-the-build-loop-how-to-launch-smarter-with-strategic-mvp-planning-in-2025',
+      'from-mvp-to-moat-why-your-startup-needs-a-smarter-build-partner-in-2025',
+      'game-on-must-have-paid-apple-games-for-2025',
+      'how-growing-businesses-can-leverage-custom-apps-without-breaking-the-bank-in-2025',
+      'the-definitive-guide-to-digital-transformation-services-for-mid-sized-enterprises-in-2025',
+      'the-future-in-code-top-5-software-development-trends-for-2025',
+      'top-10-fintech-apps-to-watch-in-2025-changing-finance-and-banking',
+      'top-10-tech-trends-in-2025-shaping-the-future-of-innovation',
+      'top-10-travel-apps-to-make-your-2025-trips-stress-free',
+      'top-5-eco-friendly-apps-for-a-greener-future-in-2025',
+      'top-5-floridas-leading-ios-app-developers-in-2025',
+      'top-5-flutter-companies-for-2025',
+      'top-5-game-changing-ai-powered-platforms-for-free-app-development-in-2025',
+      'top-5-health-and-fitness-apps-to-watch-in-2025',
+      'top-5-innovative-dating-apps-for-2025',
+      'top-5-lovable-agencies-that-can-build-your-app-in-2025',
+      'top-5-no-code-ai-app-development-tools-in-2025',
+      'top-the-app-store-in-2025-5-growth-moves-that-work',
+      'vibecode-review-2025-does-it-actually-work',
+      'why-founders-should-treat-ux-as-an-early-stage-growth-lever-in-2025',
+    ].map((slug) => [`/blog/${slug}`, to(`/blog/${slug.replace(/202[45]/g, '2026')}`)])
+  ),
+
   // Author archives and podcast episode pages have no equivalent here: posts
   // show their author inline, and episodes are embedded on /podcast.
   ...Object.fromEntries(
