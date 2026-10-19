@@ -52,8 +52,6 @@ import { recaptchaConfig } from "../lib/recaptcha";
 const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConfig();
 ---
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css" />
-
 <div class={className}>
   <form id="contact-form" class:list={["flex flex-col", compact ? "gap-4" : "gap-6"]} novalidate>
     <div class:list={["grid grid-cols-2 gap-3", !compact && "sm:gap-6"]}>
@@ -200,22 +198,6 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
 )}
 
 <!--
-  is:inline is load-bearing. Without it Astro treats this as a script to
-  process and bundle, and a remote URL it cannot resolve is dropped from the
-  output entirely -- which is what happened: `window.intlTelInput` was never
-  defined, the `iti` guard below quietly fell through to `null`, and the phone
-  field rendered as a plain text box with no flag, no country list and no
-  validation. It failed silently on every page carrying this form.
-
-  A classic (non-module, non-async) script runs before the deferred module
-  below it, so the library is always in place by the time that module runs.
--->
-<script
-  is:inline
-  src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"
-></script>
-
-<!--
   RevenueHero: after a lead is accepted it opens the meeting scheduler, so the
   visitor can book the call there and then. Same router as the Webflow site.
   Webflow attached it with hero.schedule('#email-form'), which listens for a
@@ -230,27 +212,24 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
 </script>
 
 <script>
+  // intl-tel-input comes from npm, not a CDN, so its version is pinned in
+  // package.json and its phone-number metadata can be updated with the rest of
+  // the dependencies. The CDN copy this replaces was 17.0.8, from 2021: its
+  // metadata predated the 728 area code (a Florida overlay, in service since
+  // 2025), so real US numbers like (728) 206-0941 were rejected as invalid.
+  import intlTelInput from "intl-tel-input";
+  import "intl-tel-input/styles";
+
   declare global {
     interface Window {
       grecaptcha?: {
         getResponse: (widgetId?: number) => string;
         reset: (widgetId?: number) => void;
       };
-      intlTelInput?: (input: HTMLInputElement, options: Record<string, unknown>) => {
-        isValidNumber: () => boolean;
-        getValidationError: () => number;
-        getNumber: (format?: number) => string;
-        setNumber: (number: string) => void;
-        promise: Promise<unknown[]>;
-      };
-      /** Published by the library's utils.js once it finishes loading. */
       /** RevenueHero scheduler, set up by the inline script above. */
       hero?: {
         submit: (data: Record<string, string>) => Promise<unknown>;
         dialog: { open: (session: unknown) => void };
-      };
-      intlTelInputUtils?: {
-        numberFormat: { E164: number; INTERNATIONAL: number; NATIONAL: number };
       };
     }
   }
@@ -326,12 +305,13 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
   // --- Phone validation (intl-tel-input) --------------------------------------
   const phoneInput = document.getElementById("phone") as HTMLInputElement | null;
   const phoneError = document.getElementById("phone-error");
-  const PHONE_ERROR_MESSAGES: Record<number, string> = {
-    0: "Invalid phone number.",
-    1: "Invalid country code.",
-    2: "Number is too short.",
-    3: "Number is too long.",
-    4: "Invalid phone number.",
+  const PHONE_ERROR_MESSAGES: Record<string, string> = {
+    IS_POSSIBLE: "Invalid phone number.",
+    INVALID_COUNTRY_CODE: "Invalid country code.",
+    TOO_SHORT: "Number is too short.",
+    TOO_LONG: "Number is too long.",
+    IS_POSSIBLE_LOCAL_ONLY: "Invalid phone number.",
+    INVALID_LENGTH: "Invalid phone number.",
   };
 
   // Configured to match the Webflow widget this replaces, which ran with
@@ -339,38 +319,50 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
   // field (not split into a separate prefix box), those three countries are
   // pinned to the top of the list, and the country starts from the visitor's
   // own.
-  const iti = phoneInput && window.intlTelInput
-    ? window.intlTelInput(phoneInput, {
-        preferredCountries: ["us", "ca", "gb"],
+  const iti = phoneInput
+    ? intlTelInput(phoneInput, {
+        countryOrder: ["us", "ca", "gb"],
+        // As in 17.x: the dial code is implied by the flag rather than shown
+        // in a box of its own, and numbers display in national format.
+        separateDialCode: false,
+        numberDisplayFormat: "NATIONAL",
+        // Formatting happens on blur instead (see formatPhoneNational), and
+        // the keypress filter below already keeps out stray characters.
+        formatAsYouType: false,
+        strictMode: false,
+        // Any kind of number is fine for a call back -- the default (mobile
+        // or fixed line only) would turn away VoIP numbers.
+        allowedNumberTypes: null,
         // Webflow's version geo-located with a jQuery JSONP call to ipinfo.io
         // and then called setCountry() afterwards, which overwrote the
         // country if the visitor had already picked one while the request was
-        // in flight. initialCountry: "auto" is the library's own hook for
+        // in flight. initialCountryLookup is the library's own hook for
         // this and only applies the result if nothing has been chosen yet.
-        initialCountry: "auto",
-        geoIpLookup: (success: (countryCode: string) => void) => {
-          // ipinfo.io's tokenless endpoint is rate limited and can fail or
-          // hang, and the field must not be unusable when it does -- so this
-          // always resolves, and falls back to US after two seconds.
-          const done = (code: string) => success(code);
-          const timer = setTimeout(() => done("us"), 2000);
+        initialCountryLookup: () =>
+          new Promise((resolve) => {
+            // ipinfo.io's tokenless endpoint is rate limited and can fail or
+            // hang, and the field must not be unusable when it does -- so this
+            // always resolves, and falls back to US after two seconds.
+            const done = (code: string) => resolve(code.toLowerCase() as "us");
+            const timer = setTimeout(() => done("us"), 2000);
 
-          fetch("https://ipinfo.io/json")
-            .then((res) => (res.ok ? res.json() : Promise.reject()))
-            .then((data: { country?: string }) => {
-              clearTimeout(timer);
-              done(data.country || "us");
-            })
-            .catch(() => {
-              clearTimeout(timer);
-              done("us");
-            });
-        },
+            fetch("https://ipinfo.io/json")
+              .then((res) => (res.ok ? res.json() : Promise.reject()))
+              .then((data: { country?: string }) => {
+                clearTimeout(timer);
+                done(data.country || "us");
+              })
+              .catch(() => {
+                clearTimeout(timer);
+                done("us");
+              });
+          }),
         // The compact form's placeholder names the field, so the library must
         // not swap it for an example number.
-        autoPlaceholder: phoneInput.hasAttribute("data-fixed-placeholder") ? "off" : "aggressive",
-        formatOnDisplay: true,
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        placeholderNumberPolicy: phoneInput.hasAttribute("data-fixed-placeholder") ? "OFF" : "AGGRESSIVE",
+        // The validation metadata (~260 KB) loads as its own chunk after the
+        // page, not as part of it.
+        loadUtils: () => import("intl-tel-input/utils"),
       })
     : null;
 
@@ -386,21 +378,25 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
       return false;
     }
 
-    // Without utils.js (still loading, or blocked) isValidNumber() has
-    // nothing to check against and fails every number -- let it through and
+    // Without utils (still loading, or blocked) there is nothing to check
+    // against -- and the library throws if asked -- so let it through and
     // leave the shape check to the API route.
-    if (!iti || !window.intlTelInputUtils) {
+    if (!iti || !intlTelInput.utils) {
       setFieldError(phoneInput, phoneError, null);
       return true;
     }
 
-    if (iti.isValidNumber()) {
+    // Precise, not the library's default length-only check: it also rejects
+    // numbers no carrier hands out, like 123-456-7890, as the Webflow form
+    // did. The flip side is that it relies on area-code metadata, so keep
+    // intl-tel-input reasonably current or new area codes get turned away.
+    if (iti.isValidNumberPrecise()) {
       setFieldError(phoneInput, phoneError, null);
       return true;
     }
 
     const code = iti.getValidationError();
-    setFieldError(phoneInput, phoneError, PHONE_ERROR_MESSAGES[code] ?? "Please enter a valid phone number.");
+    setFieldError(phoneInput, phoneError, (code && PHONE_ERROR_MESSAGES[code]) ?? "Please enter a valid phone number.");
     return false;
   }
 
@@ -427,11 +423,9 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
   function formatPhoneNational() {
     if (!phoneInput || !iti) return;
     if (!phoneInput.value.trim()) return;
-    if (!iti.isValidNumber()) return; // Half-typed numbers are left alone.
+    if (!intlTelInput.utils || !iti.isValidNumberPrecise()) return; // Half-typed numbers are left alone.
 
-    const national = window.intlTelInputUtils
-      ? iti.getNumber(window.intlTelInputUtils.numberFormat.NATIONAL)
-      : "";
+    const national = iti.getNumber("NATIONAL");
     if (national) phoneInput.value = national;
   }
 
@@ -530,12 +524,9 @@ const { disabled: recaptchaDisabled, siteKey: recaptchaSiteKey } = recaptchaConf
     // Normalise on the way out, as Webflow did, so the number in the
     // notification email is the same shape however the visitor typed it:
     // international ("+1 201 555 0123"), which stays readable to whoever picks
-    // the lead up. Falls back to E.164 if utils.js has not loaded, and to the
-    // raw value if the library is missing altogether.
+    // the lead up. Falls back to the raw value if utils has not loaded.
     const phoneValue = phoneInput?.value.trim()
-      ? (window.intlTelInputUtils
-          ? iti?.getNumber(window.intlTelInputUtils.numberFormat.INTERNATIONAL)
-          : iti?.getNumber()) || phoneInput.value.trim()
+      ? (intlTelInput.utils ? iti?.getNumber("INTERNATIONAL") : "") || phoneInput.value.trim()
       : "";
     const payload = {
       firstName: String(data.get("firstName") ?? ""),
