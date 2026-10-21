@@ -84,6 +84,12 @@ export async function translatePage(html: string, path: string, lang: Language):
   htmlEl?.setAttribute("lang", lang.code);
   htmlEl?.setAttribute("dir", lang.rtl ? "rtl" : "ltr");
 
+  // In right-to-left text the bidi algorithm reorders "(645) 444-1069" into
+  // "444-1069 (645)". Phone numbers and emails always read left to right.
+  if (lang.rtl) {
+    for (const a of root.querySelectorAll('a[href^="tel:"], a[href^="mailto:"]')) a.setAttribute("dir", "ltr");
+  }
+
   // Links stay in the visitor's language.
   // Except the language switcher's, which carry hreflang (Footer.astro).
   for (const a of root.querySelectorAll("a[href]:not([hreflang])")) {

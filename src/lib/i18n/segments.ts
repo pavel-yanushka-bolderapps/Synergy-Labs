@@ -125,8 +125,15 @@ export function segmentPage(html: string): ParsedPage {
   const units: Unit[] = [];
 
   const visit = (el: HTMLElement, scope: Scope) => {
-    if (skipped(el)) return;
     const t = tag(el);
+    // A <textarea>'s contents are the visitor's, but its placeholder is ours.
+    if (t === "textarea" && el.getAttribute("translate") !== "no") {
+      const value = el.getAttribute("placeholder");
+      if (value && HAS_LETTER.test(value)) {
+        units.push({ source: collapse(value), scope, apply: (tr) => (el.setAttribute("placeholder", tr), true) });
+      }
+    }
+    if (skipped(el)) return;
     if (t === "header" || t === "footer" || t === "nav") scope = "shared";
 
     for (const name of ATTRIBUTES) {

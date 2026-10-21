@@ -76,10 +76,18 @@ export async function saveTranslations(
     console.warn("[translate] SANITY_API_WRITE_TOKEN is not set; translations are not saved.");
     return;
   }
+  const sharedId = docId(lang, SHARED_PATH);
+  // Another page may have added some of these since this one read the shared
+  // document; appending them again would duplicate their _keys.
+  if (newShared.size) {
+    const have = await sanity().fetch<string[]>(`*[_id == $id][0].segments[]._key`, { id: sharedId });
+    for (const key of have ?? []) {
+      for (const source of newShared.keys()) if (segmentKey(source) === key) newShared.delete(source);
+    }
+  }
   const tx = sanity().transaction();
   tx.createOrReplace({ _id: docId(lang, path), _type: "translation", lang, path, segments: toSegments(page) });
   if (newShared.size) {
-    const sharedId = docId(lang, SHARED_PATH);
     tx.createIfNotExists({ _id: sharedId, _type: "translation", lang, path: SHARED_PATH, segments: [] });
     tx.patch(sharedId, (p) => p.setIfMissing({ segments: [] }).append("segments", toSegments(newShared)));
   }
