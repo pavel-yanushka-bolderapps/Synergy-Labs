@@ -7,6 +7,7 @@
 import { blogPage } from "../content/blogPage";
 import { getBlogPosts, getLocationDetails } from "./sanity";
 import { getSitemapPaths } from "./sitemap";
+import { isTranslatablePath, localizedPath, LANGUAGE_CODES } from "./i18n/languages";
 
 /**
  * What the Sanity webhook sends: the document's type, and the slug or href it
@@ -18,6 +19,9 @@ export interface PublishEvent {
   type?: string;
   slugs?: (string | null)[];
   hrefs?: (string | null)[];
+  /** `translation` documents only: the language and English path they cover. */
+  lang?: string | null;
+  paths?: (string | null)[];
 }
 
 const SITEMAP = "/sitemap-0.xml";
@@ -87,12 +91,37 @@ export async function pathsFor(event: PublishEvent): Promise<string[]> {
     case "clutchLanding":
       return [...slugs.map((slug) => `/${slug}`), SITEMAP];
 
+    // An editor corrected a translation in the Studio. The shared document
+    // (header, footer, nav) is on every page in that language. The site's own
+    // saves of new translations land here too; re-rendering then finds
+    // nothing new and writes nothing, so it does not loop.
+    case "translation": {
+      const lang = event.lang;
+      if (!lang || !LANGUAGE_CODES.includes(lang)) return [];
+      const paths = (event.paths ?? []).filter((p): p is string => Boolean(p));
+      const english = paths.includes("*") ? await getSitemapPaths() : paths;
+      return english.filter(isTranslatablePath).map((p) => localizedPath(p, lang));
+    }
+
     // A type this map does not know yet -- the webhook filter only sends the
     // ones above, so this means a new type was added there but not here.
     // Refresh everything rather than leave a page silently out of date.
     default:
       return [...(await getSitemapPaths()), SITEMAP];
   }
+}
+
+/**
+ * Each English path plus its copy in every language, so a publish refreshes
+ * the translations too. src/middleware.ts re-renders the English page first
+ * when it rebuilds a translation, so the order does not matter.
+ */
+export function withTranslations(paths: string[]): string[] {
+  return paths.flatMap((path) =>
+    LANGUAGE_CODES.some((code) => path === `/${code}` || path.startsWith(`/${code}/`)) || !isTranslatablePath(path)
+      ? [path]
+      : [path, ...LANGUAGE_CODES.map((code) => localizedPath(path, code))]
+  );
 }
 
 export interface RevalidateResult {

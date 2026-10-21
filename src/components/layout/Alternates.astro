@@ -1,0 +1,32 @@
+---
+// hreflang alternates: tells search engines that /blog/foo, /es/blog/foo,
+// /fr/blog/foo ... are the same page in different languages, so each market
+// gets its own copy in results instead of them competing as duplicates.
+//
+// Written on the English page and left untouched by the translation
+// middleware, so every language version carries the same complete set, which
+// is what Google requires (each page must list all the others and itself).
+//
+// Only on a page that is its own canonical. A page whose canonical points
+// elsewhere is a duplicate, and hreflang on it would contradict that.
+import { LANGUAGES } from "../../lib/i18n/languages";
+import { canonicalUrl } from "../../lib/seo";
+
+interface Props {
+  /** The page's canonical URL, as the layout computed it. */
+  canonical: string;
+}
+
+const own = canonicalUrl(Astro.url.pathname, Astro.site);
+const show = Astro.props.canonical === own;
+const path = new URL(own).pathname;
+const href = (code: string) => canonicalUrl(path === "/" ? `/${code}` : `/${code}${path}`, Astro.site);
+---
+
+{show && (
+  <>
+    <link rel="alternate" hreflang="en" href={own} />
+    {LANGUAGES.map((l) => <link rel="alternate" hreflang={l.code} href={href(l.code)} />)}
+    <link rel="alternate" hreflang="x-default" href={own} />
+  </>
+)}

@@ -8,7 +8,7 @@
 // It still owns the same head that Layout.astro does, because the SEO tags are
 // not optional on the pages most likely to be a first impression.
 import Analytics from "./Analytics.astro";
-import Weglot from "./Weglot.astro";
+import Alternates from "./Alternates.astro";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
 import { previewEnabled } from "../../lib/loadQuery";
@@ -93,6 +93,8 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     <link rel="canonical" href={pageUrl} />
     {/* Same as Layout.astro: Vercel Preview builds (staging) stay out of search. */}
     {process.env.VERCEL_ENV === "preview" && <meta name="robots" content="noindex, follow" />}
+    {/* The Arabic landing page is not translated (see src/middleware.ts). */}
+    {locale === "en" && process.env.VERCEL_ENV !== "preview" && <Alternates canonical={pageUrl} />}
 
     <meta property="og:site_name" content="Synergy Labs" />
     <meta property="og:type" content="website" />
@@ -113,7 +115,6 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     ))}
 
     <Analytics />
-    <Weglot />
   </head>
 
   <body class="min-h-screen">
