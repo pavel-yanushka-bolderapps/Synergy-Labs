@@ -1,0 +1,77 @@
+---
+// The Ops dashboard: the plan, content calendar, KPIs and bot activity that
+// Pavel and Andrew run the site's growth from. Data and actions live in
+// src/lib/ops/* and /api/ops/*; the UI is src/components/ops/OpsApp.tsx.
+//
+// Not cached (excluded from ISR in astro.config.mjs), not indexed (noindex +
+// robots.txt), and empty until signed in.
+import { currentUser, isConfigured, PEOPLE, PRIVATE_HEADERS } from "../../lib/ops/auth";
+import OpsApp from "../../components/ops/OpsApp";
+import "../../styles/global.css";
+
+export const prerender = false;
+
+for (const [k, v] of Object.entries(PRIVATE_HEADERS)) Astro.response.headers.set(k, v);
+const user = currentUser(Astro.cookies);
+const configured = isConfigured();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Synergy Ops</title>
+    <link rel="icon" href="/favicon.ico" />
+  </head>
+  <body class="ops min-h-screen bg-[#f6f7f6]">
+    {
+      user ? (
+        <OpsApp client:only="react" user={user} />
+      ) : (
+        <main class="flex min-h-screen items-center justify-center p-4">
+          <form id="login" class="w-full max-w-sm space-y-4 rounded-2xl bg-white p-8 shadow-sm ring-1 ring-black/5">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-widest text-secondary-green">Synergy Labs</p>
+              <h1 class="mt-1 text-3xl">Ops</h1>
+            </div>
+            {!configured && (
+              <p class="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+                OPS_PASSWORD is not set on this deployment (8+ characters). Add it in Vercel and redeploy.
+              </p>
+            )}
+            <label class="block text-sm">
+              <span class="mb-1 block text-neutral-600">Who are you</span>
+              <select name="name" class="w-full rounded-lg border border-neutral-300 px-3 py-2">
+                {PEOPLE.map((p) => <option>{p}</option>)}
+              </select>
+            </label>
+            <label class="block text-sm">
+              <span class="mb-1 block text-neutral-600">Password</span>
+              <input name="password" type="password" required autocomplete="current-password" class="w-full rounded-lg border border-neutral-300 px-3 py-2" />
+            </label>
+            <p id="login-error" class="hidden text-sm text-red-700"></p>
+            <button class="w-full rounded-lg bg-primary-green px-4 py-2.5 font-medium text-white hover:bg-secondary-green">Sign in</button>
+          </form>
+        </main>
+      )
+    }
+    <script>
+      const form = document.getElementById("login") as HTMLFormElement | null;
+      form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(form));
+        const res = await fetch("/api/ops/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (res.ok) return location.reload();
+        const err = document.getElementById("login-error")!;
+        err.textContent = (await res.json().catch(() => ({}))).error || "Sign-in failed";
+        err.classList.remove("hidden");
+      });
+    </script>
+  </body>
+</html>

@@ -8,6 +8,7 @@
 // It still owns the same head that Layout.astro does, because the SEO tags are
 // not optional on the pages most likely to be a first impression.
 import Analytics from "./Analytics.astro";
+import FeedbackLoader from "./FeedbackLoader.astro";
 import Weglot from "./Weglot.astro";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
@@ -159,6 +160,7 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
       </div>
     </footer>
 
+    <FeedbackLoader />
     {VisualEditing && previewEnabled && <VisualEditing enabled />}
   </body>
 </html>
