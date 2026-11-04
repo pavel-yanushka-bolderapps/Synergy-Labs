@@ -6,10 +6,20 @@
 // `errors` and the others still sync, so the dashboard fills in as access is
 // granted. Setup (once):
 //
-//   GOOGLE_SERVICE_ACCOUNT_JSON  the service account's JSON key (raw or base64).
-//                                Add its client_email as a Viewer in GA4
-//                                (Admin -> Property access management) and as
-//                                a user in Search Console (Settings -> Users).
+//   Google, either way (the service account's email must be a Viewer in GA4
+//   -- Admin -> Property access management -- and a user in Search Console):
+//
+//   a) Keyless, via Vercel OIDC + Google Workload Identity Federation (the
+//      Bolder Apps organisation blocks service-account keys):
+//        GCP_WORKLOAD_IDENTITY_PROVIDER  projects/<number>/locations/global/
+//                                        workloadIdentityPools/<pool>/providers/<provider>
+//        GCP_SERVICE_ACCOUNT_EMAIL       the service account to act as
+//      The pool's provider trusts issuer https://oidc.vercel.com/synergy-labs,
+//      audience https://vercel.com/synergy-labs; the service account grants
+//      the pool "Workload Identity User". Needs the IAM Service Account
+//      Credentials and Security Token Service APIs enabled.
+//   b) GOOGLE_SERVICE_ACCOUNT_JSON  a service account JSON key (raw or base64).
+//
 //   GA4_PROPERTY_ID              numeric, GA4 Admin -> Property details.
 //   GSC_SITE                     default "sc-domain:synergylabs.co"; use
 //                                "https://www.synergylabs.co/" for a URL-prefix
@@ -18,6 +28,7 @@
 //   GA4_EVENTS                   optional, comma-separated event names to count;
 //                                default below.
 import { createSign } from "node:crypto";
+import { getVercelOidcToken } from "@vercel/oidc";
 import { opsClient, newId, mondayOf, addDays, toStoredKpi, type KpiSnapshot } from "./store";
 
 const env = (k: string) => process.env[k] || (import.meta.env as Record<string, string | undefined>)[k] || "";
@@ -43,22 +54,68 @@ export const METRICS: Record<string, { label: string; unit?: string; better?: "u
 export const eventMetric = (name: string) => `ga4.event.${name}`;
 export const ga4Events = () => (env("GA4_EVENTS") ? env("GA4_EVENTS").split(",").map((s) => s.trim()) : DEFAULT_EVENTS);
 
+const googleConfigured = () =>
+  Boolean(env("GOOGLE_SERVICE_ACCOUNT_JSON") || (env("GCP_WORKLOAD_IDENTITY_PROVIDER") && env("GCP_SERVICE_ACCOUNT_EMAIL")));
+
 export function sourceStatus() {
   return {
-    google: Boolean(env("GOOGLE_SERVICE_ACCOUNT_JSON")),
-    ga4: Boolean(env("GOOGLE_SERVICE_ACCOUNT_JSON") && env("GA4_PROPERTY_ID")),
-    gsc: Boolean(env("GOOGLE_SERVICE_ACCOUNT_JSON")),
+    google: googleConfigured(),
+    ga4: googleConfigured() && Boolean(env("GA4_PROPERTY_ID")),
+    gsc: googleConfigured(),
     hubspot: Boolean(env("HUBSPOT_TOKEN")),
     claude: Boolean(env("ANTHROPIC_API_KEY")),
   };
 }
 
-// --- Google auth: a service-account JWT exchanged for an access token. ------
+// --- Google auth ------------------------------------------------------------------
 
+const SCOPES = ["https://www.googleapis.com/auth/analytics.readonly", "https://www.googleapis.com/auth/webmasters.readonly"];
 let googleToken: { token: string; expires: number } | undefined;
 
 async function googleAccessToken(): Promise<string> {
   if (googleToken && googleToken.expires > Date.now() + 60_000) return googleToken.token;
+  googleToken = env("GCP_WORKLOAD_IDENTITY_PROVIDER") ? await federatedToken() : await keyToken();
+  return googleToken.token;
+}
+
+/**
+ * Keyless: this deployment's Vercel OIDC token -> Google STS (a federated
+ * token for the workload identity pool) -> a short-lived access token for the
+ * service account. Nothing long-lived is stored anywhere.
+ */
+async function federatedToken() {
+  const provider = env("GCP_WORKLOAD_IDENTITY_PROVIDER");
+  const serviceAccount = env("GCP_SERVICE_ACCOUNT_EMAIL");
+  if (!serviceAccount) throw new Error("GCP_SERVICE_ACCOUNT_EMAIL is not set");
+  const oidc = await getVercelOidcToken();
+
+  const sts = await fetch("https://sts.googleapis.com/v1/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
+      audience: `//iam.googleapis.com/${provider.replace(/^\/+/, "")}`,
+      scope: "https://www.googleapis.com/auth/cloud-platform",
+      requestedTokenType: "urn:ietf:params:oauth:token-type:access_token",
+      subjectToken: oidc,
+      subjectTokenType: "urn:ietf:params:oauth:token-type:jwt",
+    }),
+  });
+  const federated = await sts.json();
+  if (!sts.ok) throw new Error(`Google STS: ${federated.error_description || federated.error || sts.status}`);
+
+  const res = await fetch(`https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${encodeURIComponent(serviceAccount)}:generateAccessToken`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${federated.access_token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ scope: SCOPES, lifetime: "3600s" }),
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(`Google impersonation: ${body.error?.message || res.status}`);
+  return { token: body.accessToken as string, expires: Date.parse(body.expireTime) };
+}
+
+/** With a downloaded key: a service-account JWT exchanged for an access token. */
+async function keyToken() {
   const raw = env("GOOGLE_SERVICE_ACCOUNT_JSON");
   if (!raw) throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not set");
   const key = JSON.parse(raw.trim().startsWith("{") ? raw : Buffer.from(raw, "base64").toString("utf8"));
@@ -66,7 +123,7 @@ async function googleAccessToken(): Promise<string> {
   const b64 = (o: object) => Buffer.from(JSON.stringify(o)).toString("base64url");
   const unsigned = `${b64({ alg: "RS256", typ: "JWT" })}.${b64({
     iss: key.client_email,
-    scope: "https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly",
+    scope: SCOPES.join(" "),
     aud: "https://oauth2.googleapis.com/token",
     iat: now,
     exp: now + 3600,
@@ -82,8 +139,7 @@ async function googleAccessToken(): Promise<string> {
   });
   const body = await res.json();
   if (!res.ok) throw new Error(`Google auth failed: ${body.error_description || body.error || res.status}`);
-  googleToken = { token: body.access_token, expires: Date.now() + body.expires_in * 1000 };
-  return googleToken.token;
+  return { token: body.access_token as string, expires: Date.now() + body.expires_in * 1000 };
 }
 
 async function google(url: string, body: object) {
@@ -247,8 +303,8 @@ export async function syncWeek(weekStart: string): Promise<KpiSnapshot> {
     }
   };
   await Promise.all([
-    run("ga4", status.ga4, "GOOGLE_SERVICE_ACCOUNT_JSON, GA4_PROPERTY_ID", () => syncGa4(weekStart, weekEnd, metrics, lists)),
-    run("gsc", status.gsc, "GOOGLE_SERVICE_ACCOUNT_JSON", () => syncGsc(weekStart, weekEnd, metrics, lists)),
+    run("ga4", status.ga4, "Google access (GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT_EMAIL), GA4_PROPERTY_ID", () => syncGa4(weekStart, weekEnd, metrics, lists)),
+    run("gsc", status.gsc, "Google access (GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT_EMAIL)", () => syncGsc(weekStart, weekEnd, metrics, lists)),
     run("hubspot", status.hubspot, "HUBSPOT_TOKEN", () => syncHubspot(weekStart, weekEnd, metrics)),
   ]);
 
