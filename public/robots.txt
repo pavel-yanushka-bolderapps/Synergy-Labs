@@ -1,8 +1,9 @@
-# The Studio is an authenticated application, not content, and /api serves
+# The Studio and /ops are authenticated applications, not content, and /api serves
 # JSON to the site's own forms -- neither belongs in an index.
 User-agent: *
 Allow: /
 Disallow: /studio
+Disallow: /ops
 Disallow: /api/
 
 Sitemap: https://www.synergylabs.co/sitemap-index.xml

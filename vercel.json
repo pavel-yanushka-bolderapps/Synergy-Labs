@@ -6,5 +6,10 @@
       "destination": "/:path*",
       "permanent": false
     }
+  ],
+  "crons": [
+    { "path": "/api/cron/kpi-sync", "schedule": "0 6 * * 1" },
+    { "path": "/api/cron/publish", "schedule": "5 * * * *" },
+    { "path": "/api/cron/draft", "schedule": "0 9,13 * * 1-5" }
   ]
 }

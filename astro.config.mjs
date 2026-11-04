@@ -62,7 +62,13 @@ export default defineConfig({
       // POST endpoints and the revalidation hook itself must never be cached.
       // Plain strings only -- the adapter turns a RegExp exclusion into a
       // literal route pattern, which never matches a real URL.
-      exclude: ['/api/contact', '/api/lead', '/api/builder', '/api/revalidate'],
+      // The Ops dashboard is per-person and behind a sign-in: caching it
+      // would serve one person's session to the next visitor. Dynamic routes
+      // are matched by their route pattern, brackets included.
+      exclude: [
+        '/api/contact', '/api/lead', '/api/builder', '/api/revalidate',
+        '/ops', '/api/ops/[action]', '/api/cron/[job]',
+      ],
     },
   }),
   // See src/lib/redirects.mjs. The Vercel adapter turns these into real
