@@ -141,15 +141,34 @@ function Modal({ title, onClose, children, wide }: { title: string; onClose: () 
 
 type FieldDef = { k: string; label: string; type?: "text" | "textarea" | "number" | "date" | "week" | "datetime" | "select" | "checkbox"; options?: [string, string][] };
 
+/** Every Monday from 8 weeks ago to the end of next year, plus `current` if it is outside that. */
+function weekOptions(current?: string): [string, string][] {
+  const weeks = weeksBetween(addDays(THIS_WEEK, -56), `${new Date().getFullYear() + 1}-12-31`);
+  if (current && !weeks.includes(mondayOf(current))) weeks.unshift(mondayOf(current));
+  const fmtDay = (s: string) => toDate(s).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  return weeks.map((w) => [w, `${fmtDay(w)} – ${fmtDay(addDays(w, 6))}${w.slice(0, 4) !== String(new Date().getFullYear()) ? `, ${w.slice(0, 4)}` : ""}${w === THIS_WEEK ? "  (this week)" : ""}`]);
+}
+
 function Form({ fields, value, onChange }: { fields: FieldDef[]; value: Record<string, any>; onChange: (v: Record<string, any>) => void }) {
-  const set = (k: string, v: any) => onChange({ ...value, [k]: v });
+  const set = (k: string, v: any) => {
+    const next = { ...value, [k]: v };
+    // Keep a task's range valid: moving one end past the other moves both.
+    if (k === "startWeek" && next.endWeek && v > next.endWeek) next.endWeek = v;
+    if (k === "endWeek" && next.startWeek && v < next.startWeek) next.startWeek = v;
+    onChange(next);
+  };
   const cls = "w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm";
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {fields.map((f) => (
         <label key={f.k} className={`block text-sm ${f.type === "textarea" || f.k === "title" ? "sm:col-span-2" : ""}`}>
           <span className="mb-1 block text-neutral-600">{f.label}</span>
-          {f.type === "textarea" ? (
+          {f.type === "week" ? (
+            <select className={cls} value={value[f.k] ? mondayOf(value[f.k]) : ""} onChange={(e) => set(f.k, e.target.value)}>
+              {!value[f.k] && <option value="">Choose a week…</option>}
+              {weekOptions(value[f.k]).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          ) : f.type === "textarea" ? (
             <textarea rows={3} className={cls} value={value[f.k] ?? ""} onChange={(e) => set(f.k, e.target.value)} />
           ) : f.type === "select" ? (
             <select className={cls} value={value[f.k] ?? ""} onChange={(e) => set(f.k, e.target.value)}>
@@ -160,11 +179,11 @@ function Form({ fields, value, onChange }: { fields: FieldDef[]; value: Record<s
           ) : (
             <input
               className={cls}
-              type={f.type === "number" ? "number" : f.type === "date" || f.type === "week" ? "date" : f.type === "datetime" ? "datetime-local" : "text"}
+              type={f.type === "number" ? "number" : f.type === "date" ? "date" : f.type === "datetime" ? "datetime-local" : "text"}
               value={f.type === "datetime" && value[f.k] ? toLocalInput(value[f.k]) : value[f.k] ?? ""}
               onChange={(e) => {
                 const v = e.target.value;
-                set(f.k, f.type === "number" ? (v === "" ? "" : Number(v)) : f.type === "week" && v ? mondayOf(v) : f.type === "datetime" && v ? new Date(v).toISOString() : v);
+                set(f.k, f.type === "number" ? (v === "" ? "" : Number(v)) : f.type === "datetime" && v ? new Date(v).toISOString() : v);
               }}
             />
           )}
@@ -662,6 +681,10 @@ function Plan({ data, open }: { data: Data; open: (d: any) => void }) {
         </div>
       }
     >
+      <p className="mb-3 text-sm text-neutral-600">
+        Each row is a task, grouped under the key result it moves. The bar covers the weeks it runs; striped bars repeat every week.
+        <b> Click a task or its bar</b> to change its weeks, owner or status, or to comment.
+      </p>
       <div className="mb-3 flex gap-4 text-xs text-neutral-600">
         {(Object.keys(OWNER_COLOR) as Owner[]).map((o) => <span key={o} className="flex items-center gap-1"><span className={`h-2.5 w-2.5 rounded ${OWNER_COLOR[o]}`} />{o}</span>)}
         <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-neutral-300" />done</span>
@@ -956,6 +979,8 @@ export default function OpsApp({ user }: { user: string }) {
           {tab === "Bots" && (
             <Card title="Bot activity">
               <p className="mb-3 text-sm text-neutral-600">
+                A log of everything the automations did (KPI syncs, health checks, drafts, publishing, digests) and key actions by people, so you can see the bots are running and what they cost.
+                <br />
                 Schedules (UTC): Mondays 06:00 KPI sync, 06:30 topic ideas, 08:00 digest email · daily 07:00 health checks · weekdays 09:00 &amp; 13:00 drafting · hourly publishing. Claude spend in this list:{" "}
                 <b>${data.runs.reduce((s, r) => s + (r.costUsd ?? 0), 0).toFixed(2)}</b>
               </p>
