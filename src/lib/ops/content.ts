@@ -7,7 +7,7 @@
 // Nothing the bot writes is public until a person approves it: drafts live at
 // "drafts.<id>", which the public dataset never returns.
 import Anthropic from "@anthropic-ai/sdk";
-import { opsClient, logRun, type ContentItem } from "./store";
+import { opsClient, logRun, loadAll, newId, mondayOf, addDays, type ContentItem } from "./store";
 import { pathsFor, revalidate } from "../revalidate";
 
 const env = (k: string) => process.env[k] || (import.meta.env as Record<string, string | undefined>)[k] || "";
@@ -260,4 +260,117 @@ export async function loadPost(postId: string) {
     `coalesce(*[_id == $draft][0], *[_id == $id][0]){ _id, title, "slug": slug.current, previewText, articleHtml, readingMinutes, date, "author": author->name }`,
     { draft: `drafts.${postId}`, id: postId }
   );
+}
+
+// --- Topic ideas -------------------------------------------------------------
+
+const IDEAS_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["ideas"],
+  properties: {
+    ideas: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["title", "kind", "keyword", "brief", "targetPath", "why"],
+        properties: {
+          title: { type: "string", description: "Working title of the article." },
+          kind: { type: "string", enum: ["new", "refresh"] },
+          keyword: { type: "string", description: "The one search query this piece targets." },
+          brief: { type: "string", description: "3-5 sentences for the writer: angle, reader, what to cover, which service page to link." },
+          targetPath: { type: "string", description: "For a refresh: the existing /blog/... path. Empty string for a new article." },
+          why: { type: "string", description: "One sentence: the search data or gap this is based on." },
+        },
+      },
+    },
+  },
+} as const;
+
+/**
+ * Asks Claude for the next articles to write, from the latest Search Console
+ * data (striking-distance queries, pages losing clicks) and what the blog
+ * already covers. Ideas land in the calendar as status "idea" -- a person
+ * promotes them to "planned", and only planned items are drafted.
+ */
+export async function suggestTopics(count: number, by: string): Promise<ContentItem[]> {
+  const startedAt = new Date().toISOString();
+  const data = await loadAll();
+  const latest = data.kpis.find((k) => k.lists?.["gsc.opportunities"]?.length);
+  const opportunities = latest?.lists?.["gsc.opportunities"] ?? [];
+  const losers = (latest?.lists?.["gsc.losers"] ?? []).filter((r) => r.label.startsWith("/blog/"));
+  const calendar = data.content.filter((c) => c.status !== "rejected").map((c) => `- ${c.title}${c.keyword ? ` [${c.keyword}]` : ""}`);
+
+  const prompt = `Propose the next ${count} pieces for the Synergy Labs blog content calendar. Mix roughly two new articles for every refresh when the data supports refreshes.
+
+Goal: more organic traffic from people likely to hire an app development agency (founders, product owners, CTOs), i.e. more leads. Prefer commercial and comparison intent (costs, timelines, "how to build X app", choosing a tech stack or an agency, industry-specific apps) over consumer how-to topics with no buying intent.
+
+<search_opportunities note="Queries where the site already ranks 7-20 last week: impressions, average position">
+${opportunities.map((o) => `- "${o.label}": ${o.value} impressions, position ${o.change}`).join("\n") || "(no Search Console data yet -- base ideas on gaps in the existing content and the agency's services)"}
+</search_opportunities>
+
+<pages_losing_clicks note="Blog posts that lost clicks week over week: clicks now, change">
+${losers.map((l) => `- ${l.label}: ${l.value} clicks (${l.change})`).join("\n") || "(none)"}
+</pages_losing_clicks>
+
+<already_planned>
+${calendar.join("\n") || "(nothing)"}
+</already_planned>
+
+<site_pages note="Existing pages; do not propose a new article that duplicates one of these -- propose a refresh of it instead">
+${await sitePages()}
+</site_pages>`;
+
+  try {
+    const client = new Anthropic({ apiKey: env("ANTHROPIC_API_KEY") || undefined });
+    const message = await client.messages
+      .stream({
+        model: MODEL(),
+        max_tokens: 16000,
+        output_config: { effort: "medium", format: { type: "json_schema", schema: IDEAS_SCHEMA } },
+        system: "You are the SEO content strategist for Synergy Labs (synergylabs.co), a US mobile and web app development agency. You plan content that wins organic search traffic which converts into app-development leads.",
+        messages: [{ role: "user", content: prompt }],
+      })
+      .finalMessage();
+    if (message.stop_reason === "refusal") throw new Error("Claude declined the request");
+    const text = message.content.find((b): b is Anthropic.TextBlock => b.type === "text")?.text ?? "";
+    const { ideas } = JSON.parse(text) as {
+      ideas: { title: string; kind: "new" | "refresh"; keyword: string; brief: string; targetPath: string; why: string }[];
+    };
+
+    // Two or three a week, starting next week.
+    const firstWeek = addDays(mondayOf(new Date()), 7);
+    const c = opsClient();
+    const tx = c.transaction();
+    const created: ContentItem[] = ideas.slice(0, count).map((idea, i) => ({
+      _id: newId("opsContent"),
+      _type: "opsContent",
+      title: idea.title,
+      kind: idea.kind === "refresh" && idea.targetPath ? "refresh" : "new",
+      keyword: idea.keyword,
+      brief: idea.brief,
+      targetPath: idea.kind === "refresh" && idea.targetPath ? idea.targetPath : undefined,
+      notes: `Why: ${idea.why}`,
+      week: addDays(firstWeek, 7 * Math.floor(i / 3)),
+      status: "idea",
+      keyResult: "ops.kr.organic-users",
+    }));
+    for (const item of created) tx.create(Object.fromEntries(Object.entries(item).filter(([, v]) => v !== undefined)) as ContentItem);
+    await tx.commit();
+
+    await logRun({
+      job: "topic-ideas",
+      startedAt,
+      ok: true,
+      by,
+      summary: `Suggested ${created.length} topics${opportunities.length ? " from Search Console data" : ""}`,
+      details: created.map((x) => x.title).join("\n"),
+      costUsd: Math.round(cost(message.usage) * 100) / 100,
+    });
+    return created;
+  } catch (err) {
+    await logRun({ job: "topic-ideas", startedAt, ok: false, by, summary: "Topic suggestions failed", details: err instanceof Error ? err.message : String(err) });
+    throw err;
+  }
 }

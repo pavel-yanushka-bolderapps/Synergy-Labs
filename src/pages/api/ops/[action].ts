@@ -10,12 +10,20 @@
 //   POST approve           schedule a reviewed draft (publishAt)
 //   POST publish           publish a reviewed draft now
 //   POST sync              pull KPIs now ({ weeks } to backfill)
+//   POST health            run the site health checks now
+//   GET  digest            preview the weekly digest email (HTML)
+//   POST digest            send the weekly digest now
+//   POST suggest           Claude proposes { count } topic ideas for the calendar
+//   POST comment           add a comment to a task, key result or content item
 import type { APIRoute } from "astro";
 import { waitUntil } from "@vercel/functions";
 import { checkPassword, currentUser, json, PEOPLE, signIn, signOut } from "../../../lib/ops/auth";
 import { isOpsId, loadAll, logRun, newId, opsClient, type ContentItem, type OpsType } from "../../../lib/ops/store";
 import { completedWeeks, METRICS, eventMetric, ga4Events, sourceStatus, syncWeek } from "../../../lib/ops/kpi";
-import { draftContent, loadPost, publishContent } from "../../../lib/ops/content";
+import { draftContent, loadPost, publishContent, suggestTopics } from "../../../lib/ops/content";
+import { runAndSaveHealth, type Health } from "../../../lib/ops/health";
+import { buildDigest, emailStatus, sendDigest } from "../../../lib/ops/digest";
+import { randomUUID } from "node:crypto";
 
 export const prerender = false;
 
@@ -34,12 +42,19 @@ export const GET: APIRoute = async ({ params, cookies, url }) => {
     const data = await loadAll();
     const metrics = { ...METRICS };
     for (const e of ga4Events()) metrics[eventMetric(e)] = { label: `GA4 event: ${e}` };
-    return json({ user, ...data, metrics, sources: sourceStatus() });
+    const health = await opsClient().getDocument<Health>("ops.health.latest");
+    return json({ user, ...data, metrics, health, sources: { ...sourceStatus(), email: emailStatus().configured }, digestTo: emailStatus().to });
   }
   if (params.action === "post") {
     const id = url.searchParams.get("id");
     if (!id) return json({ error: "id is required" }, 400);
     return json(await loadPost(id));
+  }
+  if (params.action === "digest") {
+    const { subject, html } = await buildDigest();
+    return new Response(html.replace("<body", `<body data-subject="${subject.replace(/"/g, "")}"`), {
+      headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-store" },
+    });
   }
   return json({ error: "Not found" }, 404);
 };
@@ -116,6 +131,33 @@ export const POST: APIRoute = async ({ params, cookies, request, url }) => {
         const item = await c.getDocument<ContentItem>(body._id);
         if (!item) return json({ error: "No such item" }, 404);
         return json(await publishContent(item, url.origin, user));
+      }
+
+      case "health": {
+        const { health } = await runAndSaveHealth(user);
+        return json(health);
+      }
+
+      case "digest": {
+        return json({ ok: true, subject: await sendDigest() });
+      }
+
+      case "suggest": {
+        if (!process.env.ANTHROPIC_API_KEY && !import.meta.env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY is not set" }, 400);
+        const count = Math.min(Math.max(Number(body.count) || 6, 1), 12);
+        return json(await suggestTopics(count, user));
+      }
+
+      case "comment": {
+        if (!isOpsId(body._id)) return json({ error: "Bad id" }, 400);
+        const text = String(body.text ?? "").trim().slice(0, 4000);
+        if (!text) return json({ error: "Empty comment" }, 400);
+        const updated = await c
+          .patch(body._id)
+          .setIfMissing({ comments: [] })
+          .append("comments", [{ _key: randomUUID().slice(0, 12), by: user, at: new Date().toISOString(), text }])
+          .commit();
+        return json(updated);
       }
 
       case "sync": {

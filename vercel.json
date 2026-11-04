@@ -8,8 +8,29 @@
     }
   ],
   "crons": [
-    { "path": "/api/cron/kpi-sync", "schedule": "0 6 * * 1" },
-    { "path": "/api/cron/publish", "schedule": "5 * * * *" },
-    { "path": "/api/cron/draft", "schedule": "0 9,13 * * 1-5" }
+    {
+      "path": "/api/cron/kpi-sync",
+      "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/ideas",
+      "schedule": "30 6 * * 1"
+    },
+    {
+      "path": "/api/cron/health",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/digest",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/draft",
+      "schedule": "0 9,13 * * 1-5"
+    },
+    {
+      "path": "/api/cron/publish",
+      "schedule": "5 * * * *"
+    }
   ]
 }

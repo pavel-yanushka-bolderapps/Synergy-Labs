@@ -7,11 +7,18 @@
 //   publish    hourly: publishes approved posts whose time has come
 //   draft      twice on weekdays: drafts the next planned calendar item that is
 //              due (one per call, to stay inside the function time limit)
+//   health     daily: site health checks; emails when a check starts failing
+//   ideas      Mondays: tops the calendar up with topic ideas from Search
+//              Console when fewer than 6 ideas/planned items are coming up
+//   digest     Mondays: the weekly email to OPS_DIGEST_TO
 import type { APIRoute } from "astro";
 import { json } from "../../../lib/ops/auth";
 import { logRun } from "../../../lib/ops/store";
 import { completedWeeks, syncWeek } from "../../../lib/ops/kpi";
-import { draftDue, publishDue } from "../../../lib/ops/content";
+import { draftDue, publishDue, suggestTopics } from "../../../lib/ops/content";
+import { runAndSaveHealth } from "../../../lib/ops/health";
+import { emailStatus, sendDigest, sendHealthAlert } from "../../../lib/ops/digest";
+import { loadAll, mondayOf, addDays } from "../../../lib/ops/store";
 
 export const prerender = false;
 
@@ -45,6 +52,26 @@ export const GET: APIRoute = async ({ params, request, url }) => {
       case "draft": {
         const results = await draftDue();
         return json({ ok: true, results });
+      }
+      case "health": {
+        const { failing, newlyBroken } = await runAndSaveHealth("Bot");
+        const alerted = await sendHealthAlert(newlyBroken).catch((e) => (console.error("[ops] alert", e), false));
+        return json({ ok: true, failing: failing.length, alerted });
+      }
+      case "ideas": {
+        if (!process.env.ANTHROPIC_API_KEY) return json({ ok: true, skipped: "ANTHROPIC_API_KEY not set" });
+        const { content } = await loadAll();
+        const horizon = addDays(mondayOf(new Date()), 21);
+        const upcoming = content.filter((c) => (c.status === "idea" || c.status === "planned") && c.week <= horizon && (c.kind === "new" || c.kind === "refresh"));
+        if (upcoming.length >= 6) return json({ ok: true, skipped: `${upcoming.length} items already planned` });
+        const created = await suggestTopics(6 - upcoming.length, "Bot");
+        return json({ ok: true, created: created.length });
+      }
+      case "digest": {
+        if (!emailStatus().configured) return json({ ok: true, skipped: "email not configured" });
+        const subject = await sendDigest();
+        await logRun({ job: "digest", startedAt, ok: true, by: "Bot", summary: `Sent weekly digest to ${emailStatus().to}`, details: subject });
+        return json({ ok: true, subject });
       }
     }
   } catch (err) {

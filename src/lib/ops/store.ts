@@ -46,6 +46,14 @@ export const isOpsId = (id: unknown): id is string => typeof id === "string" && 
 
 export type Owner = "Pavel" | "Andrew" | "Bot";
 
+/** Discussion on a task, key result or content item. */
+export interface Comment {
+  _key: string;
+  by: string;
+  at: string;
+  text: string;
+}
+
 export interface KeyResult {
   _id: string;
   _type: "opsKeyResult";
@@ -61,6 +69,7 @@ export interface KeyResult {
   dueDate?: string;
   owner?: Owner;
   order?: number;
+  comments?: Comment[];
 }
 
 export type TaskStatus = "todo" | "doing" | "done" | "blocked";
@@ -77,6 +86,7 @@ export interface Task {
   /** "Every week" bot jobs and human tasks render the same way on the plan. */
   recurring?: boolean;
   notes?: string;
+  comments?: Comment[];
 }
 
 export type ContentKind = "new" | "refresh" | "location" | "backlink";
@@ -101,6 +111,7 @@ export interface ContentItem {
   publishedAt?: string;
   approvedBy?: string;
   notes?: string;
+  comments?: Comment[];
 }
 
 export interface BotRun {

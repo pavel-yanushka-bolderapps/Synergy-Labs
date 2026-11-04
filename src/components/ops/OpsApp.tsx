@@ -6,9 +6,12 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 // ---- Types (mirrors src/lib/ops/store.ts; that file imports node modules) ----
 
 type Owner = "Pavel" | "Andrew" | "Bot";
-interface KeyResult { _id: string; _type: "opsKeyResult"; title: string; objective: string; metric?: string; baseline?: number; target?: number; current?: number; unit?: string; dueDate?: string; owner?: Owner; order?: number }
-interface Task { _id: string; _type: "opsTask"; title: string; owner: Owner; keyResult?: string; status: "todo" | "doing" | "done" | "blocked"; startWeek: string; endWeek: string; recurring?: boolean; notes?: string }
-interface ContentItem { _id: string; _type: "opsContent"; title: string; kind: "new" | "refresh" | "location" | "backlink"; keyword?: string; brief?: string; week: string; status: string; keyResult?: string; postId?: string; slug?: string; targetPath?: string; publishAt?: string; publishedAt?: string; approvedBy?: string; notes?: string }
+interface Comment { _key: string; by: string; at: string; text: string }
+interface Check { _key: string; name: string; group: string; ok: boolean; detail: string }
+interface Health { checkedAt: string; checks: Check[] }
+interface KeyResult { _id: string; _type: "opsKeyResult"; title: string; objective: string; metric?: string; baseline?: number; target?: number; current?: number; unit?: string; dueDate?: string; owner?: Owner; order?: number; comments?: Comment[] }
+interface Task { _id: string; _type: "opsTask"; title: string; owner: Owner; keyResult?: string; status: "todo" | "doing" | "done" | "blocked"; startWeek: string; endWeek: string; recurring?: boolean; notes?: string; comments?: Comment[] }
+interface ContentItem { _id: string; _type: "opsContent"; title: string; kind: "new" | "refresh" | "location" | "backlink"; keyword?: string; brief?: string; week: string; status: string; keyResult?: string; postId?: string; slug?: string; targetPath?: string; publishAt?: string; publishedAt?: string; approvedBy?: string; notes?: string; comments?: Comment[] }
 interface BotRun { _id: string; job: string; startedAt: string; ok: boolean; summary: string; details?: string; costUsd?: number; by?: string }
 interface ListRow { label: string; value: number; change?: number }
 interface Kpi { _id: string; weekStart: string; weekEnd: string; metrics: Record<string, number>; lists?: Record<string, ListRow[]>; errors?: Record<string, string>; syncedAt: string }
@@ -22,6 +25,8 @@ interface Data {
   kpis: Kpi[];
   metrics: Record<string, MetricDef>;
   sources: Record<string, boolean>;
+  health: Health | null;
+  digestTo: string;
 }
 
 // ---- Helpers -------------------------------------------------------------------
@@ -171,6 +176,45 @@ const toLocalInput = (isoStr: string) => {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
 
+// ---- Comments ---------------------------------------------------------------------
+
+function Comments({ doc, onSaved }: { doc: { _id?: string; comments?: Comment[] }; onSaved: () => void }) {
+  const [list, setList] = useState<Comment[]>(doc.comments ?? []);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  if (!doc._id) return null;
+  const post = async () => {
+    if (!text.trim()) return;
+    setBusy(true);
+    try {
+      const updated = await api("comment", { _id: doc._id, text });
+      setList(updated.comments ?? []);
+      setText("");
+      onSaved();
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-6 border-t border-neutral-100 pt-4">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">Discussion</p>
+      <ul className="mb-3 space-y-2">
+        {list.map((c) => (
+          <li key={c._key} className="rounded-lg bg-neutral-50 px-3 py-2 text-sm">
+            <p className="text-xs text-neutral-500"><b className="text-neutral-700">{c.by}</b> · {new Date(c.at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+            <p className="whitespace-pre-wrap">{c.text}</p>
+          </li>
+        ))}
+        {!list.length && <li className="text-sm text-neutral-400">No comments yet.</li>}
+      </ul>
+      <div className="flex gap-2">
+        <textarea rows={2} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => (e.metaKey || e.ctrlKey) && e.key === "Enter" && post()} placeholder="Write a comment… (⌘↵ to send)" className="flex-1 rounded-lg border border-neutral-300 px-3 py-2 text-sm" />
+        <Btn onClick={post} disabled={busy || !text.trim()}>Send</Btn>
+      </div>
+    </div>
+  );
+}
+
 // ---- Editors ------------------------------------------------------------------------
 
 const ownerOptions: [string, string][] = [["Pavel", "Pavel"], ["Andrew", "Andrew"], ["Bot", "Bot (automated)"]];
@@ -249,6 +293,7 @@ function Editor({ doc, data, onClose, onSaved }: { doc: Record<string, any>; dat
           <Btn onClick={save} disabled={busy || !v.title}>{busy ? "Saving…" : "Save"}</Btn>
         </div>
       </div>
+      <Comments doc={doc} onSaved={onSaved} />
     </Modal>
   );
 }
@@ -324,6 +369,13 @@ function ContentPanel({ item, data, onClose, onSaved }: { item: ContentItem; dat
           <Btn kind="danger" onClick={() => act("reject", { notes: prompt("What should change? (saved to notes)") ?? item.notes })} disabled={!!busy}>Send back</Btn>
         </div>
       )}
+      {(item.status === "idea" || item.status === "rejected") && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl bg-sky-50 p-4 text-sm">
+          <span className="flex-1">Topic idea{item.notes ? ` — ${item.notes}` : ""}. Approve it and the bot drafts it when its week starts.</span>
+          <Btn onClick={() => act("save", { _type: "opsContent", status: "planned" })} disabled={!!busy}>Approve topic</Btn>
+          {item.status === "idea" && <Btn kind="danger" onClick={() => act("save", { _type: "opsContent", status: "rejected" })} disabled={!!busy}>Reject</Btn>}
+        </div>
+      )}
       {err && <p className="mb-3 text-sm text-red-700">{err}</p>}
 
       {post ? (
@@ -338,6 +390,7 @@ function ContentPanel({ item, data, onClose, onSaved }: { item: ContentItem; dat
       ) : (
         <Empty>No draft yet.</Empty>
       )}
+      <Comments doc={item} onSaved={onSaved} />
     </Modal>
   );
 }
@@ -393,7 +446,7 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
               <ul className="divide-y divide-neutral-100">
                 {mine.map((t) => (
                   <li key={t._id} className="flex items-center justify-between gap-3 py-2">
-                    <button className="text-left text-sm hover:underline" onClick={() => open(t)}>{t.title}</button>
+                    <button className="text-left text-sm hover:underline" onClick={() => open(t)}>{t.title}{!!t.comments?.length && <span className="ml-1.5 text-xs text-neutral-500">💬 {t.comments.length}</span>}</button>
                     <Pill s={t.status} />
                   </li>
                 ))}
@@ -414,9 +467,10 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
             <ul className="space-y-2 text-sm">{upcoming.map((c) => <li key={c._id}><button className="text-left hover:underline" onClick={() => open(c)}>{c.title}</button><span className="block text-xs text-neutral-500">{c.publishAt && new Date(c.publishAt).toLocaleString()}</span></li>)}</ul>
           )}
         </Card>
+        <HealthSummary data={data} />
         <Card title="Data sources" action={<Btn kind="ghost" onClick={sync}>Sync now</Btn>}>
           <ul className="space-y-1 text-sm">
-            {[["ga4", "Google Analytics 4"], ["gsc", "Search Console"], ["hubspot", "HubSpot"], ["claude", "Claude (AI drafts)"]].map(([k, l]) => (
+            {[["ga4", "Google Analytics 4"], ["gsc", "Search Console"], ["hubspot", "HubSpot"], ["claude", "Claude (AI drafts)"], ["email", "Email digest"]].map(([k, l]) => (
               <li key={k} className="flex justify-between"><span>{l}</span><span className={data.sources[k] && !latest?.errors?.[k] ? "text-emerald-700" : "text-amber-700"}>{data.sources[k] ? (latest?.errors?.[k] ? "error" : "connected") : "not connected"}</span></li>
             ))}
           </ul>
@@ -427,6 +481,64 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
 
       <Card title="Recent bot activity" className="lg:col-span-3"><RunList runs={data.runs.slice(0, 8)} /></Card>
     </div>
+  );
+}
+
+function HealthSummary({ data }: { data: Data }) {
+  const failing = data.health?.checks.filter((c) => !c.ok) ?? [];
+  return (
+    <Card title="Site health" action={<a href="#Health" onClick={() => window.dispatchEvent(new HashChangeEvent("hashchange"))} className="text-sm text-primary-green hover:underline">Details</a>}>
+      {!data.health ? (
+        <Empty>Not checked yet.</Empty>
+      ) : failing.length ? (
+        <ul className="space-y-1 text-sm">{failing.map((c) => <li key={c._key} className="text-red-800">✕ {c.group} · {c.name}</li>)}</ul>
+      ) : (
+        <p className="text-sm text-emerald-700">✓ All {data.health.checks.length} checks pass</p>
+      )}
+      {data.health && <p className="mt-2 text-xs text-neutral-500">Checked {new Date(data.health.checkedAt).toLocaleString()}</p>}
+    </Card>
+  );
+}
+
+function HealthTab({ data, reload, setToast }: { data: Data; reload: () => void; setToast: (s: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const run = async () => {
+    setBusy(true);
+    setToast("Running health checks (about 20 seconds)…");
+    try {
+      await api("health", {});
+      setToast("Health checks done");
+      reload();
+    } catch (e: any) {
+      setToast(`Health check failed: ${e.message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const groups = [...new Set(data.health?.checks.map((c) => c.group) ?? [])];
+  return (
+    <Card title="Site health" action={<Btn onClick={run} disabled={busy}>{busy ? "Checking…" : "Run checks now"}</Btn>}>
+      <p className="mb-4 text-sm text-neutral-600">
+        Runs daily at 07:00 UTC against the live site. When a check starts failing, everyone on the digest list gets an email.
+        {data.health && <> Last run {new Date(data.health.checkedAt).toLocaleString()}.</>}
+      </p>
+      {!data.health && <Empty>Not checked yet — click “Run checks now”.</Empty>}
+      <div className="grid gap-5 md:grid-cols-2">
+        {groups.map((g) => (
+          <div key={g}>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">{g}</p>
+            <ul className="divide-y divide-neutral-100">
+              {data.health!.checks.filter((c) => c.group === g).map((c) => (
+                <li key={c._key} className="flex items-start gap-2 py-1.5 text-sm">
+                  <span className={c.ok ? "text-emerald-600" : "text-red-600"}>{c.ok ? "✓" : "✕"}</span>
+                  <span className="min-w-0 flex-1"><b className="font-medium">{c.name}</b> <span className="text-neutral-500">— {c.detail}</span></span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 
@@ -501,7 +613,21 @@ function Plan({ data, open }: { data: Data; open: (d: any) => void }) {
   );
 }
 
-function Content({ data, open }: { data: Data; open: (d: any) => void }) {
+function Content({ data, open, reload, setToast }: { data: Data; open: (d: any) => void; reload: () => void; setToast: (s: string) => void }) {
+  const [suggesting, setSuggesting] = useState(false);
+  const suggest = async () => {
+    setSuggesting(true);
+    setToast("Claude is reading the search data and planning topics (about a minute)…");
+    try {
+      const ideas = await api("suggest", { count: 6 });
+      setToast(`${ideas.length} topic ideas added — open one to approve or reject it`);
+      reload();
+    } catch (e: any) {
+      setToast(`Suggestions failed: ${e.message}`);
+    } finally {
+      setSuggesting(false);
+    }
+  };
   const end = mondayOf(`${new Date().getFullYear()}-12-31`);
   const first = data.content.reduce((m, c) => (c.week < m ? c.week : m), THIS_WEEK);
   const weeks = weeksBetween(first < addDays(THIS_WEEK, -14) ? addDays(THIS_WEEK, -14) : first, end);
@@ -509,7 +635,12 @@ function Content({ data, open }: { data: Data; open: (d: any) => void }) {
   return (
     <Card
       title="Content calendar"
-      action={<Btn onClick={() => open({ _type: "opsContent", kind: "new", status: "planned", week: THIS_WEEK })}>+ Content</Btn>}
+      action={
+        <div className="flex gap-2">
+          <Btn kind="ghost" onClick={suggest} disabled={suggesting || !data.sources.claude}>{suggesting ? "Thinking…" : "✨ Suggest topics"}</Btn>
+          <Btn onClick={() => open({ _type: "opsContent", kind: "new", status: "planned", week: THIS_WEEK })}>+ Content</Btn>
+        </div>
+      }
     >
       <div className="mb-4 flex flex-wrap gap-2 text-xs">{Object.entries(counts).map(([s, n]) => <span key={s} className="flex items-center gap-1"><Pill s={s} />{n}</span>)}</div>
       <div className="flex gap-3 overflow-x-auto pb-2">
@@ -527,6 +658,7 @@ function Content({ data, open }: { data: Data; open: (d: any) => void }) {
                     <div className="mb-1 flex items-center justify-between gap-1"><span className="text-[10px] uppercase tracking-wide text-neutral-500">{KIND_LABEL[c.kind]}</span><Pill s={c.status} /></div>
                     <p className="text-sm font-medium leading-snug">{c.title}</p>
                     {c.keyword && <p className="mt-1 truncate text-xs text-neutral-500">🔑 {c.keyword}</p>}
+                    {!!c.comments?.length && <p className="mt-1 text-xs text-neutral-500">💬 {c.comments.length}</p>}
                   </button>
                 ))}
                 {!items.length && <p className="px-1 py-3 text-xs text-neutral-400">—</p>}
@@ -536,7 +668,7 @@ function Content({ data, open }: { data: Data; open: (d: any) => void }) {
         })}
       </div>
       <p className="mt-3 text-xs text-neutral-500">
-        Bot drafts “New post” and “Refresh” items automatically on weekdays once their week starts (or click one → “Write draft with AI”). Drafts are private until someone approves them; approved posts publish at their scheduled time.
+        Ideas (from “Suggest topics” or the Monday bot) need a person to approve them. Then the bot drafts “New post” and “Refresh” items automatically on weekdays once their week starts (or click one → “Write draft with AI”). Drafts are private until someone approves them; approved posts publish at their scheduled time.
       </p>
     </Card>
   );
@@ -649,7 +781,7 @@ function RunList({ runs }: { runs: BotRun[] }) {
 
 // ---- App -----------------------------------------------------------------------------------
 
-const TABS = ["Overview", "Plan", "Content", "KPIs", "Bots"] as const;
+const TABS = ["Overview", "Plan", "Content", "KPIs", "Health", "Bots"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function OpsApp({ user }: { user: string }) {
@@ -665,6 +797,14 @@ export default function OpsApp({ user }: { user: string }) {
   const load = useCallback(() => api<Data>("data").then(setData).catch((e) => setError(e.message)), []);
   useEffect(() => void load(), [load]);
   useEffect(() => void history.replaceState(null, "", `#${tab}`), [tab]);
+  useEffect(() => {
+    const onHash = () => {
+      const h = decodeURIComponent(location.hash.slice(1));
+      if ((TABS as readonly string[]).includes(h)) setTab(h as Tab);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(""), 5000);
@@ -701,6 +841,7 @@ export default function OpsApp({ user }: { user: string }) {
         {TABS.map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${tab === t ? "border-primary-green text-primary-green" : "border-transparent text-neutral-500 hover:text-neutral-800"}`}>
             {t}
+            {t === "Health" && data?.health?.checks.some((c) => !c.ok) && <span className="ml-1.5 rounded-full bg-red-600 px-1.5 text-[10px] text-white">{data.health.checks.filter((c) => !c.ok).length}</span>}
             {t === "Content" && data && data.content.some((c) => c.status === "review") && <span className="ml-1.5 rounded-full bg-orange-500 px-1.5 text-[10px] text-white">{data.content.filter((c) => c.status === "review").length}</span>}
           </button>
         ))}
@@ -712,14 +853,33 @@ export default function OpsApp({ user }: { user: string }) {
         <>
           {tab === "Overview" && <Overview data={data} open={setEditing} sync={() => sync(1)} />}
           {tab === "Plan" && <Plan data={data} open={setEditing} />}
-          {tab === "Content" && <Content data={data} open={setEditing} />}
+          {tab === "Content" && <Content data={data} open={setEditing} reload={load} setToast={setToast} />}
+          {tab === "Health" && <HealthTab data={data} reload={load} setToast={setToast} />}
           {tab === "KPIs" && <Kpis data={data} sync={sync} open={setEditing} />}
           {tab === "Bots" && (
             <Card title="Bot activity">
               <p className="mb-3 text-sm text-neutral-600">
-                Schedules: KPI sync Mondays 06:00 UTC · drafting weekdays 09:00 &amp; 13:00 UTC · publishing hourly. Claude spend this list:{" "}
+                Schedules (UTC): Mondays 06:00 KPI sync, 06:30 topic ideas, 08:00 digest email · daily 07:00 health checks · weekdays 09:00 &amp; 13:00 drafting · hourly publishing. Claude spend in this list:{" "}
                 <b>${data.runs.reduce((s, r) => s + (r.costUsd ?? 0), 0).toFixed(2)}</b>
               </p>
+              <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-neutral-50 p-3 text-sm">
+                <span className="flex-1">Weekly digest → {data.digestTo || <span className="text-amber-800">no recipients (set OPS_DIGEST_TO)</span>}</span>
+                <a className="rounded-lg px-3 py-1.5 font-medium text-neutral-700 ring-1 ring-neutral-300 hover:bg-white" href="/api/ops/digest" target="_blank" rel="noreferrer">Preview</a>
+                <Btn
+                  disabled={!data.sources.email}
+                  onClick={async () => {
+                    if (!confirm(`Send the digest to ${data.digestTo} now?`)) return;
+                    try {
+                      const r = await api("digest", {});
+                      setToast(`Sent: ${r.subject}`);
+                    } catch (e: any) {
+                      setToast(`Send failed: ${e.message}`);
+                    }
+                  }}
+                >
+                  Send now
+                </Btn>
+              </div>
               <RunList runs={data.runs} />
             </Card>
           )}
