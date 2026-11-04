@@ -9,6 +9,7 @@ type Owner = "Pavel" | "Andrew" | "Bot";
 interface Comment { _key: string; by: string; at: string; text: string }
 interface Check { _key: string; name: string; group: string; ok: boolean; detail: string }
 interface Health { checkedAt: string; checks: Check[] }
+interface Feedback { _id: string; _type: "opsFeedback"; number: number; title: string; status: "open" | "doing" | "done"; assignee?: Owner; createdBy: string; createdAt: string; host: string; path: string; viewport: string; userAgent?: string; elementText?: string; screenshot?: string; comments?: Comment[] }
 interface KeyResult { _id: string; _type: "opsKeyResult"; title: string; objective: string; metric?: string; baseline?: number; target?: number; current?: number; unit?: string; dueDate?: string; owner?: Owner; order?: number; comments?: Comment[] }
 interface Task { _id: string; _type: "opsTask"; title: string; owner: Owner; keyResult?: string; status: "todo" | "doing" | "done" | "blocked"; startWeek: string; endWeek: string; recurring?: boolean; notes?: string; comments?: Comment[] }
 interface ContentItem { _id: string; _type: "opsContent"; title: string; kind: "new" | "refresh" | "location" | "backlink"; keyword?: string; brief?: string; week: string; status: string; keyResult?: string; postId?: string; slug?: string; targetPath?: string; publishAt?: string; publishedAt?: string; approvedBy?: string; notes?: string; comments?: Comment[] }
@@ -26,6 +27,7 @@ interface Data {
   metrics: Record<string, MetricDef>;
   sources: Record<string, boolean>;
   health: Health | null;
+  feedback: Feedback[];
   digestTo: string;
 }
 
@@ -92,7 +94,7 @@ function krValue(kr: KeyResult, kpis: Kpi[]): { value?: number; from?: string } 
 
 // ---- Small UI pieces --------------------------------------------------------------
 
-const Pill = ({ s }: { s: string }) => <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLE[s] ?? "bg-neutral-100"}`}>{s}</span>;
+const Pill = ({ s, label }: { s: string; label?: string }) => <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLE[s] ?? "bg-neutral-100"}`}>{label ?? s}</span>;
 const Card = ({ title, action, children, className = "" }: { title?: ReactNode; action?: ReactNode; children: ReactNode; className?: string }) => (
   <section className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5 ${className}`}>
     {(title || action) && (
@@ -542,6 +544,99 @@ function HealthTab({ data, reload, setToast }: { data: Data; reload: () => void;
   );
 }
 
+const FB_STATUS: Record<Feedback["status"], string> = { open: "Open", doing: "In progress", done: "Done" };
+const fbLink = (f: Feedback) => `https://${f.host}${f.path}?feedback=${f.number}`;
+const browserOf = (ua = "") => (/Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "") + (/Mobile|iPhone|Android/.test(ua) ? " mobile" : "");
+
+function FeedbackPanel({ item, onClose, onSaved }: { item: Feedback; onClose: () => void; onSaved: () => void }) {
+  const [f, setF] = useState(item);
+  const save = async (fields: Partial<Feedback>) => {
+    setF(await api("save", { _id: f._id, _type: "opsFeedback", ...fields }));
+    onSaved();
+  };
+  return (
+    <Modal title={`#${f.number} · ${f.path}`} onClose={onClose} wide>
+      <div className="grid gap-6 md:grid-cols-[1fr_320px]">
+        <div>
+          <p className="whitespace-pre-wrap text-base">{f.title}</p>
+          {f.screenshot && (
+            <a href={f.screenshot} target="_blank" rel="noreferrer" className="mt-4 block overflow-hidden rounded-xl ring-1 ring-neutral-200">
+              <img src={`${f.screenshot}?w=1200`} alt="Screenshot" className="w-full" />
+            </a>
+          )}
+          <Comments doc={f} onSaved={onSaved} />
+        </div>
+        <div className="space-y-3 text-sm">
+          <label className="block">
+            <span className="mb-1 block text-neutral-600">Status</span>
+            <select className="w-full rounded-lg border border-neutral-300 px-3 py-2" value={f.status} onChange={(e) => save({ status: e.target.value as Feedback["status"] })}>
+              {Object.entries(FB_STATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-neutral-600">Assignee</span>
+            <select className="w-full rounded-lg border border-neutral-300 px-3 py-2" value={f.assignee ?? ""} onChange={(e) => save({ assignee: (e.target.value || "") as Owner })}>
+              <option value="">Unassigned</option><option>Pavel</option><option>Andrew</option>
+            </select>
+          </label>
+          <a href={fbLink(f)} target="_blank" rel="noreferrer" className="block rounded-lg bg-primary-green px-3 py-2 text-center font-medium text-white hover:bg-secondary-green">Open on the page ↗</a>
+          <dl className="space-y-1 text-neutral-600">
+            <div><dt className="inline text-neutral-400">By </dt><dd className="inline">{f.createdBy}, {new Date(f.createdAt).toLocaleString()}</dd></div>
+            <div><dt className="inline text-neutral-400">Site </dt><dd className="inline">{f.host}</dd></div>
+            <div><dt className="inline text-neutral-400">Screen </dt><dd className="inline">{f.viewport} {browserOf(f.userAgent)}</dd></div>
+            {f.elementText && <div><dt className="inline text-neutral-400">Element </dt><dd className="inline">“{f.elementText.slice(0, 120)}”</dd></div>}
+          </dl>
+          <Btn kind="danger" onClick={async () => { if (confirm("Delete this feedback?")) { await api("delete", { _id: f._id }); onSaved(); onClose(); } }}>Delete</Btn>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function FeedbackTab({ data, reload }: { data: Data; reload: () => void }) {
+  const [status, setStatus] = useState<"active" | Feedback["status"] | "all">("active");
+  const [who, setWho] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const list = data.feedback.filter((f) => (status === "all" ? true : status === "active" ? f.status !== "done" : f.status === status) && (!who || f.assignee === who));
+  const opened = data.feedback.find((f) => f._id === openId);
+  return (
+    <Card
+      title={`Site feedback (${data.feedback.filter((f) => f.status !== "done").length} open)`}
+      action={
+        <div className="flex gap-2 text-sm">
+          <select className="rounded-lg border border-neutral-300 px-2 py-1" value={status} onChange={(e) => setStatus(e.target.value as any)}>
+            <option value="active">Open + in progress</option><option value="open">Open</option><option value="doing">In progress</option><option value="done">Done</option><option value="all">All</option>
+          </select>
+          <select className="rounded-lg border border-neutral-300 px-2 py-1" value={who} onChange={(e) => setWho(e.target.value)}>
+            <option value="">Anyone</option><option>Pavel</option><option>Andrew</option>
+          </select>
+        </div>
+      }
+    >
+      <p className="mb-4 text-sm text-neutral-600">
+        While you are signed in here, every page of the site (production and staging) shows a <b>Feedback</b> bar in the bottom-left corner: click <b>+ Add</b>, click any element, and write what should change. A screenshot is attached automatically.
+      </p>
+      {!list.length && <Empty>No feedback{status !== "all" ? " in this view" : ""} yet.</Empty>}
+      <ul className="divide-y divide-neutral-100">
+        {list.map((f) => (
+          <li key={f._id}>
+            <button onClick={() => setOpenId(f._id)} className="flex w-full items-start gap-4 py-3 text-left hover:bg-neutral-50">
+              {f.screenshot ? <img src={`${f.screenshot}?w=240&h=150&fit=crop`} alt="" className="h-[75px] w-[120px] shrink-0 rounded-lg object-cover ring-1 ring-neutral-200" /> : <div className="h-[75px] w-[120px] shrink-0 rounded-lg bg-neutral-100" />}
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-neutral-500">#{f.number} · {f.host.startsWith("dev.") ? "staging " : ""}{f.path} · {f.createdBy}, {new Date(f.createdAt).toLocaleDateString()}</p>
+                <p className="line-clamp-2 text-sm font-medium">{f.title}</p>
+                <p className="mt-1 text-xs text-neutral-500">{f.assignee ? `→ ${f.assignee}` : "Unassigned"}{f.comments?.length ? ` · 💬 ${f.comments.length}` : ""}</p>
+              </div>
+              <Pill s={f.status === "open" ? "review" : f.status} label={FB_STATUS[f.status]} />
+            </button>
+          </li>
+        ))}
+      </ul>
+      {opened && <FeedbackPanel key={opened._id} item={opened} onClose={() => setOpenId(null)} onSaved={reload} />}
+    </Card>
+  );
+}
+
 function Plan({ data, open }: { data: Data; open: (d: any) => void }) {
   const start = useMemo(() => {
     const first = data.tasks.reduce((m, t) => (t.startWeek < m ? t.startWeek : m), THIS_WEEK);
@@ -781,7 +876,7 @@ function RunList({ runs }: { runs: BotRun[] }) {
 
 // ---- App -----------------------------------------------------------------------------------
 
-const TABS = ["Overview", "Plan", "Content", "KPIs", "Health", "Bots"] as const;
+const TABS = ["Overview", "Plan", "Content", "Feedback", "KPIs", "Health", "Bots"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function OpsApp({ user }: { user: string }) {
@@ -841,6 +936,7 @@ export default function OpsApp({ user }: { user: string }) {
         {TABS.map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${tab === t ? "border-primary-green text-primary-green" : "border-transparent text-neutral-500 hover:text-neutral-800"}`}>
             {t}
+            {t === "Feedback" && !!data?.feedback.filter((f) => f.status !== "done").length && <span className="ml-1.5 rounded-full bg-orange-500 px-1.5 text-[10px] text-white">{data.feedback.filter((f) => f.status !== "done").length}</span>}
             {t === "Health" && data?.health?.checks.some((c) => !c.ok) && <span className="ml-1.5 rounded-full bg-red-600 px-1.5 text-[10px] text-white">{data.health.checks.filter((c) => !c.ok).length}</span>}
             {t === "Content" && data && data.content.some((c) => c.status === "review") && <span className="ml-1.5 rounded-full bg-orange-500 px-1.5 text-[10px] text-white">{data.content.filter((c) => c.status === "review").length}</span>}
           </button>
@@ -854,6 +950,7 @@ export default function OpsApp({ user }: { user: string }) {
           {tab === "Overview" && <Overview data={data} open={setEditing} sync={() => sync(1)} />}
           {tab === "Plan" && <Plan data={data} open={setEditing} />}
           {tab === "Content" && <Content data={data} open={setEditing} reload={load} setToast={setToast} />}
+          {tab === "Feedback" && <FeedbackTab data={data} reload={load} />}
           {tab === "Health" && <HealthTab data={data} reload={load} setToast={setToast} />}
           {tab === "KPIs" && <Kpis data={data} sync={sync} open={setEditing} />}
           {tab === "Bots" && (

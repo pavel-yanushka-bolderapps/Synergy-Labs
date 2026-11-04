@@ -24,18 +24,22 @@ export function checkPassword(password: string): boolean {
   return isConfigured() && a.length === b.length && timingSafeEqual(a, b);
 }
 
+/**
+ * Readable by page scripts, and carrying no secret: it only tells the site's
+ * cached pages to load the feedback tool (public/ops-feedback.js), which then
+ * asks /api/ops/* -- where the real, httpOnly session is checked.
+ */
+export const UI_COOKIE = "ops_ui";
+
 export function signIn(cookies: AstroCookies, name: string) {
-  cookies.set(COOKIE, `${name}.${sign(name)}`, {
-    path: "/",
-    httpOnly: true,
-    secure: import.meta.env.PROD,
-    sameSite: "lax",
-    maxAge: MAX_AGE,
-  });
+  const options = { path: "/", secure: import.meta.env.PROD, sameSite: "lax" as const, maxAge: MAX_AGE };
+  cookies.set(COOKIE, `${name}.${sign(name)}`, { ...options, httpOnly: true });
+  cookies.set(UI_COOKIE, "1", options);
 }
 
 export function signOut(cookies: AstroCookies) {
   cookies.delete(COOKIE, { path: "/" });
+  cookies.delete(UI_COOKIE, { path: "/" });
 }
 
 /** The signed-in person's name, or null. */

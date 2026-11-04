@@ -1,5 +1,6 @@
 ---
 import Analytics from "./Analytics.astro";
+import FeedbackLoader from "./FeedbackLoader.astro";
 import Weglot from "./Weglot.astro";
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
@@ -154,6 +155,7 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
       unless queries are running in preview mode (see src/lib/loadQuery.ts),
       so this costs the public site nothing.
     -->
+    <FeedbackLoader />
     {VisualEditing && previewEnabled && <VisualEditing enabled />}
     {previewEnabled && (
       <!--

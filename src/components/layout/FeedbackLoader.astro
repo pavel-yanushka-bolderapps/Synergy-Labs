@@ -1,0 +1,16 @@
+---
+// Loads the on-site feedback tool (public/ops-feedback.js) for Pavel and
+// Andrew only. Pages are cached and identical for every visitor, so the check
+// happens in the browser: the `ops_ui` cookie is set when someone signs in to
+// /ops (src/lib/ops/auth.ts). Everyone else runs this one line and loads
+// nothing.
+---
+
+<script is:inline>
+  if (/(?:^|; )ops_ui=1/.test(document.cookie)) {
+    var s = document.createElement("script");
+    s.src = "/ops-feedback.js";
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+</script>

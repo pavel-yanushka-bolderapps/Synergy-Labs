@@ -15,6 +15,9 @@
 //   POST digest            send the weekly digest now
 //   POST suggest           Claude proposes { count } topic ideas for the calendar
 //   POST comment           add a comment to a task, key result or content item
+//   GET  feedback?path=    on-site feedback pins for one page (the site overlay)
+//   POST feedback          create a pin (from public/ops-feedback.js)
+//   POST screenshot        upload a pin's screenshot (JPEG data URL) -> { url }
 import type { APIRoute } from "astro";
 import { waitUntil } from "@vercel/functions";
 import { checkPassword, currentUser, json, PEOPLE, signIn, signOut } from "../../../lib/ops/auth";
@@ -32,6 +35,7 @@ const EDITABLE: Record<Exclude<OpsType, "opsRun" | "opsKpi">, string[]> = {
   opsKeyResult: ["title", "objective", "metric", "baseline", "target", "current", "unit", "dueDate", "owner", "order"],
   opsTask: ["title", "owner", "keyResult", "status", "startWeek", "endWeek", "recurring", "notes"],
   opsContent: ["title", "kind", "keyword", "brief", "week", "status", "keyResult", "targetPath", "publishAt", "notes"],
+  opsFeedback: ["title", "status", "assignee"],
 };
 
 export const GET: APIRoute = async ({ params, cookies, url }) => {
@@ -49,6 +53,17 @@ export const GET: APIRoute = async ({ params, cookies, url }) => {
     const id = url.searchParams.get("id");
     if (!id) return json({ error: "id is required" }, 400);
     return json(await loadPost(id));
+  }
+  if (params.action === "me") return json({ user });
+  if (params.action === "feedback") {
+    const path = url.searchParams.get("path") ?? "/";
+    const host = url.searchParams.get("host") ?? url.host;
+    return json(
+      await opsClient().fetch(
+        `*[_type == "opsFeedback" && _id in path("ops.**") && path == $path && host == $host] | order(number asc)`,
+        { path, host }
+      )
+    );
   }
   if (params.action === "digest") {
     const { subject, html } = await buildDigest();
@@ -158,6 +173,48 @@ export const POST: APIRoute = async ({ params, cookies, request, url }) => {
           .append("comments", [{ _key: randomUUID().slice(0, 12), by: user, at: new Date().toISOString(), text }])
           .commit();
         return json(updated);
+      }
+
+      case "feedback": {
+        const str = (v: unknown, max = 500) => String(v ?? "").slice(0, max);
+        const n = (v: unknown) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+        const title = str(body.title, 4000).trim();
+        if (!title) return json({ error: "Write a comment first" }, 400);
+        const last = await c.fetch<number | null>(`*[_type == "opsFeedback" && _id in path("ops.**")] | order(number desc)[0].number`);
+        const doc = {
+          _id: newId("opsFeedback"),
+          _type: "opsFeedback",
+          number: (last ?? 0) + 1,
+          title,
+          status: "open",
+          assignee: PEOPLE.includes(body.assignee) ? body.assignee : undefined,
+          createdBy: user,
+          createdAt: new Date().toISOString(),
+          host: str(body.host, 200),
+          path: str(body.path, 1000),
+          selector: str(body.selector, 2000),
+          offsetX: n(body.offsetX),
+          offsetY: n(body.offsetY),
+          pageX: n(body.pageX),
+          pageY: n(body.pageY),
+          viewport: str(body.viewport, 40),
+          userAgent: str(request.headers.get("user-agent"), 300),
+          elementText: str(body.elementText, 200),
+          screenshot: typeof body.screenshot === "string" && body.screenshot.startsWith("https://cdn.sanity.io/") ? body.screenshot : undefined,
+        };
+        const created = await c.create(Object.fromEntries(Object.entries(doc).filter(([, v]) => v !== undefined)) as typeof doc);
+        await logRun({ job: "feedback", ok: true, by: user, summary: `${user} left feedback #${doc.number} on ${doc.path}`, details: title.slice(0, 200) });
+        return json(created);
+      }
+
+      case "screenshot": {
+        const m = /^data:image\/(jpeg|png);base64,(.+)$/.exec(String(body.dataUrl ?? ""));
+        if (!m) return json({ error: "Expected a JPEG or PNG data URL" }, 400);
+        const buffer = Buffer.from(m[2], "base64");
+        if (buffer.length > 3_000_000) return json({ error: "Screenshot too large" }, 413);
+        // Sanity assets are served from an unguessable CDN URL, not listed anywhere public.
+        const asset = await c.assets.upload("image", buffer, { filename: `ops-feedback-${Date.now()}.${m[1] === "png" ? "png" : "jpg"}` });
+        return json({ url: asset.url });
       }
 
       case "sync": {

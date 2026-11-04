@@ -30,7 +30,7 @@ export function opsClient(): SanityClient {
   return client;
 }
 
-export const OPS_TYPES = ["opsKeyResult", "opsTask", "opsContent", "opsRun", "opsKpi"] as const;
+export const OPS_TYPES = ["opsKeyResult", "opsTask", "opsContent", "opsRun", "opsKpi", "opsFeedback"] as const;
 export type OpsType = (typeof OPS_TYPES)[number];
 
 const PREFIX: Record<OpsType, string> = {
@@ -39,6 +39,7 @@ const PREFIX: Record<OpsType, string> = {
   opsContent: "ops.content.",
   opsRun: "ops.run.",
   opsKpi: "ops.kpi.",
+  opsFeedback: "ops.feedback.",
 };
 
 export const newId = (type: OpsType, suffix: string = randomUUID().slice(0, 12)) => PREFIX[type] + suffix;
@@ -114,6 +115,35 @@ export interface ContentItem {
   comments?: Comment[];
 }
 
+export type FeedbackStatus = "open" | "doing" | "done";
+/** A comment pinned to an element of a site page (the on-site feedback tool). */
+export interface Feedback {
+  _id: string;
+  _type: "opsFeedback";
+  /** Sequential number shown on the pin. */
+  number: number;
+  title: string;
+  status: FeedbackStatus;
+  assignee?: Owner;
+  createdBy: string;
+  createdAt: string;
+  /** Host + path the pin is on, e.g. "www.synergylabs.co" and "/contact". */
+  host: string;
+  path: string;
+  /** CSS selector of the clicked element, and where in it (0-1 fractions). */
+  selector: string;
+  offsetX: number;
+  offsetY: number;
+  /** Fallback position: page coordinates at the time, and the viewport. */
+  pageX: number;
+  pageY: number;
+  viewport: string;
+  userAgent?: string;
+  elementText?: string;
+  screenshot?: string;
+  comments?: Comment[];
+}
+
 export interface BotRun {
   _id: string;
   _type: "opsRun";
@@ -174,7 +204,7 @@ function fromStoredKpi(s: StoredKpi): KpiSnapshot {
 
 export async function loadAll() {
   const c = opsClient();
-  const [keyResults, tasks, content, runs, kpis] = await Promise.all([
+  const [keyResults, tasks, content, runs, kpis, feedback] = await Promise.all([
     c.fetch<KeyResult[]>(`*[_type == "opsKeyResult" && _id in path("ops.**")] | order(order asc, _createdAt asc)`),
     c.fetch<Task[]>(`*[_type == "opsTask" && _id in path("ops.**")] | order(startWeek asc, _createdAt asc)`),
     c.fetch<ContentItem[]>(`*[_type == "opsContent" && _id in path("ops.**")] | order(week asc, _createdAt asc)`),
@@ -182,8 +212,9 @@ export async function loadAll() {
     c
       .fetch<StoredKpi[]>(`*[_type == "opsKpi" && _id in path("ops.**")] | order(weekStart desc)[0...26]`)
       .then((list) => list.map(fromStoredKpi)),
+    c.fetch<Feedback[]>(`*[_type == "opsFeedback" && _id in path("ops.**")] | order(number desc)`),
   ]);
-  return { keyResults, tasks, content, runs, kpis };
+  return { keyResults, tasks, content, runs, kpis, feedback };
 }
 
 /** Appends to the bot activity log. Never throws: logging must not fail a job. */
