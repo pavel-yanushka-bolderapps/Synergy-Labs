@@ -11,6 +11,20 @@ import type { Language } from "./languages";
 /** Overridable without a deploy, e.g. TRANSLATE_MODEL=claude-sonnet-5-5. */
 export const MODEL = process.env.TRANSLATE_MODEL || "claude-opus-5-5";
 
+/** List prices, $ per million input / output tokens. The Batch API is half. */
+export const PRICES: Record<string, [number, number]> = {
+  "claude-opus-5-5": [4, 20],
+  "claude-sonnet-5-5": [2, 10],
+  "claude-haiku-5-5": [0.1, 0.5],
+};
+
+export interface Usage {
+  inputTokens: number;
+  outputTokens: number;
+  /** At list price; 0 for a model missing from PRICES. */
+  usd: number;
+}
+
 /** Segments per request: keeps each response well inside max_tokens. */
 export const CHUNK_SIZE = 120;
 
@@ -79,15 +93,22 @@ export function parseTranslations(message: Anthropic.Message, segments: string[]
 let client: Anthropic | undefined;
 
 /** Translates segments into one language, a chunk per request, chunks in parallel. */
-export async function translateSegments(segments: string[], lang: Language): Promise<Map<string, string>> {
+export async function translateSegments(
+  segments: string[],
+  lang: Language
+): Promise<{ translations: Map<string, string>; usage: Usage }> {
   client ??= new Anthropic();
   const chunks: string[][] = [];
   for (let i = 0; i < segments.length; i += CHUNK_SIZE) chunks.push(segments.slice(i, i + CHUNK_SIZE));
 
+  const usage: Usage = { inputTokens: 0, outputTokens: 0, usd: 0 };
   const results = await Promise.all(
     chunks.map(async (chunk) => {
       try {
         const message = await client!.messages.stream(translationRequest(chunk, lang)).finalMessage();
+        // Counted before parsing: a response that cannot be used is still billed.
+        usage.inputTokens += message.usage.input_tokens;
+        usage.outputTokens += message.usage.output_tokens;
         return parseTranslations(message, chunk);
       } catch (err) {
         if (err instanceof Anthropic.RateLimitError) console.error("[translate] Rate limited:", err.message);
@@ -97,5 +118,7 @@ export async function translateSegments(segments: string[], lang: Language): Pro
       }
     })
   );
-  return new Map(results.flatMap((m) => [...m]));
+  const [pin, pout] = PRICES[MODEL] ?? [0, 0];
+  usage.usd = (usage.inputTokens * pin + usage.outputTokens * pout) / 1e6;
+  return { translations: new Map(results.flatMap((m) => [...m])), usage };
 }

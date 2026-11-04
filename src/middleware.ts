@@ -54,8 +54,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const result = await translatePage(html, storePath, lang);
   waitUntil(result.save.catch((err) => console.error(`[translate] Saving ${lang.code}${path} failed:`, err)));
   if (result.translated || result.untranslated) {
+    const { usage } = result;
+    const cost = usage
+      ? ` (${usage.inputTokens.toLocaleString("en-US")} in / ${usage.outputTokens.toLocaleString("en-US")} out tokens, $${usage.usd.toFixed(4)})`
+      : "";
     console.log(
-      `[translate] ${lang.code}${path}: ${result.translated} new from Claude, ${result.untranslated} left in English`
+      `[translate] ${lang.code}${path}: ${result.translated} new from Claude, ${result.untranslated} left in English${cost}`
     );
   }
 

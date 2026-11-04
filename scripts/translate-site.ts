@@ -17,7 +17,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { LANGUAGES, isTranslatablePath, type Language } from "../src/lib/i18n/languages";
 import { segmentPage } from "../src/lib/i18n/segments";
 import { loadTranslations, saveTranslations } from "../src/lib/i18n/store";
-import { CHUNK_SIZE, translationRequest, parseTranslations } from "../src/lib/i18n/claude";
+import { CHUNK_SIZE, PRICES, translationRequest, parseTranslations } from "../src/lib/i18n/claude";
 
 const arg = (name: string) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -72,11 +72,6 @@ const totalChars = [...missing.values()].reduce((n, set) => n + [...set].join(""
 // (Hindi, Arabic and Russian at the top). Batch is half the list price.
 const inTok = totalChars / 4;
 const outTok = inTok * 1.7;
-const PRICES: Record<string, [number, number]> = {
-  "claude-opus-5-5": [4, 20],
-  "claude-sonnet-5-5": [2, 10],
-  "claude-haiku-5-5": [0.1, 0.5],
-};
 const model = translationRequest([], langs[0]).model;
 const [pin, pout] = PRICES[model] ?? [4, 20];
 for (const lang of langs) console.log(`  ${lang.code}: ${missing.get(lang.code)!.size} segments to translate`);
@@ -125,6 +120,8 @@ for (;;) {
 // --batch <id> works from a fresh run (as long as the site has not changed).
 const results = new Map<string, Map<string, string>>(langs.map((l) => [l.code, new Map()]));
 let failed = 0;
+let usedIn = 0;
+let usedOut = 0;
 for await (const result of await client.messages.batches.results(batchId)) {
   const [code, index] = result.custom_id.split("-");
   const list = [...missing.get(code)!].slice(Number(index) * CHUNK_SIZE, (Number(index) + 1) * CHUNK_SIZE);
@@ -132,6 +129,8 @@ for await (const result of await client.messages.batches.results(batchId)) {
     failed++;
     continue;
   }
+  usedIn += result.result.message.usage.input_tokens;
+  usedOut += result.result.message.usage.output_tokens;
   try {
     for (const [s, t] of parseTranslations(result.result.message, list)) results.get(code)!.set(s, t);
   } catch (err) {
@@ -140,6 +139,10 @@ for await (const result of await client.messages.batches.results(batchId)) {
   }
 }
 if (failed) console.log(`${failed} requests failed; their pages translate live on first visit, or re-run this script.`);
+console.log(
+  `Used ${usedIn.toLocaleString()} input / ${usedOut.toLocaleString()} output tokens: ` +
+    `$${(((usedIn * pin + usedOut * pout) / 1e6) * 0.5).toFixed(2)} at batch prices.`
+);
 
 // 4. Save, page by page. Placeholder mismatches are caught at render time
 //    (segments.ts) and fall back to English, so nothing is validated here.

@@ -13,7 +13,7 @@
 // this code at all.
 import { segmentPage } from "./segments";
 import { loadTranslations, saveTranslations } from "./store";
-import { translateSegments } from "./claude";
+import { translateSegments, type Usage } from "./claude";
 import { isTranslatablePath, localizedPath, LANGUAGE_CODES, type Language } from "./languages";
 
 const SITE_HOSTS = new Set(["www.synergylabs.co", "synergylabs.co"]);
@@ -34,6 +34,17 @@ function localizeHref(href: string, lang: Language): string | null {
   return relative ? path : `https://www.synergylabs.co${path}`;
 }
 
+/** The floating picker (LanguagePicker.astro) shows the page's own language. */
+function markCurrentLanguage(root: ReturnType<typeof segmentPage>["root"], lang: Language) {
+  const picker = root.querySelector("[data-lang-picker]");
+  if (!picker) return;
+  picker.querySelector("[data-lang-current]")?.set_content(lang.code.toUpperCase());
+  for (const a of picker.querySelectorAll("a[data-lang]")) {
+    if (a.getAttribute("data-lang") === lang.code) a.setAttribute("aria-current", "true");
+    else a.removeAttribute("aria-current");
+  }
+}
+
 export interface TranslateResult {
   html: string;
   /** Saves new translations; the caller decides whether to wait for it. */
@@ -42,6 +53,8 @@ export interface TranslateResult {
   translated: number;
   /** Segments left in English (Claude failed or broke the markup). */
   untranslated: number;
+  /** What this render's Claude requests cost; undefined when none were made. */
+  usage?: Usage;
 }
 
 export async function translatePage(html: string, path: string, lang: Language): Promise<TranslateResult> {
@@ -53,7 +66,8 @@ export async function translatePage(html: string, path: string, lang: Language):
   // Without a way to save them, every re-render would pay for the same
   // translations again -- so no Claude at all; untranslated text stays English.
   const canSave = Boolean(process.env.SANITY_API_WRITE_TOKEN);
-  const fresh = missing.length && canSave ? await translateSegments(missing, lang) : new Map<string, string>();
+  const claude = missing.length && canSave ? await translateSegments(missing, lang) : undefined;
+  const fresh = claude?.translations ?? new Map<string, string>();
 
   const page = new Map<string, string>();
   const newShared = new Map<string, string>();
@@ -97,6 +111,8 @@ export async function translatePage(html: string, path: string, lang: Language):
     if (href) a.setAttribute("href", href);
   }
 
+  markCurrentLanguage(root, lang);
+
   // Each translation is its own canonical page; the hreflang alternates the
   // layout wrote already list every language and stay as they are.
   for (const el of root.querySelectorAll('link[rel="canonical"], meta[property="og:url"]')) {
@@ -107,5 +123,5 @@ export async function translatePage(html: string, path: string, lang: Language):
   }
   root.querySelector('meta[property="og:locale"]')?.setAttribute("content", lang.code);
 
-  return { html: root.toString(), save, translated: fresh.size, untranslated };
+  return { html: root.toString(), save, translated: fresh.size, untranslated, usage: claude?.usage };
 }

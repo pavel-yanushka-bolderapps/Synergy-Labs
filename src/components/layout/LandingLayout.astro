@@ -9,6 +9,7 @@
 // not optional on the pages most likely to be a first impression.
 import Analytics from "./Analytics.astro";
 import Alternates from "./Alternates.astro";
+import LanguagePicker from "./LanguagePicker.astro";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
 import { previewEnabled } from "../../lib/loadQuery";
@@ -159,6 +160,9 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
         <span>{footer.copyright}</span>
       </div>
     </footer>
+
+    {/* Not on the Arabic landing page, which has no translations. */}
+    {locale === "en" && <LanguagePicker />}
 
     {VisualEditing && previewEnabled && <VisualEditing enabled />}
   </body>
