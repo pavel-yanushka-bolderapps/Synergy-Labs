@@ -27,6 +27,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@vercel/functions": "^3.9.11",
+    "@vercel/oidc": "^4.0.0",
     "astro": "^5.0.0",
     "intl-tel-input": "29.5.3",
     "react": "^19.2.8",
