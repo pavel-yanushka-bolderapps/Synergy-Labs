@@ -2,6 +2,7 @@
 // tab -- Overview, Plan, Content, KPIs, Bots -- all reading the single
 // /api/ops/data payload and writing through /api/ops/<action>.
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { HBars, Legend, LineChart, Sparkline, StackedBars, compact, type Series } from "./charts";
 
 // ---- Types (mirrors src/lib/ops/store.ts; that file imports node modules) ----
 
@@ -63,23 +64,25 @@ const fmt = (v: number | undefined, def?: MetricDef) => {
   return Math.round(v).toLocaleString();
 };
 
-const OWNER_COLOR: Record<Owner, string> = {
-  Pavel: "bg-sky-600",
-  Andrew: "bg-violet-600",
-  Bot: "bg-emerald-600",
-};
+// Chart + identity colours. Categorical slots (owners, series) and the one-hue
+// ramp for ordered pipeline stages were run through the dataviz palette
+// validator (CVD-safe adjacent pairs; ramp monotone with a visible light end).
+const C = { blue: "#2a78d6", orange: "#eb6834", aqua: "#1baf7a", grey: "#c3c2b7", good: "#0ca30c", critical: "#d03b3b" };
+const OWNER_COLOR: Record<Owner, string> = { Pavel: C.blue, Andrew: C.orange, Bot: C.aqua };
+const STAGES = ["idea", "planned", "drafting", "review", "approved", "published"] as const;
+const STAGE_COLOR: Record<string, string> = { idea: "#c6dcf7", planned: "#86b6ef", drafting: "#5598e7", review: "#2a78d6", approved: "#1c5cab", published: "#104281" };
 const STATUS_STYLE: Record<string, string> = {
   idea: "bg-neutral-100 text-neutral-600",
-  planned: "bg-sky-50 text-sky-800",
-  drafting: "bg-amber-50 text-amber-800",
-  review: "bg-orange-100 text-orange-900",
-  approved: "bg-emerald-50 text-emerald-800",
-  published: "bg-emerald-600 text-white",
-  rejected: "bg-red-50 text-red-800",
-  todo: "bg-neutral-100 text-neutral-700",
-  doing: "bg-sky-100 text-sky-900",
-  done: "bg-emerald-100 text-emerald-900",
-  blocked: "bg-red-100 text-red-900",
+  planned: "bg-sky-50 text-sky-800 ring-sky-200",
+  drafting: "bg-amber-50 text-amber-800 ring-amber-200",
+  review: "bg-orange-50 text-orange-800 ring-orange-200",
+  approved: "bg-emerald-50 text-emerald-800 ring-emerald-200",
+  published: "bg-[#0a332c] text-white ring-[#0a332c]",
+  rejected: "bg-red-50 text-red-700 ring-red-200",
+  todo: "bg-neutral-100 text-neutral-600",
+  doing: "bg-sky-50 text-sky-800 ring-sky-200",
+  done: "bg-emerald-50 text-emerald-800 ring-emerald-200",
+  blocked: "bg-red-50 text-red-700 ring-red-200",
 };
 const KIND_LABEL = { new: "New post", refresh: "Refresh", location: "Location page", backlink: "Backlink" };
 
@@ -94,12 +97,15 @@ function krValue(kr: KeyResult, kpis: Kpi[]): { value?: number; from?: string } 
 
 // ---- Small UI pieces --------------------------------------------------------------
 
-const Pill = ({ s, label }: { s: string; label?: string }) => <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLE[s] ?? "bg-neutral-100"}`}>{label ?? s}</span>;
-const Card = ({ title, action, children, className = "" }: { title?: ReactNode; action?: ReactNode; children: ReactNode; className?: string }) => (
-  <section className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5 ${className}`}>
+const Pill = ({ s, label }: { s: string; label?: string }) => <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium capitalize ring-1 ring-inset ring-black/5 ${STATUS_STYLE[s] ?? "bg-neutral-100"}`}>{label ?? s}</span>;
+const Card = ({ title, sub, action, children, className = "" }: { title?: ReactNode; sub?: ReactNode; action?: ReactNode; children: ReactNode; className?: string }) => (
+  <section className={`min-w-0 rounded-xl border border-black/[0.07] bg-white p-5 ${className}`}>
     {(title || action) && (
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="font-sans text-sm font-semibold uppercase tracking-wider text-neutral-500">{title}</h2>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="font-sans text-[15px] font-semibold text-neutral-900">{title}</h2>
+          {sub && <p className="mt-0.5 text-xs text-neutral-500">{sub}</p>}
+        </div>
         {action}
       </div>
     )}
@@ -111,14 +117,84 @@ const Btn = ({ children, onClick, kind = "primary", disabled, type = "button" }:
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className={`rounded-lg px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 ${
-      kind === "primary" ? "bg-primary-green text-white hover:bg-secondary-green" : kind === "danger" ? "text-red-700 hover:bg-red-50" : "text-neutral-700 ring-1 ring-neutral-300 hover:bg-neutral-50"
+    className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 ${
+      kind === "primary" ? "bg-primary-green text-white hover:bg-secondary-green" : kind === "danger" ? "text-red-700 hover:bg-red-50" : "bg-white text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50"
     }`}
   >
     {children}
   </button>
 );
 const Empty = ({ children }: { children: ReactNode }) => <p className="py-4 text-sm text-neutral-500">{children}</p>;
+const Dot = ({ color }: { color: string }) => <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: color }} />;
+
+/** Not-connected placeholder used inside a chart card. */
+const Waiting = ({ what }: { what: string }) => (
+  <div className="flex h-[180px] flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-neutral-200 bg-neutral-50/60 text-center">
+    <p className="text-sm font-medium text-neutral-600">Waiting for {what}</p>
+    <p className="max-w-xs text-xs text-neutral-500">Fills in on the next KPI sync once access is granted.</p>
+  </div>
+);
+
+/** A KPI tile: latest value, change vs previous week, 12-week sparkline. */
+function Stat({ label, metric, data, color = C.blue, source }: { label: string; metric: string; data: Data; color?: string; source: string }) {
+  const def = data.metrics[metric];
+  const snaps = [...data.kpis].slice(0, 12).reverse();
+  const values = snaps.map((s) => s.metrics?.[metric]);
+  const latestI = values.map((v, i) => (v === undefined ? -1 : i)).filter((i) => i >= 0).pop();
+  const v = latestI === undefined ? undefined : values[latestI];
+  const prev = latestI === undefined ? undefined : values[latestI - 1];
+  const ch = v !== undefined && prev ? (v - prev) / prev : undefined;
+  const good = ch !== undefined && (def?.better === "down" ? ch < 0 : ch > 0);
+  return (
+    <div className="min-w-0 rounded-xl border border-black/[0.07] bg-white p-4">
+      <p className="truncate text-xs font-medium text-neutral-500">{label}</p>
+      {v === undefined ? (
+        <>
+          <p className="mt-1.5 text-2xl font-semibold text-neutral-300">–</p>
+          <p className="mt-2 text-[11px] text-neutral-400">{data.sources[source] ? "Waiting for first sync" : "Not connected yet"}</p>
+        </>
+      ) : (
+        <>
+          <div className="mt-1 flex items-baseline gap-2">
+            <p className="text-2xl font-semibold text-neutral-900">{fmt(v, def)}</p>
+            {ch !== undefined && Math.abs(ch) >= 0.005 && (
+              <span className={`text-xs font-medium ${good ? "text-[#006300]" : "text-[#b42727]"}`}>{ch > 0 ? "▲" : "▼"} {Math.abs(ch * 100).toFixed(0)}%</span>
+            )}
+          </div>
+          <div className="mt-1"><Sparkline values={values} color={color} /></div>
+          <p className="text-[11px] text-neutral-400">week of {weekLabel(snaps[latestI!].weekStart)} · vs prior week</p>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Content items per week, stacked by pipeline stage. */
+function PipelineChart({ data, weeks }: { data: Data; weeks: string[] }) {
+  const series: Series[] = STAGES.map((s) => ({ key: s, label: s[0].toUpperCase() + s.slice(1), color: STAGE_COLOR[s], values: weeks.map((w) => data.content.filter((c) => c.status === s && mondayOf(c.week) === w).length) }));
+  return (
+    <>
+      <Legend items={series} />
+      <StackedBars x={weeks.map(weekLabel)} series={series} height={170} highlight={weeks.indexOf(THIS_WEEK)} format={(v) => String(Math.round(v))} />
+    </>
+  );
+}
+
+/** Open tasks per week, stacked by owner (recurring tasks count every week). */
+function WorkloadChart({ data, weeks }: { data: Data; weeks: string[] }) {
+  const series: Series[] = (["Pavel", "Andrew", "Bot"] as Owner[]).map((o) => ({
+    key: o,
+    label: o,
+    color: OWNER_COLOR[o],
+    values: weeks.map((w) => data.tasks.filter((t) => t.owner === o && t.status !== "done" && mondayOf(t.startWeek) <= w && mondayOf(t.endWeek) >= w).length),
+  }));
+  return (
+    <>
+      <Legend items={series} />
+      <StackedBars x={weeks.map(weekLabel)} series={series} height={170} highlight={weeks.indexOf(THIS_WEEK)} format={(v) => String(Math.round(v))} />
+    </>
+  );
+}
 
 function Modal({ title, onClose, children, wide }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
   useEffect(() => {
@@ -425,28 +501,61 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
   const latest = data.kpis[0];
   const missing = Object.entries(latest?.errors ?? {});
 
+  const leadsKr = data.keyResults.find((k) => k.metric?.startsWith("hubspot.") && k.target !== undefined);
+  const trend = [...data.kpis].slice(0, 12).reverse();
+  const around = weeksBetween(addDays(THIS_WEEK, -21), addDays(THIS_WEEK, 56));
+  const doneCount = data.tasks.filter((t) => t.status === "done").length;
+
   return (
-    <div className="grid gap-5 lg:grid-cols-3">
-      <Card title="Key results" className="lg:col-span-3" action={<Btn kind="ghost" onClick={() => open({ _type: "opsKeyResult", objective: data.keyResults[0]?.objective ?? "", owner: "Pavel" })}>+ Key result</Btn>}>
+    <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 lg:col-span-3 xl:grid-cols-4">
+        <Stat label="New leads (HubSpot)" metric="hubspot.newContacts" source="hubspot" data={data} color={C.blue} />
+        <Stat label="Organic users" metric="ga4.organicUsers" source="ga4" data={data} color={C.blue} />
+        <Stat label="Search clicks" metric="gsc.clicks" source="gsc" data={data} color={C.blue} />
+        <Stat label="Avg. search position" metric="gsc.position" source="gsc" data={data} color={C.blue} />
+      </div>
+
+      <Card title="Leads per week" sub={leadsKr ? `Dashed line: key result target (${leadsKr.title})` : "New HubSpot contacts, all sources vs organic search"} className="lg:col-span-2">
+        {!trend.some((k) => k.metrics?.["hubspot.newContacts"] !== undefined) ? (
+          <Waiting what="HubSpot access" />
+        ) : (
+          <>
+            <Legend items={[{ label: "All leads", color: C.blue }, { label: "From organic search", color: C.orange }]} />
+            <LineChart
+              x={trend.map((k) => weekLabel(k.weekStart))}
+              series={[
+                { key: "all", label: "All leads", color: C.blue, values: trend.map((k) => k.metrics?.["hubspot.newContacts"]) },
+                { key: "org", label: "From organic search", color: C.orange, values: trend.map((k) => k.metrics?.["hubspot.newContactsOrganic"]) },
+              ]}
+              target={leadsKr && leadsKr.metric === "hubspot.newContacts" ? { value: leadsKr.target!, label: `Target ${fmt(leadsKr.target)}` } : undefined}
+              height={220}
+            />
+          </>
+        )}
+      </Card>
+
+      <Card title="Key results" action={<Btn kind="ghost" onClick={() => open({ _type: "opsKeyResult", objective: data.keyResults[0]?.objective ?? "", owner: "Pavel" })}>+ Add</Btn>}>
         {data.keyResults.length === 0 && <Empty>No key results yet.</Empty>}
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="space-y-2">
           {data.keyResults.map((kr) => {
             const { value, from } = krValue(kr, data.kpis);
             const base = kr.baseline ?? 0;
             const pct = kr.target !== undefined && value !== undefined && kr.target !== base ? Math.max(0, Math.min(1, (value - base) / (kr.target - base))) : undefined;
             const linked = data.tasks.filter((t) => t.keyResult === kr._id);
             return (
-              <button key={kr._id} onClick={() => open(kr)} className="rounded-xl p-4 text-left ring-1 ring-neutral-200 hover:ring-primary-green">
-                <p className="text-xs text-neutral-500">{kr.objective}</p>
-                <p className="mt-1 font-medium">{kr.title}</p>
-                <p className="mt-3 text-2xl font-semibold">
-                  {fmt(value)} <span className="text-sm font-normal text-neutral-500">/ {fmt(kr.target)}</span>
-                </p>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-100">
-                  <div className="h-full rounded-full bg-secondary-green" style={{ width: `${(pct ?? 0) * 100}%` }} />
+              <button key={kr._id} onClick={() => open(kr)} className="block w-full rounded-lg p-3 text-left ring-1 ring-neutral-100 transition hover:bg-neutral-50 hover:ring-neutral-200">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm font-medium leading-snug text-neutral-900">{kr.title}</p>
+                  <p className="shrink-0 text-sm font-semibold tabular-nums">
+                    {fmt(value)}<span className="font-normal text-neutral-400"> / {fmt(kr.target)}</span>
+                  </p>
                 </div>
-                <p className="mt-2 text-xs text-neutral-500">
-                  {kr.metric ? (from ? `Auto · week of ${weekLabel(from)}` : "Auto · waiting for first sync") : "Manual value"}
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-neutral-100">
+                  <div className="h-full rounded-full" style={{ width: `${(pct ?? 0) * 100}%`, background: C.blue }} />
+                </div>
+                <p className="mt-1.5 text-[11px] text-neutral-500">
+                  {pct !== undefined && <b className="font-medium text-neutral-700">{Math.round(pct * 100)}% · </b>}
+                  {kr.metric ? (from ? `auto, week of ${weekLabel(from)}` : "auto, waiting for data") : "manual"}
                   {" · "}{linked.length} task{linked.length === 1 ? "" : "s"}
                   {kr.dueDate && ` · due ${weekLabel(kr.dueDate)}`}
                 </p>
@@ -456,28 +565,30 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
         </div>
       </Card>
 
-      <Card title={`This week · ${weekLabel(THIS_WEEK)}`} className="lg:col-span-2" action={<Btn kind="ghost" onClick={() => open({ _type: "opsTask", owner: "Pavel", status: "todo", startWeek: THIS_WEEK, endWeek: THIS_WEEK })}>+ Task</Btn>}>
+      <Card title={`This week · ${weekLabel(THIS_WEEK)}`} sub={`${week.length} open · ${doneCount} of ${data.tasks.length} tasks done overall`} className="lg:col-span-2" action={<Btn kind="ghost" onClick={() => open({ _type: "opsTask", owner: "Pavel", status: "todo", startWeek: THIS_WEEK, endWeek: THIS_WEEK })}>+ Task</Btn>}>
         {week.length === 0 && <Empty>Nothing open this week.</Empty>}
-        {(["Pavel", "Andrew", "Bot"] as Owner[]).map((o) => {
-          const mine = week.filter((t) => t.owner === o);
-          if (!mine.length) return null;
-          return (
-            <div key={o} className="mb-3">
-              <p className="mb-1 flex items-center gap-2 text-xs font-semibold text-neutral-500"><span className={`h-2 w-2 rounded-full ${OWNER_COLOR[o]}`} />{o}</p>
-              <ul className="divide-y divide-neutral-100">
-                {mine.map((t) => (
-                  <li key={t._id} className="flex items-center justify-between gap-3 py-2">
-                    <button className="text-left text-sm hover:underline" onClick={() => open(t)}>{t.title}{!!t.comments?.length && <span className="ml-1.5 text-xs text-neutral-500">💬 {t.comments.length}</span>}</button>
-                    <Pill s={t.status} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
+        <div className={`grid gap-x-6 gap-y-3 ${new Set(week.map((t) => t.owner)).size > 1 ? "md:grid-cols-2" : ""}`}>
+          {(["Pavel", "Andrew", "Bot"] as Owner[]).map((o) => {
+            const mine = week.filter((t) => t.owner === o);
+            if (!mine.length) return null;
+            return (
+              <div key={o}>
+                <p className="mb-1 flex items-center gap-2 text-xs font-semibold text-neutral-500"><Dot color={OWNER_COLOR[o]} />{o} · {mine.length}</p>
+                <ul className="divide-y divide-neutral-100">
+                  {mine.map((t) => (
+                    <li key={t._id} className="flex items-center justify-between gap-3 py-2">
+                      <button className="text-left text-sm hover:underline" onClick={() => open(t)}>{t.title}{!!t.comments?.length && <span className="ml-1.5 text-xs text-neutral-500">💬 {t.comments.length}</span>}</button>
+                      <Pill s={t.status} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
       </Card>
 
-      <div className="space-y-5">
+      <div className="space-y-4 lg:row-span-2">
         <Card title={`Needs review (${review.length})`}>
           {review.length === 0 ? <Empty>Nothing waiting.</Empty> : (
             <ul className="space-y-2">{review.map((c) => <li key={c._id}><button className="text-left text-sm font-medium hover:underline" onClick={() => open(c)}>{c.title}</button></li>)}</ul>
@@ -490,14 +601,27 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
         </Card>
         <HealthSummary data={data} />
         <Card title="Data sources" action={<Btn kind="ghost" onClick={sync}>Sync now</Btn>}>
-          <ul className="space-y-1 text-sm">
-            {[["ga4", "Google Analytics 4"], ["gsc", "Search Console"], ["hubspot", "HubSpot"], ["claude", "Claude (AI drafts)"], ["email", "Email digest"]].map(([k, l]) => (
-              <li key={k} className="flex justify-between"><span>{l}</span><span className={data.sources[k] && !latest?.errors?.[k] ? "text-emerald-700" : "text-amber-700"}>{data.sources[k] ? (latest?.errors?.[k] ? "error" : "connected") : "not connected"}</span></li>
-            ))}
+          <ul className="space-y-1.5 text-sm">
+            {[["ga4", "Google Analytics 4"], ["gsc", "Search Console"], ["hubspot", "HubSpot"], ["claude", "Claude (AI drafts)"], ["email", "Email digest"]].map(([k, l]) => {
+              const state = data.sources[k] ? (latest?.errors?.[k] ? "error" : "connected") : "not connected";
+              return (
+                <li key={k} className="flex items-center justify-between gap-2">
+                  <span>{l}</span>
+                  <span className={`flex items-center gap-1.5 text-xs font-medium ${state === "connected" ? "text-[#006300]" : state === "error" ? "text-[#b42727]" : "text-neutral-500"}`}>
+                    {state === "connected" ? "✓" : state === "error" ? "✕" : "○"} {state}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
           {missing.length > 0 && <details className="mt-2 text-xs text-neutral-500"><summary>Details</summary>{missing.map(([k, e]) => <p key={k}>{k}: {e}</p>)}</details>}
           {latest && <p className="mt-2 text-xs text-neutral-500">Last sync {new Date(latest.syncedAt).toLocaleString()}</p>}
         </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:col-span-2">
+        <Card title="Content pipeline" sub="Items per planned week, by stage"><PipelineChart data={data} weeks={around} /></Card>
+        <Card title="Workload" sub="Open tasks per week, by owner"><WorkloadChart data={data} weeks={around} /></Card>
       </div>
 
       <Card title="Recent bot activity" className="lg:col-span-3"><RunList runs={data.runs.slice(0, 8)} /></Card>
@@ -518,6 +642,36 @@ function HealthSummary({ data }: { data: Data }) {
       )}
       {data.health && <p className="mt-2 text-xs text-neutral-500">Checked {new Date(data.health.checkedAt).toLocaleString()}</p>}
     </Card>
+  );
+}
+
+/** One square per recent health run (from the activity log), oldest first. */
+function HealthHistory({ runs }: { runs: BotRun[] }) {
+  const list = runs.filter((r) => r.job === "health").slice(0, 30).reverse();
+  if (!list.length) return null;
+  const bad = list.filter((r) => !r.ok).length;
+  return (
+    <div className="mb-5 rounded-lg bg-neutral-50 p-3">
+      <div className="mb-2 flex items-center justify-between text-xs text-neutral-600">
+        <span className="font-medium">Last {list.length} runs</span>
+        <span className="flex items-center gap-3">
+          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: C.good }} />✓ all pass</span>
+          <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: C.critical }} />✕ something failed ({bad})</span>
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {list.map((r) => (
+          <span
+            key={r._id}
+            title={`${new Date(r.startedAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} · ${r.summary}`}
+            className="flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold text-white"
+            style={{ background: r.ok ? C.good : C.critical }}
+          >
+            {r.ok ? "" : "✕"}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -544,6 +698,7 @@ function HealthTab({ data, reload, setToast }: { data: Data; reload: () => void;
         {data.health && <> Last run {new Date(data.health.checkedAt).toLocaleString()}.</>}
       </p>
       {!data.health && <Empty>Not checked yet — click “Run checks now”.</Empty>}
+      <HealthHistory runs={data.runs} />
       <div className="grid gap-5 md:grid-cols-2">
         {groups.map((g) => (
           <div key={g}>
@@ -668,8 +823,25 @@ function Plan({ data, open }: { data: Data; open: (d: any) => void }) {
   const weeks = weeksBetween(start, end);
   const groups = [...data.keyResults.map((k) => ({ id: k._id, title: k.title })), { id: "", title: "Not linked to a key result" }];
   const [ownerFilter, setOwnerFilter] = useState<string>("");
+  const byStatus = (["todo", "doing", "blocked", "done"] as const).map((s) => [s, data.tasks.filter((t) => t.status === s).length] as const);
+  const total = data.tasks.length || 1;
+  const STATUS_BAR: Record<string, string> = { done: C.blue, doing: "#86b6ef", todo: "#e1e0d9", blocked: C.critical };
 
   return (
+    <div className="space-y-4">
+    <div className="grid gap-4 lg:grid-cols-3">
+      <Card title="Progress" sub={`${byStatus[3][1]} of ${data.tasks.length} tasks done`}>
+        <div className="flex h-3 gap-0.5 overflow-hidden rounded-full">
+          {byStatus.filter(([, n]) => n).map(([s, n]) => <div key={s} title={`${s}: ${n}`} style={{ width: `${(n / total) * 100}%`, background: STATUS_BAR[s] }} />)}
+        </div>
+        <ul className="mt-4 grid grid-cols-2 gap-2 text-sm">
+          {byStatus.map(([s, n]) => (
+            <li key={s} className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: STATUS_BAR[s] }} /><span className="capitalize text-neutral-600">{s}</span><b className="ml-auto font-semibold tabular-nums">{n}</b></li>
+          ))}
+        </ul>
+      </Card>
+      <Card title="Workload" sub="Open tasks per week, by owner" className="lg:col-span-2"><WorkloadChart data={data} weeks={weeks.slice(0, 16)} /></Card>
+    </div>
     <Card
       title="Plan through year-end"
       action={
@@ -686,7 +858,7 @@ function Plan({ data, open }: { data: Data; open: (d: any) => void }) {
         <b> Click a task or its bar</b> to change its weeks, owner or status, or to comment.
       </p>
       <div className="mb-3 flex gap-4 text-xs text-neutral-600">
-        {(Object.keys(OWNER_COLOR) as Owner[]).map((o) => <span key={o} className="flex items-center gap-1"><span className={`h-2.5 w-2.5 rounded ${OWNER_COLOR[o]}`} />{o}</span>)}
+        {(Object.keys(OWNER_COLOR) as Owner[]).map((o) => <span key={o} className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded" style={{ background: OWNER_COLOR[o] }} />{o}</span>)}
         <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-neutral-300" />done</span>
       </div>
       <div className="overflow-x-auto">
@@ -714,8 +886,8 @@ function Plan({ data, open }: { data: Data; open: (d: any) => void }) {
                     <button
                       onClick={() => open(t)}
                       title={`${t.owner} · ${t.status}${t.notes ? ` · ${t.notes}` : ""}`}
-                      className={`z-10 mx-0.5 h-6 truncate rounded-md px-2 text-left text-[11px] font-medium text-white ${t.status === "done" ? "bg-neutral-300" : OWNER_COLOR[t.owner]} ${t.status === "blocked" ? "ring-2 ring-red-500" : ""} ${t.recurring ? "bg-[length:12px_12px] bg-[linear-gradient(45deg,rgba(255,255,255,.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,.15)_50%,rgba(255,255,255,.15)_75%,transparent_75%)]" : ""}`}
-                      style={{ gridRow: 1, gridColumn: `${s + 1} / ${endIdx + 2}` }}
+                      className={`z-10 mx-0.5 h-6 truncate rounded-md px-2 text-left text-[11px] font-medium text-white transition hover:brightness-110 ${t.status === "blocked" ? "ring-2 ring-red-500 ring-offset-1" : ""} ${t.recurring ? "bg-[length:12px_12px] bg-[linear-gradient(45deg,rgba(255,255,255,.18)_25%,transparent_25%,transparent_50%,rgba(255,255,255,.18)_50%,rgba(255,255,255,.18)_75%,transparent_75%)]" : ""}`}
+                      style={{ gridRow: 1, gridColumn: `${s + 1} / ${endIdx + 2}`, backgroundColor: t.status === "done" ? C.grey : OWNER_COLOR[t.owner] }}
                     >
                       {t.owner}{t.recurring ? " · weekly" : ""}
                     </button>
@@ -728,6 +900,7 @@ function Plan({ data, open }: { data: Data; open: (d: any) => void }) {
       </div>
       {data.tasks.length === 0 && <Empty>No tasks yet.</Empty>}
     </Card>
+    </div>
   );
 }
 
@@ -750,7 +923,22 @@ function Content({ data, open, reload, setToast }: { data: Data; open: (d: any) 
   const first = data.content.reduce((m, c) => (c.week < m ? c.week : m), THIS_WEEK);
   const weeks = weeksBetween(first < addDays(THIS_WEEK, -14) ? addDays(THIS_WEEK, -14) : first, end);
   const counts = data.content.reduce<Record<string, number>>((m, c) => ((m[c.status] = (m[c.status] ?? 0) + 1), m), {});
+  const total = data.content.length || 1;
   return (
+    <div className="space-y-4">
+    <div className="grid gap-4 lg:grid-cols-3">
+      <Card title="Pipeline" sub={`${data.content.length} items · ${counts.published ?? 0} published`}>
+        <div className="flex h-3 gap-0.5 overflow-hidden rounded-full">
+          {STAGES.filter((s) => counts[s]).map((s) => <div key={s} title={`${s}: ${counts[s]}`} style={{ width: `${(counts[s] / total) * 100}%`, background: STAGE_COLOR[s] }} />)}
+        </div>
+        <ul className="mt-4 grid grid-cols-2 gap-2 text-sm">
+          {[...STAGES, "rejected"].map((s) => (
+            <li key={s} className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: STAGE_COLOR[s] ?? "#e1e0d9" }} /><span className="capitalize text-neutral-600">{s}</span><b className="ml-auto font-semibold tabular-nums">{counts[s] ?? 0}</b></li>
+          ))}
+        </ul>
+      </Card>
+      <Card title="Content per week" sub="By stage; current week highlighted" className="lg:col-span-2"><PipelineChart data={data} weeks={weeks.slice(0, 16)} /></Card>
+    </div>
     <Card
       title="Content calendar"
       action={
@@ -760,12 +948,11 @@ function Content({ data, open, reload, setToast }: { data: Data; open: (d: any) 
         </div>
       }
     >
-      <div className="mb-4 flex flex-wrap gap-2 text-xs">{Object.entries(counts).map(([s, n]) => <span key={s} className="flex items-center gap-1"><Pill s={s} />{n}</span>)}</div>
       <div className="flex gap-3 overflow-x-auto pb-2">
         {weeks.map((w) => {
           const items = data.content.filter((c) => mondayOf(c.week) === w);
           return (
-            <div key={w} className={`w-60 shrink-0 rounded-xl p-2 ${w === THIS_WEEK ? "bg-emerald-50 ring-1 ring-emerald-200" : "bg-neutral-50"}`}>
+            <div key={w} className={`w-60 shrink-0 rounded-xl p-2 ${w === THIS_WEEK ? "bg-[#eef7f8] ring-1 ring-[#007244]/25" : "bg-neutral-50"}`}>
               <div className="mb-2 flex items-center justify-between px-1">
                 <p className={`text-xs font-semibold ${w === THIS_WEEK ? "text-primary-green" : "text-neutral-500"}`}>Week of {weekLabel(w)}</p>
                 <button className="text-lg leading-none text-neutral-400 hover:text-neutral-700" onClick={() => open({ _type: "opsContent", kind: "new", status: "planned", week: w })} aria-label="Add">+</button>
@@ -789,6 +976,7 @@ function Content({ data, open, reload, setToast }: { data: Data; open: (d: any) 
         Ideas (from “Suggest topics” or the Monday bot) need a person to approve them. Then the bot drafts “New post” and “Refresh” items automatically on weekdays once their week starts (or click one → “Write draft with AI”). Drafts are private until someone approves them; approved posts publish at their scheduled time.
       </p>
     </Card>
+    </div>
   );
 }
 
@@ -797,19 +985,86 @@ function Kpis({ data, sync, open }: { data: Data; sync: (weeks?: number) => void
   const keys = Object.keys(data.metrics).filter((k) => snaps.some((s) => s.metrics?.[k] !== undefined));
   const latest = snaps[0];
   const lists: [string, string, string][] = [
-    ["gsc.opportunities", "Search opportunities (pos. 7–20)", "impr. · pos"],
-    ["gsc.gainers", "Pages gaining clicks", "clicks · Δ"],
-    ["gsc.losers", "Pages losing clicks", "clicks · Δ"],
-    ["ga4.topOrganicPages", "Top organic landing pages", "users"],
+    ["gsc.opportunities", "Search opportunities (position 7–20)", "impressions · avg. position"],
+    ["ga4.topOrganicPages", "Top organic landing pages", "organic users"],
+    ["gsc.gainers", "Pages gaining clicks", "clicks · change vs prior week"],
+    ["gsc.losers", "Pages losing clicks", "clicks · change vs prior week"],
   ];
+  const trend = [...data.kpis].slice(0, 26).reverse();
+  const xs = trend.map((k) => weekLabel(k.weekStart));
+  const m = (key: string) => trend.map((k) => k.metrics?.[key]);
+  const hasAny = (...keys: string[]) => keys.some((key) => m(key).some((v) => v !== undefined));
+  const chart = (title: string, sub: string, keys: [string, string, string][], source: string, opts: { zero?: boolean; invert?: boolean; format?: (v: number) => string } = {}) => (
+    <Card title={title} sub={sub}>
+      {!hasAny(...keys.map((k) => k[0])) ? (
+        <Waiting what={source} />
+      ) : (
+        <>
+          {keys.length > 1 && <Legend items={keys.map(([, label, color]) => ({ label, color }))} />}
+          <LineChart x={xs} series={keys.map(([key, label, color]) => ({ key, label, color, values: m(key) }))} height={190} {...opts} />
+        </>
+      )}
+    </Card>
+  );
+  const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+
   return (
-    <div className="space-y-5">
-      <Card
-        title="Weekly KPIs"
-        action={<div className="flex gap-2"><Btn kind="ghost" onClick={() => sync(12)}>Backfill 12 weeks</Btn><Btn onClick={() => sync(1)}>Sync now</Btn></div>}
-      >
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-neutral-600">
+          {latest ? <>Weekly snapshots, Monday–Sunday. Last sync {new Date(latest.syncedAt).toLocaleString()}.</> : "No data yet. Connect GA4 / Search Console / HubSpot (see Data sources on the Overview), then “Sync now”."}
+        </p>
+        <div className="flex gap-2"><Btn kind="ghost" onClick={() => sync(12)}>Backfill 12 weeks</Btn><Btn onClick={() => sync(1)}>Sync now</Btn></div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <Stat label="New leads" metric="hubspot.newContacts" source="hubspot" data={data} />
+        <Stat label="Leads from organic" metric="hubspot.newContactsOrganic" source="hubspot" data={data} />
+        <Stat label="Organic users" metric="ga4.organicUsers" source="ga4" data={data} />
+        <Stat label="Search clicks" metric="gsc.clicks" source="gsc" data={data} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {chart("Leads", "New HubSpot contacts per week", [["hubspot.newContacts", "All leads", C.blue], ["hubspot.newContactsOrganic", "From organic search", C.orange]], "HubSpot access")}
+        {chart("Lead quality", "Contacts that became MQL / SQL that week", [["hubspot.mql", "MQLs", C.blue], ["hubspot.sql", "SQLs", C.orange]], "HubSpot access")}
+        {chart("Website users", "GA4, per week", [["ga4.users", "All users", C.blue], ["ga4.organicUsers", "Organic users", C.orange]], "Google Analytics access")}
+        {chart("Sessions", "GA4, per week", [["ga4.sessions", "All sessions", C.blue], ["ga4.organicSessions", "Organic sessions", C.orange]], "Google Analytics access")}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {chart("Search clicks", "Google Search Console", [["gsc.clicks", "Clicks", C.blue]], "Search Console access")}
+        {chart("Impressions", "Google Search Console", [["gsc.impressions", "Impressions", C.blue]], "Search Console access")}
+        {chart("Click-through rate", "Clicks ÷ impressions", [["gsc.ctr", "CTR", C.blue]], "Search Console access", { zero: false, format: pct })}
+        {chart("Avg. position", "Lower is better (axis flipped)", [["gsc.position", "Position", C.blue]], "Search Console access", { zero: false, invert: true, format: (v) => v.toFixed(1) })}
+      </div>
+
+      {latest && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {lists.map(([key, title, unit]) => (
+            <Card key={key} title={title} sub={`Week of ${weekLabel(latest.weekStart)} · ${unit}`}>
+              {!latest.lists?.[key]?.length ? <Empty>No data.</Empty> : (
+                <HBars
+                  rows={latest.lists[key].slice(0, 10)}
+                  color={key === "gsc.losers" ? C.orange : C.blue}
+                  format={compact}
+                  note={(r) => r.change !== undefined && <span className="w-12 text-right text-neutral-500">{key === "gsc.opportunities" ? `#${r.change}` : `${r.change > 0 ? "+" : ""}${r.change}`}</span>}
+                  action={(r) =>
+                    key === "gsc.opportunities" ? (
+                      <button className="rounded px-1.5 text-xs text-primary-green ring-1 ring-primary-green/30 hover:bg-emerald-50" onClick={() => open({ _type: "opsContent", kind: "new", status: "planned", week: addDays(THIS_WEEK, 7), title: r.label, keyword: r.label })}>+ plan</button>
+                    ) : key === "gsc.losers" && r.label.startsWith("/blog/") ? (
+                      <button className="rounded px-1.5 text-xs text-primary-green ring-1 ring-primary-green/30 hover:bg-emerald-50" onClick={() => open({ _type: "opsContent", kind: "refresh", status: "planned", week: addDays(THIS_WEEK, 7), title: `Refresh ${r.label}`, targetPath: r.label })}>+ refresh</button>
+                    ) : null
+                  }
+                />
+              )}
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Card title="All numbers" sub="Last 8 weeks, with change vs the week before">
         {!snaps.length ? (
-          <Empty>No data yet. Connect GA4 / Search Console / HubSpot (see Data sources on the Overview), then “Sync now”.</Empty>
+          <Empty>No data yet.</Empty>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
@@ -845,34 +1100,24 @@ function Kpis({ data, sync, open }: { data: Data; sync: (weeks?: number) => void
           </div>
         )}
       </Card>
-      {latest && (
-        <div className="grid gap-5 md:grid-cols-2">
-          {lists.map(([key, title, unit]) => (
-            <Card key={key} title={`${title} · ${weekLabel(latest.weekStart)}`}>
-              {!latest.lists?.[key]?.length ? <Empty>No data.</Empty> : (
-                <ul className="divide-y divide-neutral-100 text-sm">
-                  {latest.lists[key].map((r) => (
-                    <li key={r.label} className="flex items-center justify-between gap-3 py-1.5">
-                      <span className="truncate" title={r.label}>{r.label}</span>
-                      <span className="flex shrink-0 items-center gap-2 tabular-nums text-neutral-600">
-                        {r.value.toLocaleString()}{r.change !== undefined && ` · ${r.change > 0 && key !== "gsc.opportunities" ? "+" : ""}${r.change}`}
-                        {key === "gsc.opportunities" && (
-                          <button className="rounded px-1.5 text-xs text-primary-green ring-1 ring-primary-green/30 hover:bg-emerald-50" onClick={() => open({ _type: "opsContent", kind: "new", status: "planned", week: addDays(THIS_WEEK, 7), title: r.label, keyword: r.label })}>+ plan</button>
-                        )}
-                        {key === "gsc.losers" && r.label.startsWith("/blog/") && (
-                          <button className="rounded px-1.5 text-xs text-primary-green ring-1 ring-primary-green/30 hover:bg-emerald-50" onClick={() => open({ _type: "opsContent", kind: "refresh", status: "planned", week: addDays(THIS_WEEK, 7), title: `Refresh ${r.label}`, targetPath: r.label })}>+ refresh</button>
-                        )}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <p className="mt-2 text-[11px] text-neutral-400">{unit}</p>
-            </Card>
-          ))}
-        </div>
-      )}
     </div>
+  );
+}
+
+/** Runs per day over the last 14 days, split into succeeded / failed. */
+function ActivityChart({ runs }: { runs: BotRun[] }) {
+  const days = Array.from({ length: 14 }, (_, i) => iso(new Date(Date.now() - (13 - i) * DAY)));
+  const count = (ok: boolean) => days.map((d) => runs.filter((r) => r.ok === ok && r.startedAt.slice(0, 10) === d).length);
+  const series: Series[] = [
+    { key: "ok", label: "✓ Succeeded", color: C.blue, values: count(true) },
+    { key: "fail", label: "✕ Failed", color: C.critical, values: count(false) },
+  ];
+  return (
+    <>
+      <Legend items={series} />
+      <StackedBars x={days.map((d) => toDate(d).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" }))} series={series} height={160} highlight={13} format={(v) => String(Math.round(v))} />
+      <p className="mt-1 text-[11px] text-neutral-400">The log keeps the latest 60 entries, so older days may be incomplete.</p>
+    </>
   );
 }
 
@@ -901,6 +1146,16 @@ function RunList({ runs }: { runs: BotRun[] }) {
 
 const TABS = ["Overview", "Plan", "Content", "Feedback", "KPIs", "Health", "Bots"] as const;
 type Tab = (typeof TABS)[number];
+const TAB_ICON: Record<Tab, string> = { Overview: "◎", Plan: "▤", Content: "✎", Feedback: "◍", KPIs: "↗", Health: "♥", Bots: "⚙" };
+const TAB_SUB: Record<Tab, string> = {
+  Overview: "Leads first: every task ties to a key result.",
+  Plan: "Who does what, week by week, through year-end.",
+  Content: "Topics, AI drafts, review and scheduled publishing.",
+  Feedback: "Pins left on the live and staging site.",
+  KPIs: "GA4, Search Console and HubSpot, synced every Monday.",
+  Health: "Daily checks against the live site.",
+  Bots: "Everything the automations did, and what it cost.",
+};
 
 export default function OpsApp({ user }: { user: string }) {
   const [data, setData] = useState<Data | null>(null);
@@ -944,27 +1199,47 @@ export default function OpsApp({ user }: { user: string }) {
   const current = editing && data ? (editing._type === "opsContent" && editing._id ? data.content.find((c) => c._id === editing._id) ?? editing : editing) : null;
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 pb-16 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-3 py-5">
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-3xl">Synergy Ops</h1>
-          <span className="hidden text-sm text-neutral-500 sm:inline">leads first: every task ties to a key result</span>
+    <div className="min-h-screen lg:flex">
+      <aside className="sticky top-0 z-30 bg-primary-green text-white lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-56 lg:flex-col">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 lg:block lg:px-5 lg:py-6">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">Synergy Labs</p>
+            <p className="font-display text-2xl leading-tight">Ops</p>
+          </div>
+          <div className="flex items-center gap-3 text-sm lg:hidden">
+            <span className="text-white/70">{user}</span>
+            <button className="text-white/60 hover:text-white" onClick={() => api("logout", {}).then(() => location.reload())}>Sign out</button>
+          </div>
         </div>
-        <div className="flex items-center gap-3 text-sm">
-          <span className="text-neutral-600">{user}</span>
-          <button className="text-neutral-500 hover:text-neutral-800" onClick={() => api("logout", {}).then(() => location.reload())}>Sign out</button>
+        <nav className="flex gap-1 overflow-x-auto px-2 pb-2 lg:flex-1 lg:flex-col lg:overflow-visible lg:px-3">
+          {TABS.map((t) => {
+            const badge =
+              t === "Feedback" ? data?.feedback.filter((f) => f.status !== "done").length
+              : t === "Health" ? data?.health?.checks.filter((c) => !c.ok).length
+              : t === "Content" ? data?.content.filter((c) => c.status === "review").length
+              : 0;
+            return (
+              <button key={t} onClick={() => setTab(t)} className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${tab === t ? "bg-white/[0.12] text-white" : "text-white/65 hover:bg-white/[0.06] hover:text-white"}`}>
+                <span className="hidden w-4 text-center text-white/60 lg:inline" aria-hidden>{TAB_ICON[t]}</span>
+                {t}
+                {!!badge && <span className={`ml-auto rounded-full px-1.5 text-[10px] font-semibold ${t === "Health" ? "bg-red-500" : "bg-orange-500"} text-white`}>{badge}</span>}
+              </button>
+            );
+          })}
+        </nav>
+        <div className="hidden border-t border-white/10 px-5 py-4 text-sm lg:block">
+          <p className="text-white/80">{user}</p>
+          <button className="text-xs text-white/50 hover:text-white" onClick={() => api("logout", {}).then(() => location.reload())}>Sign out</button>
+        </div>
+      </aside>
+
+      <main className="min-w-0 flex-1 px-4 pb-16 sm:px-6 lg:ml-56 lg:px-8">
+      <header className="flex flex-wrap items-end justify-between gap-3 pb-5 pt-6">
+        <div>
+          <h1 className="text-3xl">{tab}</h1>
+          <p className="mt-1 text-sm text-neutral-500">{TAB_SUB[tab]}</p>
         </div>
       </header>
-      <nav className="mb-5 flex gap-1 overflow-x-auto border-b border-neutral-200">
-        {TABS.map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${tab === t ? "border-primary-green text-primary-green" : "border-transparent text-neutral-500 hover:text-neutral-800"}`}>
-            {t}
-            {t === "Feedback" && !!data?.feedback.filter((f) => f.status !== "done").length && <span className="ml-1.5 rounded-full bg-orange-500 px-1.5 text-[10px] text-white">{data.feedback.filter((f) => f.status !== "done").length}</span>}
-            {t === "Health" && data?.health?.checks.some((c) => !c.ok) && <span className="ml-1.5 rounded-full bg-red-600 px-1.5 text-[10px] text-white">{data.health.checks.filter((c) => !c.ok).length}</span>}
-            {t === "Content" && data && data.content.some((c) => c.status === "review") && <span className="ml-1.5 rounded-full bg-orange-500 px-1.5 text-[10px] text-white">{data.content.filter((c) => c.status === "review").length}</span>}
-          </button>
-        ))}
-      </nav>
 
       {error && <p className="rounded-lg bg-red-50 p-4 text-sm text-red-800">Could not load: {error}</p>}
       {!data && !error && <p className="text-sm text-neutral-500">Loading…</p>}
@@ -977,6 +1252,19 @@ export default function OpsApp({ user }: { user: string }) {
           {tab === "Health" && <HealthTab data={data} reload={load} setToast={setToast} />}
           {tab === "KPIs" && <Kpis data={data} sync={sync} open={setEditing} />}
           {tab === "Bots" && (
+            <div className="space-y-4">
+            <div className="grid gap-4 lg:grid-cols-3">
+              <Card title="Runs per day" sub="Last 14 days" className="lg:col-span-2"><ActivityChart runs={data.runs} /></Card>
+              <Card title="By job" sub="Entries in the log">
+                <HBars
+                  rows={Object.entries(data.runs.reduce<Record<string, number>>((m, r) => ((m[r.job] = (m[r.job] ?? 0) + 1), m), {}))
+                    .map(([label, value]) => ({ label, value }))
+                    .sort((a, b) => b.value - a.value)}
+                  color={C.blue}
+                />
+                {!data.runs.length && <Empty>No activity yet.</Empty>}
+              </Card>
+            </div>
             <Card title="Bot activity">
               <p className="mb-3 text-sm text-neutral-600">
                 A log of everything the automations did (KPI syncs, health checks, drafts, publishing, digests) and key actions by people, so you can see the bots are running and what they cost.
@@ -1004,6 +1292,7 @@ export default function OpsApp({ user }: { user: string }) {
               </div>
               <RunList runs={data.runs} />
             </Card>
+            </div>
           )}
           {current && current._type === "opsContent" && current._id ? (
             <ContentPanel key={current._id + current.status} item={current} data={data} onClose={() => setEditing(null)} onSaved={load} />
@@ -1012,6 +1301,7 @@ export default function OpsApp({ user }: { user: string }) {
           ) : null}
         </>
       )}
+      </main>
       {toast && <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-neutral-900 px-4 py-2 text-sm text-white shadow-lg">{toast}</div>}
       <style>{`
         .prose-ops h2 { font-size: 1.5rem; margin: 1.75rem 0 .75rem; }
