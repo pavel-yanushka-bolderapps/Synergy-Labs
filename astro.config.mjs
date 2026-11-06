@@ -66,7 +66,7 @@ export default defineConfig({
       // would serve one person's session to the next visitor. Dynamic routes
       // are matched by their route pattern, brackets included.
       exclude: [
-        '/api/contact', '/api/lead', '/api/builder', '/api/revalidate',
+        '/api/contact', '/api/lead', '/api/builder', '/api/revalidate', '/api/forms/webflow',
         '/ops', '/api/ops/[action]', '/api/cron/[job]',
       ],
     },

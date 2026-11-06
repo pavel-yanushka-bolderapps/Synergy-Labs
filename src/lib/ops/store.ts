@@ -30,7 +30,7 @@ export function opsClient(): SanityClient {
   return client;
 }
 
-export const OPS_TYPES = ["opsKeyResult", "opsTask", "opsContent", "opsRun", "opsKpi", "opsFeedback"] as const;
+export const OPS_TYPES = ["opsKeyResult", "opsTask", "opsContent", "opsRun", "opsKpi", "opsFeedback", "opsSubmission"] as const;
 export type OpsType = (typeof OPS_TYPES)[number];
 
 const PREFIX: Record<OpsType, string> = {
@@ -40,6 +40,7 @@ const PREFIX: Record<OpsType, string> = {
   opsRun: "ops.run.",
   opsKpi: "ops.kpi.",
   opsFeedback: "ops.feedback.",
+  opsSubmission: "ops.submission.",
 };
 
 export const newId = (type: OpsType, suffix: string = randomUUID().slice(0, 12)) => PREFIX[type] + suffix;

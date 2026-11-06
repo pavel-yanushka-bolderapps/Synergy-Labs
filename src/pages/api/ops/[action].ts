@@ -18,6 +18,10 @@
 //   GET  feedback?path=    on-site feedback pins for one page (the site overlay)
 //   POST feedback          create a pin (from public/ops-feedback.js)
 //   POST screenshot        upload a pin's screenshot (JPEG data URL) -> { url }
+//   GET  submissions       every form submission + the test-detection rules
+//   POST submission-mark   { ids, test: true | false | null } (null = automatic)
+//   POST submission-delete { ids }
+//   POST form-rules        { rules: string[] } the words that flag a test submission
 import type { APIRoute } from "astro";
 import { waitUntil } from "@vercel/functions";
 import { checkPassword, currentUser, json, PEOPLE, signIn, signOut } from "../../../lib/ops/auth";
@@ -27,11 +31,12 @@ import { draftContent, loadPost, publishContent, suggestTopics } from "../../../
 import { runAndSaveHealth, type Health } from "../../../lib/ops/health";
 import { buildDigest, emailStatus, sendDigest } from "../../../lib/ops/digest";
 import { randomUUID } from "node:crypto";
+import { loadSubmissions, SETTINGS_ID } from "../../../lib/ops/submissions";
 
 export const prerender = false;
 
 /** Fields a person may set on each type; everything else is dropped. */
-const EDITABLE: Record<Exclude<OpsType, "opsRun" | "opsKpi">, string[]> = {
+const EDITABLE: Record<Exclude<OpsType, "opsRun" | "opsKpi" | "opsSubmission">, string[]> = {
   opsKeyResult: ["title", "objective", "metric", "baseline", "target", "current", "unit", "dueDate", "owner", "order"],
   opsTask: ["title", "owner", "keyResult", "status", "startWeek", "endWeek", "recurring", "notes"],
   opsContent: ["title", "kind", "keyword", "brief", "week", "status", "keyResult", "targetPath", "publishAt", "notes"],
@@ -55,6 +60,7 @@ export const GET: APIRoute = async ({ params, cookies, url }) => {
     return json(await loadPost(id));
   }
   if (params.action === "me") return json({ user });
+  if (params.action === "submissions") return json(await loadSubmissions());
   if (params.action === "feedback") {
     const path = url.searchParams.get("path") ?? "/";
     const host = url.searchParams.get("host") ?? url.host;
@@ -215,6 +221,27 @@ export const POST: APIRoute = async ({ params, cookies, request, url }) => {
         // Sanity assets are served from an unguessable CDN URL, not listed anywhere public.
         const asset = await c.assets.upload("image", buffer, { filename: `ops-feedback-${Date.now()}.${m[1] === "png" ? "png" : "jpg"}` });
         return json({ url: asset.url });
+      }
+
+      case "submission-mark":
+      case "submission-delete": {
+        const ids: string[] = (Array.isArray(body.ids) ? body.ids : []).filter((id: unknown) => typeof id === "string" && id.startsWith("ops.submission."));
+        if (!ids.length) return json({ error: "No submissions selected" }, 400);
+        const tx = c.transaction();
+        for (const id of ids) {
+          if (params.action === "submission-delete") tx.delete(id);
+          else if (body.test === true || body.test === false) tx.patch(id, (p) => p.set({ test: body.test }));
+          else tx.patch(id, (p) => p.unset(["test"]));
+        }
+        await tx.commit();
+        if (params.action === "submission-delete") await logRun({ job: "forms", ok: true, by: user, summary: `${user} deleted ${ids.length} form submission(s)` });
+        return json({ ok: true, count: ids.length });
+      }
+
+      case "form-rules": {
+        const rules = [...new Set((Array.isArray(body.rules) ? body.rules : []).map((r: unknown) => String(r).trim().toLowerCase()).filter(Boolean))].slice(0, 200);
+        await c.createOrReplace({ _id: SETTINGS_ID, _type: "opsSettings", testRules: rules, updatedBy: user });
+        return json({ testRules: rules });
       }
 
       case "sync": {

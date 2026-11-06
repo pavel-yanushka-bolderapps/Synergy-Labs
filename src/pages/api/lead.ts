@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { Resend } from "resend";
+import { recordSubmission } from "../../lib/ops/submissions";
 
 // Receives the single-field email forms: an address plus the page it was
 // entered on. Currently that is the two forms on /ambassador-program and
@@ -115,6 +116,20 @@ export const POST: APIRoute = async ({ request }) => {
 
   const resend = new Resend(resendApiKey);
 
+  // Kept for the Ops "Forms" tab, whether or not the email goes out.
+  const save = (emailSent: boolean, emailError?: string) =>
+    recordSubmission(
+      {
+        form: "lead",
+        formName: sourceLabel === "/1-week-pilot" ? "1-week pilot" : sourceLabel === "/ambassador-program" ? "Ambassador program" : "Email signup",
+        email: email.trim(),
+        pageUrl: sourceLabel === "unknown" ? undefined : `https://www.synergylabs.co${sourceLabel}`,
+        emailSent,
+        emailError,
+      },
+      request
+    );
+
   try {
     // As in the other two routes: the Resend SDK resolves with an { error }
     // field rather than throwing on an API-level failure, so a thrown-exception
@@ -128,6 +143,7 @@ export const POST: APIRoute = async ({ request }) => {
       text: [`Email: ${email.trim()}`, "", `Submitted from ${sourceLabel}.`].join("\n"),
     });
 
+    save(!sendError, sendError?.message);
     if (sendError) {
       console.error("Resend API error:", sendError);
       return jsonResponse(
@@ -137,6 +153,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
   } catch (err) {
     console.error("Resend send threw:", err);
+    save(false, err instanceof Error ? err.message : String(err));
     return jsonResponse(
       { success: false, error: "Could not send your request. Please try again shortly." },
       502
