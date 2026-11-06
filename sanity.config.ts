@@ -3,6 +3,7 @@ import { structureTool } from "sanity/structure";
 import { presentationTool, defineLocations, defineDocuments } from "sanity/presentation";
 import { media } from "sanity-plugin-media";
 import { schemaTypes } from "./src/sanity/schemaTypes";
+import { structure } from "./src/sanity/structure";
 
 // Embedded Sanity Studio config -- served at /studio (see the `sanity()`
 // integration entry in astro.config.mjs). This is the admin UI for editing
@@ -23,7 +24,8 @@ export default defineConfig({
   releases: { enabled: false },
   scheduledDrafts: { enabled: false },
   plugins: [
-    structureTool(),
+    // Translations sorted into folders: see src/sanity/structure.ts.
+    structureTool({ structure }),
     // The "Media" tab: every uploaded image and file in one browsable grid,
     // with search, tags, alt text and which documents use each one.
     //

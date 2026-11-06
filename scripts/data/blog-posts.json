@@ -1,5 +1,155 @@
 [
   {
+    "slug": "how-to-lock-my-phone-with-password",
+    "title": "Secure Your Android Phone by Updating Your Lock Screen Password",
+    "date": "2026-11-03",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-7"
+  },
+  {
+    "slug": "phone-lock-app",
+    "title": "Top Phone Lock App Picks to Guard Your Private Data",
+    "date": "2026-10-31",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-7"
+  },
+  {
+    "slug": "mobile-app-backend-development",
+    "title": "The 2026 Mobile App Backend Development Field Guide",
+    "date": "2026-10-30",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-1"
+  },
+  {
+    "slug": "android-antivirus-multi-language",
+    "title": "Multilingual Android Antivirus Development: Secure Solutions for 2026",
+    "date": "2026-10-29",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-7"
+  },
+  {
+    "slug": "hipaa-compliant-apps-guide-2026",
+    "title": "HIPAA Secure Mobile Apps Architecture and Compliance Checklist in 2026",
+    "date": "2026-10-28",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-1"
+  },
+  {
+    "slug": "anti-virus-software-for-iphones",
+    "title": "Protect Your iPhone Data Using Free Native Security Features",
+    "date": "2026-10-27",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-1"
+  },
+  {
+    "slug": "antivirus-app-download-apk",
+    "title": "Top Rated Android Antivirus and Mobile Security APK Downloads in 2026",
+    "date": "2026-10-23",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-1"
+  },
+  {
+    "slug": "best-free-security-app-for-iphone",
+    "title": "Secure Your iPhone Today with the Best Free Security Apps",
+    "date": "2026-10-22",
+    "author": "sardor-akhmedov",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-7"
+  },
+  {
+    "slug": "mobile-app-launch-marketing",
+    "title": "Mastering Mobile App Launch Marketing for High-Converting App Store Releases",
+    "date": "2026-10-21",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-7"
+  },
+  {
+    "slug": "azure-mobile-app-support",
+    "title": "Mastering Azure Mobile App Support for Enterprise Cloud Services",
+    "date": "2026-10-20",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-7"
+  },
+  {
+    "slug": "iphone-11-unlock-complete-guide",
+    "title": "A Quick Guide to Unlocking iPhone 11 Safely",
+    "date": "2026-10-19",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-1"
+  },
+  {
+    "slug": "phone-lock-password",
+    "title": "Mastering Your Android Phone Lock Password for Maximum Security",
+    "date": "2026-10-16",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-1"
+  },
+  {
+    "slug": "mobile-app-tech-stack",
+    "title": "The Engineering Field Guide to Modern Mobile App Tech Stacks",
+    "date": "2026-10-15",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-1"
+  },
+  {
+    "slug": "android-antivirus-for-automotive",
+    "title": "Don't Let Hackers Take the Wheel: Android Antivirus for Automotive Infotainment",
+    "date": "2026-10-14",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-7"
+  },
+  {
+    "slug": "mobile-app-firewall-guide-2026",
+    "title": "Lock Down Your Smartphone Traffic with Mobile App Firewall Protection",
+    "date": "2026-10-13",
+    "author": "jon-knight",
+    "previewImageText": null,
+    "previewText": "",
+    "readingMinutes": 10,
+    "template": "template-7"
+  },
+  {
     "slug": "avg-free-for-iphone",
     "title": "AVG Free for iPhone Review and Safety Breakdown in 2026",
     "date": "2026-10-12",

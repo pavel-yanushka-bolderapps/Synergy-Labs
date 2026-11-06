@@ -9,7 +9,8 @@
 // not optional on the pages most likely to be a first impression.
 import Analytics from "./Analytics.astro";
 import FeedbackLoader from "./FeedbackLoader.astro";
-import Weglot from "./Weglot.astro";
+import Alternates from "./Alternates.astro";
+import LanguagePicker from "./LanguagePicker.astro";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
 import { previewEnabled } from "../../lib/loadQuery";
@@ -94,6 +95,8 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     <link rel="canonical" href={pageUrl} />
     {/* Same as Layout.astro: Vercel Preview builds (staging) stay out of search. */}
     {process.env.VERCEL_ENV === "preview" && <meta name="robots" content="noindex, follow" />}
+    {/* The Arabic landing page is not translated (see src/middleware.ts). */}
+    {locale === "en" && process.env.VERCEL_ENV !== "preview" && <Alternates canonical={pageUrl} />}
 
     <meta property="og:site_name" content="Synergy Labs" />
     <meta property="og:type" content="website" />
@@ -114,7 +117,6 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     ))}
 
     <Analytics />
-    <Weglot />
   </head>
 
   <body class="min-h-screen">
@@ -161,6 +163,9 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     </footer>
 
     <FeedbackLoader />
+    {/* Not on the Arabic landing page, which has no translations. */}
+    {locale === "en" && <LanguagePicker />}
+
     {VisualEditing && previewEnabled && <VisualEditing enabled />}
   </body>
 </html>

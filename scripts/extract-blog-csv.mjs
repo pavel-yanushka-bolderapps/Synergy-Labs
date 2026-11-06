@@ -3,6 +3,14 @@
 //
 //   node scripts/extract-blog-csv.mjs
 //
+// Or, for a partial export of posts published since the last import:
+//
+//   node scripts/extract-blog-csv.mjs --append path/to/export.csv
+//
+// which adds only slugs the JSON doesn't have yet and leaves every existing
+// entry untouched (their article HTML has since had its Webflow image URLs
+// rewritten by migrate-webflow-assets.mjs, which a full re-extract would undo).
+//
 // Writes, into scripts/data/:
 //
 //   blog-authors.json   the six bylines, deduped out of the Author column
@@ -19,10 +27,16 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 
-const CSV = new URL(
-  "data/webflow/Synergy Labs - Blogs - 66b25e37cb4087accb88e158.csv",
-  import.meta.url
-);
+const appendIndex = process.argv.indexOf("--append");
+const appendPath = appendIndex === -1 ? null : process.argv[appendIndex + 1];
+if (appendIndex !== -1 && !appendPath) {
+  console.error("--append needs a CSV path");
+  process.exit(1);
+}
+
+const CSV = appendPath
+  ? new URL(appendPath, `file://${process.cwd()}/`)
+  : new URL("data/webflow/Synergy Labs - Blogs - 66b25e37cb4087accb88e158.csv", import.meta.url);
 
 // The Author column holds Webflow's author-collection slug. Names and avatars
 // aren't in the Blogs export -- they live in a separate collection -- so they
@@ -86,6 +100,33 @@ for (const row of rows.slice(1)) {
   articles[slug] = html;
 }
 
+const dir = new URL("./data/", import.meta.url);
+
+if (appendPath) {
+  const readJson = async (name) => JSON.parse(await readFile(new URL(name, dir), "utf8"));
+  const existingPosts = await readJson("blog-posts.json");
+  const existingArticles = await readJson("blog-articles.json");
+  const existingAuthors = await readJson("blog-authors.json");
+
+  const known = new Set(existingPosts.map((p) => p.slug));
+  const added = posts.filter((p) => !known.has(p.slug));
+  const alreadyThere = posts.length - added.length;
+
+  for (const post of added) existingArticles[post.slug] = articles[post.slug];
+  posts.length = 0;
+  posts.push(...existingPosts, ...added);
+  for (const key of Object.keys(articles)) delete articles[key];
+  Object.assign(articles, existingArticles);
+
+  const knownAuthors = new Set(existingAuthors.map((a) => a.slug));
+  for (const a of existingAuthors) usedAuthors.add(a.slug);
+  const newAuthors = added.map((p) => p.author).filter((a) => a && !knownAuthors.has(a));
+  if (newAuthors.length) console.log(`  NEW author(s), add a headshot: ${[...new Set(newAuthors)].join(", ")}`);
+
+  console.log(`appended  ${added.length} new: ${added.map((p) => p.slug).join(",")}`);
+  if (alreadyThere) console.log(`  ${alreadyThere} already imported, left alone`);
+}
+
 // Newest first -- the order /blog, the homepage and the builder page all want.
 posts.sort((a, b) => b.date.localeCompare(a.date));
 
@@ -94,8 +135,6 @@ const authors = [...usedAuthors].sort().map((slug) => ({
   name: AUTHORS[slug] ?? titleCase(slug),
   image: `/images/blog/authors/${slug}.webp`,
 }));
-
-const dir = new URL("./data/", import.meta.url);
 await writeFile(new URL("blog-authors.json", dir), JSON.stringify(authors, null, 2) + "\n");
 await writeFile(new URL("blog-posts.json", dir), JSON.stringify(posts, null, 2) + "\n");
 await writeFile(new URL("blog-articles.json", dir), JSON.stringify(articles) + "\n");

@@ -1,9 +1,10 @@
 ---
 import Analytics from "./Analytics.astro";
 import FeedbackLoader from "./FeedbackLoader.astro";
-import Weglot from "./Weglot.astro";
+import Alternates from "./Alternates.astro";
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
+import LanguagePicker from "./LanguagePicker.astro";
 import { nav } from "../../content/nav";
 import { footer } from "../../content/footer";
 import { previewEnabled } from "../../lib/loadQuery";
@@ -114,7 +115,7 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     <meta name="description" content={metaDescription} />
 
     <link rel="canonical" href={pageUrl} />
-    {robotsNoindex && <meta name="robots" content="noindex, follow" />}
+    {robotsNoindex ? <meta name="robots" content="noindex, follow" /> : <Alternates canonical={pageUrl} />}
 
     <meta property="og:site_name" content="Synergy Labs" />
     <meta property="og:type" content={ogType} />
@@ -136,7 +137,6 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
     ))}
 
     <Analytics />
-    <Weglot />
   </head>
   <body class="min-h-screen">
     <a
@@ -150,6 +150,7 @@ const VisualEditing = __VISUAL_EDITING_ENABLED__
       <slot />
     </main>
     <Footer footer={footer} />
+    <LanguagePicker />
     <!--
       Click-to-edit overlay for the Studio's "Preview" tab. Renders nothing
       unless queries are running in preview mode (see src/lib/loadQuery.ts),

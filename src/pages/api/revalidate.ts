@@ -11,15 +11,18 @@
 //       Trigger on  Create, Update, Delete
 //       Filter      _type in ["blogPost", "blogAuthor", "service", "location",
 //                     "locationService", "locationIndustry",
-//                     "locationTechnology", "project", "clutchLanding"]
+//                     "locationTechnology", "project", "clutchLanding",
+//                     "translation"]
 //       Projection  {"type": _type,
 //                    "slugs": [before().slug.current, after().slug.current],
-//                    "hrefs": [before().href, after().href]}
+//                    "hrefs": [before().href, after().href],
+//                    "lang": coalesce(after().lang, before().lang),
+//                    "paths": [before().path, after().path]}
 //       Secret      the SANITY_WEBHOOK_SECRET value
 import type { APIRoute } from "astro";
 import { isValidSignature, SIGNATURE_HEADER_NAME } from "@sanity/webhook";
 import { waitUntil } from "@vercel/functions";
-import { pathsFor, revalidate, type PublishEvent } from "../../lib/revalidate";
+import { pathsFor, revalidate, withTranslations, type PublishEvent } from "../../lib/revalidate";
 
 export const prerender = false;
 
@@ -50,7 +53,7 @@ export const POST: APIRoute = async ({ request, url }) => {
     return Response.json({ error: "Body is not JSON" }, { status: 400 });
   }
 
-  const paths = await pathsFor(event);
+  const paths = withTranslations(await pathsFor(event));
 
   if (paths.length > ANSWER_FIRST_ABOVE) {
     waitUntil(revalidate(url.origin, paths, token));

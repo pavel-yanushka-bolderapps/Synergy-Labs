@@ -8,6 +8,7 @@ import { blogAuthor } from "./blogAuthor";
 import { blogPost } from "./blogPost";
 import { clutchLanding } from "./clutchLanding";
 import { caseStudySections } from "./caseStudySections";
+import { translation } from "./translation";
 
 export const schemaTypes = [
   service,
@@ -20,4 +21,5 @@ export const schemaTypes = [
   blogPost,
   clutchLanding,
   ...caseStudySections,
+  translation,
 ];
