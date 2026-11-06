@@ -375,12 +375,34 @@
       ignoreElements: (node) => node === host,
     });
     const ctx = canvas.getContext("2d");
+    // html2canvas leaves its own scale and scroll offset on the context;
+    // without resetting it, these marks were drawn scaled twice and shifted
+    // by the scroll position -- i.e. off the image on any scrolled page.
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     const k = canvas.width / innerWidth;
-    ctx.strokeStyle = "#e8590c";
-    ctx.lineWidth = 4 * k;
-    ctx.beginPath();
-    ctx.arc(spot.clientX * k, spot.clientY * k, 22 * k, 0, Math.PI * 2);
-    ctx.stroke();
+    // Where the element and the clicked point are *now* (the screenshot is of
+    // the current scroll position, which may differ from when it was clicked).
+    let point = { x: spot.clientX, y: spot.clientY };
+    if (spot.target?.isConnected) {
+      const r = spot.target.getBoundingClientRect();
+      point = { x: r.left + spot.offsetX * r.width, y: r.top + spot.offsetY * r.height };
+      // The selected element: the same yellow box as while hovering.
+      ctx.fillStyle = "rgba(255, 212, 59, 0.18)";
+      ctx.fillRect(r.left * k, r.top * k, r.width * k, r.height * k);
+      ctx.strokeStyle = "#f59f00";
+      ctx.lineWidth = 3 * k;
+      ctx.setLineDash([8 * k, 5 * k]);
+      ctx.strokeRect(r.left * k, r.top * k, r.width * k, r.height * k);
+      ctx.setLineDash([]);
+    }
+    // The clicked point: a ring with a white halo, readable on any background.
+    for (const [color, width] of [["#ffffff", 8], ["#e8590c", 4]]) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width * k;
+      ctx.beginPath();
+      ctx.arc(point.x * k, point.y * k, 22 * k, 0, Math.PI * 2);
+      ctx.stroke();
+    }
     const { url } = await api("screenshot", { dataUrl: canvas.toDataURL("image/jpeg", 0.72) });
     return url;
   }
