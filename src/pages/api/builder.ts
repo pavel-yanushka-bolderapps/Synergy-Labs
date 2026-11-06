@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { Resend } from "resend";
+import { sendToEachRecipient } from "../../lib/notify";
 
 // Receives the /synergy-builder form: an email, a domain, and the answer to
 // the "is your site mobile friendly?" gate. Same shape and same spam
@@ -129,10 +130,8 @@ export const POST: APIRoute = async ({ request }) => {
     // As in the contact route: the Resend SDK resolves with an { error } field
     // rather than throwing on an API-level failure, so a thrown-exception
     // check alone would report a failed send to the browser as a success.
-    const { error: sendError } = await resend.emails.send({
+    const { error: sendError } = await sendToEachRecipient(resend, toEmail, {
       from: fromEmail,
-      // CONTACT_TO_EMAIL may list several inboxes, comma-separated.
-      to: toEmail.split(",").map((address) => address.trim()).filter(Boolean),
       replyTo: email,
       subject: `App builder request: ${domain}`,
       text: [

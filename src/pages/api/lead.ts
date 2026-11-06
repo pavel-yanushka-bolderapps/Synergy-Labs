@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { Resend } from "resend";
+import { sendToEachRecipient } from "../../lib/notify";
 
 // Receives the single-field email forms: an address plus the page it was
 // entered on. Currently that is the two forms on /ambassador-program and
@@ -119,10 +120,8 @@ export const POST: APIRoute = async ({ request }) => {
     // As in the other two routes: the Resend SDK resolves with an { error }
     // field rather than throwing on an API-level failure, so a thrown-exception
     // check alone would report a failed send to the browser as a success.
-    const { error: sendError } = await resend.emails.send({
+    const { error: sendError } = await sendToEachRecipient(resend, toEmail, {
       from: fromEmail,
-      // CONTACT_TO_EMAIL may list several inboxes, comma-separated.
-      to: toEmail.split(",").map((address) => address.trim()).filter(Boolean),
       replyTo: email.trim(),
       subject: `Ambassador enquiry: ${email.trim()}`,
       text: [`Email: ${email.trim()}`, "", `Submitted from ${sourceLabel}.`].join("\n"),
