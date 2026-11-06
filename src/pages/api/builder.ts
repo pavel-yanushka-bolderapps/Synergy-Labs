@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { Resend } from "resend";
+import { recordSubmission } from "../../lib/ops/submissions";
 
 // Receives the /synergy-builder form: an email, a domain, and the answer to
 // the "is your site mobile friendly?" gate. Same shape and same spam
@@ -125,6 +126,22 @@ export const POST: APIRoute = async ({ request }) => {
         ? "No — they were pointed at mobile optimization instead"
         : "Not answered (closed the popup)";
 
+  // Kept for the Ops "Forms" tab, whether or not the email goes out.
+  const save = (emailSent: boolean, emailError?: string) =>
+    recordSubmission(
+      {
+        form: "builder",
+        formName: "App builder",
+        email,
+        domain,
+        pageUrl: "https://www.synergylabs.co/synergy-builder",
+        extra: { "Mobile friendly": mobileFriendlyLine },
+        emailSent,
+        emailError,
+      },
+      request
+    );
+
   try {
     // As in the contact route: the Resend SDK resolves with an { error } field
     // rather than throwing on an API-level failure, so a thrown-exception
@@ -144,6 +161,7 @@ export const POST: APIRoute = async ({ request }) => {
       ].join("\n"),
     });
 
+    save(!sendError, sendError?.message);
     if (sendError) {
       console.error("Resend API error:", sendError);
       return jsonResponse(
@@ -153,6 +171,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
   } catch (err) {
     console.error("Resend send threw:", err);
+    save(false, err instanceof Error ? err.message : String(err));
     return jsonResponse(
       { success: false, error: "Could not send your request. Please try again shortly." },
       502

@@ -1,5 +1,5 @@
 // The Ops dashboard UI (mounted by src/pages/ops/index.astro). One screen per
-// tab -- Overview, Plan, Content, KPIs, Bots -- all reading the single
+// tab -- Overview, Plan, Content, Forms, Feedback, KPIs, Health, Bots -- all reading the single
 // /api/ops/data payload and writing through /api/ops/<action>.
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { HBars, Legend, LineChart, Sparkline, StackedBars, compact, type Series } from "./charts";
@@ -811,6 +811,326 @@ function FeedbackTab({ data, reload }: { data: Data; reload: () => void }) {
   );
 }
 
+// ---- Forms (every submission from the site's forms) ------------------------------
+
+interface Submission {
+  _id: string; site?: "synergy" | "bolder"; form: "contact" | "lead" | "builder" | "webflow" | "import"; formName: string; submittedAt: string;
+  name?: string; email?: string; phone?: string; budget?: string; message?: string; domain?: string;
+  extra?: { _key: string; key: string; value: string }[];
+  pageUrl?: string; country?: string; city?: string; referrer?: string; userAgent?: string;
+  env: string; emailSent?: boolean; emailError?: string; test?: boolean;
+}
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * Why a submission looks like a test, or "" if it looks real. A person's
+ * mark wins; staging/local submissions are always tests. A rule with "@" or
+ * "." matches inside the email or domain ("@bolderapps.com", "example.com");
+ * any other rule matches as a whole word, optionally followed by digits
+ * ("test", "test2", "Test123" -- but not "testimonial").
+ */
+function testReason(s: Submission, rules: string[]): string {
+  if (s.test === true) return "Marked as test";
+  if (s.test === false) return "";
+  if (s.env !== "production" && s.env !== "import") return s.env === "preview" ? "Sent from staging" : "Sent from a local build";
+  const addr = `${s.email ?? ""} ${s.domain ?? ""}`.toLowerCase();
+  const text = [s.name, s.email, s.phone, s.message, s.domain, s.budget, ...(s.extra ?? []).map((x) => x.value)].filter(Boolean).join(" \n ").toLowerCase();
+  for (const r of rules) {
+    if (/[@.]/.test(r)) {
+      if (addr.includes(r)) return `Contains “${r}”`;
+    } else if (new RegExp(`(^|[^a-z0-9])${escapeRe(r)}\\d*($|[^a-z0-9])`, "i").test(text)) return `Contains “${r}”`;
+  }
+  return "";
+}
+
+const FORM_LABEL: Record<Submission["form"], string> = { contact: "Contact", lead: "Ambassador / pilot", builder: "App builder", webflow: "Webflow form", import: "Imported" };
+const SITE_LABEL = { synergy: "Synergy Labs", bolder: "Bolder Apps" } as const;
+const siteOf = (s: Submission) => s.site ?? "synergy";
+const pathOf = (u?: string) => {
+  if (!u) return "";
+  try { const x = new URL(u); return x.pathname + x.search; } catch { return u; }
+};
+const when = (iso: string) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+
+function toCsv(rows: Submission[], rules: string[]): string {
+  const extraKeys = [...new Set(rows.flatMap((r) => (r.extra ?? []).map((x) => x.key)))];
+  const head = ["Submitted (UTC)", "Website", "Form", "Name", "Email", "Phone", "Budget", "Message", "Domain", ...extraKeys, "Page", "Country", "City", "Referrer", "Email delivered", "Test", "Test reason", "Environment", "ID"];
+  const cell = (v: unknown) => {
+    const s = v === undefined || v === null ? "" : String(v);
+    // Leading = + - @ would run as a formula in Excel/Sheets; phone numbers
+    // ("+1 305 ...") are left as they are.
+    const safe = /^[=+\-@]/.test(s) && !/^\+[\d\s().-]+$/.test(s) ? `'${s}` : s;
+    return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+  };
+  const lines = rows.map((r) => {
+    const reason = testReason(r, rules);
+    const extra = Object.fromEntries((r.extra ?? []).map((x) => [x.key, x.value]));
+    return [r.submittedAt.replace("T", " ").slice(0, 19), SITE_LABEL[siteOf(r)], r.formName, r.name, r.email, r.phone, r.budget, r.message, r.domain, ...extraKeys.map((k) => extra[k]), r.pageUrl, r.country, r.city, r.referrer, r.emailSent === false ? "NO" : r.emailSent ? "yes" : "", reason ? "yes" : "no", reason, r.env, r._id].map(cell).join(",");
+  });
+  return "﻿" + [head.map(cell).join(","), ...lines].join("\r\n");
+}
+
+function download(name: string, text: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+  const a = Object.assign(document.createElement("a"), { href: url, download: name });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function SubmissionPanel({ s, rules, onClose, act }: { s: Submission; rules: string[]; onClose: () => void; act: (action: "submission-mark" | "submission-delete", ids: string[], test?: boolean | null) => Promise<void> }) {
+  const reason = testReason(s, rules);
+  const rows: [string, ReactNode][] = [
+    ["Website", SITE_LABEL[siteOf(s)]],
+    ["Form", s.formName],
+    ["Submitted", when(s.submittedAt)],
+    ["Name", s.name],
+    ["Email", s.email && <a className="text-secondary-green underline" href={`mailto:${s.email}`}>{s.email}</a>],
+    ["Phone", s.phone && <a className="text-secondary-green underline" href={`tel:${s.phone.replace(/[^\d+]/g, "")}`}>{s.phone}</a>],
+    ["Budget", s.budget],
+    ["Domain", s.domain],
+    ...(s.extra ?? []).map((x) => [x.key, x.value] as [string, ReactNode]),
+    ["Page", s.pageUrl && <a className="break-all text-secondary-green underline" href={s.pageUrl} target="_blank" rel="noreferrer">{pathOf(s.pageUrl)}</a>],
+    ["Location", [s.city, s.country].filter(Boolean).join(", ")],
+    ["Came from", s.referrer],
+    ["Browser", s.userAgent && browserOf(s.userAgent)],
+    ["Email to team", s.emailSent === false ? <span className="text-red-700">Not delivered{s.emailError ? `: ${s.emailError}` : ""}</span> : s.emailSent ? "Delivered" : ""],
+    ["Environment", s.env],
+  ];
+  return (
+    <Modal title={s.name || s.email || "Submission"} onClose={onClose}>
+      {reason && <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">Counted as a test: {reason}</p>}
+      <dl className="grid grid-cols-[8rem_1fr] gap-x-3 gap-y-2 text-sm">
+        {rows.filter(([, v]) => v).map(([k, v]) => (
+          <div key={k} className="contents"><dt className="text-neutral-500">{k}</dt><dd className="min-w-0 break-words">{v}</dd></div>
+        ))}
+      </dl>
+      {s.message && <div className="mt-4 whitespace-pre-wrap rounded-lg bg-neutral-50 p-3 text-sm">{s.message}</div>}
+      <div className="mt-5 flex flex-wrap gap-2">
+        {s.email && <a className="rounded-lg bg-primary-green px-3 py-1.5 text-sm font-medium text-white hover:bg-secondary-green" href={`mailto:${s.email}?subject=${encodeURIComponent("Re: your Synergy Labs enquiry")}`}>Reply</a>}
+        {reason ? <Btn kind="ghost" onClick={() => act("submission-mark", [s._id], false)}>Not a test</Btn> : <Btn kind="ghost" onClick={() => act("submission-mark", [s._id], true)}>Mark as test</Btn>}
+        {s.test !== undefined && <Btn kind="ghost" onClick={() => act("submission-mark", [s._id], null)}>Back to automatic</Btn>}
+        <span className="flex-1" />
+        <Btn kind="danger" onClick={() => confirm("Delete this submission for good?") && act("submission-delete", [s._id]).then(onClose)}>Delete</Btn>
+      </div>
+    </Modal>
+  );
+}
+
+function RulesEditor({ rules, onClose, onSaved }: { rules: string[]; onClose: () => void; onSaved: (r: string[]) => void }) {
+  const [text, setText] = useState(rules.join("\n"));
+  const [busy, setBusy] = useState(false);
+  return (
+    <Modal title="Test-submission rules" onClose={onClose}>
+      <p className="mb-3 text-sm text-neutral-600">
+        One per line. A plain word flags a submission when it appears as a whole word in any field (<b>test</b> catches “Test”, “test2”, but not “testimonial”). Anything with <b>@</b> or a dot is matched inside the email or domain, e.g. <b>@bolderapps.com</b> or <b>example.com</b>. Submissions from staging always count as tests. Nothing is deleted: tests are only hidden from the default view.
+      </p>
+      <textarea className="h-64 w-full rounded-lg border border-neutral-300 p-2 font-mono text-sm" value={text} onChange={(e) => setText(e.target.value)} />
+      <div className="mt-3 flex justify-end gap-2">
+        <Btn kind="ghost" onClick={onClose}>Cancel</Btn>
+        <Btn disabled={busy} onClick={async () => {
+          setBusy(true);
+          try {
+            const r = await api<{ testRules: string[] }>("form-rules", { rules: text.split("\n") });
+            onSaved(r.testRules);
+            onClose();
+          } catch (e: any) { alert(e.message); } finally { setBusy(false); }
+        }}>Save rules</Btn>
+      </div>
+    </Modal>
+  );
+}
+
+function FormsTab({ setToast }: { setToast: (s: string) => void }) {
+  const [subs, setSubs] = useState<Submission[] | null>(null);
+  const [rules, setRules] = useState<string[]>([]);
+  const [err, setErr] = useState("");
+  const [q, setQ] = useState("");
+  const [site, setSite] = useState<"synergy" | "bolder" | "all">(() => { try { return (localStorage.getItem("ops.forms.site") as any) || "synergy"; } catch { return "synergy"; } });
+  useEffect(() => { try { localStorage.setItem("ops.forms.site", site); } catch {} }, [site]);
+  const [form, setForm] = useState("");
+  const [range, setRange] = useState("90");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [show, setShow] = useState<"real" | "test" | "all">("real");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [editRules, setEditRules] = useState(false);
+
+  const load = useCallback(() => api<{ submissions: Submission[]; testRules: string[] }>("submissions").then((d) => { setSubs(d.submissions); setRules(d.testRules); }).catch((e) => setErr(e.message)), []);
+  useEffect(() => void load(), [load]);
+
+  const act = async (action: "submission-mark" | "submission-delete", ids: string[], test?: boolean | null) => {
+    try {
+      await api(action, { ids, test });
+      setToast(action === "submission-delete" ? `Deleted ${ids.length}` : test === true ? `Marked ${ids.length} as test` : test === false ? `Marked ${ids.length} as real` : "Back to automatic detection");
+      setSelected(new Set());
+      await load();
+    } catch (e: any) { setToast(e.message); }
+  };
+
+  const withReason = useMemo(() => (subs ?? []).map((s) => ({ s, reason: testReason(s, rules) })), [subs, rules]);
+  const inRange = useMemo(() => {
+    const min = range === "custom" ? (from ? `${from}T00:00:00` : "") : range === "all" ? "" : new Date(Date.now() - Number(range) * DAY).toISOString();
+    const max = range === "custom" && to ? `${to}T23:59:59.999` : "";
+    return withReason.filter(({ s }) => (site === "all" || siteOf(s) === site) && (!min || s.submittedAt >= min) && (!max || s.submittedAt <= max));
+  }, [withReason, range, from, to, site]);
+  const list = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return inRange.filter(({ s, reason }) =>
+      (!form || s.formName === form) &&
+      (show === "all" || (show === "test" ? !!reason : !reason)) &&
+      (!needle || [s.name, s.email, s.phone, s.message, s.domain, s.budget, s.pageUrl, s.formName, s.country, s.city].some((v) => v?.toLowerCase().includes(needle)))
+    );
+  }, [inRange, form, show, q]);
+
+  if (err) return <p className="rounded-lg bg-red-50 p-4 text-sm text-red-800">Could not load submissions: {err}</p>;
+  if (!subs) return <p className="text-sm text-neutral-500">Loading submissions…</p>;
+
+  const real = inRange.filter((x) => !x.reason);
+  const failed = inRange.filter((x) => x.s.emailSent === false && !x.reason).length;
+  const weeks = Array.from({ length: 12 }, (_, i) => addDays(THIS_WEEK, (i - 11) * 7));
+  const perWeek = (pred: (x: { reason: string }) => boolean) => weeks.map((w) => withReason.filter((x) => (site === "all" || siteOf(x.s) === site) && pred(x) && mondayOf(x.s.submittedAt) === w).length);
+  const pages = Object.entries(real.reduce<Record<string, number>>((m, { s }) => { const p = pathOf(s.pageUrl).split("?")[0] || "(unknown)"; m[p] = (m[p] ?? 0) + 1; return m; }, {}))
+    .map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value).slice(0, 6);
+  const allSelected = list.length > 0 && list.every(({ s }) => selected.has(s._id));
+  const opened = subs.find((s) => s._id === openId);
+  const sel = "rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-sm";
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-neutral-500">Website</span>
+        <div className="flex overflow-hidden rounded-lg ring-1 ring-neutral-300">
+          {(["synergy", "bolder", "all"] as const).map((v) => (
+            <button key={v} onClick={() => { setSite(v); setForm(""); setSelected(new Set()); }} className={`px-3 py-1.5 text-sm ${site === v ? "bg-primary-green text-white" : "bg-white text-neutral-700 hover:bg-neutral-50"}`}>
+              {v === "all" ? "Both" : SITE_LABEL[v]} <span className="opacity-60">{subs.filter((s) => v === "all" || siteOf(s) === v).length}</span>
+            </button>
+          ))}
+        </div>
+        {site === "bolder" && !subs.some((s) => siteOf(s) === "bolder") && <span className="text-xs text-amber-800">Waiting for the Webflow webhook / CSV import</span>}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          ["Real submissions", real.length, "in the selected dates"],
+          ["Contact form leads", real.filter((x) => x.s.form === "contact").length, "the ones with a project brief"],
+          ["Tests filtered out", inRange.length - real.length, "by your rules or marked by hand"],
+          ["Emails not delivered", failed, failed ? "check these by hand: the team never got them" : "every notification went out"],
+        ].map(([label, n, sub]) => (
+          <div key={label as string} className={`rounded-xl border bg-white p-4 ${label === "Emails not delivered" && failed ? "border-red-300" : "border-black/[0.07]"}`}>
+            <p className="text-xs font-medium text-neutral-500">{label}</p>
+            <p className="mt-1 text-3xl font-semibold tabular-nums">{n}</p>
+            <p className="mt-0.5 text-xs text-neutral-500">{sub}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card title="Submissions per week" sub="Last 12 weeks, all forms" className="lg:col-span-2">
+          <StackedBars x={weeks.map(weekLabel)} series={[
+            { key: "real", label: "Real", color: C.blue, values: perWeek((x) => !x.reason) },
+            { key: "test", label: "Test", color: C.grey, values: perWeek((x) => !!x.reason) },
+          ]} highlight={11} />
+          <div className="mt-2"><Legend items={[{ label: "Real", color: C.blue }, { label: "Test", color: C.grey }]} /></div>
+        </Card>
+        <Card title="Top pages" sub="Where real submissions came from">
+          {pages.length ? <HBars rows={pages} color={C.aqua} /> : <Empty>Nothing in these dates.</Empty>}
+        </Card>
+      </div>
+
+      <Card
+        title={`Submissions (${list.length.toLocaleString()})`}
+        sub="Every form on the site: contact, ambassador / 1-week pilot, app builder. Stored from the moment this tab went live; older ones can be imported from a Webflow CSV."
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Btn kind="ghost" onClick={() => setEditRules(true)}>Test rules ({rules.length})</Btn>
+            <Btn kind="ghost" disabled={!list.length} onClick={() => download(`synergy-form-submissions-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(list.map((x) => x.s), rules))}>Download CSV</Btn>
+          </div>
+        }
+      >
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <input className={`${sel} min-w-[14rem] flex-1`} placeholder="Search name, email, phone, message, page…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <select className={sel} value={form} onChange={(e) => setForm(e.target.value)}>
+            <option value="">All forms</option>
+            {[...new Set(inRange.map((x) => x.s.formName))].sort().map((f) => <option key={f} value={f}>{f}</option>)}
+          </select>
+          <select className={sel} value={range} onChange={(e) => setRange(e.target.value)}>
+            <option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option><option value="all">All time</option><option value="custom">Custom dates…</option>
+          </select>
+          {range === "custom" && (<>
+            <input type="date" className={sel} value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From" />
+            <span className="text-sm text-neutral-400">–</span>
+            <input type="date" className={sel} value={to} onChange={(e) => setTo(e.target.value)} aria-label="To" />
+          </>)}
+          <div className="flex overflow-hidden rounded-lg ring-1 ring-neutral-300">
+            {(["real", "test", "all"] as const).map((v) => (
+              <button key={v} onClick={() => setShow(v)} className={`px-3 py-1.5 text-sm ${show === v ? "bg-primary-green text-white" : "bg-white text-neutral-700 hover:bg-neutral-50"}`}>{v === "real" ? "Real" : v === "test" ? "Tests" : "All"}</button>
+            ))}
+          </div>
+        </div>
+
+        {selected.size > 0 && (
+          <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg bg-neutral-50 px-3 py-2 text-sm">
+            <b>{selected.size} selected</b>
+            <Btn kind="ghost" onClick={() => act("submission-mark", [...selected], true)}>Mark as test</Btn>
+            <Btn kind="ghost" onClick={() => act("submission-mark", [...selected], false)}>Mark as real</Btn>
+            <Btn kind="ghost" onClick={() => download(`synergy-form-submissions-selected.csv`, toCsv(subs.filter((s) => selected.has(s._id)), rules))}>Download selected</Btn>
+            <span className="flex-1" />
+            <Btn kind="danger" onClick={() => confirm(`Delete ${selected.size} submission(s) for good?`) && act("submission-delete", [...selected])}>Delete</Btn>
+          </div>
+        )}
+
+        {!list.length ? (
+          <Empty>{subs.length ? "No submissions match these filters." : "No submissions stored yet. New ones appear here as soon as someone sends a form on the live site."}</Empty>
+        ) : (
+          <div className="-mx-5 overflow-x-auto">
+            <table className="w-full min-w-[56rem] text-left text-sm">
+              <thead className="border-y border-neutral-100 bg-neutral-50/70 text-xs text-neutral-500">
+                <tr>
+                  <th className="w-10 py-2 pl-5 pr-2"><input type="checkbox" checked={allSelected} onChange={() => setSelected(allSelected ? new Set() : new Set(list.map((x) => x.s._id)))} aria-label="Select all" /></th>
+                  <th className="py-2 pr-3 font-medium">Date</th>
+                  <th className="py-2 pr-3 font-medium">Form</th>
+                  <th className="py-2 pr-3 font-medium">Name / email</th>
+                  <th className="py-2 pr-3 font-medium">Phone</th>
+                  <th className="py-2 pr-3 font-medium">Budget</th>
+                  <th className="py-2 pr-3 font-medium">Message</th>
+                  <th className="py-2 pr-5 font-medium">Page</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {list.slice(0, 500).map(({ s, reason }) => (
+                  <tr key={s._id} onClick={() => setOpenId(s._id)} className={`cursor-pointer align-top hover:bg-neutral-50 ${reason ? "text-neutral-400" : ""}`}>
+                    <td className="py-2.5 pl-5 pr-2" onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" checked={selected.has(s._id)} onChange={() => setSelected((prev) => { const n = new Set(prev); n.has(s._id) ? n.delete(s._id) : n.add(s._id); return n; })} aria-label="Select" />
+                    </td>
+                    <td className="whitespace-nowrap py-2.5 pr-3 tabular-nums">{when(s.submittedAt)}</td>
+                    <td className="whitespace-nowrap py-2.5 pr-3">
+                      {site === "all" && <span className="mr-1.5 rounded bg-neutral-100 px-1 text-[10px] font-semibold uppercase text-neutral-600">{siteOf(s) === "bolder" ? "Bolder" : "Synergy"}</span>}
+                      {s.formName}
+                      {reason && <span className="ml-1.5 rounded bg-amber-100 px-1 text-[10px] font-semibold uppercase text-amber-800" title={reason}>test</span>}
+                      {s.emailSent === false && <span className="ml-1.5 rounded bg-red-100 px-1 text-[10px] font-semibold uppercase text-red-700" title={s.emailError}>email failed</span>}
+                    </td>
+                    <td className="max-w-[14rem] py-2.5 pr-3"><p className="truncate font-medium">{s.name || s.domain || "—"}</p><p className="truncate text-xs text-neutral-500">{s.email}</p></td>
+                    <td className="whitespace-nowrap py-2.5 pr-3">{s.phone}</td>
+                    <td className="whitespace-nowrap py-2.5 pr-3">{s.budget}</td>
+                    <td className="max-w-[20rem] py-2.5 pr-3"><p className="line-clamp-2">{s.message}</p></td>
+                    <td className="max-w-[12rem] truncate py-2.5 pr-5 text-xs text-neutral-500">{pathOf(s.pageUrl)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {list.length > 500 && <p className="px-5 pt-3 text-xs text-neutral-500">Showing the newest 500 of {list.length.toLocaleString()} — narrow the filters, or download the CSV for all of them.</p>}
+          </div>
+        )}
+      </Card>
+      {opened && <SubmissionPanel key={opened._id + String(opened.test)} s={opened} rules={rules} onClose={() => setOpenId(null)} act={act} />}
+      {editRules && <RulesEditor rules={rules} onClose={() => setEditRules(false)} onSaved={setRules} />}
+    </div>
+  );
+}
+
 function Plan({ data, open }: { data: Data; open: (d: any) => void }) {
   const start = useMemo(() => {
     const first = data.tasks.reduce((m, t) => (t.startWeek < m ? t.startWeek : m), THIS_WEEK);
@@ -1144,13 +1464,14 @@ function RunList({ runs }: { runs: BotRun[] }) {
 
 // ---- App -----------------------------------------------------------------------------------
 
-const TABS = ["Overview", "Plan", "Content", "Feedback", "KPIs", "Health", "Bots"] as const;
+const TABS = ["Overview", "Plan", "Content", "Forms", "Feedback", "KPIs", "Health", "Bots"] as const;
 type Tab = (typeof TABS)[number];
-const TAB_ICON: Record<Tab, string> = { Overview: "◎", Plan: "▤", Content: "✎", Feedback: "◍", KPIs: "↗", Health: "♥", Bots: "⚙" };
+const TAB_ICON: Record<Tab, string> = { Overview: "◎", Plan: "▤", Content: "✎", Forms: "✉", Feedback: "◍", KPIs: "↗", Health: "♥", Bots: "⚙" };
 const TAB_SUB: Record<Tab, string> = {
   Overview: "Leads first: every task ties to a key result.",
   Plan: "Who does what, week by week, through year-end.",
   Content: "Topics, AI drafts, review and scheduled publishing.",
+  Forms: "Every form submission on the site: filter, search, download.",
   Feedback: "Pins left on the live and staging site.",
   KPIs: "GA4, Search Console and HubSpot, synced every Monday.",
   Health: "Daily checks against the live site.",
@@ -1248,6 +1569,7 @@ export default function OpsApp({ user }: { user: string }) {
           {tab === "Overview" && <Overview data={data} open={setEditing} sync={() => sync(1)} />}
           {tab === "Plan" && <Plan data={data} open={setEditing} />}
           {tab === "Content" && <Content data={data} open={setEditing} reload={load} setToast={setToast} />}
+          {tab === "Forms" && <FormsTab setToast={setToast} />}
           {tab === "Feedback" && <FeedbackTab data={data} reload={load} />}
           {tab === "Health" && <HealthTab data={data} reload={load} setToast={setToast} />}
           {tab === "KPIs" && <Kpis data={data} sync={sync} open={setEditing} />}

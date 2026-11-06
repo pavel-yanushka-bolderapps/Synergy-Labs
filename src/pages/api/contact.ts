@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { Resend } from "resend";
+import { recordSubmission } from "../../lib/ops/submissions";
 
 // This route needs to run per-request (to call reCAPTCHA + Resend), so it
 // opts out of the site's default static prerendering. Every other page
@@ -141,6 +142,24 @@ export const POST: APIRoute = async ({ request }) => {
 
   const resend = new Resend(resendApiKey);
 
+  // Kept for the Ops "Forms" tab, whether or not the email goes out.
+  const save = (emailSent: boolean, emailError?: string) =>
+    recordSubmission(
+      {
+        form: "contact",
+        formName: "Contact",
+        name: `${firstName} ${lastName}`,
+        email,
+        phone,
+        budget: budgetRange,
+        message: projectDetails,
+        pageUrl: pageLabel(pageUrl) === "(unknown)" ? undefined : pageLabel(pageUrl),
+        emailSent,
+        emailError,
+      },
+      request
+    );
+
   try {
     // The Resend SDK does NOT throw on an API-level failure (e.g. an
     // unverified "from" domain) -- it resolves normally with an { error }
@@ -164,12 +183,14 @@ export const POST: APIRoute = async ({ request }) => {
       ].join("\n"),
     });
 
+    save(!sendError, sendError?.message);
     if (sendError) {
       console.error("Resend API error:", sendError);
       return jsonResponse({ success: false, error: "Could not send your message. Please try again shortly." }, 502);
     }
   } catch (err) {
     console.error("Resend send threw:", err);
+    save(false, err instanceof Error ? err.message : String(err));
     return jsonResponse({ success: false, error: "Could not send your message. Please try again shortly." }, 502);
   }
 
