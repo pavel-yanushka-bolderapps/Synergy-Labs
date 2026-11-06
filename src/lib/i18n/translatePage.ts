@@ -55,6 +55,10 @@ export interface TranslateResult {
   untranslated: number;
   /** What this render's Claude requests cost; undefined when none were made. */
   usage?: Usage;
+  /** Every segment on the page. */
+  total: number;
+  /** Whether the page had its own saved translation before this render. */
+  hasPageTranslation: boolean;
 }
 
 export async function translatePage(html: string, path: string, lang: Language): Promise<TranslateResult> {
@@ -66,7 +70,10 @@ export async function translatePage(html: string, path: string, lang: Language):
   // Without a way to save them, every re-render would pay for the same
   // translations again -- so no Claude at all; untranslated text stays English.
   const canSave = Boolean(process.env.SANITY_API_WRITE_TOKEN);
-  const claude = missing.length && canSave ? await translateSegments(missing, lang) : undefined;
+  // No Claude key (or credit): serve what is stored; the middleware decides
+  // whether that is enough or the visitor gets the English page.
+  const canTranslate = canSave && Boolean(process.env.ANTHROPIC_API_KEY);
+  const claude = missing.length && canTranslate ? await translateSegments(missing, lang) : undefined;
   const fresh = claude?.translations ?? new Map<string, string>();
 
   const page = new Map<string, string>();
@@ -123,5 +130,5 @@ export async function translatePage(html: string, path: string, lang: Language):
   }
   root.querySelector('meta[property="og:locale"]')?.setAttribute("content", lang.code);
 
-  return { html: root.toString(), save, translated: fresh.size, untranslated, usage: claude?.usage };
+  return { html: root.toString(), save, translated: fresh.size, untranslated, usage: claude?.usage, total: units.length, hasPageTranslation: stored.page.size > 0 };
 }

@@ -11,7 +11,7 @@
 // translated paths).
 import { defineMiddleware } from "astro:middleware";
 import { waitUntil } from "@vercel/functions";
-import { isTranslatablePath, LIVE_LANGUAGE_CODES, localizedPath, splitLangPath } from "./lib/i18n/languages";
+import { isTranslatablePath, LIVE_LANGUAGE_CODES, localizedPath, MAX_UNTRANSLATED, splitLangPath } from "./lib/i18n/languages";
 import { translatePage } from "./lib/i18n/translatePage";
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -55,6 +55,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // per URL a bot tries.
   const storePath = english.status === 404 ? "/404" : path;
   const result = await translatePage(html, storePath, lang);
+
+  // Not translated (a page added after the last translation run), or too
+  // much of it still English: the English page, rather than English text
+  // under a /es/ URL with a Spanish canonical.
+  if (english.status !== 404 && (!result.hasPageTranslation || result.untranslated > result.total * MAX_UNTRANSLATED)) {
+    console.log(`[translate] ${lang.code}${path}: ${result.hasPageTranslation ? `${result.untranslated}/${result.total} segments untranslated` : "no translation"}; redirecting to English`);
+    return context.redirect(path + context.url.search, 302);
+  }
   waitUntil(result.save.catch((err) => console.error(`[translate] Saving ${lang.code}${path} failed:`, err)));
   if (result.translated || result.untranslated) {
     const { usage } = result;

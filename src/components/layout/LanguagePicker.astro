@@ -8,15 +8,18 @@
 // then marks the visitor's language as the current one -- see
 // markCurrentLanguage in src/lib/i18n/translatePage.ts.
 import { LIVE_LANGUAGES, localizedPath } from "../../lib/i18n/languages";
+import { translatedLanguages } from "../../lib/i18n/store";
 
 const path = Astro.url.pathname;
+// Only the languages this page is translated into.
+const langs = await translatedLanguages(path, LIVE_LANGUAGES.map((l) => l.code));
 const options = [
   { code: "en", native: "English", href: path },
-  ...LIVE_LANGUAGES.map((l) => ({ code: l.code, native: l.native, href: localizedPath(path, l.code) })),
+  ...LIVE_LANGUAGES.filter((l) => langs.includes(l.code)).map((l) => ({ code: l.code, native: l.native, href: localizedPath(path, l.code) })),
 ];
 ---
 
-{LIVE_LANGUAGES.length > 0 && (
+{langs.length > 0 && (
 <details
   class="lang-picker notranslate group fixed bottom-4 right-4 z-50 text-sm"
   translate="no"

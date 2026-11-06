@@ -10,6 +10,7 @@
 // Only on a page that is its own canonical. A page whose canonical points
 // elsewhere is a duplicate, and hreflang on it would contradict that.
 import { LIVE_LANGUAGES } from "../../lib/i18n/languages";
+import { translatedLanguages } from "../../lib/i18n/store";
 import { canonicalUrl } from "../../lib/seo";
 
 interface Props {
@@ -18,16 +19,18 @@ interface Props {
 }
 
 const own = canonicalUrl(Astro.url.pathname, Astro.site);
-// Nothing until a language is live (see LIVE_LANGUAGE_CODES).
-const show = LIVE_LANGUAGES.length > 0 && Astro.props.canonical === own;
 const path = new URL(own).pathname;
+// Only languages this page is actually translated into: the rest redirect to
+// English, and an hreflang pointing at a redirect is an error to Google.
+const langs = Astro.props.canonical === own ? await translatedLanguages(path, LIVE_LANGUAGES.map((l) => l.code)) : [];
+const show = langs.length > 0;
 const href = (code: string) => canonicalUrl(path === "/" ? `/${code}` : `/${code}${path}`, Astro.site);
 ---
 
 {show && (
   <>
     <link rel="alternate" hreflang="en" href={own} />
-    {LIVE_LANGUAGES.map((l) => <link rel="alternate" hreflang={l.code} href={href(l.code)} />)}
+    {LIVE_LANGUAGES.filter((l) => langs.includes(l.code)).map((l) => <link rel="alternate" hreflang={l.code} href={href(l.code)} />)}
     <link rel="alternate" hreflang="x-default" href={own} />
   </>
 )}

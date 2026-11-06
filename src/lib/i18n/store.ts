@@ -46,6 +46,29 @@ function sanity(): SanityClient {
   return client;
 }
 
+const available = new Map<string, { at: number; langs: string[] }>();
+
+/**
+ * The given languages that have their own saved translation of `path` -- the
+ * ones its hreflang and language picker may offer. Remembered for a minute
+ * per path, since the layout asks once per component.
+ */
+export async function translatedLanguages(path: string, langs: string[]): Promise<string[]> {
+  if (!langs.length) return [];
+  const key = `${path}|${langs.join(",")}`;
+  const hit = available.get(key);
+  if (hit && Date.now() - hit.at < 60_000) return hit.langs;
+  try {
+    const found = await sanity().fetch<string[]>(`*[_id in $ids].lang`, { ids: langs.map((l) => docId(l, path)) });
+    const result = langs.filter((l) => found.includes(l));
+    available.set(key, { at: Date.now(), langs: result });
+    return result;
+  } catch (err) {
+    console.error("[translate] availability lookup failed:", err);
+    return [];
+  }
+}
+
 /** The page's own translations and the shared ones, as English -> translation. */
 export async function loadTranslations(lang: string, path: string) {
   const docs = await sanity().fetch<TranslationDoc[]>(`*[_id in $ids]{_id, path, segments}`, {

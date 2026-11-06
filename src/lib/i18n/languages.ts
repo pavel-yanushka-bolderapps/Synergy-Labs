@@ -28,17 +28,24 @@ export const LANGUAGES: Language[] = [
 export const LANGUAGE_CODES = LANGUAGES.map((l) => l.code);
 
 /**
- * The languages visitors can actually reach. Empty = translations are off:
- * every /{code}/... URL redirects to English (vercel.json, and the middleware
- * as a backstop), and no hreflang, picker or footer switcher is rendered.
+ * The languages visitors can reach. The others redirect every /{code}/... URL
+ * to English (vercel.json, and the middleware as a backstop) and appear in no
+ * hreflang, picker or footer switcher.
  *
- * To launch a language, e.g. Spanish:
- *   1. translate it ahead: npx tsx --env-file=.env scripts/translate-site.ts --lang=es
- *   2. add "es" here
- *   3. remove "es" from the redirect's language list in vercel.json
- * Languages not listed keep redirecting.
+ * es, fr, ru and ar were translated for the whole site on 2026-10-25 (427 of
+ * 445 pages). Even in a live language, a page is only served translated when
+ * it has its own saved translation and at most MAX_UNTRANSLATED of its text
+ * is missing -- otherwise it redirects to English (see src/middleware.ts).
+ *
+ * To launch another language, e.g. German:
+ *   1. translate it ahead: npx tsx --env-file=.env scripts/translate-site.ts --lang=de
+ *   2. add "de" here
+ *   3. remove "de" from the redirect's language list in vercel.json
  */
-export const LIVE_LANGUAGE_CODES: string[] = [];
+export const LIVE_LANGUAGE_CODES: string[] = ["es", "fr", "ru", "ar"];
+
+/** Share of a page's text that may still be English before it falls back to the English page. */
+export const MAX_UNTRANSLATED = 0.1;
 export const LIVE_LANGUAGES = LANGUAGES.filter((l) => LIVE_LANGUAGE_CODES.includes(l.code));
 
 export function getLanguage(code: string | undefined): Language | undefined {

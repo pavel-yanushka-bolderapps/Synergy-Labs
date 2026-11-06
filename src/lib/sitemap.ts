@@ -23,6 +23,9 @@ import {
 // with the `noindex` prop passed in src/pages.
 const NOINDEX_PATHS = new Set(["/ambassador-program", "/1-week-pilot"]);
 
+/** Private, signed-in pages (noindex and robots.txt Disallow): never listed. */
+const PRIVATE_PATHS = new Set(["/ops"]);
+
 /** The fixed pages: every .astro file in src/pages without a [param]. */
 function staticPaths(): string[] {
   return Object.keys(import.meta.glob("/src/pages/**/*.astro"))
@@ -34,7 +37,7 @@ function staticPaths(): string[] {
         .replace(/\/index$/, "")
     )
     .map((path) => path || "/")
-    .filter((path) => path !== "/404" && !NOINDEX_PATHS.has(path));
+    .filter((path) => path !== "/404" && !NOINDEX_PATHS.has(path) && !PRIVATE_PATHS.has(path));
 }
 
 export async function getSitemapPaths(): Promise<string[]> {
