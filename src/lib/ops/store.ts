@@ -30,7 +30,7 @@ export function opsClient(): SanityClient {
   return client;
 }
 
-export const OPS_TYPES = ["opsKeyResult", "opsTask", "opsContent", "opsRun", "opsKpi", "opsFeedback", "opsSubmission"] as const;
+export const OPS_TYPES = ["opsKeyResult", "opsTask", "opsContent", "opsRun", "opsKpi", "opsFeedback", "opsSubmission", "opsWeekly"] as const;
 export type OpsType = (typeof OPS_TYPES)[number];
 
 const PREFIX: Record<OpsType, string> = {
@@ -41,6 +41,7 @@ const PREFIX: Record<OpsType, string> = {
   opsKpi: "ops.kpi.",
   opsFeedback: "ops.feedback.",
   opsSubmission: "ops.submission.",
+  opsWeekly: "ops.weekly.",
 };
 
 export const newId = (type: OpsType, suffix: string = randomUUID().slice(0, 12)) => PREFIX[type] + suffix;
@@ -71,6 +72,20 @@ export interface KeyResult {
   dueDate?: string;
   owner?: Owner;
   order?: number;
+  /** "1.1", "K2"... as in the OKR sheet. */
+  code?: string;
+  stretch?: number;
+  /** Andrew's OKR this rolls up to, e.g. "O5 KR2". */
+  andrewKr?: string;
+  /**
+   * How progress is judged: "metric" (a number vs target), "milestone" (done
+   * when every linked task is done, late after targetDate), "count" (number
+   * of linked tasks done vs target).
+   */
+  kind?: "metric" | "milestone" | "count";
+  /** Metric KRs: the value adds up over the quarter (vs. a latest-week level). */
+  cumulative?: boolean;
+  targetDate?: string;
   comments?: Comment[];
 }
 
@@ -88,6 +103,9 @@ export interface Task {
   /** "Every week" bot jobs and human tasks render the same way on the plan. */
   recurring?: boolean;
   notes?: string;
+  /** Deadline from the OKR sheet's Priorities; late when past and not done. */
+  dueDate?: string;
+  andrewKr?: string;
   comments?: Comment[];
 }
 
@@ -160,6 +178,8 @@ export interface BotRun {
 export interface KpiSnapshot {
   _id: string;
   _type: "opsKpi";
+  /** Missing = Synergy Labs; "bolder" = Bolder Apps (ids "ops.kpi.bolder-<week>"). */
+  site?: "bolder";
   /** Monday..Sunday of the week measured. */
   weekStart: string;
   weekEnd: string;
@@ -211,11 +231,20 @@ export async function loadAll() {
     c.fetch<ContentItem[]>(`*[_type == "opsContent" && _id in path("ops.**")] | order(week asc, _createdAt asc)`),
     c.fetch<BotRun[]>(`*[_type == "opsRun" && _id in path("ops.**")] | order(startedAt desc)[0...60]`),
     c
-      .fetch<StoredKpi[]>(`*[_type == "opsKpi" && _id in path("ops.**")] | order(weekStart desc)[0...26]`)
+      .fetch<StoredKpi[]>(`*[_type == "opsKpi" && _id in path("ops.**") && !defined(site)] | order(weekStart desc)[0...26]`)
       .then((list) => list.map(fromStoredKpi)),
     c.fetch<Feedback[]>(`*[_type == "opsFeedback" && _id in path("ops.**")] | order(number desc)`),
   ]);
   return { keyResults, tasks, content, runs, kpis, feedback };
+}
+
+/** Weekly snapshots for another website's tab (Bolder Apps), newest first. */
+export async function loadSiteKpis(site: "bolder"): Promise<KpiSnapshot[]> {
+  const list = await opsClient().fetch<StoredKpi[]>(
+    `*[_type == "opsKpi" && _id in path("ops.**") && site == $site] | order(weekStart desc)[0...26]`,
+    { site }
+  );
+  return list.map(fromStoredKpi);
 }
 
 /** Appends to the bot activity log. Never throws: logging must not fail a job. */

@@ -43,6 +43,18 @@ export const GET: APIRoute = async ({ params, request, url }) => {
           summary: `Weekly KPI sync` + (failed.length ? `; not synced: ${failed.join(", ")}` : ""),
           details: failed.map((k) => `${k}: ${snaps[0].errors![k]}`).join("\n") || undefined,
         });
+        // Bolder Apps: same weeks, logged on its own line.
+        const bolder: Awaited<ReturnType<typeof syncWeek>>[] = [];
+        for (const week of completedWeeks(2)) bolder.push(await syncWeek(week, "bolder"));
+        const bFailed = Object.keys(bolder[0].errors ?? {});
+        await logRun({
+          job: "kpi-sync",
+          startedAt,
+          ok: bFailed.length < 2,
+          by: "Bot",
+          summary: `Bolder Apps KPI sync` + (bFailed.length ? `; not synced: ${bFailed.join(", ")}` : ""),
+          details: bFailed.map((k) => `${k}: ${bolder[0].errors![k]}`).join("\n") || undefined,
+        });
         return json({ ok: true, weeks: snaps.map((s) => s.weekStart) });
       }
       case "publish": {

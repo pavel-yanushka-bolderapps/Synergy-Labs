@@ -58,7 +58,7 @@ const col = {
   date: find("date", "submittedat", "submitted", "created"),
   form: find("formname"),
   first: find("firstname"),
-  last: find("lastname"),
+  last: find("lastname", "secondname", "surname"),
   name: header.findIndex((h) => ["name", "fullname", "yourname"].includes(norm(h))),
   email: find("email"),
   phone: find("phone", "tel"),
@@ -73,7 +73,13 @@ const docs = rows.map((r) => {
   const name = get(col.name) || [get(col.first), get(col.last)].filter(Boolean).join(" ");
   // A bare "2026-09-01 10:00" is read as UTC (as Webflow exports it), not local time.
   const rawDate = get(col.date);
-  const parsed = rawDate ? new Date(/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.test(rawDate) ? `${rawDate.replace(" ", "T")}Z` : rawDate) : null;
+  // Webflow's own export writes "11/06/2026 12:32:36 pm", also in UTC.
+  const us = /^(\d{1,2})\/(\d{1,2})\/(\d{4}) (\d{1,2}):(\d{2})(?::(\d{2}))? ?([ap]m)?$/i.exec(rawDate);
+  const parsed = !rawDate
+    ? null
+    : us
+      ? new Date(Date.UTC(+us[3], +us[1] - 1, +us[2], us[7] ? (+us[4] % 12) + (/pm/i.test(us[7]) ? 12 : 0) : +us[4], +us[5], +(us[6] ?? 0)))
+      : new Date(/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.test(rawDate) ? `${rawDate.replace(" ", "T")}Z` : rawDate);
   const submittedAt = parsed && !Number.isNaN(parsed.getTime()) ? parsed.toISOString() : new Date(0).toISOString();
   const extra = header
     .map((h, i) => ({ key: h, value: get(i) }))
@@ -98,6 +104,27 @@ const docs = rows.map((r) => {
   };
   return Object.fromEntries(Object.entries(doc).filter(([, v]) => v !== undefined));
 });
+
+// Skip rows that already arrived another way (e.g. by the live webhook):
+// same email within two minutes of an existing submission for this site.
+const existingClient = createClient({
+  projectId: process.env.PUBLIC_SANITY_PROJECT_ID || "toot3mhg",
+  dataset: process.env.PUBLIC_SANITY_DATASET || "production",
+  apiVersion: "2024-01-01",
+  token: process.env.SANITY_API_WRITE_TOKEN,
+  useCdn: false,
+});
+const existing = await existingClient.fetch(
+  `*[_type == "opsSubmission" && coalesce(site, "synergy") == $site && !(_id match "ops.submission.import-*")]{ email, submittedAt }`,
+  { site }
+);
+const dupes = new Set();
+for (const d of docs) {
+  const t = Date.parse(d.submittedAt);
+  if (existing.some((e) => e.email && d.email && e.email.toLowerCase() === d.email.toLowerCase() && Math.abs(Date.parse(e.submittedAt) - t) < 120_000)) dupes.add(d._id);
+}
+if (dupes.size) console.log(`Skipping ${dupes.size} row(s) already stored (e.g. via the webhook).`);
+docs.splice(0, docs.length, ...docs.filter((d) => !dupes.has(d._id)));
 
 console.log(`Columns: ${Object.entries(col).map(([k, i]) => `${k}=${i >= 0 ? `"${header[i]}"` : "—"}`).join(", ")}`);
 console.log(`Extra columns kept: ${header.filter((_, i) => !used.has(i)).join(", ") || "none"}`);

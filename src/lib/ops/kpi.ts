@@ -25,21 +25,33 @@
 //                                "https://www.synergylabs.co/" for a URL-prefix
 //                                property.
 //   HUBSPOT_TOKEN                private app token with crm.objects.contacts.read.
+//
+//   Bolder Apps (www.bolderapps.com, the "Bolder Apps" tab) uses the same
+//   Google login with its own property and site; HubSpot is Synergy-only:
+//   BOLDER_GA4_PROPERTY_ID       numeric
+//   BOLDER_GSC_SITE              default "sc-domain:bolderapps.com"
 //   GA4_EVENTS                   optional, comma-separated event names to count;
 //                                default below.
+//   GA4_CTA_EVENT                optional, the GA4 event a CTA click sends (for
+//                                the "CTA clicks per week" key result).
+//   Form start rate = GA4 "form_start" events / sessions (form_start is sent
+//   by GA4 enhanced measurement, "Form interactions").
 import { createSign } from "node:crypto";
 import { getVercelOidcToken } from "@vercel/oidc";
 import { opsClient, newId, mondayOf, addDays, toStoredKpi, type KpiSnapshot } from "./store";
 
 const env = (k: string) => process.env[k] || (import.meta.env as Record<string, string | undefined>)[k] || "";
 
-const DEFAULT_EVENTS = ["FormStart", "ContactFormStart", "FormStep1", "FormStep2", "form_submit", "generate_lead"];
+const DEFAULT_EVENTS = ["form_start", "FormStart", "ContactFormStart", "FormStep1", "FormStep2", "form_submit", "generate_lead"];
 
 /** Every metric the dashboard knows, with a label. Key results link to these keys. */
 export const METRICS: Record<string, { label: string; unit?: string; better?: "up" | "down"; format?: "pct" | "dec" }> = {
   "ga4.organicUsers": { label: "Organic users (week)" },
   "ga4.organicUsers30d": { label: "Organic users (last 30 days)" },
   "ga4.users": { label: "All users (week)" },
+  "ga4.newUsers": { label: "New users (week)" },
+  "ga4.formStartRate": { label: "Form start rate (form_start ÷ sessions)", format: "pct" },
+  "ga4.ctaClicks": { label: "CTA clicks (week)" },
   "ga4.sessions": { label: "Sessions (week)" },
   "ga4.organicSessions": { label: "Organic sessions (week)" },
   "gsc.clicks": { label: "Search clicks" },
@@ -52,17 +64,30 @@ export const METRICS: Record<string, { label: string; unit?: string; better?: "u
   "hubspot.sql": { label: "New SQLs" },
 };
 export const eventMetric = (name: string) => `ga4.event.${name}`;
-export const ga4Events = () => (env("GA4_EVENTS") ? env("GA4_EVENTS").split(",").map((s) => s.trim()) : DEFAULT_EVENTS);
+export const ga4Events = () => {
+  const list = env("GA4_EVENTS") ? env("GA4_EVENTS").split(",").map((s) => s.trim()) : DEFAULT_EVENTS;
+  const cta = env("GA4_CTA_EVENT");
+  return cta && !list.includes(cta) ? [...list, cta] : list;
+};
+
+export type KpiSite = "synergy" | "bolder";
+
+/** Where each website's numbers come from. */
+const SOURCES: Record<KpiSite, { ga4Property: () => string; ga4Var: string; gscSite: () => string; hubspot: boolean }> = {
+  synergy: { ga4Property: () => env("GA4_PROPERTY_ID"), ga4Var: "GA4_PROPERTY_ID", gscSite: () => env("GSC_SITE") || "sc-domain:synergylabs.co", hubspot: true },
+  bolder: { ga4Property: () => env("BOLDER_GA4_PROPERTY_ID"), ga4Var: "BOLDER_GA4_PROPERTY_ID", gscSite: () => env("BOLDER_GSC_SITE") || "sc-domain:bolderapps.com", hubspot: false },
+};
+export const isKpiSite = (s: unknown): s is KpiSite => s === "synergy" || s === "bolder";
 
 const googleConfigured = () =>
   Boolean(env("GOOGLE_SERVICE_ACCOUNT_JSON") || (env("GCP_WORKLOAD_IDENTITY_PROVIDER") && env("GCP_SERVICE_ACCOUNT_EMAIL")));
 
-export function sourceStatus() {
+export function sourceStatus(site: KpiSite = "synergy") {
   return {
     google: googleConfigured(),
-    ga4: googleConfigured() && Boolean(env("GA4_PROPERTY_ID")),
+    ga4: googleConfigured() && Boolean(SOURCES[site].ga4Property()),
     gsc: googleConfigured(),
-    hubspot: Boolean(env("HUBSPOT_TOKEN")),
+    hubspot: SOURCES[site].hubspot && Boolean(env("HUBSPOT_TOKEN")),
     claude: Boolean(env("ANTHROPIC_API_KEY")),
   };
 }
@@ -153,13 +178,44 @@ async function google(url: string, body: object) {
   return data;
 }
 
+/**
+ * What the service account can read: every GA4 property and Search Console
+ * site it has been granted. Used by the KPIs tab's "Check Google access" to
+ * confirm access before setting GA4_PROPERTY_ID / GSC_SITE for a website.
+ */
+export async function googleAccess() {
+  const token = await googleAccessToken();
+  const get = async (url: string) => {
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json().catch(() => ({}));
+    return res.ok ? { data } : { error: data.error?.message || `HTTP ${res.status}` };
+  };
+  const [ga, sc] = await Promise.all([
+    get("https://analyticsadmin.googleapis.com/v1beta/accountSummaries?pageSize=200"),
+    get("https://www.googleapis.com/webmasters/v3/sites"),
+  ]);
+  return {
+    serviceAccount: env("GCP_SERVICE_ACCOUNT_EMAIL") || "(from GOOGLE_SERVICE_ACCOUNT_JSON)",
+    configured: Object.fromEntries(
+      (Object.keys(SOURCES) as KpiSite[]).map((s) => [s, { ga4Property: SOURCES[s].ga4Property() || null, gscSite: SOURCES[s].gscSite() }])
+    ),
+    ga4: ga.error
+      ? { error: ga.error }
+      : {
+          properties: ((ga.data as any).accountSummaries ?? []).flatMap((a: any) =>
+            (a.propertySummaries ?? []).map((p: any) => ({ id: String(p.property).replace("properties/", ""), name: p.displayName, account: a.displayName }))
+          ),
+        },
+    gsc: sc.error ? { error: sc.error } : { sites: ((sc.data as any).siteEntry ?? []).map((s: any) => ({ url: s.siteUrl, permission: s.permissionLevel })) },
+  };
+}
+
 // --- GA4 ---------------------------------------------------------------------
 
 type Ga4Row = { dimensionValues?: { value: string }[]; metricValues: { value: string }[] };
 
-async function ga4Report(body: object): Promise<Ga4Row[]> {
-  const property = env("GA4_PROPERTY_ID");
-  if (!property) throw new Error("GA4_PROPERTY_ID is not set");
+async function ga4Report(property: string, body: object): Promise<Ga4Row[]> {
+  if (!property) throw new Error("No GA4 property id is set");
   const data = await google(`https://analyticsdata.googleapis.com/v1beta/properties/${property}:runReport`, body);
   return data.rows ?? [];
 }
@@ -168,27 +224,28 @@ const organicFilter = {
   filter: { fieldName: "sessionDefaultChannelGroup", stringFilter: { value: "Organic Search" } },
 };
 
-async function syncGa4(start: string, end: string, metrics: Record<string, number>, lists: KpiSnapshot["lists"]) {
+async function syncGa4(property: string, start: string, end: string, metrics: Record<string, number>, lists: KpiSnapshot["lists"]) {
   const range = [{ startDate: start, endDate: end }];
+  const ga4Report_ = (body: object) => ga4Report(property, body);
   const [all, organic, organic30, events, pages] = await Promise.all([
-    ga4Report({ dateRanges: range, metrics: [{ name: "activeUsers" }, { name: "sessions" }] }),
-    ga4Report({
+    ga4Report_({ dateRanges: range, metrics: [{ name: "activeUsers" }, { name: "sessions" }, { name: "newUsers" }] }),
+    ga4Report_({
       dateRanges: range,
       metrics: [{ name: "activeUsers" }, { name: "sessions" }],
       dimensionFilter: organicFilter,
     }),
-    ga4Report({
+    ga4Report_({
       dateRanges: [{ startDate: addDays(end, -29), endDate: end }],
       metrics: [{ name: "activeUsers" }],
       dimensionFilter: organicFilter,
     }),
-    ga4Report({
+    ga4Report_({
       dateRanges: range,
       dimensions: [{ name: "eventName" }],
       metrics: [{ name: "eventCount" }],
       dimensionFilter: { filter: { fieldName: "eventName", inListFilter: { values: ga4Events() } } },
     }),
-    ga4Report({
+    ga4Report_({
       dateRanges: range,
       dimensions: [{ name: "landingPage" }],
       metrics: [{ name: "activeUsers" }],
@@ -200,11 +257,14 @@ async function syncGa4(start: string, end: string, metrics: Record<string, numbe
   const n = (rows: Ga4Row[], i = 0) => Number(rows[0]?.metricValues[i]?.value ?? 0);
   metrics["ga4.users"] = n(all);
   metrics["ga4.sessions"] = n(all, 1);
+  metrics["ga4.newUsers"] = n(all, 2);
   metrics["ga4.organicUsers"] = n(organic);
   metrics["ga4.organicSessions"] = n(organic, 1);
   metrics["ga4.organicUsers30d"] = n(organic30);
   for (const name of ga4Events()) metrics[eventMetric(name)] = 0;
   for (const row of events) metrics[eventMetric(row.dimensionValues![0].value)] = Number(row.metricValues[0].value);
+  if (metrics["ga4.sessions"]) metrics["ga4.formStartRate"] = (metrics[eventMetric("form_start")] ?? 0) / metrics["ga4.sessions"];
+  if (env("GA4_CTA_EVENT")) metrics["ga4.ctaClicks"] = metrics[eventMetric(env("GA4_CTA_EVENT"))] ?? 0;
   lists!["ga4.topOrganicPages"] = pages.map((r) => ({
     label: r.dimensionValues![0].value,
     value: Number(r.metricValues[0].value),
@@ -215,20 +275,20 @@ async function syncGa4(start: string, end: string, metrics: Record<string, numbe
 
 type GscRow = { keys?: string[]; clicks: number; impressions: number; ctr: number; position: number };
 
-async function gscQuery(body: object): Promise<GscRow[]> {
-  const site = encodeURIComponent(env("GSC_SITE") || "sc-domain:synergylabs.co");
+async function gscQuery(siteUrl: string, body: object): Promise<GscRow[]> {
+  const site = encodeURIComponent(siteUrl);
   const data = await google(`https://www.googleapis.com/webmasters/v3/sites/${site}/searchAnalytics/query`, body);
   return data.rows ?? [];
 }
 
-async function syncGsc(start: string, end: string, metrics: Record<string, number>, lists: KpiSnapshot["lists"]) {
+async function syncGsc(siteUrl: string, start: string, end: string, metrics: Record<string, number>, lists: KpiSnapshot["lists"]) {
   const prevStart = addDays(start, -7);
   const prevEnd = addDays(end, -7);
   const [totals, pages, prevPages, queries] = await Promise.all([
-    gscQuery({ startDate: start, endDate: end }),
-    gscQuery({ startDate: start, endDate: end, dimensions: ["page"], rowLimit: 500 }),
-    gscQuery({ startDate: prevStart, endDate: prevEnd, dimensions: ["page"], rowLimit: 500 }),
-    gscQuery({ startDate: start, endDate: end, dimensions: ["query"], rowLimit: 500 }),
+    gscQuery(siteUrl, { startDate: start, endDate: end }),
+    gscQuery(siteUrl, { startDate: start, endDate: end, dimensions: ["page"], rowLimit: 500 }),
+    gscQuery(siteUrl, { startDate: prevStart, endDate: prevEnd, dimensions: ["page"], rowLimit: 500 }),
+    gscQuery(siteUrl, { startDate: start, endDate: end, dimensions: ["query"], rowLimit: 500 }),
   ]);
   const t = totals[0];
   metrics["gsc.clicks"] = t?.clicks ?? 0;
@@ -286,13 +346,18 @@ async function syncHubspot(start: string, end: string, metrics: Record<string, n
 
 // --- The snapshot -------------------------------------------------------------------
 
-/** Syncs one week (Monday `weekStart`) and saves it, if any source returned data. */
-export async function syncWeek(weekStart: string): Promise<KpiSnapshot> {
+/**
+ * Syncs one week (Monday `weekStart`) for one website and saves it, if any
+ * source returned data. Synergy keeps its original ids ("ops.kpi.<week>");
+ * Bolder's are "ops.kpi.bolder-<week>".
+ */
+export async function syncWeek(weekStart: string, site: KpiSite = "synergy"): Promise<KpiSnapshot> {
   const weekEnd = addDays(weekStart, 6);
   const metrics: Record<string, number> = {};
   const lists: NonNullable<KpiSnapshot["lists"]> = {};
   const errors: Record<string, string> = {};
-  const status = sourceStatus();
+  const status = sourceStatus(site);
+  const src = SOURCES[site];
 
   const run = async (name: string, enabled: boolean, missing: string, fn: () => Promise<void>) => {
     if (!enabled) return void (errors[name] = `Not connected: ${missing}`);
@@ -303,14 +368,15 @@ export async function syncWeek(weekStart: string): Promise<KpiSnapshot> {
     }
   };
   await Promise.all([
-    run("ga4", status.ga4, "Google access (GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT_EMAIL), GA4_PROPERTY_ID", () => syncGa4(weekStart, weekEnd, metrics, lists)),
-    run("gsc", status.gsc, "Google access (GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT_EMAIL)", () => syncGsc(weekStart, weekEnd, metrics, lists)),
-    run("hubspot", status.hubspot, "HUBSPOT_TOKEN", () => syncHubspot(weekStart, weekEnd, metrics)),
+    run("ga4", status.ga4, `Google access (GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT_EMAIL), ${src.ga4Var}`, () => syncGa4(src.ga4Property(), weekStart, weekEnd, metrics, lists)),
+    run("gsc", status.gsc, "Google access (GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT_EMAIL)", () => syncGsc(src.gscSite(), weekStart, weekEnd, metrics, lists)),
+    ...(src.hubspot ? [run("hubspot", status.hubspot, "HUBSPOT_TOKEN", () => syncHubspot(weekStart, weekEnd, metrics))] : []),
   ]);
 
   const snapshot: KpiSnapshot = {
-    _id: newId("opsKpi", weekStart),
+    _id: newId("opsKpi", site === "synergy" ? weekStart : `${site}-${weekStart}`),
     _type: "opsKpi",
+    ...(site === "synergy" ? {} : { site }),
     weekStart,
     weekEnd,
     metrics,

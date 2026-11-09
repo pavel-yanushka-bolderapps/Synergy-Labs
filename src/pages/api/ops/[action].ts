@@ -18,6 +18,9 @@
 //   GET  feedback?path=    on-site feedback pins for one page (the site overlay)
 //   POST feedback          create a pin (from public/ops-feedback.js)
 //   POST screenshot        upload a pin's screenshot (JPEG data URL) -> { url }
+//   POST weekly-save       { week, abWinners, notes } the typed-in Weekly columns
+//   GET  bolder            the Bolder Apps tab: its weekly GA4 / Search Console snapshots
+//   GET  google-access     GA4 properties + Search Console sites the service account can read
 //   GET  submissions       every form submission + the test-detection rules
 //   POST submission-mark   { ids, test: true | false | null } (null = automatic)
 //   POST submission-delete { ids }
@@ -25,20 +28,21 @@
 import type { APIRoute } from "astro";
 import { waitUntil } from "@vercel/functions";
 import { checkPassword, currentUser, json, PEOPLE, signIn, signOut } from "../../../lib/ops/auth";
-import { isOpsId, loadAll, logRun, newId, opsClient, type ContentItem, type OpsType } from "../../../lib/ops/store";
-import { completedWeeks, METRICS, eventMetric, ga4Events, sourceStatus, syncWeek } from "../../../lib/ops/kpi";
+import { isOpsId, loadAll, loadSiteKpis, logRun, newId, opsClient, type ContentItem, type OpsType } from "../../../lib/ops/store";
+import { completedWeeks, METRICS, eventMetric, ga4Events, googleAccess, isKpiSite, sourceStatus, syncWeek } from "../../../lib/ops/kpi";
 import { draftContent, loadPost, publishContent, suggestTopics } from "../../../lib/ops/content";
 import { runAndSaveHealth, type Health } from "../../../lib/ops/health";
 import { buildDigest, emailStatus, sendDigest } from "../../../lib/ops/digest";
 import { randomUUID } from "node:crypto";
 import { loadSubmissions, SETTINGS_ID } from "../../../lib/ops/submissions";
+import { buildScorecard, DERIVED_METRICS, loadWeeklyNotes } from "../../../lib/ops/scorecard";
 
 export const prerender = false;
 
 /** Fields a person may set on each type; everything else is dropped. */
-const EDITABLE: Record<Exclude<OpsType, "opsRun" | "opsKpi" | "opsSubmission">, string[]> = {
-  opsKeyResult: ["title", "objective", "metric", "baseline", "target", "current", "unit", "dueDate", "owner", "order"],
-  opsTask: ["title", "owner", "keyResult", "status", "startWeek", "endWeek", "recurring", "notes"],
+const EDITABLE: Record<Exclude<OpsType, "opsRun" | "opsKpi" | "opsSubmission" | "opsWeekly">, string[]> = {
+  opsKeyResult: ["title", "objective", "metric", "baseline", "target", "current", "unit", "dueDate", "owner", "order", "code", "stretch", "andrewKr", "kind", "cumulative", "targetDate"],
+  opsTask: ["title", "owner", "keyResult", "status", "startWeek", "endWeek", "recurring", "notes", "dueDate", "andrewKr"],
   opsContent: ["title", "kind", "keyword", "brief", "week", "status", "keyResult", "targetPath", "publishAt", "notes"],
   opsFeedback: ["title", "status", "assignee"],
 };
@@ -48,11 +52,12 @@ export const GET: APIRoute = async ({ params, cookies, url }) => {
   if (!user) return json({ error: "Sign in" }, 401);
 
   if (params.action === "data") {
-    const data = await loadAll();
-    const metrics = { ...METRICS };
+    const [data, bolderKpis, forms, notes] = await Promise.all([loadAll(), loadSiteKpis("bolder"), loadSubmissions(), loadWeeklyNotes()]);
+    const metrics: Record<string, { label: string; format?: string }> = { ...METRICS, ...DERIVED_METRICS };
     for (const e of ga4Events()) metrics[eventMetric(e)] = { label: `GA4 event: ${e}` };
     const health = await opsClient().getDocument<Health>("ops.health.latest");
-    return json({ user, ...data, metrics, health, sources: { ...sourceStatus(), email: emailStatus().configured }, digestTo: emailStatus().to });
+    const scorecard = buildScorecard(data.kpis, bolderKpis, forms.submissions, forms.testRules, notes);
+    return json({ user, ...data, metrics, health, scorecard, sources: { ...sourceStatus(), email: emailStatus().configured }, digestTo: emailStatus().to });
   }
   if (params.action === "post") {
     const id = url.searchParams.get("id");
@@ -61,6 +66,18 @@ export const GET: APIRoute = async ({ params, cookies, url }) => {
   }
   if (params.action === "me") return json({ user });
   if (params.action === "submissions") return json(await loadSubmissions());
+  if (params.action === "bolder") {
+    const metrics = { ...METRICS };
+    for (const e of ga4Events()) metrics[eventMetric(e)] = { label: `GA4 event: ${e}` };
+    return json({ kpis: await loadSiteKpis("bolder"), sources: sourceStatus("bolder"), metrics });
+  }
+  if (params.action === "google-access") {
+    try {
+      return json(await googleAccess());
+    } catch (err) {
+      return json({ error: err instanceof Error ? err.message : String(err) }, 500);
+    }
+  }
   if (params.action === "feedback") {
     const path = url.searchParams.get("path") ?? "/";
     const host = url.searchParams.get("host") ?? url.host;
@@ -244,15 +261,24 @@ export const POST: APIRoute = async ({ params, cookies, request, url }) => {
         return json({ testRules: rules });
       }
 
+      case "weekly-save": {
+        const week = String(body.week ?? "");
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(week)) return json({ error: "Bad week" }, 400);
+        const ab = body.abWinners === "" || body.abWinners === null || body.abWinners === undefined ? undefined : Number(body.abWinners);
+        const doc = { _id: `ops.weekly.${week}`, _type: "opsWeekly", week, ...(Number.isFinite(ab) ? { abWinners: ab } : {}), ...(String(body.notes ?? "").trim() ? { notes: String(body.notes).trim().slice(0, 2000) } : {}), updatedBy: user };
+        return json(await c.createOrReplace(doc));
+      }
+
       case "sync": {
         const weeks = Math.min(Math.max(Number(body.weeks) || 1, 1), 26);
+        const site = isKpiSite(body.site) ? body.site : "synergy";
         const list = completedWeeks(weeks);
         // The newest week answers the request; a backfill finishes in the background.
-        const first = await syncWeek(list[0]);
+        const first = await syncWeek(list[0], site);
         if (list.length > 1) {
           waitUntil(
             (async () => {
-              for (const w of list.slice(1)) await syncWeek(w).catch((e) => console.error("[ops] sync", w, e));
+              for (const w of list.slice(1)) await syncWeek(w, site).catch((e) => console.error("[ops] sync", w, e));
             })()
           );
         }
@@ -261,7 +287,7 @@ export const POST: APIRoute = async ({ params, cookies, request, url }) => {
           job: "kpi-sync",
           ok: failed.length < 3,
           by: user,
-          summary: `KPIs synced for ${weeks} week(s)` + (failed.length ? `; not synced: ${failed.join(", ")}` : ""),
+          summary: `${site === "bolder" ? "Bolder Apps " : ""}KPIs synced for ${weeks} week(s)` + (failed.length ? `; not synced: ${failed.join(", ")}` : ""),
           details: failed.map((k) => `${k}: ${first.errors![k]}`).join("\n") || undefined,
         });
         return json(first);
