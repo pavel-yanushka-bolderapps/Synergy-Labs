@@ -49,21 +49,8 @@ export interface Submission {
 
 export const SETTINGS_ID = "ops.settings.forms";
 
-/** Starting list; editable in the Forms tab. See isTest() in OpsApp. */
-export const DEFAULT_TEST_RULES = [
-  "test",
-  "testing",
-  "tester",
-  "asdf",
-  "qwerty",
-  "lorem",
-  "ipsum",
-  "dummy",
-  "fake",
-  "example.com",
-  "@bolderapps.com",
-  "@synergylabs.co",
-];
+export { DEFAULT_TEST_RULES } from "./formtest";
+import { DEFAULT_TEST_RULES } from "./formtest";
 
 const cap = (v: unknown, max = 5000) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : undefined);
 

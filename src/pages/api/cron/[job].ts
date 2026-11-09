@@ -11,12 +11,15 @@
 //   ideas      Mondays: tops the calendar up with topic ideas from Search
 //              Console when fewer than 6 ideas/planned items are coming up
 //   digest     Mondays: the weekly email to OPS_DIGEST_TO
+//   blogs      Mondays: blog tracker -- post list for both sites + last week's
+//              GA4 traffic per post
 import type { APIRoute } from "astro";
 import { json } from "../../../lib/ops/auth";
 import { logRun } from "../../../lib/ops/store";
 import { completedWeeks, syncWeek } from "../../../lib/ops/kpi";
 import { draftDue, publishDue, suggestTopics } from "../../../lib/ops/content";
 import { runAndSaveHealth } from "../../../lib/ops/health";
+import { runBlogSync } from "../../../lib/ops/blogs";
 import { emailStatus, sendDigest, sendHealthAlert } from "../../../lib/ops/digest";
 import { loadAll, mondayOf, addDays } from "../../../lib/ops/store";
 
@@ -43,6 +46,18 @@ export const GET: APIRoute = async ({ params, request, url }) => {
           summary: `Weekly KPI sync` + (failed.length ? `; not synced: ${failed.join(", ")}` : ""),
           details: failed.map((k) => `${k}: ${snaps[0].errors![k]}`).join("\n") || undefined,
         });
+        // Bolder Apps: same weeks, logged on its own line.
+        const bolder: Awaited<ReturnType<typeof syncWeek>>[] = [];
+        for (const week of completedWeeks(2)) bolder.push(await syncWeek(week, "bolder"));
+        const bFailed = Object.keys(bolder[0].errors ?? {});
+        await logRun({
+          job: "kpi-sync",
+          startedAt,
+          ok: bFailed.length < 2,
+          by: "Bot",
+          summary: `Bolder Apps KPI sync` + (bFailed.length ? `; not synced: ${bFailed.join(", ")}` : ""),
+          details: bFailed.map((k) => `${k}: ${bolder[0].errors![k]}`).join("\n") || undefined,
+        });
         return json({ ok: true, weeks: snaps.map((s) => s.weekStart) });
       }
       case "publish": {
@@ -66,6 +81,10 @@ export const GET: APIRoute = async ({ params, request, url }) => {
         if (upcoming.length >= 6) return json({ ok: true, skipped: `${upcoming.length} items already planned` });
         const created = await suggestTopics(6 - upcoming.length, "Bot");
         return json({ ok: true, created: created.length });
+      }
+      case "blogs": {
+        const { list, traffic } = await runBlogSync("Bot", 2);
+        return json({ ok: true, list, traffic });
       }
       case "digest": {
         if (!emailStatus().configured) return json({ ok: true, skipped: "email not configured" });

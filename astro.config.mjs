@@ -67,7 +67,7 @@ export default defineConfig({
       // are matched by their route pattern, brackets included.
       exclude: [
         '/api/contact', '/api/lead', '/api/builder', '/api/revalidate', '/api/forms/webflow',
-        '/ops', '/api/ops/[action]', '/api/cron/[job]',
+        '/ops', '/api/ops/[action]', '/api/ops/agent/[action]', '/api/cron/[job]',
       ],
     },
   }),
