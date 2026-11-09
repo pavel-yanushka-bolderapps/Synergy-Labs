@@ -1,5 +1,5 @@
 // Sign-in for /ops: one shared password (OPS_PASSWORD) plus the person's name,
-// kept in a signed cookie. Enough for two people and no Sanity seats; swap for
+// kept in a signed cookie. Enough for a few people and no Sanity seats; swap for
 // Google sign-in limited to @bolderapps.com when more people join.
 //
 // The cookie is "<name>.<hmac>" signed with OPS_PASSWORD, so changing the
@@ -8,7 +8,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import type { AstroCookies } from "astro";
 
 export const COOKIE = "ops_session";
-export const PEOPLE = ["Pavel", "Andrew"] as const;
+export const PEOPLE = ["Pavel", "Andrew", "Shawn"] as const;
 const MAX_AGE = 60 * 60 * 24 * 30;
 
 const secret = () => process.env.OPS_PASSWORD || import.meta.env.OPS_PASSWORD || "";

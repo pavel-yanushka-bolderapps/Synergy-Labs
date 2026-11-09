@@ -40,10 +40,10 @@ const list = (items: string[], empty: string) =>
   items.length ? `<ul style="margin:0;padding-left:18px">${items.map((i) => `<li style="margin:4px 0">${i}</li>`).join("")}</ul>` : `<p style="color:#6b7280;margin:0">${empty}</p>`;
 const wrap = (title: string, body: string) => `<!doctype html><html><body style="margin:0;background:#f6f7f6">
 <div style="max-width:640px;margin:0 auto;padding:24px;font:15px/1.5 Arial,sans-serif;color:#1b1b1b">
-<p style="margin:0;color:#007244;font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase">Synergy Ops</p>
+<p style="margin:0;color:#007244;font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase">Website Ops</p>
 <h1 style="font:500 26px/1.25 Georgia,serif;margin:4px 0 0">${title}</h1>
 ${body}
-<p style="margin-top:32px"><a href="${SITE()}/ops" style="background:#0a332c;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">Open Synergy Ops</a></p>
+<p style="margin-top:32px"><a href="${SITE()}/ops" style="background:#0a332c;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">Open Website Ops</a></p>
 </div></body></html>`;
 
 function krLine(kr: KeyResult, kpis: KpiSnapshot[]) {
@@ -111,7 +111,7 @@ export async function buildDigest() {
     failedRuns.length ? list(failedRuns.slice(0, 5).map((r) => `${esc(r.summary)}`), "") : "",
   ].join("\n");
 
-  const subject = `Synergy Ops · week of ${dateLabel(thisWeek)}${review.length ? ` · ${review.length} to approve` : ""}${failing.length ? ` · ${failing.length} health issue${failing.length > 1 ? "s" : ""}` : ""}`;
+  const subject = `Website Ops · week of ${dateLabel(thisWeek)}${review.length ? ` · ${review.length} to approve` : ""}${failing.length ? ` · ${failing.length} health issue${failing.length > 1 ? "s" : ""}` : ""}`;
   return { subject, html: wrap(`Weekly digest · ${dateLabel(thisWeek)}`, body) };
 }
 

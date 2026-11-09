@@ -30,7 +30,7 @@ export function opsClient(): SanityClient {
   return client;
 }
 
-export const OPS_TYPES = ["opsKeyResult", "opsTask", "opsContent", "opsRun", "opsKpi", "opsFeedback", "opsSubmission", "opsWeekly"] as const;
+export const OPS_TYPES = ["opsKeyResult", "opsTask", "opsContent", "opsRun", "opsKpi", "opsFeedback", "opsSubmission", "opsWeekly", "opsBlog", "opsInbox"] as const;
 export type OpsType = (typeof OPS_TYPES)[number];
 
 const PREFIX: Record<OpsType, string> = {
@@ -42,12 +42,14 @@ const PREFIX: Record<OpsType, string> = {
   opsFeedback: "ops.feedback.",
   opsSubmission: "ops.submission.",
   opsWeekly: "ops.weekly.",
+  opsBlog: "ops.blog.",
+  opsInbox: "ops.inbox.",
 };
 
 export const newId = (type: OpsType, suffix: string = randomUUID().slice(0, 12)) => PREFIX[type] + suffix;
 export const isOpsId = (id: unknown): id is string => typeof id === "string" && id.startsWith("ops.");
 
-export type Owner = "Pavel" | "Andrew" | "Bot";
+export type Owner = "Pavel" | "Andrew" | "Shawn" | "Bot";
 
 /** Discussion on a task, key result or content item. */
 export interface Comment {
@@ -173,6 +175,31 @@ export interface BotRun {
   details?: string;
   costUsd?: number;
   by?: string;
+  /** Set when an outside agent (via /api/ops/agent) did it. */
+  agent?: boolean;
+}
+
+export type InboxStatus = "new" | "in-progress" | "done" | "skipped";
+/**
+ * A Markdown file an agent dropped in (e.g. "blog-refresh-wk45.md"), or a
+ * person added. Blog refresh briefs carry the post they are about.
+ */
+export interface InboxFile {
+  _id: string;
+  _type: "opsInbox";
+  name: string;
+  kind: string;
+  content: string;
+  by: string;
+  createdAt: string;
+  status: InboxStatus;
+  site?: "synergy" | "bolder";
+  postPath?: string;
+  title?: string;
+  handledBy?: string;
+  handledAt?: string;
+  note?: string;
+  publishedUrl?: string;
 }
 
 export interface KpiSnapshot {

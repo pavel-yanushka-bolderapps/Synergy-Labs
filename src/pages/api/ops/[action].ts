@@ -25,6 +25,14 @@
 //   POST submission-mark   { ids, test: true | false | null } (null = automatic)
 //   POST submission-delete { ids }
 //   POST form-rules        { rules: string[] } the words that flag a test submission
+//   GET  blogs             the blog tracker: every post on both sites + dropped .md files
+//   GET  file?id=          one dropped .md file with its content
+//   POST blog-sync         { weeks } refresh the post list and GA4 traffic (weeks > 1 backfills)
+//   POST blog-source       { posts: [{ site, slug, source }] }
+//   POST file              { name, content } add a .md file by hand
+//   POST file-status       { id, status, note?, publishedUrl? }
+//   POST pulse             { week, text } the weekly one-line pulse
+//   GET  agents            how many agent tokens are set (never the tokens)
 import type { APIRoute } from "astro";
 import { waitUntil } from "@vercel/functions";
 import { checkPassword, currentUser, json, PEOPLE, signIn, signOut } from "../../../lib/ops/auth";
@@ -36,11 +44,14 @@ import { buildDigest, emailStatus, sendDigest } from "../../../lib/ops/digest";
 import { randomUUID } from "node:crypto";
 import { loadSubmissions, SETTINGS_ID } from "../../../lib/ops/submissions";
 import { buildScorecard, DERIVED_METRICS, loadWeeklyNotes } from "../../../lib/ops/scorecard";
+import { loadBlogs, runBlogSync, refreshDueDate, weeksSinceYearStart } from "../../../lib/ops/blogs";
+import { agentCount, dropFile, setBlogSources, setFileStatus, setPulse, HttpError } from "../../../lib/ops/agent";
+import type { InboxFile } from "../../../lib/ops/store";
 
 export const prerender = false;
 
 /** Fields a person may set on each type; everything else is dropped. */
-const EDITABLE: Record<Exclude<OpsType, "opsRun" | "opsKpi" | "opsSubmission" | "opsWeekly">, string[]> = {
+const EDITABLE: Record<Exclude<OpsType, "opsRun" | "opsKpi" | "opsSubmission" | "opsWeekly" | "opsBlog" | "opsInbox">, string[]> = {
   opsKeyResult: ["title", "objective", "metric", "baseline", "target", "current", "unit", "dueDate", "owner", "order", "code", "stretch", "andrewKr", "kind", "cumulative", "targetDate"],
   opsTask: ["title", "owner", "keyResult", "status", "startWeek", "endWeek", "recurring", "notes", "dueDate", "andrewKr"],
   opsContent: ["title", "kind", "keyword", "brief", "week", "status", "keyResult", "targetPath", "publishAt", "notes"],
@@ -52,12 +63,31 @@ export const GET: APIRoute = async ({ params, cookies, url }) => {
   if (!user) return json({ error: "Sign in" }, 401);
 
   if (params.action === "data") {
-    const [data, bolderKpis, forms, notes] = await Promise.all([loadAll(), loadSiteKpis("bolder"), loadSubmissions(), loadWeeklyNotes()]);
+    const [data, bolderKpis, forms, notes, blogs, newRefresh] = await Promise.all([
+      loadAll(),
+      loadSiteKpis("bolder"),
+      loadSubmissions(),
+      loadWeeklyNotes(),
+      loadBlogs().catch(() => []),
+      opsClient().fetch<number>(`count(*[_type == "opsInbox" && _id in path("ops.**") && kind == "blog-refresh" && status == "new"])`),
+    ]);
     const metrics: Record<string, { label: string; format?: string }> = { ...METRICS, ...DERIVED_METRICS };
     for (const e of ga4Events()) metrics[eventMetric(e)] = { label: `GA4 event: ${e}` };
     const health = await opsClient().getDocument<Health>("ops.health.latest");
-    const scorecard = buildScorecard(data.kpis, bolderKpis, forms.submissions, forms.testRules, notes);
-    return json({ user, ...data, metrics, health, scorecard, sources: { ...sourceStatus(), email: emailStatus().configured }, digestTo: emailStatus().to });
+    const scorecard = buildScorecard(data.kpis, bolderKpis, forms.submissions, forms.testRules, notes, blogs);
+    return json({ user, ...data, metrics, health, scorecard, sources: { ...sourceStatus(), bolderGa4: sourceStatus("bolder").ga4, email: emailStatus().configured, agents: agentCount() > 0 }, digestTo: emailStatus().to, inbox: { newRefresh } });
+  }
+  if (params.action === "blogs") {
+    const [posts, files] = await Promise.all([
+      loadBlogs(),
+      opsClient().fetch<Omit<InboxFile, "content">[]>(`*[_type == "opsInbox" && _id in path("ops.**")] | order(createdAt desc)[0...300]{..., "content": null}`),
+    ]);
+    return json({ posts: posts.map((p) => ({ ...p, refreshDue: refreshDueDate(p) })), files });
+  }
+  if (params.action === "file") {
+    const id = url.searchParams.get("id") ?? "";
+    if (!id.startsWith("ops.inbox.")) return json({ error: "Bad id" }, 400);
+    return json(await opsClient().getDocument(id));
   }
   if (params.action === "post") {
     const id = url.searchParams.get("id");
@@ -265,9 +295,37 @@ export const POST: APIRoute = async ({ params, cookies, request, url }) => {
         const week = String(body.week ?? "");
         if (!/^\d{4}-\d{2}-\d{2}$/.test(week)) return json({ error: "Bad week" }, 400);
         const ab = body.abWinners === "" || body.abWinners === null || body.abWinners === undefined ? undefined : Number(body.abWinners);
-        const doc = { _id: `ops.weekly.${week}`, _type: "opsWeekly", week, ...(Number.isFinite(ab) ? { abWinners: ab } : {}), ...(String(body.notes ?? "").trim() ? { notes: String(body.notes).trim().slice(0, 2000) } : {}), updatedBy: user };
-        return json(await c.createOrReplace(doc));
+        // Patch, not replace: the same document holds the agent-written pulse.
+        const id = `ops.weekly.${week}`;
+        const notes = String(body.notes ?? "").trim().slice(0, 2000);
+        await c.createIfNotExists({ _id: id, _type: "opsWeekly", week });
+        const unset = [...(Number.isFinite(ab) ? [] : ["abWinners"]), ...(notes ? [] : ["notes"])];
+        let patch = c.patch(id).set({ updatedBy: user, ...(Number.isFinite(ab) ? { abWinners: ab } : {}), ...(notes ? { notes } : {}) });
+        if (unset.length) patch = patch.unset(unset);
+        return json(await patch.commit());
       }
+
+      case "blog-sync": {
+        const weeks = body.weeks === "ytd" ? weeksSinceYearStart() : Math.min(Math.max(Number(body.weeks) || 1, 1), 53);
+        if (weeks > 2) {
+          // A long backfill runs after the response.
+          waitUntil(runBlogSync(user, weeks).catch((e) => console.error("[ops] blog-sync", e)));
+          return json({ started: true, weeks });
+        }
+        return json(await runBlogSync(user, weeks));
+      }
+
+      case "blog-source":
+        return json(await setBlogSources(user, body, false));
+
+      case "file":
+        return json(await dropFile(user, body));
+
+      case "file-status":
+        return json(await setFileStatus(user, body, false));
+
+      case "pulse":
+        return json(await setPulse(user, body, false));
 
       case "sync": {
         const weeks = Math.min(Math.max(Number(body.weeks) || 1, 1), 26);
@@ -294,6 +352,7 @@ export const POST: APIRoute = async ({ params, cookies, request, url }) => {
       }
     }
   } catch (err) {
+    if (err instanceof HttpError) return json({ error: err.message }, err.status);
     console.error(`[ops] ${params.action} failed:`, err);
     return json({ error: err instanceof Error ? err.message : String(err) }, 500);
   }

@@ -1,5 +1,5 @@
 // The Ops dashboard UI (mounted by src/pages/ops/index.astro). One screen per
-// tab -- Overview, Plan, Content, Forms, Feedback, KPIs, Health, Bots -- all reading the single
+// tab -- Overview, Plan, Weekly, Blogs, Content, Forms, Feedback, KPIs, Bolder Apps, Health, Bots -- all reading the single
 // /api/ops/data payload and writing through /api/ops/<action>.
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { HBars, Legend, LineChart, Sparkline, StackedBars, compact, type Series } from "./charts";
@@ -7,16 +7,16 @@ import { testReason } from "../../lib/ops/formtest";
 
 // ---- Types (mirrors src/lib/ops/store.ts; that file imports node modules) ----
 
-type Owner = "Pavel" | "Andrew" | "Bot";
+type Owner = "Pavel" | "Andrew" | "Shawn" | "Bot";
 interface Comment { _key: string; by: string; at: string; text: string }
 interface Check { _key: string; name: string; group: string; ok: boolean; detail: string }
 interface Health { checkedAt: string; checks: Check[] }
 interface Feedback { _id: string; _type: "opsFeedback"; number: number; title: string; status: "open" | "doing" | "done"; assignee?: Owner; createdBy: string; createdAt: string; host: string; path: string; viewport: string; userAgent?: string; elementText?: string; screenshot?: string; comments?: Comment[] }
 interface KeyResult { _id: string; _type: "opsKeyResult"; title: string; objective: string; metric?: string; baseline?: number; target?: number; current?: number; unit?: string; dueDate?: string; owner?: Owner; order?: number; code?: string; stretch?: number; andrewKr?: string; kind?: "metric" | "milestone" | "count"; cumulative?: boolean; targetDate?: string; comments?: Comment[] }
 interface Task { _id: string; _type: "opsTask"; title: string; owner: Owner; keyResult?: string; status: "todo" | "doing" | "done" | "blocked"; startWeek: string; endWeek: string; recurring?: boolean; notes?: string; dueDate?: string; andrewKr?: string; comments?: Comment[] }
-interface ScoreRow { week: string; gscClicks?: number; gscClicksSynergy?: number; gscClicksBolder?: number; newUsers?: number; ctaClicks?: number; formStartRateBolder?: number; mqlsBolder: number; mqlsSynergy: number; abWinners?: number; notes?: string }
+interface ScoreRow { week: string; gscClicks?: number; gscClicksSynergy?: number; gscClicksBolder?: number; newUsers?: number; ctaClicks?: number; formStartRateBolder?: number; mqlsBolder: number; mqlsSynergy: number; abWinners?: number; notes?: string; blogsBolder?: number; blogsSynergy?: number; mqlHubspot?: number; mqlHubspotBolder?: number; mqlHubspotSynergy?: number; sqlHubspot?: number; pulse?: string; pulseBy?: string }
 interface ContentItem { _id: string; _type: "opsContent"; title: string; kind: "new" | "refresh" | "location" | "backlink"; keyword?: string; brief?: string; week: string; status: string; keyResult?: string; postId?: string; slug?: string; targetPath?: string; publishAt?: string; publishedAt?: string; approvedBy?: string; notes?: string; comments?: Comment[] }
-interface BotRun { _id: string; job: string; startedAt: string; ok: boolean; summary: string; details?: string; costUsd?: number; by?: string }
+interface BotRun { _id: string; job: string; startedAt: string; ok: boolean; summary: string; details?: string; costUsd?: number; by?: string; agent?: boolean }
 interface ListRow { label: string; value: number; change?: number }
 interface Kpi { _id: string; weekStart: string; weekEnd: string; metrics: Record<string, number>; lists?: Record<string, ListRow[]>; errors?: Record<string, string>; syncedAt: string }
 interface MetricDef { label: string; better?: "up" | "down"; format?: "pct" | "dec" }
@@ -32,6 +32,7 @@ interface Data {
   health: Health | null;
   feedback: Feedback[];
   digestTo: string;
+  inbox?: { newRefresh: number };
   scorecard: { rows: ScoreRow[]; derived: Record<string, { value: number; from?: string } | undefined> };
 }
 
@@ -70,8 +71,8 @@ const fmt = (v: number | undefined, def?: MetricDef) => {
 // Chart + identity colours. Categorical slots (owners, series) and the one-hue
 // ramp for ordered pipeline stages were run through the dataviz palette
 // validator (CVD-safe adjacent pairs; ramp monotone with a visible light end).
-const C = { blue: "#2a78d6", orange: "#eb6834", aqua: "#1baf7a", grey: "#c3c2b7", good: "#0ca30c", critical: "#d03b3b" };
-const OWNER_COLOR: Record<Owner, string> = { Pavel: C.blue, Andrew: C.orange, Bot: C.aqua };
+const C = { blue: "#2a78d6", orange: "#eb6834", aqua: "#1baf7a", violet: "#7c5cc4", grey: "#c3c2b7", good: "#0ca30c", critical: "#d03b3b" };
+const OWNER_COLOR: Record<Owner, string> = { Pavel: C.blue, Andrew: C.orange, Shawn: C.violet, Bot: C.aqua };
 const STAGES = ["idea", "planned", "drafting", "review", "approved", "published"] as const;
 const STAGE_COLOR: Record<string, string> = { idea: "#c6dcf7", planned: "#86b6ef", drafting: "#5598e7", review: "#2a78d6", approved: "#1c5cab", published: "#104281" };
 const STATUS_STYLE: Record<string, string> = {
@@ -214,7 +215,7 @@ function PipelineChart({ data, weeks }: { data: Data; weeks: string[] }) {
 
 /** Open tasks per week, stacked by owner (recurring tasks count every week). */
 function WorkloadChart({ data, weeks }: { data: Data; weeks: string[] }) {
-  const series: Series[] = (["Pavel", "Andrew", "Bot"] as Owner[]).map((o) => ({
+  const series: Series[] = (["Pavel", "Andrew", "Shawn", "Bot"] as Owner[]).map((o) => ({
     key: o,
     label: o,
     color: OWNER_COLOR[o],
@@ -346,7 +347,7 @@ function Comments({ doc, onSaved }: { doc: { _id?: string; comments?: Comment[] 
 
 // ---- Editors ------------------------------------------------------------------------
 
-const ownerOptions: [string, string][] = [["Pavel", "Pavel"], ["Andrew", "Andrew"], ["Bot", "Bot (automated)"]];
+const ownerOptions: [string, string][] = [["Pavel", "Pavel"], ["Andrew", "Andrew"], ["Shawn", "Shawn"], ["Bot", "Bot (automated)"]];
 
 function krOptions(krs: KeyResult[]): [string, string][] {
   return [["", "— none —"], ...krs.map((k) => [k._id, k.title] as [string, string])];
@@ -551,13 +552,13 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="grid grid-cols-2 gap-4 lg:col-span-3 xl:grid-cols-4">
-        <Stat label="New leads (HubSpot)" metric="hubspot.newContacts" source="hubspot" data={data} color={C.blue} />
+        <Stat label="MQLs (HubSpot)" metric="hubspot.mql" source="hubspot" data={data} color={C.blue} />
         <Stat label="Organic users" metric="ga4.organicUsers" source="ga4" data={data} color={C.blue} />
         <Stat label="Search clicks" metric="gsc.clicks" source="gsc" data={data} color={C.blue} />
         <Stat label="Avg. search position" metric="gsc.position" source="gsc" data={data} color={C.blue} />
       </div>
 
-      <Card title="Form MQLs per week" sub="Real form submissions this quarter (Forms tab, tests excluded)" className="lg:col-span-3">
+      <Card title="Form submissions per week, by brand" sub="Real form submissions this quarter (Forms tab, tests excluded)" className="lg:col-span-3">
         <StackedBars
           x={data.scorecard.rows.map((r) => weekLabel(r.week))}
           series={[
@@ -569,19 +570,53 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
         <div className="mt-2"><Legend items={[{ label: "bolderapps.com", color: C.blue }, { label: "synergylabs.co", color: C.orange }]} /></div>
       </Card>
 
-      <Card title="Leads per week (HubSpot)" sub={leadsKr ? `Dashed line: key result target (${leadsKr.title})` : "New HubSpot contacts, all sources vs organic search"} className="lg:col-span-3">
-        {!trend.some((k) => k.metrics?.["hubspot.newContacts"] !== undefined) ? (
+      <Card title="MQLs by brand (HubSpot)" sub="Contacts that became MQL that week, by the website they first arrived on" className="lg:col-span-2">
+        {!trend.some((k) => k.metrics?.["hubspot.mql"] !== undefined) ? (
           <Waiting what="HubSpot access" />
         ) : (
           <>
-            <Legend items={[{ label: "All leads", color: C.blue }, { label: "From organic search", color: C.orange }]} />
+            <StackedBars
+              x={trend.map((k) => weekLabel(k.weekStart))}
+              series={[
+                { key: "b", label: "Bolder Apps", color: C.blue, values: trend.map((k) => k.metrics?.["hubspot.mql.bolder"]) },
+                { key: "s", label: "Synergy Labs", color: C.orange, values: trend.map((k) => k.metrics?.["hubspot.mql.synergy"]) },
+                { key: "o", label: "Other / unknown", color: C.grey, values: trend.map((k) => k.metrics?.["hubspot.mql"] === undefined ? undefined : Math.max(0, k.metrics["hubspot.mql"] - (k.metrics["hubspot.mql.bolder"] ?? 0) - (k.metrics["hubspot.mql.synergy"] ?? 0))) },
+              ]}
+              format={(v) => String(Math.round(v))}
+            />
+            <div className="mt-2"><Legend items={[{ label: "Bolder Apps", color: C.blue }, { label: "Synergy Labs", color: C.orange }, { label: "Other / unknown", color: C.grey }]} /></div>
+          </>
+        )}
+      </Card>
+      <Card title="MQL split, year to date" sub="Share of HubSpot MQLs by brand, weeks synced so far">
+        {(() => {
+          const sum = (key: string) => data.kpis.filter((k) => k.weekStart >= `${THIS_WEEK.slice(0, 4)}-01-01`).reduce((s, k) => s + (k.metrics?.[key] ?? 0), 0);
+          const total = sum("hubspot.mql");
+          if (!total) return <Waiting what="HubSpot access" />;
+          const rows = [{ label: "Bolder Apps", value: sum("hubspot.mql.bolder") }, { label: "Synergy Labs", value: sum("hubspot.mql.synergy") }];
+          rows.push({ label: "Other / unknown", value: Math.max(0, total - rows[0].value - rows[1].value) });
+          return (
+            <>
+              <p className="mb-3 text-sm text-neutral-600"><b>{fmt(total)}</b> MQLs · <b>{fmt(sum("hubspot.sql"))}</b> SQLs</p>
+              <HBars rows={rows.map((r) => ({ label: `${r.label} · ${Math.round((r.value / total) * 100)}%`, value: r.value }))} color={C.blue} />
+            </>
+          );
+        })()}
+      </Card>
+
+      <Card title="MQLs and SQLs per week (HubSpot)" sub={leadsKr ? `Dashed line: key result target (${leadsKr.title})` : "Contacts that reached each lifecycle stage that week"} className="lg:col-span-3">
+        {!trend.some((k) => k.metrics?.["hubspot.mql"] !== undefined) ? (
+          <Waiting what="HubSpot access" />
+        ) : (
+          <>
+            <Legend items={[{ label: "MQLs", color: C.blue }, { label: "SQLs", color: C.orange }]} />
             <LineChart
               x={trend.map((k) => weekLabel(k.weekStart))}
               series={[
-                { key: "all", label: "All leads", color: C.blue, values: trend.map((k) => k.metrics?.["hubspot.newContacts"]) },
-                { key: "org", label: "From organic search", color: C.orange, values: trend.map((k) => k.metrics?.["hubspot.newContactsOrganic"]) },
+                { key: "mql", label: "MQLs", color: C.blue, values: trend.map((k) => k.metrics?.["hubspot.mql"]) },
+                { key: "sql", label: "SQLs", color: C.orange, values: trend.map((k) => k.metrics?.["hubspot.sql"]) },
               ]}
-              target={leadsKr && leadsKr.metric === "hubspot.newContacts" ? { value: leadsKr.target!, label: `Target ${fmt(leadsKr.target)}` } : undefined}
+              target={leadsKr && (leadsKr.metric === "hubspot.mql" || leadsKr.metric === "hubspot.sql") ? { value: leadsKr.target!, label: `Target ${fmt(leadsKr.target)}` } : undefined}
               height={220}
             />
           </>
@@ -633,7 +668,7 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
       <Card title={`This week · ${weekLabel(THIS_WEEK)}`} sub={`${week.length} open · ${doneCount} of ${data.tasks.length} tasks done overall`} className="lg:col-span-2" action={<Btn kind="ghost" onClick={() => open({ _type: "opsTask", owner: "Pavel", status: "todo", startWeek: THIS_WEEK, endWeek: THIS_WEEK })}>+ Task</Btn>}>
         {week.length === 0 && <Empty>Nothing open this week.</Empty>}
         <div className={`grid gap-x-6 gap-y-3 ${new Set(week.map((t) => t.owner)).size > 1 ? "md:grid-cols-2" : ""}`}>
-          {(["Pavel", "Andrew", "Bot"] as Owner[]).map((o) => {
+          {(["Pavel", "Andrew", "Shawn", "Bot"] as Owner[]).map((o) => {
             const mine = week.filter((t) => t.owner === o);
             if (!mine.length) return null;
             return (
@@ -689,7 +724,7 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
         <Card title="Workload" sub="Open tasks per week, by owner"><WorkloadChart data={data} weeks={around} /></Card>
       </div>
 
-      <Card title="Recent bot activity" className="lg:col-span-3"><RunList runs={data.runs.slice(0, 8)} /></Card>
+      <Card title="Recent activity" sub="Bots, people and outside agents (e.g. Andrew’s Claude)" className="lg:col-span-3"><RunList runs={data.runs.slice(0, 8)} /></Card>
     </div>
   );
 }
@@ -1057,7 +1092,7 @@ function FormsTab({ setToast }: { setToast: (s: string) => void }) {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["Real submissions", real.length, "in the selected dates"],
-          ["Contact form leads", real.filter((x) => x.s.form === "contact").length, "the ones with a project brief"],
+          ["Contact form submissions", real.filter((x) => x.s.form === "contact").length, "the ones with a project brief"],
           ["Tests filtered out", inRange.length - real.length, "by your rules or marked by hand"],
           ["Emails not delivered", failed, failed ? "check these by hand: the team never got them" : "every notification went out"],
         ].map(([label, n, sub]) => (
@@ -1345,7 +1380,7 @@ function Content({ data, open, reload, setToast }: { data: Data; open: (d: any) 
 }
 
 /** One editable cell of the Weekly tab (saved when it loses focus). */
-function WeeklyInput({ row, field, reload, wide }: { row: ScoreRow; field: "abWinners" | "notes"; reload: () => void; wide?: boolean }) {
+function WeeklyInput({ row, field, reload, wide }: { row: ScoreRow; field: "abWinners" | "notes" | "pulse"; reload: () => void; wide?: boolean }) {
   const initial = row[field] === undefined ? "" : String(row[field]);
   const [v, setV] = useState(initial);
   const [state, setState] = useState<"" | "saving" | "saved" | "error">("");
@@ -1354,7 +1389,8 @@ function WeeklyInput({ row, field, reload, wide }: { row: ScoreRow; field: "abWi
     if (v === initial) return;
     setState("saving");
     try {
-      await api("weekly-save", { week: row.week, abWinners: field === "abWinners" ? v : row.abWinners ?? "", notes: field === "notes" ? v : row.notes ?? "" });
+      if (field === "pulse") await api("pulse", { week: row.week, text: v });
+      else await api("weekly-save", { week: row.week, abWinners: field === "abWinners" ? v : row.abWinners ?? "", notes: field === "notes" ? v : row.notes ?? "" });
       setState("saved");
       reload();
     } catch {
@@ -1369,7 +1405,8 @@ function WeeklyInput({ row, field, reload, wide }: { row: ScoreRow; field: "abWi
       onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
       inputMode={field === "abWinners" ? "numeric" : undefined}
       className={`w-full rounded border bg-transparent px-1.5 py-1 text-sm ${state === "error" ? "border-red-400" : state === "saved" ? "border-emerald-300" : "border-transparent hover:border-neutral-200 focus:border-neutral-300"} ${wide ? "min-w-[14rem]" : "text-right"}`}
-      placeholder={field === "notes" ? "Add a note…" : "–"}
+      placeholder={field === "notes" ? "Add a note…" : field === "pulse" ? "What moved? Worth a look?" : "–"}
+      title={field === "pulse" && row.pulseBy ? `Written by ${row.pulseBy}` : undefined}
     />
   );
 }
@@ -1380,11 +1417,11 @@ function WeeklyTab({ data, reload }: { data: Data; reload: () => void }) {
   const pct = (v?: number) => (v === undefined ? "–" : `${(v * 100).toFixed(1)}%`);
   const num = (v?: number) => (v === undefined ? "–" : v.toLocaleString());
   const past = rows.filter((r) => r.week <= THIS_WEEK);
-  const total = (k: "mqlsBolder" | "mqlsSynergy" | "abWinners") => past.reduce((a, r) => a + (r[k] ?? 0), 0);
+  const total = (k: "mqlsBolder" | "mqlsSynergy" | "abWinners" | "blogsBolder" | "blogsSynergy" | "mqlHubspot") => past.reduce((a, r) => a + (r[k] ?? 0), 0);
   const csv = () => {
-    const head = ["Week of", "Organic search clicks (Search Console)", "  synergylabs.co", "  bolderapps.com", "New users (GA4)", "CTA clicks", "Form start rate, bolderapps.com", "Form MQLs, Bolder", "Form MQLs, Synergy", "A/B tests finished with a winner", "Notes"];
+    const head = ["Week of", "Organic search clicks (Search Console)", "  synergylabs.co", "  bolderapps.com", "New users (GA4)", "CTA clicks", "Form start rate, bolderapps.com", "Form MQLs, Bolder", "Form MQLs, Synergy", "MQLs (HubSpot)", "  Bolder", "  Synergy", "SQLs (HubSpot)", "Blogs posted, Bolder", "Blogs posted, Synergy", "A/B tests finished with a winner", "Pulse", "Notes"];
     const cell = (x: unknown) => { const t = x === undefined || x === null ? "" : String(x); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
-    const body = rows.map((r) => [weekLabel(r.week), r.gscClicks, r.gscClicksSynergy, r.gscClicksBolder, r.newUsers, r.ctaClicks, r.formStartRateBolder === undefined ? "" : `${(r.formStartRateBolder * 100).toFixed(2)}%`, r.week <= THIS_WEEK ? r.mqlsBolder : "", r.week <= THIS_WEEK ? r.mqlsSynergy : "", r.abWinners, r.notes].map(cell).join(","));
+    const body = rows.map((r) => [weekLabel(r.week), r.gscClicks, r.gscClicksSynergy, r.gscClicksBolder, r.newUsers, r.ctaClicks, r.formStartRateBolder === undefined ? "" : `${(r.formStartRateBolder * 100).toFixed(2)}%`, r.week <= THIS_WEEK ? r.mqlsBolder : "", r.week <= THIS_WEEK ? r.mqlsSynergy : "", r.mqlHubspot, r.mqlHubspotBolder, r.mqlHubspotSynergy, r.sqlHubspot, r.week <= THIS_WEEK ? r.blogsBolder : "", r.week <= THIS_WEEK ? r.blogsSynergy : "", r.abWinners, r.pulse, r.notes].map(cell).join(","));
     download(`q4-2026-weekly-${TODAY}.csv`, "\uFEFF" + [head.map(cell).join(","), ...body].join("\r\n"));
   };
   const missing = [
@@ -1401,7 +1438,7 @@ function WeeklyTab({ data, reload }: { data: Data; reload: () => void }) {
     >
       {missing.length > 0 && <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">Waiting for: {missing.join(" · ")}. Those columns stay empty until access is granted (see KPIs → Google access).</p>}
       <div className="-mx-5 overflow-x-auto">
-        <table className="w-full min-w-[980px] text-sm">
+        <table className="w-full min-w-[1400px] text-sm">
           <thead className="border-y border-neutral-100 bg-neutral-50/70 text-xs text-neutral-500">
             <tr>
               <th className="py-2 pl-5 pr-2 text-left font-medium align-bottom">Week of</th>
@@ -1409,9 +1446,13 @@ function WeeklyTab({ data, reload }: { data: Data; reload: () => void }) {
               <th className={th}>New users<br /><span className="font-normal">GA4, both</span></th>
               <th className={th}>CTA clicks</th>
               <th className={th}>Form start rate<br /><span className="font-normal">bolderapps.com</span></th>
-              <th className={th}>Form MQLs<br /><span className="font-normal">Bolder</span></th>
-              <th className={th}>Form MQLs<br /><span className="font-normal">Synergy</span></th>
+              <th className={th} title="“Form MQLs” in the OKR sheet">Form subs<br /><span className="font-normal">Bolder</span></th>
+              <th className={th} title="“Form MQLs” in the OKR sheet">Form subs<br /><span className="font-normal">Synergy</span></th>
+              <th className={th}>MQLs<br /><span className="font-normal">HubSpot</span></th>
+              <th className={th}>Blogs posted<br /><span className="font-normal">Bolder</span></th>
+              <th className={th}>Blogs posted<br /><span className="font-normal">Synergy</span></th>
               <th className={th}>A/B tests<br /><span className="font-normal">with a winner</span></th>
+              <th className="px-2 py-2 text-left font-medium align-bottom">Pulse<br /><span className="font-normal">what moved, worth a look?</span></th>
               <th className="py-2 pl-2 pr-5 text-left font-medium align-bottom">Notes</th>
             </tr>
           </thead>
@@ -1427,7 +1468,11 @@ function WeeklyTab({ data, reload }: { data: Data; reload: () => void }) {
                   <td className="px-2 py-1.5 text-right tabular-nums">{pct(r.formStartRateBolder)}</td>
                   <td className="px-2 py-1.5 text-right font-medium tabular-nums">{future ? "" : r.mqlsBolder}</td>
                   <td className="px-2 py-1.5 text-right font-medium tabular-nums" title={r.week < "2026-10-12" ? "Synergy was still on Webflow: not in the Forms tab" : undefined}>{future ? "" : r.week < "2026-10-12" ? "–" : r.mqlsSynergy}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums" title={r.mqlHubspot !== undefined ? `Bolder ${num(r.mqlHubspotBolder)} · Synergy ${num(r.mqlHubspotSynergy)} · SQLs ${num(r.sqlHubspot)}` : undefined}>{num(r.mqlHubspot)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{future ? "" : r.blogsBolder ?? "–"}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{future ? "" : r.blogsSynergy ?? "–"}</td>
                   <td className="w-24 px-1 py-1"><WeeklyInput row={r} field="abWinners" reload={reload} /></td>
+                  <td className="px-1 py-1">{!future && <WeeklyInput row={r} field="pulse" reload={reload} wide />}</td>
                   <td className="py-1 pl-1 pr-5"><WeeklyInput row={r} field="notes" reload={reload} wide /></td>
                 </tr>
               );
@@ -1439,8 +1484,12 @@ function WeeklyTab({ data, reload }: { data: Data; reload: () => void }) {
               <td colSpan={4} />
               <td className="px-2 py-2 text-right tabular-nums">{total("mqlsBolder")}</td>
               <td className="px-2 py-2 text-right tabular-nums">{total("mqlsSynergy")}</td>
+              <td className="px-2 py-2 text-right tabular-nums">{past.some((r) => r.mqlHubspot !== undefined) ? total("mqlHubspot") : "–"}</td>
+              <td className="px-2 py-2 text-right tabular-nums">{total("blogsBolder")}</td>
+              <td className="px-2 py-2 text-right tabular-nums">{total("blogsSynergy")}</td>
               <td className="px-2 py-2 text-right tabular-nums">{total("abWinners")}</td>
-              <td className="py-2 pl-2 pr-5 text-xs font-normal text-neutral-500">Form MQLs = real submissions (tests excluded; Synergy counted from the Oct 12 launch)</td>
+              <td />
+              <td className="py-2 pl-2 pr-5 text-xs font-normal text-neutral-500">Form subs = real form submissions (the OKR sheet’s “Form MQLs”; tests excluded; Synergy counted from the Oct 12 launch). MQLs = HubSpot lifecycle stage.</td>
             </tr>
           </tfoot>
         </table>
@@ -1496,21 +1545,21 @@ function BolderTab({ data, setToast }: { data: Data; setToast: (s: string) => vo
   return (
     <div className="space-y-4">
       <p className="text-sm text-neutral-600">
-        www.bolderapps.com. Form leads arrive live from Webflow; Google Analytics and Search Console fill in once the service account has access (see <b>Google access</b> below).
+        www.bolderapps.com. Form submissions arrive live from Webflow; Google Analytics and Search Console fill in once the service account has access (see <b>Google access</b> below).
       </p>
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {tile("Form leads this week", thisWeek, `${lastWeek} last week`)}
-        {tile("Form leads, last 4 weeks", last4, `${prev4} in the 4 weeks before`)}
-        {tile("All-time real leads", marked.filter((x) => !x.test).length, `since ${subs.length ? new Date(subs[subs.length - 1].submittedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}`)}
+        {tile("Form submissions this week", thisWeek, `${lastWeek} last week`)}
+        {tile("Form submissions, last 4 weeks", last4, `${prev4} in the 4 weeks before`)}
+        {tile("All-time real submissions", marked.filter((x) => !x.test).length, `since ${subs.length ? new Date(subs[subs.length - 1].submittedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}`)}
         {tile("Tests filtered out", marked.filter((x) => x.test).length, "test words, webflow.io staging")}
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card title="Form leads per week" sub="Webflow forms on bolderapps.com, last 12 weeks" className="lg:col-span-2">
+        <Card title="Form submissions per week" sub="Webflow forms on bolderapps.com, last 12 weeks" className="lg:col-span-2">
           <StackedBars x={weeks.map(weekLabel)} series={[{ key: "real", label: "Real", color: C.blue, values: real }, { key: "test", label: "Test", color: C.grey, values: per(true) }]} highlight={11} />
           <div className="mt-2"><Legend items={[{ label: "Real", color: C.blue }, { label: "Test", color: C.grey }]} /></div>
         </Card>
-        <Card title="Pages that convert" sub="Real form leads, last 12 weeks">
-          {pages.length ? <HBars rows={pages} color={C.aqua} /> : <Empty>No leads in this period.</Empty>}
+        <Card title="Pages that convert" sub="Real form submissions, last 12 weeks">
+          {pages.length ? <HBars rows={pages} color={C.aqua} /> : <Empty>No submissions in this period.</Empty>}
         </Card>
       </div>
       <Kpis data={{ ...data, kpis: b.kpis, sources: b.sources, metrics: b.metrics }} sync={sync} open={() => {}} site="bolder" />
@@ -1599,8 +1648,8 @@ function Kpis({ data, sync, open, site = "synergy" }: { data: Data; sync: (weeks
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         {synergy ? (
           <>
-            <Stat label="New leads" metric="hubspot.newContacts" source="hubspot" data={data} />
-            <Stat label="Leads from organic" metric="hubspot.newContactsOrganic" source="hubspot" data={data} />
+            <Stat label="MQLs" metric="hubspot.mql" source="hubspot" data={data} />
+            <Stat label="SQLs" metric="hubspot.sql" source="hubspot" data={data} />
           </>
         ) : (
           <>
@@ -1613,8 +1662,9 @@ function Kpis({ data, sync, open, site = "synergy" }: { data: Data; sync: (weeks
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {synergy && chart("Leads", "New HubSpot contacts per week", [["hubspot.newContacts", "All leads", C.blue], ["hubspot.newContactsOrganic", "From organic search", C.orange]], "HubSpot access")}
-        {synergy && chart("Lead quality", "Contacts that became MQL / SQL that week", [["hubspot.mql", "MQLs", C.blue], ["hubspot.sql", "SQLs", C.orange]], "HubSpot access")}
+        {synergy && chart("MQLs and SQLs", "Contacts that became MQL / SQL that week", [["hubspot.mql", "MQLs", C.blue], ["hubspot.sql", "SQLs", C.orange]], "HubSpot access")}
+        {synergy && chart("MQLs by brand", "By the website the contact first arrived on", [["hubspot.mql.bolder", "Bolder Apps", C.blue], ["hubspot.mql.synergy", "Synergy Labs", C.orange]], "HubSpot access")}
+        {synergy && chart("New contacts", "New HubSpot contacts per week (before MQL)", [["hubspot.newContacts", "All contacts", C.blue], ["hubspot.newContactsOrganic", "From organic search", C.orange]], "HubSpot access")}
         {chart("Website users", "GA4, per week", [["ga4.users", "All users", C.blue], ["ga4.organicUsers", "Organic users", C.orange]], "Google Analytics access")}
         {chart("Sessions", "GA4, per week", [["ga4.sessions", "All sessions", C.blue], ["ga4.organicSessions", "Organic sessions", C.orange]], "Google Analytics access")}
       </div>
@@ -1717,7 +1767,7 @@ function RunList({ runs }: { runs: BotRun[] }) {
         <li key={r._id} className="flex items-start gap-3 py-2">
           <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${r.ok ? "bg-emerald-500" : "bg-red-500"}`} />
           <div className="min-w-0 flex-1">
-            <p>{r.summary}</p>
+            <p>{r.agent && <span className="mr-1.5 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-violet-800">agent</span>}{r.summary}</p>
             {r.details && <p className="truncate text-xs text-neutral-500" title={r.details}>{r.details}</p>}
           </div>
           <div className="shrink-0 text-right text-xs text-neutral-500">
@@ -1730,22 +1780,303 @@ function RunList({ runs }: { runs: BotRun[] }) {
   );
 }
 
+// ---- Blogs: tracker, refresh queue, agent files ------------------------------------------
+
+type BlogSource = "adaptify" | "redrover" | "vineyard" | "team";
+const SOURCE_LABEL: Record<BlogSource, string> = { adaptify: "Adaptify", redrover: "Red Rover", vineyard: "Vineyard", team: "Team-sourced" };
+const SOURCE_COLOR: Record<BlogSource | "none", string> = { adaptify: C.blue, redrover: C.orange, vineyard: C.violet, team: C.aqua, none: C.grey };
+interface BlogPost { _id: string; site: "synergy" | "bolder"; slug: string; path: string; title: string; publishedAt?: string; source?: BlogSource; sourceBy?: string; refreshedAt?: string; views?: number; live?: boolean; refreshDue?: string; recent?: { week: string; views: number }[] }
+interface InboxFile { _id: string; name: string; kind: string; content?: string | null; by: string; createdAt: string; status: "new" | "in-progress" | "done" | "skipped"; site?: "synergy" | "bolder"; postPath?: string; title?: string; handledBy?: string; handledAt?: string; note?: string; publishedUrl?: string }
+const SITE_HOST = { synergy: "https://www.synergylabs.co", bolder: "https://www.bolderapps.com" } as const;
+const SITE_NAME = { synergy: "Synergy", bolder: "Bolder" } as const;
+const FILE_STATUS: Record<InboxFile["status"], string> = { new: "bg-orange-100 text-orange-800", "in-progress": "bg-blue-100 text-blue-800", done: "bg-emerald-100 text-emerald-800", skipped: "bg-neutral-100 text-neutral-600" };
+
+function BlogsTab({ data, setToast }: { data: Data; setToast: (s: string) => void }) {
+  const [view, setView] = useState<"Tracker" | "Refresh queue" | "Files">(() => (location.hash.includes("refresh") ? "Refresh queue" : "Tracker"));
+  const [posts, setPosts] = useState<BlogPost[] | null>(null);
+  const [files, setFiles] = useState<InboxFile[]>([]);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const load = useCallback(() => api<{ posts: BlogPost[]; files: InboxFile[] }>("blogs").then((d) => { setPosts(d.posts); setFiles(d.files); }).catch((e) => setErr(e.message)), []);
+  useEffect(() => void load(), [load]);
+
+  const sync = async (weeks: number | "ytd") => {
+    setBusy(true);
+    setToast(weeks === "ytd" ? "Backfilling 2026 traffic in the background — reload in a couple of minutes…" : "Syncing the blog list and last week’s traffic…");
+    try {
+      const r = await api("blog-sync", { weeks });
+      if (!r.started) {
+        const failed = (r.traffic ?? []).filter((t: any) => !t.ok).map((t: any) => t.message);
+        setToast(`${r.list.synergy} Synergy + ${r.list.bolder} Bolder posts${r.list.added ? ` (${r.list.added} new)` : ""}${failed.length ? ` · traffic: ${failed.join("; ")}` : " · traffic synced"}`);
+      }
+    } catch (e: any) {
+      setToast(`Sync failed: ${e.message}`);
+    }
+    setBusy(false);
+    load();
+  };
+
+  if (err) return <p className="rounded-lg bg-red-50 p-4 text-sm text-red-800">Could not load: {err}</p>;
+  if (!posts) return <p className="text-sm text-neutral-500">Loading…</p>;
+  const openFiles = files.filter((f) => f.kind === "blog-refresh" && (f.status === "new" || f.status === "in-progress")).length;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-1 rounded-lg bg-white p-1 ring-1 ring-black/[0.07]">
+          {(["Tracker", "Refresh queue", "Files"] as const).map((v) => (
+            <button key={v} onClick={() => setView(v)} className={`rounded-md px-3 py-1.5 text-sm font-medium ${view === v ? "bg-primary-green text-white" : "text-neutral-600 hover:bg-neutral-50"}`}>
+              {v}{v === "Refresh queue" && openFiles > 0 && <span className="ml-1.5 rounded-full bg-orange-500 px-1.5 text-[10px] text-white">{openFiles}</span>}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Btn kind="ghost" disabled={busy} onClick={() => sync("ytd")}>Backfill 2026 traffic</Btn>
+          <Btn disabled={busy} onClick={() => sync(1)}>Sync now</Btn>
+        </div>
+      </div>
+      {!data.sources.ga4 && <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">Per-article traffic is waiting for GA4 access (GA4_PROPERTY_ID{data.sources.bolderGa4 ? "" : " and BOLDER_GA4_PROPERTY_ID"} in Vercel). The post list and source tags work now.</p>}
+      {view === "Tracker" && <BlogTracker posts={posts} reload={load} setToast={setToast} />}
+      {view === "Refresh queue" && <RefreshQueue posts={posts} files={files} reload={load} setToast={setToast} />}
+      {view === "Files" && <FilesList files={files} reload={load} setToast={setToast} />}
+    </div>
+  );
+}
+
+function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: () => void; setToast: (s: string) => void }) {
+  const year = THIS_WEEK.slice(0, 4);
+  const [site, setSite] = useState<"" | "synergy" | "bolder">("");
+  const [source, setSource] = useState<"" | BlogSource | "none">("");
+  const [period, setPeriod] = useState<"year" | "all">("year");
+  const [q, setQ] = useState("");
+  const [limit, setLimit] = useState(100);
+  const [sort, setSort] = useState<"date" | "views">("date");
+
+  const live = posts.filter((p) => p.live !== false);
+  const shown = live
+    .filter((p) => (!site || p.site === site) && (!source || (source === "none" ? !p.source : p.source === source)) && (period === "all" || (p.publishedAt ?? "") >= `${year}-01-01`))
+    .filter((p) => !q || `${p.title} ${p.path}`.toLowerCase().includes(q.toLowerCase()))
+    .sort((a, b) => (sort === "views" ? (b.views ?? 0) - (a.views ?? 0) : (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "")));
+  const thisYear = live.filter((p) => (p.publishedAt ?? "") >= `${year}-01-01`);
+
+  // Posts per month this year, stacked by source.
+  const months = Array.from({ length: Number(THIS_WEEK.slice(5, 7)) }, (_, i) => `${year}-${String(i + 1).padStart(2, "0")}`);
+  const inScope = thisYear.filter((p) => !site || p.site === site);
+  const series: Series[] = ([...(Object.keys(SOURCE_LABEL) as BlogSource[]), "none"] as const).map((s) => ({
+    key: s,
+    label: s === "none" ? "Not tagged" : SOURCE_LABEL[s],
+    color: SOURCE_COLOR[s],
+    values: months.map((m) => inScope.filter((p) => p.publishedAt?.startsWith(m) && (s === "none" ? !p.source : p.source === s)).length),
+  }));
+  const viewsBySource = (Object.keys(SOURCE_LABEL) as BlogSource[]).map((s) => {
+    const list = inScope.filter((p) => p.source === s);
+    return { label: `${SOURCE_LABEL[s]} · ${list.length} posts`, value: list.reduce((a, p) => a + (p.views ?? 0), 0) };
+  });
+
+  const tag = async (p: BlogPost, value: string) => {
+    try {
+      await api("blog-source", { posts: [{ site: p.site, slug: p.slug, source: value || null }] });
+      reload();
+    } catch (e: any) {
+      setToast(`Could not tag: ${e.message}`);
+    }
+  };
+  const csv = () => {
+    const cell = (x: unknown) => { const t = x === undefined || x === null ? "" : String(x); return /[",\n]/.test(t) || /^[=+\-@]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+    const head = ["Site", "Title", "URL", "Published", "Source", "Views (tracked)", "Refresh due"];
+    const body = shown.map((p) => [SITE_NAME[p.site], p.title, SITE_HOST[p.site] + p.path, p.publishedAt, p.source ? SOURCE_LABEL[p.source] : "", p.views ?? "", p.refreshDue].map(cell).join(","));
+    download(`blogs-${TODAY}.csv`, "﻿" + [head.join(","), ...body].join("\r\n"));
+  };
+  const tile = (label: string, value: ReactNode, sub: string) => (
+    <div className="rounded-xl border border-black/[0.07] bg-white p-4"><p className="text-xs font-medium text-neutral-500">{label}</p><p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p><p className="text-xs text-neutral-500">{sub}</p></div>
+  );
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        {tile(`Posts in ${year}`, thisYear.length, `Bolder ${thisYear.filter((p) => p.site === "bolder").length} · Synergy ${thisYear.filter((p) => p.site === "synergy").length}`)}
+        {tile("This month", thisYear.filter((p) => p.publishedAt?.startsWith(months[months.length - 1])).length, "both sites")}
+        {tile("Not tagged", thisYear.filter((p) => !p.source).length, `of ${thisYear.length} posts this year`)}
+        {tile("All posts", live.length, `Bolder ${live.filter((p) => p.site === "bolder").length} · Synergy ${live.filter((p) => p.site === "synergy").length}`)}
+      </div>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card title={`Posts per month, ${year}`} sub={`By source${site ? ` · ${SITE_NAME[site]} only` : " · both sites"}`} className="lg:col-span-2">
+          <Legend items={series} />
+          <StackedBars x={months.map((m) => new Date(`${m}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }))} series={series} height={180} format={(v) => String(Math.round(v))} />
+        </Card>
+        <Card title="Views by source" sub={`Tracked GA4 views since publish, ${year} posts`}>
+          {viewsBySource.some((r) => r.value) ? <HBars rows={viewsBySource} color={C.blue} /> : <Empty>No traffic yet: tag sources and wait for GA4.</Empty>}
+        </Card>
+      </div>
+      <Card title="Every post" sub="Source tags save as you pick them; agents can set them through the API too." action={<Btn kind="ghost" onClick={csv}>Download CSV</Btn>}>
+        <div className="mb-3 flex flex-wrap gap-2 text-sm">
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search titles…" className="min-w-[12rem] flex-1 rounded-lg border border-neutral-300 px-3 py-1.5" />
+          <select value={site} onChange={(e) => setSite(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="">Both sites</option><option value="bolder">Bolder Apps</option><option value="synergy">Synergy Labs</option></select>
+          <select value={source} onChange={(e) => setSource(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="">Any source</option>{Object.entries(SOURCE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}<option value="none">Not tagged</option></select>
+          <select value={period} onChange={(e) => setPeriod(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="year">Published {year}</option><option value="all">All time</option></select>
+          <select value={sort} onChange={(e) => setSort(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="date">Newest first</option><option value="views">Most viewed</option></select>
+        </div>
+        {!posts.length ? (
+          <Empty>No posts yet. Click “Sync now” to load both sites’ blogs.</Empty>
+        ) : (
+          <div className="-mx-5 overflow-x-auto">
+            <table className="w-full min-w-[820px] text-sm">
+              <thead className="border-y border-neutral-100 bg-neutral-50/70 text-xs text-neutral-500">
+                <tr><th className="py-2 pl-5 pr-2 text-left font-medium">Post</th><th className="px-2 text-left font-medium">Site</th><th className="px-2 text-left font-medium">Published</th><th className="px-2 text-left font-medium">Source</th><th className="px-2 text-right font-medium">Views</th><th className="px-2 font-medium">Last 4 wks</th><th className="py-2 pl-2 pr-5 text-left font-medium">Refresh due</th></tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {shown.slice(0, limit).map((p) => (
+                  <tr key={p._id}>
+                    <td className="max-w-[26rem] py-1.5 pl-5 pr-2"><a className="line-clamp-2 hover:underline" href={SITE_HOST[p.site] + p.path} target="_blank" rel="noreferrer">{p.title}</a></td>
+                    <td className="px-2 text-xs text-neutral-600">{SITE_NAME[p.site]}</td>
+                    <td className="whitespace-nowrap px-2 tabular-nums text-neutral-600">{p.publishedAt ?? "–"}</td>
+                    <td className="px-2">
+                      <select value={p.source ?? ""} onChange={(e) => tag(p, e.target.value)} title={p.sourceBy ? `Tagged by ${p.sourceBy}` : undefined} className={`rounded border px-1.5 py-0.5 text-xs ${p.source ? "border-neutral-200" : "border-dashed border-amber-400 text-amber-800"}`}>
+                        <option value="">Not tagged</option>
+                        {Object.entries(SOURCE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      </select>
+                    </td>
+                    <td className="px-2 text-right tabular-nums">{p.views == null ? "–" : p.views.toLocaleString()}</td>
+                    <td className="px-2">{p.recent?.length ? <Sparkline values={p.recent.map((r) => r.views)} color={C.blue} /> : null}</td>
+                    <td className={`whitespace-nowrap py-1.5 pl-2 pr-5 tabular-nums ${p.refreshDue && p.refreshDue <= TODAY ? "font-medium text-orange-700" : "text-neutral-500"}`}>{p.refreshDue ?? "–"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {shown.length > limit && <div className="px-5 pt-3"><Btn kind="ghost" onClick={() => setLimit(limit + 200)}>Show more ({shown.length - limit} left)</Btn></div>}
+            {!shown.length && <Empty>No posts match.</Empty>}
+          </div>
+        )}
+      </Card>
+    </>
+  );
+}
+
+function RefreshQueue({ posts, files, reload, setToast }: { posts: BlogPost[]; files: InboxFile[]; reload: () => void; setToast: (s: string) => void }) {
+  const [openFile, setOpenFile] = useState<InboxFile | null>(null);
+  const soon = iso(new Date(Date.now() + 7 * DAY));
+  const briefs = files.filter((f) => f.kind === "blog-refresh");
+  const queued = new Set(briefs.filter((f) => f.status === "new" || f.status === "in-progress").map((f) => f.postPath));
+  const due = posts.filter((p) => p.live !== false && p.refreshDue && p.refreshDue <= soon).sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
+  const newThisWeek = due.filter((p) => p.refreshDue! > iso(new Date(Date.now() - 7 * DAY)));
+
+  return (
+    <>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card title="Refresh briefs" sub="Dropped as .md files by Andrew’s Claude (or added by hand). Mark done when the refresh is live — that resets the post’s 11-month clock." className="lg:col-span-2">
+          {!briefs.length ? <Empty>No briefs yet. They arrive here as blog-refresh-*.md files.</Empty> : (
+            <ul className="divide-y divide-neutral-100">
+              {briefs.map((f) => <FileRow key={f._id} f={f} onOpen={() => setOpenFile(f)} reload={reload} setToast={setToast} />)}
+            </ul>
+          )}
+        </Card>
+        <Card title="Hitting 11 months" sub="Published or last refreshed 11+ months ago (or within the next 7 days), most viewed first">
+          <p className="mb-2 text-sm text-neutral-600"><b>{due.length}</b> due · <b>{newThisWeek.length}</b> new this week · <b>{due.filter((p) => queued.has(p.path)).length}</b> have a brief</p>
+          <ul className="max-h-[32rem] divide-y divide-neutral-100 overflow-y-auto text-sm">
+            {due.slice(0, 150).map((p) => (
+              <li key={p._id} className="flex items-start gap-2 py-1.5">
+                <span className="min-w-0 flex-1">
+                  <a className="line-clamp-2 hover:underline" href={SITE_HOST[p.site] + p.path} target="_blank" rel="noreferrer">{p.title}</a>
+                  <span className="text-xs text-neutral-500">{SITE_NAME[p.site]} · due {p.refreshDue}{p.views != null ? ` · ${p.views.toLocaleString()} views` : ""}</span>
+                </span>
+                {queued.has(p.path) && <span className="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800">brief</span>}
+              </li>
+            ))}
+            {!due.length && <Empty>Nothing due.</Empty>}
+          </ul>
+        </Card>
+      </div>
+      {openFile && <FileModal f={openFile} onClose={() => setOpenFile(null)} />}
+    </>
+  );
+}
+
+function FileRow({ f, onOpen, reload, setToast }: { f: InboxFile; onOpen: () => void; reload: () => void; setToast: (s: string) => void }) {
+  const set = async (status: InboxFile["status"]) => {
+    let note: string | null = "";
+    let publishedUrl = "";
+    if (status === "done" && f.kind === "blog-refresh") publishedUrl = prompt("Link to the refreshed post (optional)", f.postPath ? `${SITE_HOST[f.site ?? "synergy"]}${f.postPath}` : "") ?? "";
+    if (status === "skipped") {
+      note = prompt("Why skip it? (optional)");
+      if (note === null) return;
+    }
+    try {
+      await api("file-status", { id: f._id, status, note, publishedUrl });
+      reload();
+    } catch (e: any) {
+      setToast(`Could not update: ${e.message}`);
+    }
+  };
+  return (
+    <li className="flex flex-wrap items-center gap-3 py-2 text-sm">
+      <button className="min-w-0 flex-1 text-left" onClick={onOpen}>
+        <span className="font-medium hover:underline">{f.title || f.name}</span>
+        <span className="block text-xs text-neutral-500">{f.name} · {f.by} · {new Date(f.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}{f.postPath ? ` · ${f.postPath}` : ""}{f.handledBy && f.status !== "new" ? ` · ${f.status} by ${f.handledBy}` : ""}{f.note ? ` · “${f.note}”` : ""}</span>
+      </button>
+      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${FILE_STATUS[f.status]}`}>{f.status}</span>
+      <select value="" onChange={(e) => e.target.value && set(e.target.value as InboxFile["status"])} className="rounded border border-neutral-200 px-1.5 py-0.5 text-xs" aria-label="Change status">
+        <option value="">Move to…</option>
+        {(["new", "in-progress", "done", "skipped"] as const).filter((s) => s !== f.status).map((s) => <option key={s} value={s}>{s}</option>)}
+      </select>
+    </li>
+  );
+}
+
+function FileModal({ f, onClose }: { f: InboxFile; onClose: () => void }) {
+  const [content, setContent] = useState<string | null>(f.content ?? null);
+  useEffect(() => {
+    if (content === null) api<InboxFile>(`file?id=${encodeURIComponent(f._id)}`).then((d) => setContent(d.content ?? "")).catch((e) => setContent(`Could not load: ${e.message}`));
+  }, [f._id]);
+  return (
+    <Modal title={f.title || f.name} onClose={onClose} wide>
+      <p className="mb-3 text-xs text-neutral-500">{f.name} · dropped by {f.by} on {new Date(f.createdAt).toLocaleString()}{f.postPath && <> · <a className="underline" href={`${SITE_HOST[f.site ?? "synergy"]}${f.postPath}`} target="_blank" rel="noreferrer">{f.postPath}</a></>}</p>
+      <pre className="max-h-[70vh] overflow-auto whitespace-pre-wrap rounded-lg bg-neutral-50 p-4 font-mono text-[13px] leading-relaxed text-neutral-800">{content ?? "Loading…"}</pre>
+      <div className="mt-3 flex justify-end"><Btn kind="ghost" onClick={() => content && download(f.name.endsWith(".md") ? f.name : `${f.name}.md`, content)}>Download .md</Btn></div>
+    </Modal>
+  );
+}
+
+function FilesList({ files, reload, setToast }: { files: InboxFile[]; reload: () => void; setToast: (s: string) => void }) {
+  const [openFile, setOpenFile] = useState<InboxFile | null>(null);
+  const upload = async (list: FileList | null) => {
+    for (const file of Array.from(list ?? [])) {
+      try {
+        await api("file", { name: file.name, content: await file.text() });
+      } catch (e: any) {
+        setToast(`${file.name}: ${e.message}`);
+      }
+    }
+    reload();
+  };
+  return (
+    <Card
+      title="Files from agents"
+      sub="Every .md file dropped through the agent API (or added here). Blog refresh briefs also show in the Refresh queue."
+      action={<label className="cursor-pointer rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50">Add .md<input type="file" accept=".md,text/markdown,text/plain" multiple className="hidden" onChange={(e) => upload(e.target.files)} /></label>}
+    >
+      {!files.length ? <Empty>No files yet.</Empty> : <ul className="divide-y divide-neutral-100">{files.map((f) => <FileRow key={f._id} f={f} onOpen={() => setOpenFile(f)} reload={reload} setToast={setToast} />)}</ul>}
+      {openFile && <FileModal f={openFile} onClose={() => setOpenFile(null)} />}
+    </Card>
+  );
+}
+
 // ---- App -----------------------------------------------------------------------------------
 
-const TABS = ["Overview", "Plan", "Weekly", "Content", "Forms", "Feedback", "KPIs", "Bolder Apps", "Health", "Bots"] as const;
+const TABS = ["Overview", "Plan", "Weekly", "Blogs", "Content", "Forms", "Feedback", "KPIs", "Bolder Apps", "Health", "Bots"] as const;
 type Tab = (typeof TABS)[number];
-const TAB_ICON: Record<Tab, string> = { Overview: "◎", Plan: "▤", Weekly: "▦", Content: "✎", Forms: "✉", "Bolder Apps": "◆", Feedback: "◍", KPIs: "↗", Health: "♥", Bots: "⚙" };
+const TAB_ICON: Record<Tab, string> = { Overview: "◎", Plan: "▤", Weekly: "▦", Blogs: "¶", Content: "✎", Forms: "✉", "Bolder Apps": "◆", Feedback: "◍", KPIs: "↗", Health: "♥", Bots: "⚙" };
 const TAB_SUB: Record<Tab, string> = {
-  Overview: "Leads first: every task ties to a key result.",
+  Overview: "MQLs first: every task ties to a key result. Covers synergylabs.co and bolderapps.com.",
   Plan: "Who does what, week by week, through year-end.",
   Weekly: "The Q4 OKR sheet’s weekly numbers, filled in automatically.",
-  Content: "Topics, AI drafts, review and scheduled publishing.",
+  Blogs: "Every post on both sites: source, traffic since publish, and the 11-month refresh queue.",
+  Content: "Content calendar: topics, AI drafts, review and scheduled publishing.",
   Forms: "Every form submission on the site: filter, search, download.",
   Feedback: "Pins left on the live and staging site.",
   KPIs: "GA4, Search Console and HubSpot, synced every Monday.",
-  "Bolder Apps": "bolderapps.com: form leads, Google Analytics and Search Console.",
+  "Bolder Apps": "bolderapps.com: form submissions, Google Analytics and Search Console.",
   Health: "Daily checks against the live site.",
-  Bots: "Everything the automations did, and what it cost.",
+  Bots: "Everything the automations and agents did, and what it cost.",
 };
 
 export default function OpsApp({ user }: { user: string }) {
@@ -1794,8 +2125,8 @@ export default function OpsApp({ user }: { user: string }) {
       <aside className="sticky top-0 z-30 bg-primary-green text-white lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-56 lg:flex-col">
         <div className="flex items-center justify-between gap-3 px-4 py-3 lg:block lg:px-5 lg:py-6">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">Synergy Labs</p>
-            <p className="font-display text-2xl leading-tight">Ops</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">Synergy · Bolder</p>
+            <p className="font-display text-2xl leading-tight">Website Ops</p>
           </div>
           <div className="flex items-center gap-3 text-sm lg:hidden">
             <span className="text-white/70">{user}</span>
@@ -1808,6 +2139,7 @@ export default function OpsApp({ user }: { user: string }) {
               t === "Feedback" ? data?.feedback.filter((f) => f.status !== "done").length
               : t === "Health" ? data?.health?.checks.filter((c) => !c.ok).length
               : t === "Content" ? data?.content.filter((c) => c.status === "review").length
+              : t === "Blogs" ? data?.inbox?.newRefresh
               : 0;
             return (
               <button key={t} onClick={() => setTab(t)} className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${tab === t ? "bg-white/[0.12] text-white" : "text-white/65 hover:bg-white/[0.06] hover:text-white"}`}>
@@ -1839,6 +2171,7 @@ export default function OpsApp({ user }: { user: string }) {
           {tab === "Overview" && <Overview data={data} open={setEditing} sync={() => sync(1)} />}
           {tab === "Plan" && <Plan data={data} open={setEditing} />}
           {tab === "Weekly" && <WeeklyTab data={data} reload={load} />}
+          {tab === "Blogs" && <BlogsTab data={data} setToast={setToast} />}
           {tab === "Content" && <Content data={data} open={setEditing} reload={load} setToast={setToast} />}
           {tab === "Forms" && <FormsTab setToast={setToast} />}
           {tab === "Feedback" && <FeedbackTab data={data} reload={load} />}
@@ -1859,11 +2192,12 @@ export default function OpsApp({ user }: { user: string }) {
                 {!data.runs.length && <Empty>No activity yet.</Empty>}
               </Card>
             </div>
-            <Card title="Bot activity">
+            <Card title="Activity">
               <p className="mb-3 text-sm text-neutral-600">
-                A log of everything the automations did (KPI syncs, health checks, drafts, publishing, digests) and key actions by people, so you can see the bots are running and what they cost.
+                A log of everything the automations did (KPI syncs, blog tracker, health checks, drafts, publishing, digests), what outside agents wrote through the agent API (marked “agent”), and key actions by people.{" "}
+                {data.sources.agents ? "Agent tokens are set." : <span className="text-amber-800">No agent tokens yet (OPS_AGENT_TOKENS in Vercel).</span>}
                 <br />
-                Schedules (UTC): Mondays 06:00 KPI sync, 06:30 topic ideas, 08:00 digest email · daily 07:00 health checks · weekdays 09:00 &amp; 13:00 drafting · hourly publishing. Claude spend in this list:{" "}
+                Schedules (UTC): Mondays 06:00 KPI sync, 06:15 blog tracker, 06:30 topic ideas, 08:00 digest email · daily 07:00 health checks · weekdays 09:00 &amp; 13:00 drafting · hourly publishing. Claude spend in this list:{" "}
                 <b>${data.runs.reduce((s, r) => s + (r.costUsd ?? 0), 0).toFixed(2)}</b>
               </p>
               <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-neutral-50 p-3 text-sm">

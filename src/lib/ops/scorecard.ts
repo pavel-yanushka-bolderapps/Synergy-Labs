@@ -8,6 +8,9 @@
 //   Form start rate         GA4 form_start / sessions, bolderapps.com
 //   Form MQLs Bolder / Synergy   real (non-test) form submissions, Forms tab
 //   A/B tests with a winner, Notes   typed in (ops.weekly.<week>)
+//   Blogs posted Bolder / Synergy    posts by publish date (blog tracker, ops.blog.*)
+//   MQLs / SQLs (HubSpot)            lifecycle stage reached that week, split by brand
+//   Pulse                            one line on what moved, written by a person or agent
 import { opsClient, mondayOf, addDays, type KpiSnapshot } from "./store";
 import { testReason } from "./formtest";
 import type { Submission } from "./submissions";
@@ -20,6 +23,8 @@ export interface WeeklyNote {
   week: string;
   abWinners?: number;
   notes?: string;
+  pulse?: string;
+  pulseBy?: string;
 }
 
 export interface ScoreRow {
@@ -34,6 +39,14 @@ export interface ScoreRow {
   mqlsSynergy: number;
   abWinners?: number;
   notes?: string;
+  blogsBolder: number;
+  blogsSynergy: number;
+  mqlHubspot?: number;
+  mqlHubspotBolder?: number;
+  mqlHubspotSynergy?: number;
+  sqlHubspot?: number;
+  pulse?: string;
+  pulseBy?: string;
 }
 
 /** Live values a key result can be "tracked automatically by". */
@@ -50,7 +63,7 @@ export const DERIVED_METRICS: Record<string, { label: string; format?: "pct" }> 
 
 const sum = (...v: (number | undefined)[]) => (v.some((x) => x !== undefined) ? v.reduce<number>((a, x) => a + (x ?? 0), 0) : undefined);
 
-export function buildScorecard(synergy: KpiSnapshot[], bolder: KpiSnapshot[], submissions: Submission[], rules: string[], notes: WeeklyNote[]) {
+export function buildScorecard(synergy: KpiSnapshot[], bolder: KpiSnapshot[], submissions: Submission[], rules: string[], notes: WeeklyNote[], blogs: { site: string; publishedAt?: string }[] = []) {
   const weeks: string[] = [];
   for (let w = QUARTER.firstWeek; w <= QUARTER.lastWeek; w = addDays(w, 7)) weeks.push(w);
   const at = (list: KpiSnapshot[], w: string) => list.find((k) => k.weekStart === w)?.metrics ?? {};
@@ -73,6 +86,14 @@ export function buildScorecard(synergy: KpiSnapshot[], bolder: KpiSnapshot[], su
       mqlsSynergy: mqls("synergy", week),
       abWinners: note?.abWinners,
       notes: note?.notes,
+      blogsBolder: blogs.filter((b) => b.site === "bolder" && b.publishedAt && mondayOf(b.publishedAt) === week).length,
+      blogsSynergy: blogs.filter((b) => b.site === "synergy" && b.publishedAt && mondayOf(b.publishedAt) === week).length,
+      mqlHubspot: sy["hubspot.mql"],
+      mqlHubspotBolder: sy["hubspot.mql.bolder"],
+      mqlHubspotSynergy: sy["hubspot.mql.synergy"],
+      sqlHubspot: sy["hubspot.sql"],
+      pulse: note?.pulse,
+      pulseBy: note?.pulseBy,
     };
   });
 

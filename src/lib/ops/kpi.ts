@@ -25,6 +25,10 @@
 //                                "https://www.synergylabs.co/" for a URL-prefix
 //                                property.
 //   HUBSPOT_TOKEN                private app token with crm.objects.contacts.read.
+//   HUBSPOT_BRAND_PROPERTY       optional; the contact property that tells which
+//                                website a contact came from (default
+//                                hs_analytics_first_url). MQLs/SQLs are split by
+//                                whether it contains "bolderapps" or "synergylabs".
 //
 //   Bolder Apps (www.bolderapps.com, the "Bolder Apps" tab) uses the same
 //   Google login with its own property and site; HubSpot is Synergy-only:
@@ -60,8 +64,12 @@ export const METRICS: Record<string, { label: string; unit?: string; better?: "u
   "gsc.position": { label: "Avg. position", better: "down", format: "dec" },
   "hubspot.newContacts": { label: "New contacts" },
   "hubspot.newContactsOrganic": { label: "New contacts from organic" },
-  "hubspot.mql": { label: "New MQLs" },
-  "hubspot.sql": { label: "New SQLs" },
+  "hubspot.mql": { label: "MQLs" },
+  "hubspot.sql": { label: "SQLs" },
+  "hubspot.mql.bolder": { label: "MQLs · Bolder Apps" },
+  "hubspot.mql.synergy": { label: "MQLs · Synergy Labs" },
+  "hubspot.sql.bolder": { label: "SQLs · Bolder Apps" },
+  "hubspot.sql.synergy": { label: "SQLs · Synergy Labs" },
 };
 export const eventMetric = (name: string) => `ga4.event.${name}`;
 export const ga4Events = () => {
@@ -220,6 +228,11 @@ async function ga4Report(property: string, body: object): Promise<Ga4Row[]> {
   return data.rows ?? [];
 }
 
+/** A GA4 report for one website's property (used by the blog tracker). */
+export function ga4ReportForSite(site: KpiSite, body: object): Promise<Ga4Row[]> {
+  return ga4Report(SOURCES[site].ga4Property(), body);
+}
+
 const organicFilter = {
   filter: { fieldName: "sessionDefaultChannelGroup", stringFilter: { value: "Organic Search" } },
 };
@@ -342,6 +355,26 @@ async function syncHubspot(start: string, end: string, metrics: Record<string, n
   metrics["hubspot.newContactsOrganic"] = organic;
   metrics["hubspot.mql"] = mql;
   metrics["hubspot.sql"] = sql;
+
+  // MQLs / SQLs by brand. One HubSpot portal serves both websites, so the
+  // brand comes from the URL the contact first arrived on. Best effort: a
+  // failure here must not lose the totals above.
+  const prop = env("HUBSPOT_BRAND_PROPERTY") || "hs_analytics_first_url";
+  const brand = (token: string) => ({ propertyName: prop, operator: "CONTAINS_TOKEN", value: `*${token}*` });
+  try {
+    const [mb, ms, sb, ss] = await Promise.all([
+      hubspotCount([between("hs_lifecyclestage_marketingqualifiedlead_date"), brand("bolderapps")]),
+      hubspotCount([between("hs_lifecyclestage_marketingqualifiedlead_date"), brand("synergylabs")]),
+      hubspotCount([between("hs_lifecyclestage_salesqualifiedlead_date"), brand("bolderapps")]),
+      hubspotCount([between("hs_lifecyclestage_salesqualifiedlead_date"), brand("synergylabs")]),
+    ]);
+    metrics["hubspot.mql.bolder"] = mb;
+    metrics["hubspot.mql.synergy"] = ms;
+    metrics["hubspot.sql.bolder"] = sb;
+    metrics["hubspot.sql.synergy"] = ss;
+  } catch (err) {
+    console.error("[ops] HubSpot brand split failed:", err);
+  }
 }
 
 // --- The snapshot -------------------------------------------------------------------
