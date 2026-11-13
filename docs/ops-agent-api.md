@@ -72,10 +72,10 @@ Sources: `adaptify`, `redrover`, `vineyard`, `team` (team-sourced / original). `
 ### Weekly pulse: `POST pulse`
 
 ```json
-{ "week": "2026-11-02", "text": "Organic clicks down 12% WoW. Check the /blog/ai-* pages that lost position." }
+{ "week": "2026-11-02", "site": "synergy", "text": "Organic clicks down 12% WoW. Check the /blog/ai-* pages that lost position." }
 ```
 
-`week` is any date in the week (stored under its Monday); omitted = this week. Shown in the **Weekly** tab's Pulse column.
+`week` is any date in the week (stored under its Monday); omitted = this week. `site` is `"synergy"` (default) or `"bolder"`: each website has its own pulse, shown in that website's **Weekly** tab. Send one per site.
 
 ### Backfill form submissions: `POST submissions`
 
@@ -95,7 +95,7 @@ What already exists (so only fill the gaps): **Synergy** Oct 6 → now; **Bolder
 
 ## Weekly routines this enables
 
-1. **KPI tracker** (Fridays): `GET scorecard`, fill the sheet, then `POST pulse` with one line on what moved.
+1. **KPI tracker** (Fridays): `GET scorecard`, fill the sheet, then `POST pulse` once per website (`site: "synergy"` and `site: "bolder"`) with one line on what moved.
 2. **Blog tracker** (weekly): `GET blogs`, tag any untagged posts with `POST blog-source`.
 3. **Refresh queue** (weekly): `GET refresh-due`, pick the ones worth refreshing, and `POST file` one `blog-refresh-*.md` brief each.
 4. **Publishing** (Pavel's Claude): `GET files?kind=blog-refresh&status=new`, then `file-status` → `in-progress`, refresh the post, then `file-status` → `done`.
