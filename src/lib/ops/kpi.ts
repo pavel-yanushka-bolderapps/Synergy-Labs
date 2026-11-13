@@ -80,10 +80,13 @@ export const ga4Events = () => {
 
 export type KpiSite = "synergy" | "bolder";
 
+/** "properties/123 " -> "123": the id is pasted from GA4 in more than one form. */
+const propertyId = (v: string) => v.trim().replace(/^properties\//, "");
+
 /** Where each website's numbers come from. */
 const SOURCES: Record<KpiSite, { ga4Property: () => string; ga4Var: string; gscSite: () => string; hubspot: boolean }> = {
-  synergy: { ga4Property: () => env("GA4_PROPERTY_ID"), ga4Var: "GA4_PROPERTY_ID", gscSite: () => env("GSC_SITE") || "sc-domain:synergylabs.co", hubspot: true },
-  bolder: { ga4Property: () => env("BOLDER_GA4_PROPERTY_ID"), ga4Var: "BOLDER_GA4_PROPERTY_ID", gscSite: () => env("BOLDER_GSC_SITE") || "sc-domain:bolderapps.com", hubspot: false },
+  synergy: { ga4Property: () => propertyId(env("GA4_PROPERTY_ID")), ga4Var: "GA4_PROPERTY_ID", gscSite: () => env("GSC_SITE") || "sc-domain:synergylabs.co", hubspot: true },
+  bolder: { ga4Property: () => propertyId(env("BOLDER_GA4_PROPERTY_ID")), ga4Var: "BOLDER_GA4_PROPERTY_ID", gscSite: () => env("BOLDER_GSC_SITE") || "sc-domain:bolderapps.com", hubspot: false },
 };
 export const isKpiSite = (s: unknown): s is KpiSite => s === "synergy" || s === "bolder";
 
@@ -181,7 +184,14 @@ async function google(url: string, body: object) {
     headers: { Authorization: `Bearer ${await googleAccessToken()}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = await res.json();
+  const text = await res.text();
+  let data: any;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    // Google answers a malformed URL (usually a bad property id) with an HTML page.
+    throw new Error(`Google API ${res.status} for ${new URL(url).pathname} (not JSON; check the GA4 property id is the numeric Property ID, not a G-… Measurement ID)`);
+  }
   if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
   return data;
 }
@@ -330,14 +340,38 @@ async function syncGsc(siteUrl: string, start: string, end: string, metrics: Rec
 // --- HubSpot ---------------------------------------------------------------------
 
 async function hubspotCount(filters: object[]): Promise<number> {
-  const res = await fetch("https://api.hubapi.com/crm/v3/objects/contacts/search", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env("HUBSPOT_TOKEN")}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ filterGroups: [{ filters }], limit: 1 }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
-  return data.total ?? 0;
+  // The search API allows a few requests a second per account: space them out
+  // and retry once on 429.
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch("https://api.hubapi.com/crm/v3/objects/contacts/search", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env("HUBSPOT_TOKEN").trim()}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ filterGroups: [{ filters }], limit: 1 }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 429 && attempt < 2) {
+      await new Promise((r) => setTimeout(r, 1100));
+      continue;
+    }
+    if (!res.ok) {
+      // "There was a problem with the request." alone says nothing; keep the
+      // status, category and first detail (e.g. MISSING_SCOPES, a bad property).
+      const detail = data.errors?.[0]?.message || data.context ? JSON.stringify(data.errors?.[0]?.message ?? data.context) : "";
+      const hint = res.status === 401 ? " (token not accepted: use a HubSpot private app access token, pat-…)" : res.status === 403 ? " (the private app needs the crm.objects.contacts.read scope)" : "";
+      throw new Error(`HubSpot ${res.status}${data.category ? ` ${data.category}` : ""}: ${data.message || "request failed"}${detail ? ` ${detail}` : ""}${hint}`);
+    }
+    return data.total ?? 0;
+  }
+}
+
+/** HubSpot counts one after another, a little apart (see hubspotCount). */
+async function inTurn<T>(jobs: (() => Promise<T>)[]): Promise<T[]> {
+  const out: T[] = [];
+  for (const job of jobs) {
+    out.push(await job());
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  return out;
 }
 
 async function syncHubspot(start: string, end: string, metrics: Record<string, number>) {
@@ -345,11 +379,11 @@ async function syncHubspot(start: string, end: string, metrics: Record<string, n
   const from = String(Date.parse(`${start}T00:00:00Z`));
   const to = String(Date.parse(`${addDays(end, 1)}T00:00:00Z`) - 1);
   const between = (propertyName: string) => ({ propertyName, operator: "BETWEEN", value: from, highValue: to });
-  const [contacts, organic, mql, sql] = await Promise.all([
-    hubspotCount([between("createdate")]),
-    hubspotCount([between("createdate"), { propertyName: "hs_analytics_source", operator: "EQ", value: "ORGANIC_SEARCH" }]),
-    hubspotCount([between("hs_lifecyclestage_marketingqualifiedlead_date")]),
-    hubspotCount([between("hs_lifecyclestage_salesqualifiedlead_date")]),
+  const [contacts, organic, mql, sql] = await inTurn([
+    () => hubspotCount([between("createdate")]),
+    () => hubspotCount([between("createdate"), { propertyName: "hs_analytics_source", operator: "EQ", value: "ORGANIC_SEARCH" }]),
+    () => hubspotCount([between("hs_lifecyclestage_marketingqualifiedlead_date")]),
+    () => hubspotCount([between("hs_lifecyclestage_salesqualifiedlead_date")]),
   ]);
   metrics["hubspot.newContacts"] = contacts;
   metrics["hubspot.newContactsOrganic"] = organic;
@@ -362,11 +396,11 @@ async function syncHubspot(start: string, end: string, metrics: Record<string, n
   const prop = env("HUBSPOT_BRAND_PROPERTY") || "hs_analytics_first_url";
   const brand = (token: string) => ({ propertyName: prop, operator: "CONTAINS_TOKEN", value: `*${token}*` });
   try {
-    const [mb, ms, sb, ss] = await Promise.all([
-      hubspotCount([between("hs_lifecyclestage_marketingqualifiedlead_date"), brand("bolderapps")]),
-      hubspotCount([between("hs_lifecyclestage_marketingqualifiedlead_date"), brand("synergylabs")]),
-      hubspotCount([between("hs_lifecyclestage_salesqualifiedlead_date"), brand("bolderapps")]),
-      hubspotCount([between("hs_lifecyclestage_salesqualifiedlead_date"), brand("synergylabs")]),
+    const [mb, ms, sb, ss] = await inTurn([
+      () => hubspotCount([between("hs_lifecyclestage_marketingqualifiedlead_date"), brand("bolderapps")]),
+      () => hubspotCount([between("hs_lifecyclestage_marketingqualifiedlead_date"), brand("synergylabs")]),
+      () => hubspotCount([between("hs_lifecyclestage_salesqualifiedlead_date"), brand("bolderapps")]),
+      () => hubspotCount([between("hs_lifecyclestage_salesqualifiedlead_date"), brand("synergylabs")]),
     ]);
     metrics["hubspot.mql.bolder"] = mb;
     metrics["hubspot.mql.synergy"] = ms;
