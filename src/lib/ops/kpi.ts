@@ -352,7 +352,9 @@ async function hubspotCount(filters: object[]): Promise<number> {
       headers: { Authorization: `Bearer ${env("HUBSPOT_TOKEN").trim()}`, "Content-Type": "application/json" },
       body: JSON.stringify({ filterGroups: [{ filters }], limit: 1 }),
     });
-    const data = await res.json().catch(() => ({}));
+    const raw = await res.text();
+    let data: any = {};
+    try { data = JSON.parse(raw); } catch {}
     if (res.status === 429 && attempt < 2) {
       await new Promise((r) => setTimeout(r, 1100));
       continue;
@@ -362,7 +364,8 @@ async function hubspotCount(filters: object[]): Promise<number> {
       // status, category and first detail (e.g. MISSING_SCOPES, a bad property).
       const detail = data.errors?.[0]?.message || data.context ? JSON.stringify(data.errors?.[0]?.message ?? data.context) : "";
       const hint = res.status === 401 ? " (token not accepted: use a HubSpot private app access token, pat-…)" : res.status === 403 ? " (the private app needs the crm.objects.contacts.read scope)" : "";
-      throw new Error(`HubSpot ${res.status}${data.category ? ` ${data.category}` : ""}: ${data.message || "request failed"}${detail ? ` ${detail}` : ""}${hint}`);
+      const which = (filters as { propertyName: string }[]).map((f) => f.propertyName).join(" + ");
+      throw new Error(`HubSpot ${res.status}${data.category ? ` ${data.category}` : ""} on ${which}: ${data.message || "request failed"}${detail ? ` ${detail}` : ""}${hint} · ${raw.slice(0, 300)}`);
     }
     return data.total ?? 0;
   }
