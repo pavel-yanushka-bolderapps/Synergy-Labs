@@ -18,7 +18,7 @@
 //   GET  feedback?path=    on-site feedback pins for one page (the site overlay)
 //   POST feedback          create a pin (from public/ops-feedback.js)
 //   POST screenshot        upload a pin's screenshot (JPEG data URL) -> { url }
-//   POST weekly-save       { week, abWinners, notes } the typed-in Weekly columns
+//   POST weekly-save       { week, site?, abWinners, notes } the typed-in Weekly columns
 //   GET  bolder            the Bolder Apps tab: its weekly GA4 / Search Console snapshots
 //   GET  google-access     GA4 properties + Search Console sites the service account can read
 //   GET  submissions       every form submission + the test-detection rules
@@ -31,7 +31,7 @@
 //   POST blog-source       { posts: [{ site, slug, source }] }
 //   POST file              { name, content } add a .md file by hand
 //   POST file-status       { id, status, note?, publishedUrl? }
-//   POST pulse             { week, text } the weekly one-line pulse
+//   POST pulse             { week, text, site? } the weekly one-line pulse
 //   GET  agents            how many agent tokens are set (never the tokens)
 import type { APIRoute } from "astro";
 import { waitUntil } from "@vercel/functions";
@@ -43,7 +43,7 @@ import { runAndSaveHealth, type Health } from "../../../lib/ops/health";
 import { buildDigest, emailStatus, sendDigest } from "../../../lib/ops/digest";
 import { randomUUID } from "node:crypto";
 import { loadSubmissions, SETTINGS_ID } from "../../../lib/ops/submissions";
-import { buildScorecard, DERIVED_METRICS, loadWeeklyNotes } from "../../../lib/ops/scorecard";
+import { buildScorecard, DERIVED_METRICS, loadWeeklyNotes, weeklyField } from "../../../lib/ops/scorecard";
 import { loadBlogs, runBlogSync, refreshDueDate, weeksSinceYearStart } from "../../../lib/ops/blogs";
 import { agentCount, dropFile, setBlogSources, setFileStatus, setPulse, HttpError } from "../../../lib/ops/agent";
 import type { InboxFile } from "../../../lib/ops/store";
@@ -52,9 +52,9 @@ export const prerender = false;
 
 /** Fields a person may set on each type; everything else is dropped. */
 const EDITABLE: Record<Exclude<OpsType, "opsRun" | "opsKpi" | "opsSubmission" | "opsWeekly" | "opsBlog" | "opsInbox">, string[]> = {
-  opsKeyResult: ["title", "objective", "metric", "baseline", "target", "current", "unit", "dueDate", "owner", "order", "code", "stretch", "andrewKr", "kind", "cumulative", "targetDate"],
-  opsTask: ["title", "owner", "keyResult", "status", "startWeek", "endWeek", "recurring", "notes", "dueDate", "andrewKr"],
-  opsContent: ["title", "kind", "keyword", "brief", "week", "status", "keyResult", "targetPath", "publishAt", "notes"],
+  opsKeyResult: ["title", "objective", "metric", "baseline", "target", "current", "unit", "dueDate", "owner", "order", "code", "stretch", "andrewKr", "kind", "cumulative", "targetDate", "site"],
+  opsTask: ["title", "owner", "keyResult", "status", "startWeek", "endWeek", "recurring", "notes", "dueDate", "andrewKr", "site"],
+  opsContent: ["title", "kind", "keyword", "brief", "week", "status", "keyResult", "targetPath", "publishAt", "notes", "site"],
   opsFeedback: ["title", "status", "assignee"],
 };
 
@@ -75,7 +75,20 @@ export const GET: APIRoute = async ({ params, cookies, url }) => {
     for (const e of ga4Events()) metrics[eventMetric(e)] = { label: `GA4 event: ${e}` };
     const health = await opsClient().getDocument<Health>("ops.health.latest");
     const scorecard = buildScorecard(data.kpis, bolderKpis, forms.submissions, forms.testRules, notes, blogs);
-    return json({ user, ...data, metrics, health, scorecard, sources: { ...sourceStatus(), bolderGa4: sourceStatus("bolder").ga4, email: emailStatus().configured, agents: agentCount() > 0 }, digestTo: emailStatus().to, inbox: { newRefresh } });
+    const shared = { email: emailStatus().configured, agents: agentCount() > 0 };
+    return json({
+      user,
+      ...data,
+      metrics,
+      health,
+      scorecard,
+      sources: { ...sourceStatus(), bolderGa4: sourceStatus("bolder").ga4, ...shared },
+      // The Bolder Apps view of the dashboard reads these instead of kpis / sources.
+      kpisBolder: bolderKpis,
+      sourcesBolder: { ...sourceStatus("bolder"), ...shared },
+      digestTo: emailStatus().to,
+      inbox: { newRefresh },
+    });
   }
   if (params.action === "blogs") {
     const [posts, files] = await Promise.all([
@@ -297,10 +310,13 @@ export const POST: APIRoute = async ({ params, cookies, request, url }) => {
         const ab = body.abWinners === "" || body.abWinners === null || body.abWinners === undefined ? undefined : Number(body.abWinners);
         // Patch, not replace: the same document holds the agent-written pulse.
         const id = `ops.weekly.${week}`;
+        const site = body.site === "bolder" ? "bolder" : "synergy";
+        const abKey = weeklyField("abWinners", site);
+        const notesKey = weeklyField("notes", site);
         const notes = String(body.notes ?? "").trim().slice(0, 2000);
         await c.createIfNotExists({ _id: id, _type: "opsWeekly", week });
-        const unset = [...(Number.isFinite(ab) ? [] : ["abWinners"]), ...(notes ? [] : ["notes"])];
-        let patch = c.patch(id).set({ updatedBy: user, ...(Number.isFinite(ab) ? { abWinners: ab } : {}), ...(notes ? { notes } : {}) });
+        const unset = [...(Number.isFinite(ab) ? [] : [abKey]), ...(notes ? [] : [notesKey])];
+        let patch = c.patch(id).set({ updatedBy: user, ...(Number.isFinite(ab) ? { [abKey]: ab } : {}), ...(notes ? { [notesKey]: notes } : {}) });
         if (unset.length) patch = patch.unset(unset);
         return json(await patch.commit());
       }

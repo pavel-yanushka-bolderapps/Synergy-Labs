@@ -10,6 +10,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { opsClient, logRun, mondayOf, type InboxFile, type InboxStatus } from "./store";
 import { blogId, isBlogSource, SOURCE_LABEL, type BlogSite } from "./blogs";
+import { weeklyField } from "./scorecard";
 
 const env = (k: string) => process.env[k] || (import.meta.env as Record<string, string | undefined>)[k] || "";
 const digest = (s: string) => createHash("sha256").update(s).digest();
@@ -164,10 +165,15 @@ export async function setPulse(by: string, body: Record<string, unknown>, agent:
   const week = mondayOf(str(body.week, 10) || new Date());
   const text = str(body.text, 500);
   if (!text) throw new HttpError(400, "text is required");
+  // One pulse per website; without `site` it is Synergy's (the original field).
+  const site = body.site === "bolder" ? "bolder" : "synergy";
   const c = opsClient();
   await c.createIfNotExists({ _id: `ops.weekly.${week}`, _type: "opsWeekly", week });
-  const updated = await c.patch(`ops.weekly.${week}`).set({ pulse: text, pulseBy: by, pulseAt: new Date().toISOString() }).commit();
-  await logRun({ job: agent ? "agent" : "weekly", ok: true, by, agent, summary: `${by} wrote the weekly pulse for ${week}`, details: text });
+  const updated = await c
+    .patch(`ops.weekly.${week}`)
+    .set({ [weeklyField("pulse", site)]: text, [weeklyField("pulseBy", site)]: by, [site === "bolder" ? "pulseAtBolder" : "pulseAt"]: new Date().toISOString() })
+    .commit();
+  await logRun({ job: agent ? "agent" : "weekly", ok: true, by, agent, summary: `${by} wrote the ${site === "bolder" ? "Bolder Apps" : "Synergy Labs"} weekly pulse for ${week}`, details: text });
   return updated;
 }
 

@@ -81,6 +81,37 @@ const enabled =
       for (const id of GA_IDS) gtag("config", id);
     </script>
 
+    {/* CTA clicks, for the "CTA clicks per week" key result (Ops → Weekly).
+        One GA4 event, "cta_click", for every call to action: the quote and
+        contact buttons, links to the contact page or the #cta form, phone and
+        email links, and anything marked data-cta. Counted in Ops as
+        ga4.ctaClicks (GA4_CTA_EVENT, default "cta_click"). */}
+    <script is:inline>
+      (function () {
+        var CTA_TEXT = /free quote|get (a )?quote|book (a )?(call|demo|meeting)|schedule|contact us|get started|start (your|a) project|let.?s talk|talk to/i;
+        function isCta(el) {
+          if (el.hasAttribute("data-cta")) return true;
+          var href = el.getAttribute("href") || "";
+          if (/^(tel|mailto):/i.test(href) || /(^|\/)contact(\/|$|\?|#)|#cta$|calendly\.com|meetings\.hubspot\.com/i.test(href)) return true;
+          return CTA_TEXT.test((el.textContent || "").trim().slice(0, 60));
+        }
+        document.addEventListener(
+          "click",
+          function (e) {
+            var el = e.target && e.target.closest && e.target.closest("a[href], button, [data-cta]");
+            if (!el || el.closest("[data-lang-picker], [data-ops-feedback]") || !isCta(el)) return;
+            var where = el.closest("header, nav, footer, [data-cta-location], section[id]");
+            window.gtag("event", "cta_click", {
+              cta_text: (el.getAttribute("data-cta") || el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 80),
+              cta_url: el.getAttribute("href") || "",
+              cta_location: where ? where.getAttribute("data-cta-location") || where.id || where.tagName.toLowerCase() : "body",
+            });
+          },
+          true
+        );
+      })();
+    </script>
+
     {/* --- RB2B --- Deferred to window load, as on the Webflow site: it is a
         marketing pixel, and nothing on the page waits for it. */}
     <script is:inline define:vars={{ REB2B_KEY }}>

@@ -13,7 +13,8 @@
 //   POST file                       { name, content, kind?, url?, site?, title? } drop a .md file
 //   POST file-status                { id, status: new|in-progress|done|skipped, note?, publishedUrl? }
 //   POST blog-source                { posts: [{ url | site+slug, source: adaptify|redrover|vineyard|team }] }
-//   POST pulse                      { week?, text } the one-line weekly pulse
+//   POST pulse                      { week?, text, site? } the one-line weekly pulse
+//                                   (site "synergy" default, or "bolder")
 //   POST submissions                { site, source?, items: [{ id, submittedAt, name, email, ... }] }
 import type { APIRoute } from "astro";
 import { json } from "../../../../lib/ops/auth";
