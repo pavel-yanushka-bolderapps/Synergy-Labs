@@ -9,7 +9,7 @@
   window.__opsFeedback = true;
 
   const API = "/api/ops";
-  const PEOPLE = ["Pavel", "Andrew"];
+  const PEOPLE = ["Pavel", "Andrew", "Shawn"];
   const STATUS = { open: "Open", doing: "In progress", done: "Done" };
   const COLORS = { open: "#e8590c", doing: "#1c7ed6", done: "#868e96" };
 
