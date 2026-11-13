@@ -1,7 +1,9 @@
-// The Ops dashboard UI (mounted by src/pages/ops/index.astro). One screen per
-// tab -- Overview, Plan, Weekly, Blogs, Content, Forms, Feedback, KPIs, Bolder Apps, Health, Bots -- all reading the single
-// /api/ops/data payload and writing through /api/ops/<action>.
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+// The Ops dashboard UI (mounted by src/pages/ops/index.astro). Pick a website
+// (Synergy Labs or Bolder Apps) at the top of the sidebar; every tab -- Overview,
+// Plan, Weekly, Blogs, Content, Forms, Feedback, KPIs, Health, Bots -- then shows
+// that site's data (forSite() below), all from the single /api/ops/data payload,
+// writing through /api/ops/<action>.
+import { useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { HBars, Legend, LineChart, Sparkline, StackedBars, compact, type Series } from "./charts";
 import { testReason } from "../../lib/ops/formtest";
 
@@ -12,10 +14,11 @@ interface Comment { _key: string; by: string; at: string; text: string }
 interface Check { _key: string; name: string; group: string; ok: boolean; detail: string }
 interface Health { checkedAt: string; checks: Check[] }
 interface Feedback { _id: string; _type: "opsFeedback"; number: number; title: string; status: "open" | "doing" | "done"; assignee?: Owner; createdBy: string; createdAt: string; host: string; path: string; viewport: string; userAgent?: string; elementText?: string; screenshot?: string; comments?: Comment[] }
-interface KeyResult { _id: string; _type: "opsKeyResult"; title: string; objective: string; metric?: string; baseline?: number; target?: number; current?: number; unit?: string; dueDate?: string; owner?: Owner; order?: number; code?: string; stretch?: number; andrewKr?: string; kind?: "metric" | "milestone" | "count"; cumulative?: boolean; targetDate?: string; comments?: Comment[] }
-interface Task { _id: string; _type: "opsTask"; title: string; owner: Owner; keyResult?: string; status: "todo" | "doing" | "done" | "blocked"; startWeek: string; endWeek: string; recurring?: boolean; notes?: string; dueDate?: string; andrewKr?: string; comments?: Comment[] }
-interface ScoreRow { week: string; gscClicks?: number; gscClicksSynergy?: number; gscClicksBolder?: number; newUsers?: number; ctaClicks?: number; formStartRateBolder?: number; mqlsBolder: number; mqlsSynergy: number; abWinners?: number; notes?: string; blogsBolder?: number; blogsSynergy?: number; mqlHubspot?: number; mqlHubspotBolder?: number; mqlHubspotSynergy?: number; sqlHubspot?: number; pulse?: string; pulseBy?: string }
-interface ContentItem { _id: string; _type: "opsContent"; title: string; kind: "new" | "refresh" | "location" | "backlink"; keyword?: string; brief?: string; week: string; status: string; keyResult?: string; postId?: string; slug?: string; targetPath?: string; publishAt?: string; publishedAt?: string; approvedBy?: string; notes?: string; comments?: Comment[] }
+type Site = "synergy" | "bolder";
+interface KeyResult { _id: string; _type: "opsKeyResult"; site?: Site; title: string; objective: string; metric?: string; baseline?: number; target?: number; current?: number; unit?: string; dueDate?: string; owner?: Owner; order?: number; code?: string; stretch?: number; andrewKr?: string; kind?: "metric" | "milestone" | "count"; cumulative?: boolean; targetDate?: string; comments?: Comment[] }
+interface Task { _id: string; _type: "opsTask"; site?: Site; title: string; owner: Owner; keyResult?: string; status: "todo" | "doing" | "done" | "blocked"; startWeek: string; endWeek: string; recurring?: boolean; notes?: string; dueDate?: string; andrewKr?: string; comments?: Comment[] }
+interface ScoreRow { week: string; gscClicks?: number; gscClicksSynergy?: number; gscClicksBolder?: number; newUsers?: number; ctaClicks?: number; formStartRateBolder?: number; mqlsBolder: number; mqlsSynergy: number; abWinners?: number; notes?: string; blogsBolder?: number; blogsSynergy?: number; mqlHubspot?: number; mqlHubspotBolder?: number; mqlHubspotSynergy?: number; sqlHubspot?: number; pulse?: string; pulseBy?: string; newUsersSynergy?: number; newUsersBolder?: number; ctaClicksSynergy?: number; ctaClicksBolder?: number; formStartRateSynergy?: number; sqlHubspotBolder?: number; sqlHubspotSynergy?: number; abWinnersBolder?: number; notesBolder?: string; pulseBolder?: string; pulseByBolder?: string }
+interface ContentItem { _id: string; _type: "opsContent"; site?: Site; title: string; kind: "new" | "refresh" | "location" | "backlink"; keyword?: string; brief?: string; week: string; status: string; keyResult?: string; postId?: string; slug?: string; targetPath?: string; publishAt?: string; publishedAt?: string; approvedBy?: string; notes?: string; comments?: Comment[] }
 interface BotRun { _id: string; job: string; startedAt: string; ok: boolean; summary: string; details?: string; costUsd?: number; by?: string; agent?: boolean }
 interface ListRow { label: string; value: number; change?: number }
 interface Kpi { _id: string; weekStart: string; weekEnd: string; metrics: Record<string, number>; lists?: Record<string, ListRow[]>; errors?: Record<string, string>; syncedAt: string }
@@ -29,11 +32,78 @@ interface Data {
   kpis: Kpi[];
   metrics: Record<string, MetricDef>;
   sources: Record<string, boolean>;
+  kpisBolder?: Kpi[];
+  sourcesBolder?: Record<string, boolean>;
   health: Health | null;
   feedback: Feedback[];
   digestTo: string;
   inbox?: { newRefresh: number };
   scorecard: { rows: ScoreRow[]; derived: Record<string, { value: number; from?: string } | undefined> };
+}
+
+// ---- Websites ------------------------------------------------------------------
+
+/**
+ * Each website's look. The dashboard's accent is the Tailwind theme colour
+ * --color-primary-green / --color-secondary-green, so overriding those two on
+ * the root re-colours the sidebar, buttons and active states in one place.
+ */
+const SITES: Record<Site, { name: string; short: string; host: string; url: string; primary: string; secondary: string }> = {
+  synergy: { name: "Synergy Labs", short: "Synergy", host: "synergylabs.co", url: "https://www.synergylabs.co", primary: "#0a332c", secondary: "#007244" },
+  bolder: { name: "Bolder Apps", short: "Bolder", host: "bolderapps.com", url: "https://www.bolderapps.com", primary: "#c2410c", secondary: "#9a3412" },
+};
+
+/**
+ * The payload as one website sees it. HubSpot is one account for both brands
+ * (synced into Synergy's snapshots), so each site's "MQLs" / "SQLs" become its
+ * own brand's numbers; the all-brand totals stay under hubspot.mql.all /
+ * hubspot.sql.all for the side-by-side charts. Tasks and key results without a
+ * site belong to both; content without one is Synergy's.
+ */
+function forSite(data: Data, site: Site): Data {
+  const hubspotByWeek = new Map(data.kpis.map((k) => [k.weekStart, k]));
+  const base = site === "bolder" ? data.kpisBolder ?? [] : data.kpis;
+  const kpis = base.map((k) => {
+    const hs = hubspotByWeek.get(k.weekStart)?.metrics ?? {};
+    const m: Record<string, number> = { ...k.metrics };
+    for (const [key, v] of Object.entries(hs)) if (key.startsWith("hubspot.")) m[key] = v;
+    for (const stage of ["mql", "sql"]) {
+      if (m[`hubspot.${stage}`] !== undefined) m[`hubspot.${stage}.all`] = m[`hubspot.${stage}`];
+      if (m[`hubspot.${stage}.${site}`] !== undefined) m[`hubspot.${stage}`] = m[`hubspot.${stage}.${site}`];
+      else delete m[`hubspot.${stage}`];
+    }
+    return { ...k, metrics: m };
+  });
+  // Bolder snapshots only exist for weeks Google has synced; add HubSpot-only weeks too.
+  if (site === "bolder") {
+    for (const k of data.kpis) if (!kpis.some((x) => x.weekStart === k.weekStart) && k.metrics?.[`hubspot.mql.${site}`] !== undefined) {
+      const m: Record<string, number> = {};
+      for (const [key, v] of Object.entries(k.metrics)) if (key.startsWith("hubspot.")) m[key] = v;
+      m["hubspot.mql.all"] = m["hubspot.mql"]; m["hubspot.sql.all"] = m["hubspot.sql"];
+      m["hubspot.mql"] = m["hubspot.mql.bolder"]; m["hubspot.sql"] = m["hubspot.sql.bolder"];
+      kpis.push({ ...k, metrics: m, errors: {} });
+    }
+    kpis.sort((a, b) => b.weekStart.localeCompare(a.weekStart));
+  }
+  const name = SITES[site].name;
+  return {
+    ...data,
+    kpis,
+    sources: site === "bolder" ? { ...(data.sourcesBolder ?? {}), hubspot: !!data.sources.hubspot, claude: !!data.sources.claude } : data.sources,
+    metrics: {
+      ...data.metrics,
+      "hubspot.mql": { label: `MQLs · ${name}` },
+      "hubspot.sql": { label: `SQLs · ${name}` },
+      "hubspot.mql.all": { label: "MQLs · both brands" },
+      "hubspot.sql.all": { label: "SQLs · both brands" },
+      "hubspot.newContacts": { label: "New contacts · both brands" },
+      "hubspot.newContactsOrganic": { label: "New contacts from organic · both brands" },
+    },
+    tasks: data.tasks.filter((t) => !t.site || t.site === site),
+    keyResults: data.keyResults.filter((k) => !k.site || k.site === site),
+    content: data.content.filter((c) => (c.site ?? "synergy") === site),
+    feedback: data.feedback.filter((f) => (/bolderapps/.test(f.host) ? "bolder" : "synergy") === site),
+  };
 }
 
 // ---- Helpers -------------------------------------------------------------------
@@ -368,6 +438,7 @@ function Editor({ doc, data, onClose, onSaved }: { doc: Record<string, any>; dat
           { k: "keyResult", label: "Drives key result", type: "select", options: krOptions(data.keyResults) },
           { k: "dueDate", label: "Due (late after this date)", type: "date" },
           { k: "andrewKr", label: "Andrew's KR (e.g. O5 KR2)" },
+          { k: "site", label: "Website", type: "select", options: [["", "Both websites"], ["synergy", "Synergy Labs"], ["bolder", "Bolder Apps"]] },
           { k: "recurring", label: "Repeats every week", type: "checkbox" },
           { k: "notes", label: "Notes", type: "textarea" },
         ]
@@ -377,6 +448,7 @@ function Editor({ doc, data, onClose, onSaved }: { doc: Record<string, any>; dat
             { k: "title", label: "Key result" },
             { k: "objective", label: "Objective" },
             { k: "andrewKr", label: "Andrew's KR (e.g. O5 KR2)" },
+            { k: "site", label: "Website", type: "select", options: [["", "Both websites"], ["synergy", "Synergy Labs"], ["bolder", "Bolder Apps"]] },
             { k: "kind", label: "Graded as", type: "select", options: [["metric", "A number vs target"], ["milestone", "Milestone: done when all linked tasks are done"], ["count", "Count of linked tasks done"]] },
             ...(v.kind === "milestone"
               ? [{ k: "targetDate", label: "Target date", type: "date" } as FieldDef]
@@ -394,6 +466,7 @@ function Editor({ doc, data, onClose, onSaved }: { doc: Record<string, any>; dat
         : [
             { k: "title", label: "Title / topic" },
             { k: "kind", label: "Type", type: "select", options: Object.entries(KIND_LABEL) },
+            { k: "site", label: "Website", type: "select", options: [["synergy", "Synergy Labs"], ["bolder", "Bolder Apps"]] },
             { k: "week", label: "Planned week", type: "week" },
             { k: "keyword", label: "Target keyword" },
             { k: "status", label: "Status", type: "select", options: ["idea", "planned", "drafting", "review", "approved", "published", "rejected"].map((s) => [s, s]) },
@@ -537,7 +610,7 @@ function ContentPanel({ item, data, onClose, onSaved }: { item: ContentItem; dat
 
 // ---- Tabs ------------------------------------------------------------------------------
 
-function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sync: () => void }) {
+function Overview({ data, open, sync, site }: { data: Data; open: (d: any) => void; sync: () => void; site: Site }) {
   const week = data.tasks.filter((t) => t.startWeek <= THIS_WEEK && t.endWeek >= THIS_WEEK && t.status !== "done");
   const review = data.content.filter((c) => c.status === "review");
   const upcoming = data.content.filter((c) => c.status === "approved").sort((a, b) => (a.publishAt ?? "").localeCompare(b.publishAt ?? ""));
@@ -552,26 +625,23 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="grid grid-cols-2 gap-4 lg:col-span-3 xl:grid-cols-4">
-        <Stat label="MQLs (HubSpot)" metric="hubspot.mql" source="hubspot" data={data} color={C.blue} />
+        <Stat label={`MQLs · ${SITES[site].short} (HubSpot)`} metric="hubspot.mql" source="hubspot" data={data} color={C.blue} />
         <Stat label="Organic users" metric="ga4.organicUsers" source="ga4" data={data} color={C.blue} />
         <Stat label="Search clicks" metric="gsc.clicks" source="gsc" data={data} color={C.blue} />
         <Stat label="Avg. search position" metric="gsc.position" source="gsc" data={data} color={C.blue} />
       </div>
 
-      <Card title="Form submissions per week, by brand" sub="Real form submissions this quarter (Forms tab, tests excluded)" className="lg:col-span-3">
+      <Card title={`Form submissions per week · ${SITES[site].host}`} sub="Real form submissions this quarter (Forms tab, tests excluded)" className="lg:col-span-3">
         <StackedBars
           x={data.scorecard.rows.map((r) => weekLabel(r.week))}
-          series={[
-            { key: "b", label: "bolderapps.com", color: C.blue, values: data.scorecard.rows.map((r) => (r.week <= THIS_WEEK ? r.mqlsBolder : undefined)) },
-            { key: "s", label: "synergylabs.co", color: C.orange, values: data.scorecard.rows.map((r) => (r.week <= THIS_WEEK ? r.mqlsSynergy : undefined)) },
-          ]}
+          series={[{ key: site, label: SITES[site].host, color: C.blue, values: data.scorecard.rows.map((r) => (r.week > THIS_WEEK ? undefined : site === "bolder" ? r.mqlsBolder : r.week < "2026-10-12" ? undefined : r.mqlsSynergy)) }]}
           highlight={data.scorecard.rows.findIndex((r) => r.week === THIS_WEEK)}
         />
-        <div className="mt-2"><Legend items={[{ label: "bolderapps.com", color: C.blue }, { label: "synergylabs.co", color: C.orange }]} /></div>
+        {site === "synergy" && <p className="mt-2 text-xs text-neutral-500">Counted from the Oct 12 launch (Synergy was on Webflow before).</p>}
       </Card>
 
-      <Card title="MQLs by brand (HubSpot)" sub="Contacts that became MQL that week, by the website they first arrived on" className="lg:col-span-2">
-        {!trend.some((k) => k.metrics?.["hubspot.mql"] !== undefined) ? (
+      <Card title="MQLs by brand (HubSpot)" sub="Both brands side by side: contacts that became MQL that week, by the website they first arrived on" className="lg:col-span-2">
+        {!trend.some((k) => k.metrics?.["hubspot.mql.all"] !== undefined) ? (
           <Waiting what="HubSpot access" />
         ) : (
           <>
@@ -580,7 +650,7 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
               series={[
                 { key: "b", label: "Bolder Apps", color: C.blue, values: trend.map((k) => k.metrics?.["hubspot.mql.bolder"]) },
                 { key: "s", label: "Synergy Labs", color: C.orange, values: trend.map((k) => k.metrics?.["hubspot.mql.synergy"]) },
-                { key: "o", label: "Other / unknown", color: C.grey, values: trend.map((k) => k.metrics?.["hubspot.mql"] === undefined ? undefined : Math.max(0, k.metrics["hubspot.mql"] - (k.metrics["hubspot.mql.bolder"] ?? 0) - (k.metrics["hubspot.mql.synergy"] ?? 0))) },
+                { key: "o", label: "Other / unknown", color: C.grey, values: trend.map((k) => k.metrics?.["hubspot.mql.all"] === undefined ? undefined : Math.max(0, k.metrics["hubspot.mql.all"] - (k.metrics["hubspot.mql.bolder"] ?? 0) - (k.metrics["hubspot.mql.synergy"] ?? 0))) },
               ]}
               format={(v) => String(Math.round(v))}
             />
@@ -591,20 +661,20 @@ function Overview({ data, open, sync }: { data: Data; open: (d: any) => void; sy
       <Card title="MQL split, year to date" sub="Share of HubSpot MQLs by brand, weeks synced so far">
         {(() => {
           const sum = (key: string) => data.kpis.filter((k) => k.weekStart >= `${THIS_WEEK.slice(0, 4)}-01-01`).reduce((s, k) => s + (k.metrics?.[key] ?? 0), 0);
-          const total = sum("hubspot.mql");
+          const total = sum("hubspot.mql.all");
           if (!total) return <Waiting what="HubSpot access" />;
           const rows = [{ label: "Bolder Apps", value: sum("hubspot.mql.bolder") }, { label: "Synergy Labs", value: sum("hubspot.mql.synergy") }];
           rows.push({ label: "Other / unknown", value: Math.max(0, total - rows[0].value - rows[1].value) });
           return (
             <>
-              <p className="mb-3 text-sm text-neutral-600"><b>{fmt(total)}</b> MQLs · <b>{fmt(sum("hubspot.sql"))}</b> SQLs</p>
+              <p className="mb-3 text-sm text-neutral-600"><b>{fmt(total)}</b> MQLs · <b>{fmt(sum("hubspot.sql.all"))}</b> SQLs, both brands</p>
               <HBars rows={rows.map((r) => ({ label: `${r.label} · ${Math.round((r.value / total) * 100)}%`, value: r.value }))} color={C.blue} />
             </>
           );
         })()}
       </Card>
 
-      <Card title="MQLs and SQLs per week (HubSpot)" sub={leadsKr ? `Dashed line: key result target (${leadsKr.title})` : "Contacts that reached each lifecycle stage that week"} className="lg:col-span-3">
+      <Card title={`MQLs and SQLs per week · ${SITES[site].name} (HubSpot)`} sub={leadsKr ? `Dashed line: key result target (${leadsKr.title})` : "Contacts that reached each lifecycle stage that week"} className="lg:col-span-3">
         {!trend.some((k) => k.metrics?.["hubspot.mql"] !== undefined) ? (
           <Waiting what="HubSpot access" />
         ) : (
@@ -1020,13 +1090,11 @@ function RulesEditor({ rules, onClose, onSaved }: { rules: string[]; onClose: ()
   );
 }
 
-function FormsTab({ setToast }: { setToast: (s: string) => void }) {
+function FormsTab({ site, setToast }: { site: Site; setToast: (s: string) => void }) {
   const [subs, setSubs] = useState<Submission[] | null>(null);
   const [rules, setRules] = useState<string[]>([]);
   const [err, setErr] = useState("");
   const [q, setQ] = useState("");
-  const [site, setSite] = useState<"synergy" | "bolder" | "all">(() => { try { return (localStorage.getItem("ops.forms.site") as any) || "synergy"; } catch { return "synergy"; } });
-  useEffect(() => { try { localStorage.setItem("ops.forms.site", site); } catch {} }, [site]);
   const [form, setForm] = useState("");
   const [range, setRange] = useState("90");
   const [from, setFrom] = useState("");
@@ -1052,7 +1120,7 @@ function FormsTab({ setToast }: { setToast: (s: string) => void }) {
   const inRange = useMemo(() => {
     const min = range === "custom" ? (from ? `${from}T00:00:00` : "") : range === "all" ? "" : new Date(Date.now() - Number(range) * DAY).toISOString();
     const max = range === "custom" && to ? `${to}T23:59:59.999` : "";
-    return withReason.filter(({ s }) => (site === "all" || siteOf(s) === site) && (!min || s.submittedAt >= min) && (!max || s.submittedAt <= max));
+    return withReason.filter(({ s }) => siteOf(s) === site && (!min || s.submittedAt >= min) && (!max || s.submittedAt <= max));
   }, [withReason, range, from, to, site]);
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -1069,7 +1137,7 @@ function FormsTab({ setToast }: { setToast: (s: string) => void }) {
   const real = inRange.filter((x) => !x.reason);
   const failed = inRange.filter((x) => x.s.emailSent === false && !x.reason).length;
   const weeks = Array.from({ length: 12 }, (_, i) => addDays(THIS_WEEK, (i - 11) * 7));
-  const perWeek = (pred: (x: { reason: string }) => boolean) => weeks.map((w) => withReason.filter((x) => (site === "all" || siteOf(x.s) === site) && pred(x) && mondayOf(x.s.submittedAt) === w).length);
+  const perWeek = (pred: (x: { reason: string }) => boolean) => weeks.map((w) => withReason.filter((x) => siteOf(x.s) === site && pred(x) && mondayOf(x.s.submittedAt) === w).length);
   const pages = Object.entries(real.reduce<Record<string, number>>((m, { s }) => { const p = pathOf(s.pageUrl).split("?")[0] || "(unknown)"; m[p] = (m[p] ?? 0) + 1; return m; }, {}))
     .map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value).slice(0, 6);
   const allSelected = list.length > 0 && list.every(({ s }) => selected.has(s._id));
@@ -1078,17 +1146,7 @@ function FormsTab({ setToast }: { setToast: (s: string) => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-neutral-500">Website</span>
-        <div className="flex overflow-hidden rounded-lg ring-1 ring-neutral-300">
-          {(["synergy", "bolder", "all"] as const).map((v) => (
-            <button key={v} onClick={() => { setSite(v); setForm(""); setSelected(new Set()); }} className={`px-3 py-1.5 text-sm ${site === v ? "bg-primary-green text-white" : "bg-white text-neutral-700 hover:bg-neutral-50"}`}>
-              {v === "all" ? "Both" : SITE_LABEL[v]} <span className="opacity-60">{subs.filter((s) => v === "all" || siteOf(s) === v).length}</span>
-            </button>
-          ))}
-        </div>
-        {site === "bolder" && !subs.some((s) => siteOf(s) === "bolder") && <span className="text-xs text-amber-800">Waiting for the Webflow webhook / CSV import</span>}
-      </div>
+      {site === "bolder" && !subs.some((s) => siteOf(s) === "bolder") && <p className="text-xs text-amber-800">Waiting for the Webflow webhook / CSV import</p>}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["Real submissions", real.length, "in the selected dates"],
@@ -1123,7 +1181,7 @@ function FormsTab({ setToast }: { setToast: (s: string) => void }) {
         action={
           <div className="flex flex-wrap gap-2">
             <Btn kind="ghost" onClick={() => setEditRules(true)}>Test rules ({rules.length})</Btn>
-            <Btn kind="ghost" disabled={!list.length} onClick={() => download(`synergy-form-submissions-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(list.map((x) => x.s), rules))}>Download CSV</Btn>
+            <Btn kind="ghost" disabled={!list.length} onClick={() => download(`${site}-form-submissions-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(list.map((x) => x.s), rules))}>Download CSV</Btn>
           </div>
         }
       >
@@ -1153,7 +1211,7 @@ function FormsTab({ setToast }: { setToast: (s: string) => void }) {
             <b>{selected.size} selected</b>
             <Btn kind="ghost" onClick={() => act("submission-mark", [...selected], true)}>Mark as test</Btn>
             <Btn kind="ghost" onClick={() => act("submission-mark", [...selected], false)}>Mark as real</Btn>
-            <Btn kind="ghost" onClick={() => download(`synergy-form-submissions-selected.csv`, toCsv(subs.filter((s) => selected.has(s._id)), rules))}>Download selected</Btn>
+            <Btn kind="ghost" onClick={() => download(`${site}-form-submissions-selected.csv`, toCsv(subs.filter((s) => selected.has(s._id)), rules))}>Download selected</Btn>
             <span className="flex-1" />
             <Btn kind="danger" onClick={() => confirm(`Delete ${selected.size} submission(s) for good?`) && act("submission-delete", [...selected])}>Delete</Btn>
           </div>
@@ -1184,7 +1242,7 @@ function FormsTab({ setToast }: { setToast: (s: string) => void }) {
                     </td>
                     <td className="whitespace-nowrap py-2.5 pr-3 tabular-nums">{when(s.submittedAt)}</td>
                     <td className="whitespace-nowrap py-2.5 pr-3">
-                      {site === "all" && <span className="mr-1.5 rounded bg-neutral-100 px-1 text-[10px] font-semibold uppercase text-neutral-600">{siteOf(s) === "bolder" ? "Bolder" : "Synergy"}</span>}
+                      
                       {s.formName}
                       {reason && <span className="ml-1.5 rounded bg-amber-100 px-1 text-[10px] font-semibold uppercase text-amber-800" title={reason}>test</span>}
                       {s.emailSent === false && <span className="ml-1.5 rounded bg-red-100 px-1 text-[10px] font-semibold uppercase text-red-700" title={s.emailError}>email failed</span>}
@@ -1380,8 +1438,12 @@ function Content({ data, open, reload, setToast }: { data: Data; open: (d: any) 
 }
 
 /** One editable cell of the Weekly tab (saved when it loses focus). */
-function WeeklyInput({ row, field, reload, wide }: { row: ScoreRow; field: "abWinners" | "notes" | "pulse"; reload: () => void; wide?: boolean }) {
-  const initial = row[field] === undefined ? "" : String(row[field]);
+/** The row's value for a typed-in Weekly column of one website ("notes" is Synergy's, "notesBolder" Bolder's). */
+const weeklyKey = (field: "abWinners" | "notes" | "pulse" | "pulseBy", site: Site) => (site === "bolder" ? (`${field}Bolder` as const) : field);
+
+function WeeklyInput({ row, field, site, reload, wide }: { row: ScoreRow; field: "abWinners" | "notes" | "pulse"; site: Site; reload: () => void; wide?: boolean }) {
+  const own = (f: "abWinners" | "notes" | "pulse" | "pulseBy") => row[weeklyKey(f, site)];
+  const initial = own(field) === undefined ? "" : String(own(field));
   const [v, setV] = useState(initial);
   const [state, setState] = useState<"" | "saving" | "saved" | "error">("");
   useEffect(() => setV(initial), [initial]);
@@ -1389,8 +1451,8 @@ function WeeklyInput({ row, field, reload, wide }: { row: ScoreRow; field: "abWi
     if (v === initial) return;
     setState("saving");
     try {
-      if (field === "pulse") await api("pulse", { week: row.week, text: v });
-      else await api("weekly-save", { week: row.week, abWinners: field === "abWinners" ? v : row.abWinners ?? "", notes: field === "notes" ? v : row.notes ?? "" });
+      if (field === "pulse") await api("pulse", { week: row.week, text: v, site });
+      else await api("weekly-save", { week: row.week, site, abWinners: field === "abWinners" ? v : own("abWinners") ?? "", notes: field === "notes" ? v : own("notes") ?? "" });
       setState("saved");
       reload();
     } catch {
@@ -1406,51 +1468,70 @@ function WeeklyInput({ row, field, reload, wide }: { row: ScoreRow; field: "abWi
       inputMode={field === "abWinners" ? "numeric" : undefined}
       className={`w-full rounded border bg-transparent px-1.5 py-1 text-sm ${state === "error" ? "border-red-400" : state === "saved" ? "border-emerald-300" : "border-transparent hover:border-neutral-200 focus:border-neutral-300"} ${wide ? "min-w-[14rem]" : "text-right"}`}
       placeholder={field === "notes" ? "Add a note…" : field === "pulse" ? "What moved? Worth a look?" : "–"}
-      title={field === "pulse" && row.pulseBy ? `Written by ${row.pulseBy}` : undefined}
+      title={field === "pulse" && own("pulseBy") ? `Written by ${own("pulseBy")}` : undefined}
     />
   );
 }
 
-/** Pavel's Q4 OKR "Weekly" sheet: one row per week, filled from the data where it exists. */
-function WeeklyTab({ data, reload }: { data: Data; reload: () => void }) {
+/** Pavel's Q4 OKR "Weekly" sheet for one website: one row per week, filled from the data where it exists. */
+function WeeklyTab({ data, reload, site }: { data: Data; reload: () => void; site: Site }) {
   const rows = data.scorecard.rows;
+  const bolder = site === "bolder";
   const pct = (v?: number) => (v === undefined ? "–" : `${(v * 100).toFixed(1)}%`);
   const num = (v?: number) => (v === undefined ? "–" : v.toLocaleString());
   const past = rows.filter((r) => r.week <= THIS_WEEK);
-  const total = (k: "mqlsBolder" | "mqlsSynergy" | "abWinners" | "blogsBolder" | "blogsSynergy" | "mqlHubspot") => past.reduce((a, r) => a + (r[k] ?? 0), 0);
+  // This website's value in each column.
+  const col = (r: ScoreRow) => ({
+    clicks: bolder ? r.gscClicksBolder : r.gscClicksSynergy,
+    newUsers: bolder ? r.newUsersBolder : r.newUsersSynergy,
+    cta: bolder ? r.ctaClicksBolder : r.ctaClicksSynergy,
+    formStart: bolder ? r.formStartRateBolder : r.formStartRateSynergy,
+    // Synergy moved off Webflow on Oct 12; its earlier forms are not in the Forms tab.
+    forms: r.week > THIS_WEEK ? undefined : bolder ? r.mqlsBolder : r.week < "2026-10-12" ? undefined : r.mqlsSynergy,
+    mql: bolder ? r.mqlHubspotBolder : r.mqlHubspotSynergy,
+    sql: bolder ? r.sqlHubspotBolder : r.sqlHubspotSynergy,
+    blogs: r.week > THIS_WEEK ? undefined : bolder ? r.blogsBolder : r.blogsSynergy,
+    ab: r[weeklyKey("abWinners", site)] as number | undefined,
+  });
+  const total = (k: "forms" | "mql" | "sql" | "blogs" | "ab") => {
+    const vals = past.map((r) => col(r)[k]);
+    return vals.some((v) => v !== undefined) ? vals.reduce<number>((a, v) => a + (v ?? 0), 0) : undefined;
+  };
+  // The OKR sheet itself has both websites side by side, so the CSV keeps both.
   const csv = () => {
-    const head = ["Week of", "Organic search clicks (Search Console)", "  synergylabs.co", "  bolderapps.com", "New users (GA4)", "CTA clicks", "Form start rate, bolderapps.com", "Form MQLs, Bolder", "Form MQLs, Synergy", "MQLs (HubSpot)", "  Bolder", "  Synergy", "SQLs (HubSpot)", "Blogs posted, Bolder", "Blogs posted, Synergy", "A/B tests finished with a winner", "Pulse", "Notes"];
+    const head = ["Week of", "Organic search clicks (Search Console)", "  synergylabs.co", "  bolderapps.com", "New users (GA4)", "  synergylabs.co", "  bolderapps.com", "CTA clicks", "Form start rate, bolderapps.com", "Form start rate, synergylabs.co", "Form MQLs, Bolder", "Form MQLs, Synergy", "MQLs (HubSpot)", "  Bolder", "  Synergy", "SQLs (HubSpot)", "  Bolder", "  Synergy", "Blogs posted, Bolder", "Blogs posted, Synergy", "A/B tests with a winner, Synergy", "A/B tests with a winner, Bolder", "Pulse, Synergy", "Pulse, Bolder", "Notes, Synergy", "Notes, Bolder"];
     const cell = (x: unknown) => { const t = x === undefined || x === null ? "" : String(x); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
-    const body = rows.map((r) => [weekLabel(r.week), r.gscClicks, r.gscClicksSynergy, r.gscClicksBolder, r.newUsers, r.ctaClicks, r.formStartRateBolder === undefined ? "" : `${(r.formStartRateBolder * 100).toFixed(2)}%`, r.week <= THIS_WEEK ? r.mqlsBolder : "", r.week <= THIS_WEEK ? r.mqlsSynergy : "", r.mqlHubspot, r.mqlHubspotBolder, r.mqlHubspotSynergy, r.sqlHubspot, r.week <= THIS_WEEK ? r.blogsBolder : "", r.week <= THIS_WEEK ? r.blogsSynergy : "", r.abWinners, r.pulse, r.notes].map(cell).join(","));
-    download(`q4-2026-weekly-${TODAY}.csv`, "\uFEFF" + [head.map(cell).join(","), ...body].join("\r\n"));
+    const rate = (v?: number) => (v === undefined ? "" : `${(v * 100).toFixed(2)}%`);
+    const body = rows.map((r) => [weekLabel(r.week), r.gscClicks, r.gscClicksSynergy, r.gscClicksBolder, r.newUsers, r.newUsersSynergy, r.newUsersBolder, r.ctaClicks, rate(r.formStartRateBolder), rate(r.formStartRateSynergy), r.week <= THIS_WEEK ? r.mqlsBolder : "", r.week <= THIS_WEEK ? r.mqlsSynergy : "", r.mqlHubspot, r.mqlHubspotBolder, r.mqlHubspotSynergy, r.sqlHubspot, r.sqlHubspotBolder, r.sqlHubspotSynergy, r.week <= THIS_WEEK ? r.blogsBolder : "", r.week <= THIS_WEEK ? r.blogsSynergy : "", r.abWinners, r.abWinnersBolder, r.pulse, r.pulseBolder, r.notes, r.notesBolder].map(cell).join(","));
+    download(`q4-2026-weekly-${TODAY}.csv`, "﻿" + [head.map(cell).join(","), ...body].join("\r\n"));
   };
   const missing = [
-    !data.scorecard.rows.some((r) => r.gscClicks !== undefined) && "Search Console",
-    !data.scorecard.rows.some((r) => r.newUsers !== undefined) && "GA4",
-    !data.scorecard.rows.some((r) => r.ctaClicks !== undefined) && "CTA clicks (GA4 event name, GA4_CTA_EVENT)",
+    !rows.some((r) => col(r).clicks !== undefined) && "Search Console",
+    !rows.some((r) => col(r).newUsers !== undefined) && `Google Analytics (${bolder ? "BOLDER_GA4_PROPERTY_ID" : "GA4_PROPERTY_ID"}, and the service account as Viewer on the property)`,
+    !rows.some((r) => col(r).cta !== undefined) && "CTA clicks (GA4 event name, GA4_CTA_EVENT)",
+    !rows.some((r) => col(r).mql !== undefined) && "HubSpot (HUBSPOT_TOKEN)",
   ].filter(Boolean);
   const th = "px-2 py-2 text-right font-medium align-bottom";
   return (
     <Card
-      title="Q4 2026 weekly"
-      sub="Monday–Sunday weeks, same columns as the OKR sheet. Grey numbers fill in automatically; A/B tests and notes are typed here."
-      action={<Btn kind="ghost" onClick={csv}>Download CSV</Btn>}
+      title={`Q4 2026 weekly · ${SITES[site].host}`}
+      sub="Monday–Sunday weeks, same columns as the OKR sheet. Grey numbers fill in automatically; A/B tests, pulse and notes are typed here, separately for each website."
+      action={<Btn kind="ghost" onClick={csv}>Download OKR sheet CSV (both sites)</Btn>}
     >
       {missing.length > 0 && <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">Waiting for: {missing.join(" · ")}. Those columns stay empty until access is granted (see KPIs → Google access).</p>}
       <div className="-mx-5 overflow-x-auto">
-        <table className="w-full min-w-[1400px] text-sm">
+        <table className="w-full min-w-[1200px] text-sm">
           <thead className="border-y border-neutral-100 bg-neutral-50/70 text-xs text-neutral-500">
             <tr>
               <th className="py-2 pl-5 pr-2 text-left font-medium align-bottom">Week of</th>
-              <th className={th}>Organic search clicks<br /><span className="font-normal">Search Console, both</span></th>
-              <th className={th}>New users<br /><span className="font-normal">GA4, both</span></th>
+              <th className={th}>Organic search clicks<br /><span className="font-normal">Search Console</span></th>
+              <th className={th}>New users<br /><span className="font-normal">GA4</span></th>
               <th className={th}>CTA clicks</th>
-              <th className={th}>Form start rate<br /><span className="font-normal">bolderapps.com</span></th>
-              <th className={th} title="“Form MQLs” in the OKR sheet">Form subs<br /><span className="font-normal">Bolder</span></th>
-              <th className={th} title="“Form MQLs” in the OKR sheet">Form subs<br /><span className="font-normal">Synergy</span></th>
+              <th className={th}>Form start rate</th>
+              <th className={th} title="“Form MQLs” in the OKR sheet">Form subs</th>
               <th className={th}>MQLs<br /><span className="font-normal">HubSpot</span></th>
-              <th className={th}>Blogs posted<br /><span className="font-normal">Bolder</span></th>
-              <th className={th}>Blogs posted<br /><span className="font-normal">Synergy</span></th>
+              <th className={th}>SQLs<br /><span className="font-normal">HubSpot</span></th>
+              <th className={th}>Blogs posted</th>
               <th className={th}>A/B tests<br /><span className="font-normal">with a winner</span></th>
               <th className="px-2 py-2 text-left font-medium align-bottom">Pulse<br /><span className="font-normal">what moved, worth a look?</span></th>
               <th className="py-2 pl-2 pr-5 text-left font-medium align-bottom">Notes</th>
@@ -1459,21 +1540,21 @@ function WeeklyTab({ data, reload }: { data: Data; reload: () => void }) {
           <tbody className="divide-y divide-neutral-100">
             {rows.map((r) => {
               const future = r.week > THIS_WEEK;
+              const c = col(r);
               return (
-                <tr key={r.week} className={r.week === THIS_WEEK ? "bg-emerald-50/40" : future ? "text-neutral-300" : ""}>
+                <tr key={r.week} className={r.week === THIS_WEEK ? "bg-neutral-50" : future ? "text-neutral-300" : ""}>
                   <td className="whitespace-nowrap py-1.5 pl-5 pr-2 font-medium">{weekLabel(r.week)}{r.week === THIS_WEEK && <span className="ml-1.5 text-[10px] font-semibold uppercase text-primary-green">now</span>}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums" title={r.gscClicks !== undefined ? `synergylabs.co ${num(r.gscClicksSynergy)} · bolderapps.com ${num(r.gscClicksBolder)}` : undefined}>{num(r.gscClicks)}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{num(r.newUsers)}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{num(r.ctaClicks)}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{pct(r.formStartRateBolder)}</td>
-                  <td className="px-2 py-1.5 text-right font-medium tabular-nums">{future ? "" : r.mqlsBolder}</td>
-                  <td className="px-2 py-1.5 text-right font-medium tabular-nums" title={r.week < "2026-10-12" ? "Synergy was still on Webflow: not in the Forms tab" : undefined}>{future ? "" : r.week < "2026-10-12" ? "–" : r.mqlsSynergy}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums" title={r.mqlHubspot !== undefined ? `Bolder ${num(r.mqlHubspotBolder)} · Synergy ${num(r.mqlHubspotSynergy)} · SQLs ${num(r.sqlHubspot)}` : undefined}>{num(r.mqlHubspot)}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{future ? "" : r.blogsBolder ?? "–"}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{future ? "" : r.blogsSynergy ?? "–"}</td>
-                  <td className="w-24 px-1 py-1"><WeeklyInput row={r} field="abWinners" reload={reload} /></td>
-                  <td className="px-1 py-1">{!future && <WeeklyInput row={r} field="pulse" reload={reload} wide />}</td>
-                  <td className="py-1 pl-1 pr-5"><WeeklyInput row={r} field="notes" reload={reload} wide /></td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{num(c.clicks)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{num(c.newUsers)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{num(c.cta)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{pct(c.formStart)}</td>
+                  <td className="px-2 py-1.5 text-right font-medium tabular-nums" title={!bolder && r.week < "2026-10-12" ? "Synergy was still on Webflow: not in the Forms tab" : undefined}>{future ? "" : num(c.forms)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{num(c.mql)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{num(c.sql)}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{future ? "" : num(c.blogs)}</td>
+                  <td className="w-24 px-1 py-1"><WeeklyInput row={r} field="abWinners" site={site} reload={reload} /></td>
+                  <td className="px-1 py-1">{!future && <WeeklyInput row={r} field="pulse" site={site} reload={reload} wide />}</td>
+                  <td className="py-1 pl-1 pr-5"><WeeklyInput row={r} field="notes" site={site} reload={reload} wide /></td>
                 </tr>
               );
             })}
@@ -1482,79 +1563,57 @@ function WeeklyTab({ data, reload }: { data: Data; reload: () => void }) {
             <tr>
               <td className="py-2 pl-5 pr-2">Q4 so far</td>
               <td colSpan={4} />
-              <td className="px-2 py-2 text-right tabular-nums">{total("mqlsBolder")}</td>
-              <td className="px-2 py-2 text-right tabular-nums">{total("mqlsSynergy")}</td>
-              <td className="px-2 py-2 text-right tabular-nums">{past.some((r) => r.mqlHubspot !== undefined) ? total("mqlHubspot") : "–"}</td>
-              <td className="px-2 py-2 text-right tabular-nums">{total("blogsBolder")}</td>
-              <td className="px-2 py-2 text-right tabular-nums">{total("blogsSynergy")}</td>
-              <td className="px-2 py-2 text-right tabular-nums">{total("abWinners")}</td>
-              <td />
-              <td className="py-2 pl-2 pr-5 text-xs font-normal text-neutral-500">Form subs = real form submissions (the OKR sheet’s “Form MQLs”; tests excluded; Synergy counted from the Oct 12 launch). MQLs = HubSpot lifecycle stage.</td>
+              <td className="px-2 py-2 text-right tabular-nums">{num(total("forms"))}</td>
+              <td className="px-2 py-2 text-right tabular-nums">{num(total("mql"))}</td>
+              <td className="px-2 py-2 text-right tabular-nums">{num(total("sql"))}</td>
+              <td className="px-2 py-2 text-right tabular-nums">{num(total("blogs"))}</td>
+              <td className="px-2 py-2 text-right tabular-nums">{num(total("ab"))}</td>
+              <td colSpan={2} />
             </tr>
           </tfoot>
         </table>
       </div>
+      <p className="mt-3 text-xs text-neutral-500">Form subs = real form submissions (the OKR sheet’s “Form MQLs”; tests excluded{bolder ? "" : "; counted from the Oct 12 launch"}). MQLs / SQLs = HubSpot lifecycle stage, contacts who first arrived on {SITES[site].host}.</p>
     </Card>
   );
 }
 
-/** The Bolder Apps website: its form leads (live now) and GA4 / Search Console once access is granted. */
-function BolderTab({ data, setToast }: { data: Data; setToast: (s: string) => void }) {
-  const [b, setB] = useState<{ kpis: Kpi[]; sources: Record<string, boolean>; metrics: Record<string, MetricDef> } | null>(null);
-  const [subs, setSubs] = useState<Submission[]>([]);
+/** One website's numbers: its form leads (live), then GA4 / Search Console / HubSpot from the weekly sync. */
+function SiteKpis({ data, site, sync, open }: { data: Data; site: Site; sync: (weeks?: number) => void; open: (d: any) => void }) {
+  const [subs, setSubs] = useState<Submission[] | null>(null);
   const [rules, setRules] = useState<string[]>([]);
-  const [err, setErr] = useState("");
-  const load = useCallback(() => {
-    api("bolder").then(setB).catch((e) => setErr(e.message));
-    api<{ submissions: Submission[]; testRules: string[] }>("submissions").then((d) => { setSubs(d.submissions.filter((s) => s.site === "bolder")); setRules(d.testRules); }).catch(() => {});
+  useEffect(() => {
+    api<{ submissions: Submission[]; testRules: string[] }>("submissions").then((d) => { setSubs(d.submissions); setRules(d.testRules); }).catch(() => setSubs([]));
   }, []);
-  useEffect(() => void load(), [load]);
 
-  const sync = async (weeks = 1) => {
-    setToast(weeks > 1 ? `Syncing ${weeks} weeks of Bolder Apps — the rest fill in over a minute…` : "Syncing Bolder Apps…");
-    try {
-      const snap = await api("sync", { weeks, site: "bolder" });
-      const errs = Object.keys(snap.errors ?? {});
-      setToast(errs.length ? `Synced; not connected or failed: ${errs.map((k) => `${k} (${snap.errors[k]})`).join("; ")}` : "Bolder Apps synced");
-    } catch (e: any) {
-      setToast(`Sync failed: ${e.message}`);
-    }
-    load();
-  };
-
-  if (err) return <p className="rounded-lg bg-red-50 p-4 text-sm text-red-800">Could not load: {err}</p>;
-  if (!b) return <p className="text-sm text-neutral-500">Loading…</p>;
-
+  const mine = (subs ?? []).filter((s) => siteOf(s) === site);
   const weeks = Array.from({ length: 12 }, (_, i) => addDays(THIS_WEEK, (i - 11) * 7));
-  const marked = subs.map((s) => ({ s, test: !!testReason(s, rules) }));
+  const marked = mine.map((s) => ({ s, test: !!testReason(s, rules) }));
   const per = (test: boolean) => weeks.map((w) => marked.filter((x) => x.test === test && mondayOf(x.s.submittedAt) === w).length);
   const real = per(false);
-  const thisWeek = real[11], lastWeek = real[10];
   const last4 = real.slice(7, 11).reduce((a, n) => a + n, 0);
   const prev4 = real.slice(3, 7).reduce((a, n) => a + n, 0);
   const pages = Object.entries(marked.filter((x) => !x.test && x.s.submittedAt >= `${weeks[0]}`).reduce<Record<string, number>>((m, { s }) => { const p = (s.pageUrl ?? "").replace(/^https?:\/\/[^/]+/, "").split("?")[0] || "(unknown)"; m[p] = (m[p] ?? 0) + 1; return m; }, {}))
     .map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value).slice(0, 8);
+  const oldest = mine.reduce<string | undefined>((m, s) => (!m || s.submittedAt < m ? s.submittedAt : m), undefined);
   const tile = (label: string, n: number, sub: string) => (
     <div className="rounded-xl border border-black/[0.07] bg-white p-4">
       <p className="text-xs font-medium text-neutral-500">{label}</p>
-      <p className="mt-1 text-3xl font-semibold tabular-nums">{n}</p>
+      <p className="mt-1 text-3xl font-semibold tabular-nums">{subs ? n : "…"}</p>
       <p className="mt-0.5 text-xs text-neutral-500">{sub}</p>
     </div>
   );
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-neutral-600">
-        www.bolderapps.com. Form submissions arrive live from Webflow; Google Analytics and Search Console fill in once the service account has access (see <b>Google access</b> below).
-      </p>
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {tile("Form submissions this week", thisWeek, `${lastWeek} last week`)}
+        {tile("Form submissions this week", real[11], `${real[10]} last week`)}
         {tile("Form submissions, last 4 weeks", last4, `${prev4} in the 4 weeks before`)}
-        {tile("All-time real submissions", marked.filter((x) => !x.test).length, `since ${subs.length ? new Date(subs[subs.length - 1].submittedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}`)}
-        {tile("Tests filtered out", marked.filter((x) => x.test).length, "test words, webflow.io staging")}
+        {tile("All-time real submissions", marked.filter((x) => !x.test).length, oldest ? `since ${new Date(oldest).toLocaleDateString("en-US", { month: "short", year: "numeric" })}` : "—")}
+        {tile("Tests filtered out", marked.filter((x) => x.test).length, site === "bolder" ? "test words, webflow.io staging" : "test words, staging")}
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card title="Form submissions per week" sub="Webflow forms on bolderapps.com, last 12 weeks" className="lg:col-span-2">
+        <Card title="Form submissions per week" sub={`${site === "bolder" ? "Webflow forms" : "Site forms"} on ${SITES[site].host}, last 12 weeks`} className="lg:col-span-2">
           <StackedBars x={weeks.map(weekLabel)} series={[{ key: "real", label: "Real", color: C.blue, values: real }, { key: "test", label: "Test", color: C.grey, values: per(true) }]} highlight={11} />
           <div className="mt-2"><Legend items={[{ label: "Real", color: C.blue }, { label: "Test", color: C.grey }]} /></div>
         </Card>
@@ -1562,13 +1621,13 @@ function BolderTab({ data, setToast }: { data: Data; setToast: (s: string) => vo
           {pages.length ? <HBars rows={pages} color={C.aqua} /> : <Empty>No submissions in this period.</Empty>}
         </Card>
       </div>
-      <Kpis data={{ ...data, kpis: b.kpis, sources: b.sources, metrics: b.metrics }} sync={sync} open={() => {}} site="bolder" />
+      <Kpis data={data} sync={sync} open={open} site={site} />
     </div>
   );
 }
 
 /** Which GA4 properties and Search Console sites the Ops service account can read. */
-function GoogleAccess({ site = "synergy" }: { site?: "synergy" | "bolder" }) {
+function GoogleAccess({ site }: { site: Site }) {
   const [res, setRes] = useState<any>(null);
   const [busy, setBusy] = useState(false);
   const check = async () => {
@@ -1587,7 +1646,12 @@ function GoogleAccess({ site = "synergy" }: { site?: "synergy" | "bolder" }) {
         <p className="text-sm text-red-700">Could not sign in to Google: {res.error}</p>
       ) : (
         <div className="grid gap-4 text-sm md:grid-cols-2">
-          <p className="md:col-span-2 text-neutral-600">Service account: <code className="rounded bg-neutral-100 px-1">{res.serviceAccount}</code> · this tab reads GA4 <b>{res.configured[site]?.ga4Property ?? "not set"}</b>, Search Console <b>{res.configured[site]?.gscSite}</b></p>
+          <p className="md:col-span-2 text-neutral-600">Service account: <code className="rounded bg-neutral-100 px-1">{res.serviceAccount}</code> · {SITES[site].host} reads GA4 <b>{res.configured[site]?.ga4Property ?? "not set"}</b>, Search Console <b>{res.configured[site]?.gscSite}</b></p>
+          {res.configured[site]?.ga4Property && !res.ga4.error && !res.ga4.properties.some((p: any) => p.id === String(res.configured[site].ga4Property)) && (
+            <p className="md:col-span-2 rounded-lg bg-red-50 px-3 py-2 text-red-800">
+              The service account cannot read GA4 property <b>{res.configured[site].ga4Property}</b>. In Google Analytics → Admin → Property access management for that property, add <code className="rounded bg-white px-1">{res.serviceAccount}</code> as <b>Viewer</b> (not a preview or report link). Then click “Sync now” here.
+            </p>
+          )}
           <div>
             <p className="mb-1 font-medium">GA4 properties</p>
             {res.ga4.error ? <p className="text-red-700">{res.ga4.error}</p> : !res.ga4.properties.length ? <p className="text-amber-800">None yet: nobody has added the service account to a GA4 property.</p> : (
@@ -1606,8 +1670,7 @@ function GoogleAccess({ site = "synergy" }: { site?: "synergy" | "bolder" }) {
   );
 }
 
-function Kpis({ data, sync, open, site = "synergy" }: { data: Data; sync: (weeks?: number) => void; open: (d: any) => void; site?: "synergy" | "bolder" }) {
-  const synergy = site === "synergy";
+function Kpis({ data, sync, open, site }: { data: Data; sync: (weeks?: number) => void; open: (d: any) => void; site: Site }) {
   const snaps = data.kpis.slice(0, 8);
   const keys = Object.keys(data.metrics).filter((k) => snaps.some((s) => s.metrics?.[k] !== undefined));
   const latest = snaps[0];
@@ -1639,32 +1702,36 @@ function Kpis({ data, sync, open, site = "synergy" }: { data: Data; sync: (weeks
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-neutral-600">
-          {latest ? <>Weekly snapshots, Monday–Sunday. Last sync {new Date(latest.syncedAt).toLocaleString()}.</> : synergy ? "No data yet. Connect GA4 / Search Console / HubSpot (see Data sources on the Overview), then “Sync now”." : "No Google data yet. Once the service account can read Bolder’s GA4 and Search Console (see Google access), click “Backfill 12 weeks”."}
+          {latest ? <>Weekly snapshots of {SITES[site].host}, Monday–Sunday. Last sync {new Date(latest.syncedAt).toLocaleString()}.</> : `No data yet for ${SITES[site].host}. Once the service account can read its GA4 and Search Console (see Google access), click “Backfill 12 weeks”.`}
         </p>
         <div className="flex gap-2"><Btn kind="ghost" onClick={() => sync(12)}>Backfill 12 weeks</Btn><Btn onClick={() => sync(1)}>Sync now</Btn></div>
       </div>
       <GoogleAccess site={site} />
+      {latest && Object.keys(latest.errors ?? {}).length > 0 && (
+        <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p className="font-medium">Last sync of {SITES[site].host} could not read:</p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-5">
+            {Object.entries(latest.errors ?? {}).map(([k, e]) => (
+              <li key={k}>
+                <b>{k === "ga4" ? "Google Analytics" : k === "gsc" ? "Search Console" : k === "hubspot" ? "HubSpot" : k}</b>:{" "}
+                {/sufficient permissions/i.test(e) ? "the service account is not a Viewer on this GA4 property (see Google access above)." : e}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {synergy ? (
-          <>
-            <Stat label="MQLs" metric="hubspot.mql" source="hubspot" data={data} />
-            <Stat label="SQLs" metric="hubspot.sql" source="hubspot" data={data} />
-          </>
-        ) : (
-          <>
-            <Stat label="All users" metric="ga4.users" source="ga4" data={data} />
-            <Stat label="Search impressions" metric="gsc.impressions" source="gsc" data={data} />
-          </>
-        )}
+        <Stat label={`MQLs · ${SITES[site].short}`} metric="hubspot.mql" source="hubspot" data={data} />
+        <Stat label={`SQLs · ${SITES[site].short}`} metric="hubspot.sql" source="hubspot" data={data} />
         <Stat label="Organic users" metric="ga4.organicUsers" source="ga4" data={data} />
         <Stat label="Search clicks" metric="gsc.clicks" source="gsc" data={data} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {synergy && chart("MQLs and SQLs", "Contacts that became MQL / SQL that week", [["hubspot.mql", "MQLs", C.blue], ["hubspot.sql", "SQLs", C.orange]], "HubSpot access")}
-        {synergy && chart("MQLs by brand", "By the website the contact first arrived on", [["hubspot.mql.bolder", "Bolder Apps", C.blue], ["hubspot.mql.synergy", "Synergy Labs", C.orange]], "HubSpot access")}
-        {synergy && chart("New contacts", "New HubSpot contacts per week (before MQL)", [["hubspot.newContacts", "All contacts", C.blue], ["hubspot.newContactsOrganic", "From organic search", C.orange]], "HubSpot access")}
+        {chart(`MQLs and SQLs · ${SITES[site].name}`, `Contacts who first arrived on ${SITES[site].host} and became MQL / SQL that week`, [["hubspot.mql", "MQLs", C.blue], ["hubspot.sql", "SQLs", C.orange]], "HubSpot access")}
+        {chart("MQLs by brand", "Both brands side by side, by the website the contact first arrived on", [["hubspot.mql.bolder", "Bolder Apps", C.blue], ["hubspot.mql.synergy", "Synergy Labs", C.orange]], "HubSpot access")}
+        {chart("New contacts · both brands", "New HubSpot contacts per week (before MQL); HubSpot does not split these by website", [["hubspot.newContacts", "All contacts", C.blue], ["hubspot.newContactsOrganic", "From organic search", C.orange]], "HubSpot access")}
         {chart("Website users", "GA4, per week", [["ga4.users", "All users", C.blue], ["ga4.organicUsers", "Organic users", C.orange]], "Google Analytics access")}
         {chart("Sessions", "GA4, per week", [["ga4.sessions", "All sessions", C.blue], ["ga4.organicSessions", "Organic sessions", C.orange]], "Google Analytics access")}
       </div>
@@ -1687,10 +1754,10 @@ function Kpis({ data, sync, open, site = "synergy" }: { data: Data; sync: (weeks
                   format={compact}
                   note={(r) => r.change !== undefined && <span className="w-12 text-right text-neutral-500">{key === "gsc.opportunities" ? `#${r.change}` : `${r.change > 0 ? "+" : ""}${r.change}`}</span>}
                   action={(r) =>
-                    !synergy ? null : key === "gsc.opportunities" ? (
-                      <button className="rounded px-1.5 text-xs text-primary-green ring-1 ring-primary-green/30 hover:bg-emerald-50" onClick={() => open({ _type: "opsContent", kind: "new", status: "planned", week: addDays(THIS_WEEK, 7), title: r.label, keyword: r.label })}>+ plan</button>
+                    key === "gsc.opportunities" ? (
+                      <button className="rounded px-1.5 text-xs text-primary-green ring-1 ring-primary-green/30 hover:bg-neutral-50" onClick={() => open({ _type: "opsContent", kind: "new", status: "planned", week: addDays(THIS_WEEK, 7), title: r.label, keyword: r.label })}>+ plan</button>
                     ) : key === "gsc.losers" && r.label.startsWith("/blog/") ? (
-                      <button className="rounded px-1.5 text-xs text-primary-green ring-1 ring-primary-green/30 hover:bg-emerald-50" onClick={() => open({ _type: "opsContent", kind: "refresh", status: "planned", week: addDays(THIS_WEEK, 7), title: `Refresh ${r.label}`, targetPath: r.label })}>+ refresh</button>
+                      <button className="rounded px-1.5 text-xs text-primary-green ring-1 ring-primary-green/30 hover:bg-neutral-50" onClick={() => open({ _type: "opsContent", kind: "refresh", status: "planned", week: addDays(THIS_WEEK, 7), title: `Refresh ${r.label}`, targetPath: r.label })}>+ refresh</button>
                     ) : null
                   }
                 />
@@ -1791,13 +1858,13 @@ const SITE_HOST = { synergy: "https://www.synergylabs.co", bolder: "https://www.
 const SITE_NAME = { synergy: "Synergy", bolder: "Bolder" } as const;
 const FILE_STATUS: Record<InboxFile["status"], string> = { new: "bg-orange-100 text-orange-800", "in-progress": "bg-blue-100 text-blue-800", done: "bg-emerald-100 text-emerald-800", skipped: "bg-neutral-100 text-neutral-600" };
 
-function BlogsTab({ data, setToast }: { data: Data; setToast: (s: string) => void }) {
+function BlogsTab({ data, site, setToast }: { data: Data; site: Site; setToast: (s: string) => void }) {
   const [view, setView] = useState<"Tracker" | "Refresh queue" | "Files">(() => (location.hash.includes("refresh") ? "Refresh queue" : "Tracker"));
   const [posts, setPosts] = useState<BlogPost[] | null>(null);
   const [files, setFiles] = useState<InboxFile[]>([]);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
-  const load = useCallback(() => api<{ posts: BlogPost[]; files: InboxFile[] }>("blogs").then((d) => { setPosts(d.posts); setFiles(d.files); }).catch((e) => setErr(e.message)), []);
+  const load = useCallback(() => api<{ posts: BlogPost[]; files: InboxFile[] }>("blogs").then((d) => { setPosts(d.posts.filter((p) => p.site === site)); setFiles(d.files.filter((f) => (f.site ?? "synergy") === site)); }).catch((e) => setErr(e.message)), [site]);
   useEffect(() => void load(), [load]);
 
   const sync = async (weeks: number | "ytd") => {
@@ -1835,7 +1902,7 @@ function BlogsTab({ data, setToast }: { data: Data; setToast: (s: string) => voi
           <Btn disabled={busy} onClick={() => sync(1)}>Sync now</Btn>
         </div>
       </div>
-      {!data.sources.ga4 && <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">Per-article traffic is waiting for GA4 access (GA4_PROPERTY_ID{data.sources.bolderGa4 ? "" : " and BOLDER_GA4_PROPERTY_ID"} in Vercel). The post list and source tags work now.</p>}
+      {!data.sources.ga4 && <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">Per-article traffic for {SITES[site].host} is waiting for GA4 access ({site === "bolder" ? "BOLDER_GA4_PROPERTY_ID" : "GA4_PROPERTY_ID"} in Vercel, and the service account as Viewer on that property). The post list and source tags work now.</p>}
       {view === "Tracker" && <BlogTracker posts={posts} reload={load} setToast={setToast} />}
       {view === "Refresh queue" && <RefreshQueue posts={posts} files={files} reload={load} setToast={setToast} />}
       {view === "Files" && <FilesList files={files} reload={load} setToast={setToast} />}
@@ -1845,7 +1912,6 @@ function BlogsTab({ data, setToast }: { data: Data; setToast: (s: string) => voi
 
 function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: () => void; setToast: (s: string) => void }) {
   const year = THIS_WEEK.slice(0, 4);
-  const [site, setSite] = useState<"" | "synergy" | "bolder">("");
   const [source, setSource] = useState<"" | BlogSource | "none">("");
   const [period, setPeriod] = useState<"year" | "all">("year");
   const [q, setQ] = useState("");
@@ -1854,14 +1920,14 @@ function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: (
 
   const live = posts.filter((p) => p.live !== false);
   const shown = live
-    .filter((p) => (!site || p.site === site) && (!source || (source === "none" ? !p.source : p.source === source)) && (period === "all" || (p.publishedAt ?? "") >= `${year}-01-01`))
+    .filter((p) => (!source || (source === "none" ? !p.source : p.source === source)) && (period === "all" || (p.publishedAt ?? "") >= `${year}-01-01`))
     .filter((p) => !q || `${p.title} ${p.path}`.toLowerCase().includes(q.toLowerCase()))
     .sort((a, b) => (sort === "views" ? (b.views ?? 0) - (a.views ?? 0) : (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "")));
   const thisYear = live.filter((p) => (p.publishedAt ?? "") >= `${year}-01-01`);
 
   // Posts per month this year, stacked by source.
   const months = Array.from({ length: Number(THIS_WEEK.slice(5, 7)) }, (_, i) => `${year}-${String(i + 1).padStart(2, "0")}`);
-  const inScope = thisYear.filter((p) => !site || p.site === site);
+  const inScope = thisYear;
   const series: Series[] = ([...(Object.keys(SOURCE_LABEL) as BlogSource[]), "none"] as const).map((s) => ({
     key: s,
     label: s === "none" ? "Not tagged" : SOURCE_LABEL[s],
@@ -1894,13 +1960,13 @@ function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: (
   return (
     <>
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {tile(`Posts in ${year}`, thisYear.length, `Bolder ${thisYear.filter((p) => p.site === "bolder").length} · Synergy ${thisYear.filter((p) => p.site === "synergy").length}`)}
-        {tile("This month", thisYear.filter((p) => p.publishedAt?.startsWith(months[months.length - 1])).length, "both sites")}
+        {tile(`Posts in ${year}`, thisYear.length, `${thisYear.filter((p) => p.source).length} tagged with a source`)}
+        {tile("This month", thisYear.filter((p) => p.publishedAt?.startsWith(months[months.length - 1])).length, "published so far")}
         {tile("Not tagged", thisYear.filter((p) => !p.source).length, `of ${thisYear.length} posts this year`)}
-        {tile("All posts", live.length, `Bolder ${live.filter((p) => p.site === "bolder").length} · Synergy ${live.filter((p) => p.site === "synergy").length}`)}
+        {tile("All posts", live.length, "live on the site")}
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card title={`Posts per month, ${year}`} sub={`By source${site ? ` · ${SITE_NAME[site]} only` : " · both sites"}`} className="lg:col-span-2">
+        <Card title={`Posts per month, ${year}`} sub="By source" className="lg:col-span-2">
           <Legend items={series} />
           <StackedBars x={months.map((m) => new Date(`${m}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }))} series={series} height={180} format={(v) => String(Math.round(v))} />
         </Card>
@@ -1911,7 +1977,6 @@ function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: (
       <Card title="Every post" sub="Source tags save as you pick them; agents can set them through the API too." action={<Btn kind="ghost" onClick={csv}>Download CSV</Btn>}>
         <div className="mb-3 flex flex-wrap gap-2 text-sm">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search titles…" className="min-w-[12rem] flex-1 rounded-lg border border-neutral-300 px-3 py-1.5" />
-          <select value={site} onChange={(e) => setSite(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="">Both sites</option><option value="bolder">Bolder Apps</option><option value="synergy">Synergy Labs</option></select>
           <select value={source} onChange={(e) => setSource(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="">Any source</option>{Object.entries(SOURCE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}<option value="none">Not tagged</option></select>
           <select value={period} onChange={(e) => setPeriod(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="year">Published {year}</option><option value="all">All time</option></select>
           <select value={sort} onChange={(e) => setSort(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="date">Newest first</option><option value="views">Most viewed</option></select>
@@ -2062,40 +2127,56 @@ function FilesList({ files, reload, setToast }: { files: InboxFile[]; reload: ()
 
 // ---- App -----------------------------------------------------------------------------------
 
-const TABS = ["Overview", "Plan", "Weekly", "Blogs", "Content", "Forms", "Feedback", "KPIs", "Bolder Apps", "Health", "Bots"] as const;
+const TABS = ["Overview", "Plan", "Weekly", "Blogs", "Content", "Forms", "Feedback", "KPIs", "Health", "Bots"] as const;
 type Tab = (typeof TABS)[number];
-const TAB_ICON: Record<Tab, string> = { Overview: "◎", Plan: "▤", Weekly: "▦", Blogs: "¶", Content: "✎", Forms: "✉", "Bolder Apps": "◆", Feedback: "◍", KPIs: "↗", Health: "♥", Bots: "⚙" };
-const TAB_SUB: Record<Tab, string> = {
-  Overview: "MQLs first: every task ties to a key result. Covers synergylabs.co and bolderapps.com.",
-  Plan: "Who does what, week by week, through year-end.",
-  Weekly: "The Q4 OKR sheet’s weekly numbers, filled in automatically.",
-  Blogs: "Every post on both sites: source, traffic since publish, and the 11-month refresh queue.",
-  Content: "Content calendar: topics, AI drafts, review and scheduled publishing.",
-  Forms: "Every form submission on the site: filter, search, download.",
-  Feedback: "Pins left on the live and staging site.",
-  KPIs: "GA4, Search Console and HubSpot, synced every Monday.",
-  "Bolder Apps": "bolderapps.com: form submissions, Google Analytics and Search Console.",
-  Health: "Daily checks against the live site.",
-  Bots: "Everything the automations and agents did, and what it cost.",
+const TAB_ICON: Record<Tab, string> = { Overview: "◎", Plan: "▤", Weekly: "▦", Blogs: "¶", Content: "✎", Forms: "✉", Feedback: "◍", KPIs: "↗", Health: "♥", Bots: "⚙" };
+const TAB_SUB: Record<Tab, (host: string) => string> = {
+  Overview: (h) => `${h}: MQLs first, every task ties to a key result.`,
+  Plan: (h) => `Who does what for ${h}, week by week, through year-end. Tasks without a website show on both.`,
+  Weekly: (h) => `The Q4 OKR sheet’s weekly numbers for ${h}, filled in automatically.`,
+  Blogs: (h) => `Every post on ${h}: source, traffic since publish, and the 11-month refresh queue.`,
+  Content: (h) => `Content calendar for ${h}: topics, drafts, review and scheduled publishing.`,
+  Forms: (h) => `Every form submission on ${h}: filter, search, download.`,
+  Feedback: (h) => `Pins left on ${h} (live and staging).`,
+  KPIs: (h) => `${h}: form leads, GA4, Search Console and HubSpot, synced every Monday.`,
+  Health: (h) => `Daily checks against ${h}.`,
+  Bots: () => "Everything the automations and agents did on both websites, and what it cost.",
 };
+
+/** "#bolder/KPIs" -> Bolder Apps, KPIs. Old links ("#KPIs", "#Bolder Apps") still work. */
+function parseHash(): { site?: Site; tab?: Tab } {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h === "Bolder Apps") return { site: "bolder", tab: "KPIs" };
+  const [a, b] = h.includes("/") ? h.split("/") : [undefined, h];
+  const site = a === "bolder" || a === "synergy" ? a : undefined;
+  const tab = (TABS as readonly string[]).includes(b ?? "") ? (b as Tab) : undefined;
+  return { site, tab };
+}
 
 export default function OpsApp({ user }: { user: string }) {
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState<Tab>(() => {
-    const h = decodeURIComponent(location.hash.slice(1));
-    return (TABS as readonly string[]).includes(h) ? (h as Tab) : "Overview";
+  const [tab, setTab] = useState<Tab>(() => parseHash().tab ?? "Overview");
+  const [site, setSite] = useState<Site>(() => {
+    const fromHash = parseHash().site;
+    if (fromHash) return fromHash;
+    try { return localStorage.getItem("ops.site") === "bolder" ? "bolder" : "synergy"; } catch { return "synergy"; }
   });
+  useEffect(() => { try { localStorage.setItem("ops.site", site); } catch {} }, [site]);
+  const view = useMemo(() => (data ? forSite(data, site) : null), [data, site]);
+  const theme = SITES[site];
   const [editing, setEditing] = useState<any>(null);
   const [toast, setToast] = useState("");
 
   const load = useCallback(() => api<Data>("data").then(setData).catch((e) => setError(e.message)), []);
   useEffect(() => void load(), [load]);
-  useEffect(() => void history.replaceState(null, "", `#${tab}`), [tab]);
+  useEffect(() => void history.replaceState(null, "", `#${site}/${tab}`), [site, tab]);
+  useEffect(() => { document.title = `${theme.short} · Website Ops`; }, [theme]);
   useEffect(() => {
     const onHash = () => {
-      const h = decodeURIComponent(location.hash.slice(1));
-      if ((TABS as readonly string[]).includes(h)) setTab(h as Tab);
+      const h = parseHash();
+      if (h.tab) setTab(h.tab);
+      if (h.site) setSite(h.site);
     };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
@@ -2107,11 +2188,11 @@ export default function OpsApp({ user }: { user: string }) {
   }, [toast]);
 
   const sync = async (weeks = 1) => {
-    setToast(weeks > 1 ? `Syncing ${weeks} weeks — the newest shows now, the rest fill in over a minute…` : "Syncing KPIs…");
+    setToast(weeks > 1 ? `Syncing ${weeks} weeks of ${theme.name} — the newest shows now, the rest fill in over a minute…` : `Syncing ${theme.name}…`);
     try {
-      const snap = await api("sync", { weeks });
+      const snap = await api("sync", { weeks, site });
       const errs = Object.keys(snap.errors ?? {});
-      setToast(errs.length ? `Synced; not connected or failed: ${errs.join(", ")}` : "KPIs synced");
+      setToast(errs.length ? `${theme.name} synced; not connected or failed: ${errs.join(", ")}` : `${theme.name} synced`);
     } catch (e: any) {
       setToast(`Sync failed: ${e.message}`);
     }
@@ -2119,14 +2200,30 @@ export default function OpsApp({ user }: { user: string }) {
   };
 
   const current = editing && data ? (editing._type === "opsContent" && editing._id ? data.content.find((c) => c._id === editing._id) ?? editing : editing) : null;
+  // New tasks and content start on the website being viewed; key results stay shared.
+  const open = (d: any) => setEditing(d && !d._id && (d._type === "opsTask" || d._type === "opsContent") && !d.site ? { ...d, site } : d);
 
   return (
-    <div className="min-h-screen lg:flex">
-      <aside className="sticky top-0 z-30 bg-primary-green text-white lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-56 lg:flex-col">
-        <div className="flex items-center justify-between gap-3 px-4 py-3 lg:block lg:px-5 lg:py-6">
+    <div className="min-h-screen lg:flex" style={{ "--color-primary-green": theme.primary, "--color-secondary-green": theme.secondary } as CSSProperties}>
+      <aside className="sticky top-0 z-30 bg-primary-green text-white transition-colors lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-56 lg:flex-col">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 lg:block lg:px-5 lg:pb-4 lg:pt-6">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">Synergy · Bolder</p>
-            <p className="font-display text-2xl leading-tight">Website Ops</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">Website Ops</p>
+            <p className="font-display text-2xl leading-tight">{theme.name}</p>
+          </div>
+          <div role="radiogroup" aria-label="Website" className="flex rounded-lg bg-black/20 p-0.5 text-xs font-medium lg:mt-3">
+            {(Object.keys(SITES) as Site[]).map((k) => (
+              <button
+                key={k}
+                role="radio"
+                aria-checked={site === k}
+                onClick={() => { setSite(k); setEditing(null); }}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 transition ${site === k ? "bg-white text-neutral-900 shadow-sm" : "text-white/75 hover:text-white"}`}
+              >
+                <span className="h-2 w-2 rounded-full" style={{ background: SITES[k].secondary }} aria-hidden />
+                {SITES[k].short}
+              </button>
+            ))}
           </div>
           <div className="flex items-center gap-3 text-sm lg:hidden">
             <span className="text-white/70">{user}</span>
@@ -2136,10 +2233,10 @@ export default function OpsApp({ user }: { user: string }) {
         <nav className="flex gap-1 overflow-x-auto px-2 pb-2 lg:flex-1 lg:flex-col lg:overflow-visible lg:px-3">
           {TABS.map((t) => {
             const badge =
-              t === "Feedback" ? data?.feedback.filter((f) => f.status !== "done").length
-              : t === "Health" ? data?.health?.checks.filter((c) => !c.ok).length
-              : t === "Content" ? data?.content.filter((c) => c.status === "review").length
-              : t === "Blogs" ? data?.inbox?.newRefresh
+              t === "Feedback" ? view?.feedback.filter((f) => f.status !== "done").length
+              : t === "Health" ? (site === "synergy" ? view?.health?.checks.filter((c) => !c.ok).length : 0)
+              : t === "Content" ? view?.content.filter((c) => c.status === "review").length
+              : t === "Blogs" && site === "synergy" ? data?.inbox?.newRefresh
               : 0;
             return (
               <button key={t} onClick={() => setTab(t)} className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition ${tab === t ? "bg-white/[0.12] text-white" : "text-white/65 hover:bg-white/[0.06] hover:text-white"}`}>
@@ -2160,24 +2257,33 @@ export default function OpsApp({ user }: { user: string }) {
       <header className="flex flex-wrap items-end justify-between gap-3 pb-5 pt-6">
         <div>
           <h1 className="text-3xl">{tab}</h1>
-          <p className="mt-1 text-sm text-neutral-500">{TAB_SUB[tab]}</p>
+          <p className="mt-1 text-sm text-neutral-500">{TAB_SUB[tab](theme.host)}</p>
         </div>
       </header>
 
       {error && <p className="rounded-lg bg-red-50 p-4 text-sm text-red-800">Could not load: {error}</p>}
       {!data && !error && <p className="text-sm text-neutral-500">Loading…</p>}
-      {data && (
+      {data && view && (
         <>
-          {tab === "Overview" && <Overview data={data} open={setEditing} sync={() => sync(1)} />}
-          {tab === "Plan" && <Plan data={data} open={setEditing} />}
-          {tab === "Weekly" && <WeeklyTab data={data} reload={load} />}
-          {tab === "Blogs" && <BlogsTab data={data} setToast={setToast} />}
-          {tab === "Content" && <Content data={data} open={setEditing} reload={load} setToast={setToast} />}
-          {tab === "Forms" && <FormsTab setToast={setToast} />}
-          {tab === "Feedback" && <FeedbackTab data={data} reload={load} />}
-          {tab === "Health" && <HealthTab data={data} reload={load} setToast={setToast} />}
-          {tab === "KPIs" && <Kpis data={data} sync={sync} open={setEditing} />}
-          {tab === "Bolder Apps" && <BolderTab data={data} setToast={setToast} />}
+          {tab === "Overview" && <Overview key={site} data={view} open={open} sync={() => sync(1)} site={site} />}
+          {tab === "Plan" && <Plan key={site} data={view} open={open} />}
+          {tab === "Weekly" && <WeeklyTab key={site} data={view} reload={load} site={site} />}
+          {tab === "Blogs" && <BlogsTab key={site} data={view} site={site} setToast={setToast} />}
+          {tab === "Content" && (
+            <>
+              {site === "bolder" && <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">bolderapps.com runs on Webflow: plan and track Bolder content here, but AI drafting and scheduled publishing only write to the Synergy Labs site.</p>}
+              <Content key={site} data={view} open={open} reload={load} setToast={setToast} />
+            </>
+          )}
+          {tab === "Forms" && <FormsTab key={site} site={site} setToast={setToast} />}
+          {tab === "Feedback" && (
+            <>
+              {site === "bolder" && <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">The feedback bar runs on synergylabs.co only (bolderapps.com is on Webflow), so Bolder pins only appear here once it is added there.</p>}
+              <FeedbackTab key={site} data={view} reload={load} />
+            </>
+          )}
+          {tab === "Health" && (site === "synergy" ? <HealthTab data={view} reload={load} setToast={setToast} /> : <Card title="Not monitored yet"><p className="text-sm text-neutral-600">The daily health checks (pages, forms, sitemap, redirects, schema) run against synergylabs.co. bolderapps.com is hosted by Webflow and is not checked yet.</p></Card>)}
+          {tab === "KPIs" && <SiteKpis key={site} data={view} site={site} sync={sync} open={open} />}
           {tab === "Bots" && (
             <div className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-3">
@@ -2223,9 +2329,9 @@ export default function OpsApp({ user }: { user: string }) {
             </div>
           )}
           {current && current._type === "opsContent" && current._id ? (
-            <ContentPanel key={current._id + current.status} item={current} data={data} onClose={() => setEditing(null)} onSaved={load} />
+            <ContentPanel key={current._id + current.status} item={current} data={view} onClose={() => setEditing(null)} onSaved={load} />
           ) : current ? (
-            <Editor doc={current} data={data} onClose={() => setEditing(null)} onSaved={load} />
+            <Editor doc={current} data={view} onClose={() => setEditing(null)} onSaved={load} />
           ) : null}
         </>
       )}

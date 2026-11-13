@@ -79,6 +79,8 @@ export interface KeyResult {
   stretch?: number;
   /** Andrew's OKR this rolls up to, e.g. "O5 KR2". */
   andrewKr?: string;
+  /** Which website it belongs to; unset = both. */
+  site?: "synergy" | "bolder";
   /**
    * How progress is judged: "metric" (a number vs target), "milestone" (done
    * when every linked task is done, late after targetDate), "count" (number
@@ -108,6 +110,8 @@ export interface Task {
   /** Deadline from the OKR sheet's Priorities; late when past and not done. */
   dueDate?: string;
   andrewKr?: string;
+  /** Which website it belongs to; unset = both. */
+  site?: "synergy" | "bolder";
   comments?: Comment[];
 }
 
@@ -116,6 +120,8 @@ export type ContentStatus = "idea" | "planned" | "drafting" | "review" | "approv
 export interface ContentItem {
   _id: string;
   _type: "opsContent";
+  /** Which website it is for; unset = synergylabs.co. */
+  site?: "synergy" | "bolder";
   title: string;
   kind: ContentKind;
   keyword?: string;

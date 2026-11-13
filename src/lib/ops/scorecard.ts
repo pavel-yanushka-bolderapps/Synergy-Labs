@@ -7,10 +7,11 @@
 //   CTA clicks              GA4 event GA4_CTA_EVENT, Synergy + Bolder
 //   Form start rate         GA4 form_start / sessions, bolderapps.com
 //   Form MQLs Bolder / Synergy   real (non-test) form submissions, Forms tab
-//   A/B tests with a winner, Notes   typed in (ops.weekly.<week>)
+//   A/B tests with a winner, Notes   typed in (ops.weekly.<week>; one set per
+//                                    website: "notes" = Synergy, "notesBolder")
 //   Blogs posted Bolder / Synergy    posts by publish date (blog tracker, ops.blog.*)
 //   MQLs / SQLs (HubSpot)            lifecycle stage reached that week, split by brand
-//   Pulse                            one line on what moved, written by a person or agent
+//   Pulse                            one line on what moved, per website, written by a person or agent
 import { opsClient, mondayOf, addDays, type KpiSnapshot } from "./store";
 import { testReason } from "./formtest";
 import type { Submission } from "./submissions";
@@ -25,7 +26,16 @@ export interface WeeklyNote {
   notes?: string;
   pulse?: string;
   pulseBy?: string;
+  // The same three, for bolderapps.com (the unsuffixed ones are synergylabs.co).
+  abWinnersBolder?: number;
+  notesBolder?: string;
+  pulseBolder?: string;
+  pulseByBolder?: string;
 }
+
+export type ScoreSite = "synergy" | "bolder";
+/** Field name in an opsWeekly doc for a site: "notes" (Synergy) / "notesBolder". */
+export const weeklyField = (field: "abWinners" | "notes" | "pulse" | "pulseBy", site: ScoreSite) => (site === "bolder" ? `${field}Bolder` : field);
 
 export interface ScoreRow {
   week: string;
@@ -47,6 +57,18 @@ export interface ScoreRow {
   sqlHubspot?: number;
   pulse?: string;
   pulseBy?: string;
+  // Per-site values, for the Weekly tab of each website.
+  newUsersSynergy?: number;
+  newUsersBolder?: number;
+  ctaClicksSynergy?: number;
+  ctaClicksBolder?: number;
+  formStartRateSynergy?: number;
+  sqlHubspotBolder?: number;
+  sqlHubspotSynergy?: number;
+  abWinnersBolder?: number;
+  notesBolder?: string;
+  pulseBolder?: string;
+  pulseByBolder?: string;
 }
 
 /** Live values a key result can be "tracked automatically by". */
@@ -94,6 +116,17 @@ export function buildScorecard(synergy: KpiSnapshot[], bolder: KpiSnapshot[], su
       sqlHubspot: sy["hubspot.sql"],
       pulse: note?.pulse,
       pulseBy: note?.pulseBy,
+      newUsersSynergy: sy["ga4.newUsers"],
+      newUsersBolder: bo["ga4.newUsers"],
+      ctaClicksSynergy: sy["ga4.ctaClicks"],
+      ctaClicksBolder: bo["ga4.ctaClicks"],
+      formStartRateSynergy: sy["ga4.formStartRate"],
+      sqlHubspotBolder: sy["hubspot.sql.bolder"],
+      sqlHubspotSynergy: sy["hubspot.sql.synergy"],
+      abWinnersBolder: note?.abWinnersBolder,
+      notesBolder: note?.notesBolder,
+      pulseBolder: note?.pulseBolder,
+      pulseByBolder: note?.pulseByBolder,
     };
   });
 
@@ -113,7 +146,7 @@ export function buildScorecard(synergy: KpiSnapshot[], bolder: KpiSnapshot[], su
     "derived.both.newUsers": latest("newUsers"),
     "derived.both.ctaClicks": latest("ctaClicks"),
     "derived.bolder.formStartRate": latest("formStartRateBolder"),
-    "derived.abWinnersQtd": { value: rows.reduce((a, r) => a + (r.abWinners ?? 0), 0) },
+    "derived.abWinnersQtd": { value: rows.reduce((a, r) => a + (r.abWinners ?? 0) + (r.abWinnersBolder ?? 0), 0) },
   };
   return { rows, derived };
 }
