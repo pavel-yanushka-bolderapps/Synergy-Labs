@@ -36,7 +36,7 @@
 //   BOLDER_GSC_SITE              default "sc-domain:bolderapps.com"
 //   GA4_EVENTS                   optional, comma-separated event names to count;
 //                                default below.
-//   GA4_CTA_EVENT                optional, the GA4 event a CTA click sends (for
+//   GA4_CTA_EVENT                optional, default "cta_click"; the GA4 event a CTA click sends (for
 //                                the "CTA clicks per week" key result).
 //   Form start rate = GA4 "form_start" events / sessions (form_start is sent
 //   by GA4 enhanced measurement, "Form interactions").
@@ -72,9 +72,11 @@ export const METRICS: Record<string, { label: string; unit?: string; better?: "u
   "hubspot.sql.synergy": { label: "SQLs · Synergy Labs" },
 };
 export const eventMetric = (name: string) => `ga4.event.${name}`;
+/** The GA4 event a CTA click sends; synergylabs.co sends "cta_click" (Analytics.astro). */
+export const ctaEvent = () => env("GA4_CTA_EVENT") || "cta_click";
 export const ga4Events = () => {
   const list = env("GA4_EVENTS") ? env("GA4_EVENTS").split(",").map((s) => s.trim()) : DEFAULT_EVENTS;
-  const cta = env("GA4_CTA_EVENT");
+  const cta = ctaEvent();
   return cta && !list.includes(cta) ? [...list, cta] : list;
 };
 
@@ -287,7 +289,9 @@ async function syncGa4(property: string, start: string, end: string, metrics: Re
   for (const name of ga4Events()) metrics[eventMetric(name)] = 0;
   for (const row of events) metrics[eventMetric(row.dimensionValues![0].value)] = Number(row.metricValues[0].value);
   if (metrics["ga4.sessions"]) metrics["ga4.formStartRate"] = (metrics[eventMetric("form_start")] ?? 0) / metrics["ga4.sessions"];
-  if (env("GA4_CTA_EVENT")) metrics["ga4.ctaClicks"] = metrics[eventMetric(env("GA4_CTA_EVENT"))] ?? 0;
+  // Only weeks the event exists in: a site that never sends it (bolderapps.com,
+  // or synergylabs.co before Nov 2026) shows "–", not 0.
+  if (metrics[eventMetric(ctaEvent())] !== undefined) metrics["ga4.ctaClicks"] = metrics[eventMetric(ctaEvent())];
   lists!["ga4.topOrganicPages"] = pages.map((r) => ({
     label: r.dimensionValues![0].value,
     value: Number(r.metricValues[0].value),

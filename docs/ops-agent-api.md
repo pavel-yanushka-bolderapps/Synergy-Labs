@@ -30,7 +30,7 @@ Errors come back as `{"error": "..."}` with a 4xx/5xx status.
 | GET | What you get |
 |---|---|
 | `me` | `{ agent }` |
-| `scorecard` | One row per Q4 week: organic clicks (both sites), new users, CTA clicks, form start rate, form submissions by brand, HubSpot MQLs/SQLs (+ by brand), **blogs posted by brand**, A/B winners, pulse, notes. Use it to fill the KPI tracker sheet. |
+| `scorecard` | One row per Q4 week, each number per website (`…Synergy` / `…Bolder` fields, plus both-site totals): organic clicks, new users, CTA clicks, form start rate, form submissions, HubSpot MQLs/SQLs, blogs posted, A/B winners, pulse, notes. Use it to fill the KPI tracker sheet; ready-made prompts in `docs/ops-routines.md`. |
 | `kpis?site=synergy\|bolder&weeks=8` | Raw weekly GA4 / Search Console / HubSpot snapshots, newest first, incl. top pages, gainers/losers, striking-distance queries. |
 | `blogs?site=&traffic=1` | Every post on both sites: `site, title, url, publishedAt, source, views, refreshDue` (+ the full weekly `traffic` array with `traffic=1`). |
 | `refresh-due?days=7` | Posts published (or last refreshed) 11+ months ago, or reaching it within `days`. Most viewed first; `queued: true` if a brief is already open. |
