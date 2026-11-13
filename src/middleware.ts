@@ -14,6 +14,20 @@ import { waitUntil } from "@vercel/functions";
 import { isTranslatablePath, LIVE_LANGUAGE_CODES, localizedPath, MAX_UNTRANSLATED, splitLangPath } from "./lib/i18n/languages";
 import { translatePage } from "./lib/i18n/translatePage";
 
+/**
+ * Where this site is reachable from inside its own function. On Vercel the
+ * request URL Astro sees is not the public one (an ISR invocation has no real
+ * host, so context.url.origin is "http://localhost" and the fetch fails), so
+ * use the host Vercel forwards, or this deployment's own URL.
+ */
+function selfOrigin(context: { request: Request; url: URL }): string {
+  const headers = context.request.headers;
+  const host = headers.get("x-forwarded-host") || process.env.VERCEL_URL;
+  if (!host) return context.url.origin;
+  const proto = headers.get("x-forwarded-proto") || (host.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { lang, path } = splitLangPath(context.url.pathname);
   if (!lang) return next();
@@ -27,7 +41,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // A revalidation request (see src/lib/revalidate.ts) refreshes the English
   // page on the way, so the translation is never built from a stale copy.
   const bypass = context.request.headers.get("x-prerender-revalidate");
-  const english = await fetch(new URL(path + context.url.search, context.url.origin), {
+  const origin = selfOrigin(context);
+  const english = await fetch(new URL(path + context.url.search, origin), {
     headers: bypass ? { "x-prerender-revalidate": bypass } : {},
     redirect: "manual",
   });
@@ -35,8 +50,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Redirects (legacy URLs, the -2025 -> -2026 renames) keep the language.
   const location = english.headers.get("location");
   if (english.status >= 300 && english.status < 400 && location) {
-    const target = new URL(location, context.url.origin);
-    const local = target.origin === context.url.origin && isTranslatablePath(target.pathname);
+    const target = new URL(location, origin);
+    const local = target.origin === origin && isTranslatablePath(target.pathname);
     return context.redirect(
       local ? localizedPath(target.pathname, lang.code) + target.search : location,
       english.status as 301 | 302 | 307 | 308
