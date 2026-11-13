@@ -192,7 +192,7 @@ async function google(url: string, body: object) {
     data = JSON.parse(text);
   } catch {
     // Google answers a malformed URL (usually a bad property id) with an HTML page.
-    throw new Error(`Google API ${res.status} for ${new URL(url).pathname} (not JSON; check the GA4 property id is the numeric Property ID, not a G-… Measurement ID)`);
+    throw new Error(`Google API ${res.status} for ${new URL(url).pathname}${res.status === 404 ? " (check the GA4 property id is the numeric Property ID, not a G-… Measurement ID)" : res.status >= 500 ? " (Google-side error; usually gone on the next sync)" : ""}`);
   }
   if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
   return data;
