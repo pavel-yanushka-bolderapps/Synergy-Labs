@@ -12,12 +12,21 @@
 // once per page.
 //
 // Batches usually finish within an hour (24h at most); the script polls until
-// then. If it is interrupted, re-run with --batch <id> to collect the results.
+// then. If it is interrupted, re-run with --batch <id> to collect the results:
+// the segments each request carried are written to scripts/data/translate-batches/
+// when the batch is submitted, and read back from there. (The first site-wide
+// run in Oct 2026 rebuilt them from the live site instead; pages had been read
+// in a different order, so most translations were saved under the wrong
+// English. See scripts/reset-translations.mjs.)
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import Anthropic from "@anthropic-ai/sdk";
 import { LANGUAGES, isTranslatablePath, type Language } from "../src/lib/i18n/languages";
 import { segmentPage } from "../src/lib/i18n/segments";
 import { loadTranslations, saveTranslations } from "../src/lib/i18n/store";
 import { CHUNK_SIZE, PRICES, translationRequest, parseTranslations } from "../src/lib/i18n/claude";
+
+const MANIFESTS = new URL("./data/translate-batches/", import.meta.url);
+const manifestPath = (id: string) => new URL(`${id}.json`, MANIFESTS);
 
 const arg = (name: string) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -48,6 +57,10 @@ await pool(paths, 8, async (path) => {
   if (!res.ok || !/<html[^>]*\blang="en"/i.test(html)) return;
   pages.set(path, segmentPage(html).units.map(({ source, scope }) => ({ source, scope })));
 });
+// Pages finish loading in any order; sort so every list below is stable.
+const sortedPages = new Map([...pages].sort(([a], [b]) => a.localeCompare(b)));
+pages.clear();
+for (const [k, v] of sortedPages) pages.set(k, v);
 console.log(`${pages.size} English pages read.`);
 
 // 2. What each language is missing, deduplicated site-wide.
@@ -105,7 +118,19 @@ if (!batchId) {
   }
   const batch = await client.messages.batches.create({ requests });
   batchId = batch.id;
+  // Exactly which segments went into each request, so the results can be
+  // matched back however much later they are collected.
+  mkdirSync(MANIFESTS, { recursive: true });
+  writeFileSync(manifestPath(batchId), JSON.stringify(Object.fromEntries([...chunks].map(([id, c]) => [id, c.segments]))));
   console.log(`Submitted ${requests.length} requests as batch ${batchId}.`);
+}
+
+let manifest: Record<string, string[]>;
+try {
+  manifest = JSON.parse(readFileSync(manifestPath(batchId), "utf8"));
+} catch {
+  console.error(`No manifest for batch ${batchId} (${manifestPath(batchId).pathname}): cannot tell which segments its results belong to. Not saving anything.`);
+  process.exit(1);
 }
 
 // 3. Wait, then collect.
@@ -116,15 +141,19 @@ for (;;) {
   await new Promise((r) => setTimeout(r, 60_000));
 }
 
-// The segments each request carried are rebuilt from the custom_id, so
-// --batch <id> works from a fresh run (as long as the site has not changed).
+// The segments each request carried come from the manifest written at submit.
 const results = new Map<string, Map<string, string>>(langs.map((l) => [l.code, new Map()]));
 let failed = 0;
 let usedIn = 0;
 let usedOut = 0;
 for await (const result of await client.messages.batches.results(batchId)) {
-  const [code, index] = result.custom_id.split("-");
-  const list = [...missing.get(code)!].slice(Number(index) * CHUNK_SIZE, (Number(index) + 1) * CHUNK_SIZE);
+  const [code] = result.custom_id.split("-");
+  const list = manifest[result.custom_id];
+  if (!list || !results.has(code)) {
+    failed++;
+    console.error(`  ${result.custom_id}: not in the manifest, skipped`);
+    continue;
+  }
   if (result.result.type !== "succeeded") {
     failed++;
     continue;
@@ -144,8 +173,8 @@ console.log(
     `$${(((usedIn * pin + usedOut * pout) / 1e6) * 0.5).toFixed(2)} at batch prices.`
 );
 
-// 4. Save, page by page. Placeholder mismatches are caught at render time
-//    (segments.ts) and fall back to English, so nothing is validated here.
+// 4. Save, page by page. parseTranslations already dropped translations whose
+//    markup placeholders or numbers do not match their English.
 for (const lang of langs) {
   const fresh = results.get(lang.code)!;
   const savedShared = new Set<string>();

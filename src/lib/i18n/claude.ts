@@ -26,7 +26,7 @@ export interface Usage {
 }
 
 /** Segments per request: keeps each response well inside max_tokens. */
-export const CHUNK_SIZE = 120;
+export const CHUNK_SIZE = 60;
 
 const SYSTEM = `You translate the website of Synergy Labs, a mobile app and AI development agency, from English.
 
@@ -75,6 +75,34 @@ export function translationRequest(segments: string[], lang: Language) {
   };
 }
 
+// Native digits (Arabic-Indic, Persian, Devanagari) count as the same numbers.
+const NATIVE_DIGITS: [number, number][] = [[0x660, 0x669], [0x6f0, 0x6f9], [0x966, 0x96f]];
+function digitsOf(text: string): string {
+  const out: string[] = [];
+  // Placeholders and HTML entities (&#39;) carry digits that are not numbers.
+  for (const ch of text.replace(/<\/?\d+\/?>/g, "").replace(/&#?[a-z0-9]+;/gi, "")) {
+    if (ch >= "0" && ch <= "9") out.push(ch);
+    else {
+      const code = ch.codePointAt(0)!;
+      const range = NATIVE_DIGITS.find(([lo, hi]) => code >= lo && code <= hi);
+      if (range) out.push(String(code - range[0]));
+    }
+  }
+  // Zeros are ignored: "$30K" may come back as "30 000 $".
+  return out.filter((d) => d !== "0").sort().join("");
+}
+const placeholdersOf = (text: string) => [...text.matchAll(/<\/?\d+\/?>/g)].map((m) => m[0]).sort().join("");
+
+/**
+ * Whether `translated` can belong to `source`: the same markup placeholders
+ * and the same digits. A translation attached to the wrong segment (the model
+ * mixing up ids, or results matched to the wrong request) almost always fails
+ * one of the two -- and is dropped rather than saved under the wrong English.
+ */
+export function plausibleTranslation(source: string, translated: string): boolean {
+  return placeholdersOf(source) === placeholdersOf(translated) && digitsOf(source) === digitsOf(translated);
+}
+
 /** Reads a response's JSON back into translations keyed by the source segment. */
 export function parseTranslations(message: Anthropic.Message, segments: string[]): Map<string, string> {
   const out = new Map<string, string>();
@@ -84,9 +112,19 @@ export function parseTranslations(message: Anthropic.Message, segments: string[]
   }
   const text = message.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
   const { translations } = JSON.parse(text) as { translations: { id: number; text: string }[] };
+  let rejected = 0;
   for (const { id, text } of translations) {
-    if (segments[id] !== undefined && text.trim()) out.set(segments[id], text);
+    if (segments[id] === undefined || !text.trim()) continue;
+    if (plausibleTranslation(segments[id], text)) out.set(segments[id], text);
+    else rejected++;
   }
+  // Many rejections in one response means the ids drifted: then even the
+  // ones that passed may sit on the wrong segment, so keep none of them.
+  if (rejected > Math.max(2, segments.length * 0.1)) {
+    console.error(`[translate] ${rejected} of ${segments.length} translations did not match their segment; discarding this response.`);
+    return new Map();
+  }
+  if (rejected) console.warn(`[translate] Dropped ${rejected} translation(s) whose markup or numbers did not match the English.`);
   return out;
 }
 

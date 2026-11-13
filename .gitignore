@@ -16,3 +16,4 @@ synergylabs.webflow-home.zip
 # Local env files (vercel env pull writes .env.local etc.); keep the template
 .env*
 !.env.example
+scripts/data/translate-batches/
