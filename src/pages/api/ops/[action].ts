@@ -44,7 +44,7 @@ import { buildDigest, emailStatus, sendDigest } from "../../../lib/ops/digest";
 import { randomUUID } from "node:crypto";
 import { loadSubmissions, SETTINGS_ID } from "../../../lib/ops/submissions";
 import { buildScorecard, DERIVED_METRICS, loadWeeklyNotes, weeklyField } from "../../../lib/ops/scorecard";
-import { loadBlogs, runBlogSync, refreshDueDate, weeksSinceYearStart } from "../../../lib/ops/blogs";
+import { loadBlogs, monthlyBySource, runBlogSync, refreshDueDate, weeksSinceYearStart } from "../../../lib/ops/blogs";
 import { agentCount, dropFile, setBlogSources, setFileStatus, setPulse, HttpError } from "../../../lib/ops/agent";
 import type { InboxFile } from "../../../lib/ops/store";
 
@@ -91,11 +91,12 @@ export const GET: APIRoute = async ({ params, cookies, url }) => {
     });
   }
   if (params.action === "blogs") {
-    const [posts, files] = await Promise.all([
+    const [posts, monthly, files] = await Promise.all([
       loadBlogs(),
+      monthlyBySource(),
       opsClient().fetch<Omit<InboxFile, "content">[]>(`*[_type == "opsInbox" && _id in path("ops.**")] | order(createdAt desc)[0...300]{..., "content": null}`),
     ]);
-    return json({ posts: posts.map((p) => ({ ...p, refreshDue: refreshDueDate(p) })), files });
+    return json({ posts: posts.map((p) => ({ ...p, refreshDue: refreshDueDate(p) })), monthly, files });
   }
   if (params.action === "file") {
     const id = url.searchParams.get("id") ?? "";

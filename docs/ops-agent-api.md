@@ -32,7 +32,8 @@ Errors come back as `{"error": "..."}` with a 4xx/5xx status.
 | `me` | `{ agent }` |
 | `scorecard` | One row per Q4 week, each number per website (`…Synergy` / `…Bolder` fields, plus both-site totals): organic clicks, new users, CTA clicks, form start rate, form submissions, HubSpot MQLs/SQLs, blogs posted, A/B winners, pulse, notes. Use it to fill the KPI tracker sheet; ready-made prompts in `docs/ops-routines.md`. |
 | `kpis?site=synergy\|bolder&weeks=8` | Raw weekly GA4 / Search Console / HubSpot snapshots, newest first, incl. top pages, gainers/losers, striking-distance queries. |
-| `blogs?site=&traffic=1` | Every post on both sites: `site, title, url, publishedAt, source, views, refreshDue` (+ the full weekly `traffic` array with `traffic=1`). |
+| `blogs?site=&traffic=1` | Every post on both sites: `site, title, url, publishedAt, source, views, clicks, impressions, refreshDue` (+ the full weekly `traffic` array with `traffic=1`). `views` are GA4; `clicks` / `impressions` are Google Search Console for the post's URL. |
+| `blogs-monthly?site=&from=YYYY-MM` | Blog traffic per month and source: `{ site, month, source, sourceLabel, views, clicks, impressions, posts }`. A week counts in the month its Thursday falls in. Use it for month-over-month numbers by source. |
 | `refresh-due?days=7` | Posts published (or last refreshed) 11+ months ago, or reaching it within `days`. Most viewed first; `queued: true` if a brief is already open. |
 | `files?kind=blog-refresh&status=new` | Dropped files (no content). Status: `new`, `in-progress`, `done`, `skipped`. |
 | `file?id=ops.inbox.…` | One file with its Markdown content. |
@@ -67,7 +68,7 @@ Marking a `blog-refresh` file `done` resets that post's 11-month clock.
 ] }
 ```
 
-Sources: `adaptify`, `redrover`, `vineyard`, `team` (team-sourced / original). `null` clears it. Up to 1000 posts per call. Posts not yet in the tracker are listed in `skipped`; the post list refreshes every Monday 06:15 UTC (or "Sync now" on the Blogs tab).
+Sources: `adaptify`, `redrover`, `vineyard`, `team` (team-sourced / original). Location posts (a city, state or country in the title or slug, e.g. "How much does it cost to build an app in Las Vegas") are Vineyard's: the tracker tags new untagged ones automatically (`sourceBy: "Location rule"`) and never changes a source someone set. `null` clears it. Up to 1000 posts per call. Posts not yet in the tracker are listed in `skipped`; the post list refreshes every Monday 06:15 UTC (or "Sync now" on the Blogs tab).
 
 ### Weekly pulse: `POST pulse`
 

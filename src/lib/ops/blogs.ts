@@ -11,7 +11,7 @@
 // One "opsBlog" document per post, id ops.blog.<site>-<slug>. Read-only for
 // the marketing site: nothing here writes to blogPost documents.
 import { opsClient, mondayOf, addDays, logRun } from "./store";
-import { ga4ReportForSite, completedWeeks, sourceStatus, type KpiSite } from "./kpi";
+import { ga4ReportForSite, gscQueryForSite, completedWeeks, sourceStatus, type KpiSite } from "./kpi";
 
 export type BlogSite = KpiSite;
 export const BLOG_SOURCES = ["adaptify", "redrover", "vineyard", "team"] as const;
@@ -26,6 +26,9 @@ export interface TrafficWeek {
   sessions: number;
   users: number;
   organic: number;
+  /** Search Console: Google search clicks and impressions for the post's URL. */
+  clicks?: number;
+  impressions?: number;
 }
 
 export interface BlogDoc {
@@ -42,8 +45,10 @@ export interface BlogDoc {
   /** Set when the post was last refreshed (resets the 11-month clock). */
   refreshedAt?: string;
   traffic?: TrafficWeek[];
-  /** Sum of views over `traffic`. */
+  /** Sums over `traffic`. */
   views?: number;
+  clicks?: number;
+  impressions?: number;
   /** False once the post is gone from the site (kept for its history). */
   live?: boolean;
   lastSeenAt?: string;
@@ -53,6 +58,26 @@ const SITE_HOST: Record<BlogSite, string> = { synergy: "https://www.synergylabs.
 const PREFIX: Record<BlogSite, string> = { synergy: "/blog/", bolder: "/blog-posts/" };
 export const blogUrl = (site: BlogSite, path: string) => SITE_HOST[site] + path;
 export const blogId = (site: BlogSite, slug: string) => `ops.blog.${site}-${slug.replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 100)}`;
+
+// Location posts ("How much does it cost to build an app in Las Vegas", "Top
+// app developers in Dubai") are Vineyard's. New posts whose title or slug names
+// a place are tagged Vineyard automatically; a source someone set is never changed.
+const PLACES = [
+  "New York", "NYC", "Manhattan", "Brooklyn", "Los Angeles", "San Francisco", "Bay Area", "Silicon Valley", "San Jose", "San Diego",
+  "Sacramento", "Irvine", "Seattle", "Portland", "Denver", "Phoenix", "Scottsdale", "Las Vegas", "Salt Lake City", "Dallas",
+  "Houston", "Austin", "San Antonio", "Fort Worth", "Chicago", "Detroit", "Minneapolis", "Kansas City", "St. Louis", "Nashville",
+  "Atlanta", "Charlotte", "Raleigh", "Miami", "Orlando", "Tampa", "Jacksonville", "Fort Lauderdale", "Boca Raton", "Boston",
+  "Philadelphia", "Pittsburgh", "Baltimore", "Washington DC", "Washington, D.C.", "Columbus", "Cleveland", "Cincinnati",
+  "Indianapolis", "New Jersey", "New Orleans", "Florida", "Texas", "California", "Arizona", "Nevada", "Colorado", "Illinois", "Ohio",
+  "Utah", "Massachusetts", "North Carolina", "Tennessee", "Dubai", "Abu Dhabi", "UAE", "Riyadh", "Saudi", "Jeddah", "Qatar", "Doha",
+  "London", "Toronto", "Vancouver", "Sydney", "Melbourne", "Singapore", "Berlin", "Amsterdam", "Bangalore",
+];
+const PLACE_RE = new RegExp(`\\b(${PLACES.map((p) => p.replace(/[.,]/g, "\\$&").replace(/ /g, "[\\s-]+")).join("|")})\\b`, "i");
+/** The place a post is about, if its title or slug names one. */
+export function locationOf(title = "", slug = ""): string | undefined {
+  return PLACE_RE.exec(title)?.[1] ?? PLACE_RE.exec(slug.replace(/-/g, " "))?.[1];
+}
+export const LOCATION_RULE = "Location rule";
 
 const MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December";
 
@@ -81,11 +106,11 @@ async function pool<T>(items: T[], size: number, fn: (item: T) => Promise<void>)
  * and dates, and marks ones that disappeared. Never removes a source tag,
  * traffic history or refresh date.
  */
-export async function syncBlogList(): Promise<{ synergy: number; bolder: number; added: number; gone: number }> {
+export async function syncBlogList(): Promise<{ synergy: number; bolder: number; added: number; gone: number; vineyard: number }> {
   const c = opsClient();
   const now = new Date().toISOString();
-  const existing = await c.fetch<Pick<BlogDoc, "_id" | "site" | "slug" | "title" | "publishedAt" | "live">[]>(
-    `*[_type == "opsBlog" && _id in path("ops.**")]{_id, site, slug, title, publishedAt, live}`
+  const existing = await c.fetch<Pick<BlogDoc, "_id" | "site" | "slug" | "title" | "publishedAt" | "live" | "source">[]>(
+    `*[_type == "opsBlog" && _id in path("ops.**")]{_id, site, slug, title, publishedAt, live, source}`
   );
   const byId = new Map(existing.map((d) => [d._id, d]));
   const seen = new Set<string>();
@@ -120,6 +145,17 @@ export async function syncBlogList(): Promise<{ synergy: number; bolder: number;
     tx.push(had ? { id, set: fields } : { id, create: fields });
   });
 
+  // Untagged location posts -> Vineyard.
+  let vineyard = 0;
+  for (const t of tx) {
+    const fields = (t.create ?? t.set) as { slug?: string; title?: string };
+    const had = byId.get(t.id);
+    if (had?.source) continue;
+    if (!locationOf(fields.title ?? had?.title, fields.slug ?? had?.slug)) continue;
+    Object.assign(fields, { source: "vineyard", sourceBy: LOCATION_RULE });
+    vineyard++;
+  }
+
   let gone = 0;
   for (const d of existing) if (!seen.has(d._id) && d.live !== false) {
     gone++;
@@ -135,20 +171,23 @@ export async function syncBlogList(): Promise<{ synergy: number; bolder: number;
     }
     await batch.commit({ visibility: "async" });
   }
-  return { synergy: synergy.length, bolder, added, gone };
+  return { synergy: synergy.length, bolder, added, gone, vineyard };
 }
 
 /**
- * GA4 views / sessions / users per post for the given weeks (Mondays), both
- * sites. Each week's numbers replace that week's entry, so re-running is safe.
- * Weeks before a post's publish date are skipped.
+ * Per post and week: GA4 views / sessions / users and Search Console clicks /
+ * impressions, both sites. Each week's numbers replace that week's entry, so
+ * re-running is safe. Weeks before a post's publish date are skipped. GA4 and
+ * Search Console are fetched independently: one failing keeps the other.
  */
 export async function syncBlogTraffic(weeks: string[]): Promise<{ site: BlogSite; ok: boolean; message: string }[]> {
   const c = opsClient();
   const results: { site: BlogSite; ok: boolean; message: string }[] = [];
+  const clean = (path: string) => path.split("?")[0].split("#")[0].replace(/\/$/, "");
   for (const site of ["synergy", "bolder"] as BlogSite[]) {
-    if (!sourceStatus(site).ga4) {
-      results.push({ site, ok: false, message: `GA4 not connected for ${site}` });
+    const status = sourceStatus(site);
+    if (!status.ga4 && !status.gsc) {
+      results.push({ site, ok: false, message: `Google not connected for ${site}` });
       continue;
     }
     try {
@@ -156,55 +195,107 @@ export async function syncBlogTraffic(weeks: string[]): Promise<{ site: BlogSite
         `*[_type == "opsBlog" && _id in path("ops.**") && site == $site]{_id, path, publishedAt, traffic}`,
         { site }
       );
-      const byPath = new Map(posts.map((p) => [p.path.replace(/\/$/, ""), p]));
+      const byPath = new Map(posts.map((p) => [clean(p.path), p]));
+      const byId = new Map(posts.map((p) => [p._id, p]));
       const updates = new Map<string, Map<string, TrafficWeek>>();
+      const problems = new Set<string>();
       for (const week of weeks) {
-        const range = [{ startDate: week, endDate: addDays(week, 6) }];
+        const end = addDays(week, 6);
+        const range = [{ startDate: week, endDate: end }];
         const filter = { filter: { fieldName: "pagePath", stringFilter: { matchType: "BEGINS_WITH", value: PREFIX[site] } } };
-        const [all, organic] = await Promise.all([
-          ga4ReportForSite(site, { dateRanges: range, dimensions: [{ name: "pagePath" }], metrics: [{ name: "screenPageViews" }, { name: "sessions" }, { name: "activeUsers" }], dimensionFilter: filter, limit: 10000 }),
-          ga4ReportForSite(site, {
-            dateRanges: range,
-            dimensions: [{ name: "pagePath" }],
-            metrics: [{ name: "sessions" }],
-            dimensionFilter: { andGroup: { expressions: [filter, { filter: { fieldName: "sessionDefaultChannelGroup", stringFilter: { value: "Organic Search" } } }] } },
-            limit: 10000,
-          }),
+        const [all, organic, search] = await Promise.all([
+          status.ga4
+            ? ga4ReportForSite(site, { dateRanges: range, dimensions: [{ name: "pagePath" }], metrics: [{ name: "screenPageViews" }, { name: "sessions" }, { name: "activeUsers" }], dimensionFilter: filter, limit: 10000 })
+                .catch((e) => (problems.add(`GA4: ${e.message}`), null))
+            : null,
+          status.ga4
+            ? ga4ReportForSite(site, {
+                dateRanges: range,
+                dimensions: [{ name: "pagePath" }],
+                metrics: [{ name: "sessions" }],
+                dimensionFilter: { andGroup: { expressions: [filter, { filter: { fieldName: "sessionDefaultChannelGroup", stringFilter: { value: "Organic Search" } } }] } },
+                limit: 10000,
+              }).catch((e) => (problems.add(`GA4: ${e.message}`), null))
+            : null,
+          status.gsc
+            ? gscQueryForSite(site, {
+                startDate: week,
+                endDate: end,
+                dimensions: ["page"],
+                dimensionFilterGroups: [{ filters: [{ dimension: "page", operator: "contains", expression: PREFIX[site] }] }],
+                rowLimit: 25000,
+              }).catch((e) => (problems.add(`Search Console: ${e.message}`), null))
+            : null,
         ]);
-        const org = new Map(organic.map((r) => [r.dimensionValues![0].value.split("?")[0].replace(/\/$/, ""), Number(r.metricValues[0].value)]));
+        if (!all && !search) continue;
+        const org = new Map((organic ?? []).map((r) => [clean(r.dimensionValues![0].value), Number(r.metricValues[0].value)]));
         const totals = new Map<string, TrafficWeek>();
-        for (const r of all) {
-          const path = r.dimensionValues![0].value.split("?")[0].replace(/\/$/, "");
+        const live = (id: string) => {
+          const post = byId.get(id)!;
+          return !post.publishedAt || end >= post.publishedAt;
+        };
+        const entry = (id: string) => {
+          const prev = (byId.get(id)!.traffic ?? []).find((t) => t.week === week);
+          // A source that failed this run keeps what it had for the week.
+          const t = totals.get(id) ?? {
+            _key: `w${week}`,
+            week,
+            views: all ? 0 : prev?.views ?? 0,
+            sessions: all ? 0 : prev?.sessions ?? 0,
+            users: all ? 0 : prev?.users ?? 0,
+            organic: all ? 0 : prev?.organic ?? 0,
+            clicks: search ? 0 : prev?.clicks,
+            impressions: search ? 0 : prev?.impressions,
+          };
+          totals.set(id, t);
+          return t;
+        };
+        for (const r of all ?? []) {
+          const path = clean(r.dimensionValues![0].value);
           const post = byPath.get(path);
-          if (!post || (post.publishedAt && addDays(week, 6) < post.publishedAt)) continue;
-          const t = totals.get(post._id) ?? { _key: `w${week}`, week, views: 0, sessions: 0, users: 0, organic: org.get(path) ?? 0 };
+          if (!post || !live(post._id)) continue;
+          const t = entry(post._id);
           t.views += Number(r.metricValues[0].value);
           t.sessions += Number(r.metricValues[1].value);
           t.users += Number(r.metricValues[2].value);
-          totals.set(post._id, t);
+          t.organic = org.get(path) ?? 0;
         }
-        // Posts live that week with no GA4 row had 0 views: record it, so a
-        // week with no traffic is not mistaken for a week not synced.
+        for (const r of search ?? []) {
+          let path: string;
+          try {
+            path = clean(new URL(r.keys![0]).pathname);
+          } catch {
+            continue;
+          }
+          const post = byPath.get(path);
+          if (!post || !live(post._id)) continue;
+          const t = entry(post._id);
+          t.clicks = (t.clicks ?? 0) + r.clicks;
+          t.impressions = (t.impressions ?? 0) + r.impressions;
+        }
+        // Posts live that week with no row had 0: record it, so a week with
+        // no traffic is not mistaken for a week not synced.
         for (const p of posts) {
-          if (p.publishedAt && addDays(week, 6) < p.publishedAt) continue;
-          const t = totals.get(p._id) ?? { _key: `w${week}`, week, views: 0, sessions: 0, users: 0, organic: 0 };
+          if (!live(p._id)) continue;
           if (!updates.has(p._id)) updates.set(p._id, new Map());
-          updates.get(p._id)!.set(week, t);
+          updates.get(p._id)!.set(week, entry(p._id));
         }
       }
       const tx = [...updates.entries()].map(([id, weekly]) => {
-        const post = posts.find((p) => p._id === id)!;
+        const post = byId.get(id)!;
         const merged = new Map((post.traffic ?? []).map((t) => [t.week, t]));
         for (const [w, t] of weekly) merged.set(w, t);
         const traffic = [...merged.values()].sort((a, b) => a.week.localeCompare(b.week));
-        return { id, traffic, views: traffic.reduce((s, t) => s + t.views, 0) };
+        const sum = (k: "views" | "clicks" | "impressions") => traffic.reduce((s, t) => s + (t[k] ?? 0), 0);
+        return { id, traffic, views: sum("views"), clicks: sum("clicks"), impressions: sum("impressions") };
       });
       for (let i = 0; i < tx.length; i += 100) {
         const batch = c.transaction();
-        for (const t of tx.slice(i, i + 100)) batch.patch(t.id, (p) => p.set({ traffic: t.traffic, views: t.views, trafficSyncedAt: new Date().toISOString() }));
+        for (const t of tx.slice(i, i + 100)) batch.patch(t.id, (p) => p.set({ traffic: t.traffic, views: t.views, clicks: t.clicks, impressions: t.impressions, trafficSyncedAt: new Date().toISOString() }));
         await batch.commit({ visibility: "async" });
       }
-      results.push({ site, ok: true, message: `${tx.length} posts, ${weeks.length} week(s)` });
+      const missing = [!status.ga4 && "GA4 not connected", ...problems].filter(Boolean);
+      results.push({ site, ok: tx.length > 0 && !problems.size, message: `${tx.length} posts, ${weeks.length} week(s)${missing.length ? ` · ${missing.join("; ")}` : ""}` });
     } catch (err) {
       results.push({ site, ok: false, message: err instanceof Error ? err.message : String(err) });
     }
@@ -223,7 +314,7 @@ export async function runBlogSync(by: string, weeks = 1) {
     startedAt,
     ok: true,
     by,
-    summary: `Blog tracker: ${list.synergy} Synergy + ${list.bolder} Bolder posts${list.added ? `, ${list.added} new` : ""}${list.gone ? `, ${list.gone} gone` : ""}; traffic ${traffic.filter((t) => t.ok).length ? `synced (${weeks} wk)` : "not synced"}`,
+    summary: `Blog tracker: ${list.synergy} Synergy + ${list.bolder} Bolder posts${list.added ? `, ${list.added} new` : ""}${list.vineyard ? `, ${list.vineyard} location post(s) tagged Vineyard` : ""}${list.gone ? `, ${list.gone} gone` : ""}; traffic ${traffic.filter((t) => t.ok).length ? `synced (${weeks} wk)` : "not synced"}`,
     details: failed.map((f) => `${f.site}: ${f.message}`).join("\n") || undefined,
   });
   return { list, traffic };
@@ -234,7 +325,7 @@ export async function loadBlogs(opts: { withTraffic?: boolean } = {}): Promise<B
   // GROQ projections return null for missing fields; drop them so callers see undefined.
   const strip = (d: Record<string, unknown>) => Object.fromEntries(Object.entries(d).filter(([, v]) => v !== null)) as unknown as BlogDoc;
   return (await opsClient().fetch<Record<string, unknown>[]>(
-    `*[_type == "opsBlog" && _id in path("ops.**")] | order(publishedAt desc){_id, site, slug, path, title, publishedAt, source, sourceBy, refreshedAt, views, live${opts.withTraffic ? ", traffic" : ", \"recent\": traffic[-4..-1]{week, views}"}}`
+    `*[_type == "opsBlog" && _id in path("ops.**")] | order(publishedAt desc){_id, site, slug, path, title, publishedAt, source, sourceBy, refreshedAt, views, clicks, impressions, live${opts.withTraffic ? ", traffic" : ", \"recent\": traffic[-4..-1]{week, views, clicks}"}}`
   )).map(strip);
 }
 
@@ -251,4 +342,48 @@ export function refreshDueDate(p: Pick<BlogDoc, "publishedAt" | "refreshedAt">):
 export function weeksSinceYearStart(today = new Date()): number {
   const start = mondayOf(`${today.getUTCFullYear()}-01-01`);
   return Math.max(1, Math.floor((Date.parse(mondayOf(today)) - Date.parse(start)) / (7 * 86_400_000)));
+}
+
+export interface MonthBySource {
+  site: BlogSite;
+  /** YYYY-MM */
+  month: string;
+  source: BlogSource | "none";
+  views: number;
+  clicks: number;
+  impressions: number;
+  /** Posts with any views or search impressions that month. */
+  posts: number;
+}
+
+/**
+ * Blog traffic per calendar month and source, from the weekly numbers. A week
+ * counts in the month its Thursday falls in (the ISO week rule), so a month is
+ * 4 or 5 whole weeks and the totals add up to the weekly ones.
+ */
+export async function monthlyBySource(opts: { site?: BlogSite; from?: string } = {}): Promise<MonthBySource[]> {
+  const posts = await opsClient().fetch<{ site: BlogSite; source?: BlogSource; traffic?: TrafficWeek[] }[]>(
+    `*[_type == "opsBlog" && _id in path("ops.**") && ($site == "" || site == $site)]{site, source, traffic}`,
+    { site: opts.site ?? "" }
+  );
+  const rows = new Map<string, MonthBySource>();
+  for (const p of posts) {
+    const source = p.source ?? "none";
+    const seen = new Set<string>();
+    for (const t of p.traffic ?? []) {
+      const month = addDays(t.week, 3).slice(0, 7);
+      if (opts.from && month < opts.from) continue;
+      const key = `${p.site}|${month}|${source}`;
+      const r = rows.get(key) ?? { site: p.site, month, source, views: 0, clicks: 0, impressions: 0, posts: 0 };
+      r.views += t.views ?? 0;
+      r.clicks += t.clicks ?? 0;
+      r.impressions += t.impressions ?? 0;
+      if (!seen.has(month) && ((t.views ?? 0) > 0 || (t.impressions ?? 0) > 0)) {
+        seen.add(month);
+        r.posts++;
+      }
+      rows.set(key, r);
+    }
+  }
+  return [...rows.values()].sort((a, b) => a.site.localeCompare(b.site) || a.month.localeCompare(b.month) || a.source.localeCompare(b.source));
 }

@@ -1852,7 +1852,10 @@ function RunList({ runs }: { runs: BotRun[] }) {
 type BlogSource = "adaptify" | "redrover" | "vineyard" | "team";
 const SOURCE_LABEL: Record<BlogSource, string> = { adaptify: "Adaptify", redrover: "Red Rover", vineyard: "Vineyard", team: "Team-sourced" };
 const SOURCE_COLOR: Record<BlogSource | "none", string> = { adaptify: C.blue, redrover: C.orange, vineyard: C.violet, team: C.aqua, none: C.grey };
-interface BlogPost { _id: string; site: "synergy" | "bolder"; slug: string; path: string; title: string; publishedAt?: string; source?: BlogSource; sourceBy?: string; refreshedAt?: string; views?: number; live?: boolean; refreshDue?: string; recent?: { week: string; views: number }[] }
+interface BlogPost { _id: string; site: "synergy" | "bolder"; slug: string; path: string; title: string; publishedAt?: string; source?: BlogSource; sourceBy?: string; refreshedAt?: string; views?: number; clicks?: number; impressions?: number; live?: boolean; refreshDue?: string; recent?: { week: string; views: number; clicks?: number }[] }
+interface MonthBySource { site: "synergy" | "bolder"; month: string; source: BlogSource | "none"; views: number; clicks: number; impressions: number; posts: number }
+type BlogMetric = "views" | "clicks" | "impressions";
+const BLOG_METRIC: Record<BlogMetric, string> = { views: "Views (GA4)", clicks: "Search clicks", impressions: "Search impressions" };
 interface InboxFile { _id: string; name: string; kind: string; content?: string | null; by: string; createdAt: string; status: "new" | "in-progress" | "done" | "skipped"; site?: "synergy" | "bolder"; postPath?: string; title?: string; handledBy?: string; handledAt?: string; note?: string; publishedUrl?: string }
 const SITE_HOST = { synergy: "https://www.synergylabs.co", bolder: "https://www.bolderapps.com" } as const;
 const SITE_NAME = { synergy: "Synergy", bolder: "Bolder" } as const;
@@ -1862,9 +1865,10 @@ function BlogsTab({ data, site, setToast }: { data: Data; site: Site; setToast: 
   const [view, setView] = useState<"Tracker" | "Refresh queue" | "Files">(() => (location.hash.includes("refresh") ? "Refresh queue" : "Tracker"));
   const [posts, setPosts] = useState<BlogPost[] | null>(null);
   const [files, setFiles] = useState<InboxFile[]>([]);
+  const [monthly, setMonthly] = useState<MonthBySource[]>([]);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
-  const load = useCallback(() => api<{ posts: BlogPost[]; files: InboxFile[] }>("blogs").then((d) => { setPosts(d.posts.filter((p) => p.site === site)); setFiles(d.files.filter((f) => (f.site ?? "synergy") === site)); }).catch((e) => setErr(e.message)), [site]);
+  const load = useCallback(() => api<{ posts: BlogPost[]; monthly?: MonthBySource[]; files: InboxFile[] }>("blogs").then((d) => { setPosts(d.posts.filter((p) => p.site === site)); setMonthly((d.monthly ?? []).filter((r) => r.site === site)); setFiles(d.files.filter((f) => (f.site ?? "synergy") === site)); }).catch((e) => setErr(e.message)), [site]);
   useEffect(() => void load(), [load]);
 
   const sync = async (weeks: number | "ytd") => {
@@ -1903,26 +1907,27 @@ function BlogsTab({ data, site, setToast }: { data: Data; site: Site; setToast: 
         </div>
       </div>
       {!data.sources.ga4 && <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">Per-article traffic for {SITES[site].host} is waiting for GA4 access ({site === "bolder" ? "BOLDER_GA4_PROPERTY_ID" : "GA4_PROPERTY_ID"} in Vercel, and the service account as Viewer on that property). The post list and source tags work now.</p>}
-      {view === "Tracker" && <BlogTracker posts={posts} reload={load} setToast={setToast} />}
+      {view === "Tracker" && <BlogTracker posts={posts} monthly={monthly} reload={load} setToast={setToast} />}
       {view === "Refresh queue" && <RefreshQueue posts={posts} files={files} reload={load} setToast={setToast} />}
       {view === "Files" && <FilesList files={files} reload={load} setToast={setToast} />}
     </div>
   );
 }
 
-function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: () => void; setToast: (s: string) => void }) {
+function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; monthly: MonthBySource[]; reload: () => void; setToast: (s: string) => void }) {
   const year = THIS_WEEK.slice(0, 4);
   const [source, setSource] = useState<"" | BlogSource | "none">("");
   const [period, setPeriod] = useState<"year" | "all">("year");
   const [q, setQ] = useState("");
   const [limit, setLimit] = useState(100);
-  const [sort, setSort] = useState<"date" | "views">("date");
+  const [sort, setSort] = useState<"date" | BlogMetric>("date");
+  const [metric, setMetric] = useState<BlogMetric>("clicks");
 
   const live = posts.filter((p) => p.live !== false);
   const shown = live
     .filter((p) => (!source || (source === "none" ? !p.source : p.source === source)) && (period === "all" || (p.publishedAt ?? "") >= `${year}-01-01`))
     .filter((p) => !q || `${p.title} ${p.path}`.toLowerCase().includes(q.toLowerCase()))
-    .sort((a, b) => (sort === "views" ? (b.views ?? 0) - (a.views ?? 0) : (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "")));
+    .sort((a, b) => (sort === "date" ? (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "") : (b[sort] ?? 0) - (a[sort] ?? 0)));
   const thisYear = live.filter((p) => (p.publishedAt ?? "") >= `${year}-01-01`);
 
   // Posts per month this year, stacked by source.
@@ -1934,10 +1939,21 @@ function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: (
     color: SOURCE_COLOR[s],
     values: months.map((m) => inScope.filter((p) => p.publishedAt?.startsWith(m) && (s === "none" ? !p.source : p.source === s)).length),
   }));
-  const viewsBySource = (Object.keys(SOURCE_LABEL) as BlogSource[]).map((s) => {
-    const list = inScope.filter((p) => p.source === s);
-    return { label: `${SOURCE_LABEL[s]} · ${list.length} posts`, value: list.reduce((a, p) => a + (p.views ?? 0), 0) };
-  });
+  // Traffic per month by source (all posts, whenever published), for the chosen metric.
+  const SOURCES = [...(Object.keys(SOURCE_LABEL) as BlogSource[]), "none"] as const;
+  const trafficMonths = months.filter((m) => monthly.some((r) => r.month === m));
+  const cellOf = (m: string, s: BlogSource | "none") => monthly.find((r) => r.month === m && r.source === s)?.[metric] ?? 0;
+  const monthTotal = (m: string) => SOURCES.reduce((a, s) => a + cellOf(m, s), 0);
+  const trafficSeries: Series[] = SOURCES.map((s) => ({ key: s, label: s === "none" ? "Not tagged" : SOURCE_LABEL[s], color: SOURCE_COLOR[s], values: trafficMonths.map((m) => cellOf(m, s)) }));
+  const shownSources = SOURCES.filter((s) => trafficMonths.some((m) => cellOf(m, s) > 0));
+  const change = (now: number, before: number) => (before ? (now - before) / before : undefined);
+  const monthLabel = (m: string) => new Date(`${m}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+  const hasSearch = monthly.some((r) => r.impressions > 0);
+  const monthlyCsv = () => {
+    const head = ["Month", ...SOURCES.flatMap((s) => (["views", "clicks", "impressions"] as BlogMetric[]).map((k) => `${s === "none" ? "Not tagged" : SOURCE_LABEL[s]} ${BLOG_METRIC[k]}`))];
+    const body = trafficMonths.map((m) => [m, ...SOURCES.flatMap((s) => (["views", "clicks", "impressions"] as BlogMetric[]).map((k) => monthly.find((r) => r.month === m && r.source === s)?.[k] ?? 0))].join(","));
+    download(`blogs-by-source-monthly-${TODAY}.csv`, "\ufeff" + [head.map((h) => `"${h}"`).join(","), ...body].join("\r\n"));
+  };
 
   const tag = async (p: BlogPost, value: string) => {
     try {
@@ -1949,8 +1965,8 @@ function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: (
   };
   const csv = () => {
     const cell = (x: unknown) => { const t = x === undefined || x === null ? "" : String(x); return /[",\n]/.test(t) || /^[=+\-@]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
-    const head = ["Site", "Title", "URL", "Published", "Source", "Views (tracked)", "Refresh due"];
-    const body = shown.map((p) => [SITE_NAME[p.site], p.title, SITE_HOST[p.site] + p.path, p.publishedAt, p.source ? SOURCE_LABEL[p.source] : "", p.views ?? "", p.refreshDue].map(cell).join(","));
+    const head = ["Site", "Title", "URL", "Published", "Source", "Views (tracked)", "Search clicks", "Search impressions", "Refresh due"];
+    const body = shown.map((p) => [SITE_NAME[p.site], p.title, SITE_HOST[p.site] + p.path, p.publishedAt, p.source ? SOURCE_LABEL[p.source] : "", p.views ?? "", p.clicks ?? "", p.impressions ?? "", p.refreshDue].map(cell).join(","));
     download(`blogs-${TODAY}.csv`, "﻿" + [head.join(","), ...body].join("\r\n"));
   };
   const tile = (label: string, value: ReactNode, sub: string) => (
@@ -1970,24 +1986,84 @@ function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: (
           <Legend items={series} />
           <StackedBars x={months.map((m) => new Date(`${m}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }))} series={series} height={180} format={(v) => String(Math.round(v))} />
         </Card>
-        <Card title="Views by source" sub={`Tracked GA4 views since publish, ${year} posts`}>
-          {viewsBySource.some((r) => r.value) ? <HBars rows={viewsBySource} color={C.blue} /> : <Empty>No traffic yet: tag sources and wait for GA4.</Empty>}
+        <Card title={`${BLOG_METRIC[metric]} by source, ${year}`} sub="All blog posts, whenever published">
+          {trafficMonths.length ? (
+            <HBars rows={shownSources.map((s) => ({ label: s === "none" ? "Not tagged" : SOURCE_LABEL[s], value: trafficMonths.reduce((a, m) => a + cellOf(m, s), 0) }))} color={C.blue} />
+          ) : <Empty>No traffic yet: run “Backfill 2026 traffic”.</Empty>}
         </Card>
       </div>
+      <Card
+        title="Month over month, by source"
+        sub={`Blog traffic each month by where the post came from. Views from GA4; clicks and impressions from Google Search Console. A week counts in the month its Thursday falls in.${hasSearch ? "" : " Search numbers appear after “Backfill 2026 traffic”."}`}
+        action={
+          <div className="flex gap-2">
+            <div className="flex gap-1 rounded-lg bg-neutral-100 p-0.5 text-xs">
+              {(Object.keys(BLOG_METRIC) as BlogMetric[]).map((k) => (
+                <button key={k} onClick={() => setMetric(k)} className={`rounded-md px-2 py-1 font-medium ${metric === k ? "bg-white shadow-sm" : "text-neutral-600"}`}>{BLOG_METRIC[k]}</button>
+              ))}
+            </div>
+            <Btn kind="ghost" onClick={monthlyCsv}>CSV</Btn>
+          </div>
+        }
+      >
+        {!trafficMonths.length ? <Empty>No traffic yet: run “Backfill 2026 traffic”.</Empty> : (
+          <>
+            <Legend items={trafficSeries.filter((s) => shownSources.includes(s.key as any))} />
+            <StackedBars x={trafficMonths.map((m) => monthLabel(m).split(" ")[0])} series={trafficSeries.filter((s) => shownSources.includes(s.key as any))} height={180} />
+            <div className="-mx-5 mt-4 overflow-x-auto">
+              <table className="w-full min-w-[640px] text-sm">
+                <thead className="border-y border-neutral-100 bg-neutral-50/70 text-xs text-neutral-500">
+                  <tr>
+                    <th className="py-2 pl-5 pr-2 text-left font-medium">Month</th>
+                    {shownSources.map((s) => <th key={s} className="px-2 text-right font-medium">{s === "none" ? "Not tagged" : SOURCE_LABEL[s]}</th>)}
+                    <th className="px-2 text-right font-medium">Total</th>
+                    <th className="py-2 pl-2 pr-5 text-right font-medium">vs prev. month</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {[...trafficMonths].reverse().map((m) => {
+                    const i = trafficMonths.indexOf(m);
+                    const prev = i > 0 ? trafficMonths[i - 1] : undefined;
+                    const ch = prev ? change(monthTotal(m), monthTotal(prev)) : undefined;
+                    const partial = m === THIS_WEEK.slice(0, 7);
+                    return (
+                      <tr key={m}>
+                        <td className="whitespace-nowrap py-1.5 pl-5 pr-2">{monthLabel(m)}{partial && <span className="ml-1 text-xs text-neutral-400">so far</span>}</td>
+                        {shownSources.map((s) => {
+                          const v = cellOf(m, s);
+                          const c = prev ? change(v, cellOf(prev, s)) : undefined;
+                          return (
+                            <td key={s} className="px-2 text-right tabular-nums">
+                              {v.toLocaleString()}
+                              {c !== undefined && !partial && <span className={`ml-1 text-[11px] ${c >= 0 ? "text-emerald-700" : "text-red-700"}`}>{c >= 0 ? "+" : ""}{Math.round(c * 100)}%</span>}
+                            </td>
+                          );
+                        })}
+                        <td className="px-2 text-right font-medium tabular-nums">{monthTotal(m).toLocaleString()}</td>
+                        <td className={`py-1.5 pl-2 pr-5 text-right tabular-nums ${ch === undefined || partial ? "text-neutral-400" : ch >= 0 ? "text-emerald-700" : "text-red-700"}`}>{ch === undefined || partial ? "–" : `${ch >= 0 ? "+" : ""}${Math.round(ch * 100)}%`}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </Card>
       <Card title="Every post" sub="Source tags save as you pick them; agents can set them through the API too." action={<Btn kind="ghost" onClick={csv}>Download CSV</Btn>}>
         <div className="mb-3 flex flex-wrap gap-2 text-sm">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search titles…" className="min-w-[12rem] flex-1 rounded-lg border border-neutral-300 px-3 py-1.5" />
           <select value={source} onChange={(e) => setSource(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="">Any source</option>{Object.entries(SOURCE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}<option value="none">Not tagged</option></select>
           <select value={period} onChange={(e) => setPeriod(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="year">Published {year}</option><option value="all">All time</option></select>
-          <select value={sort} onChange={(e) => setSort(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="date">Newest first</option><option value="views">Most viewed</option></select>
+          <select value={sort} onChange={(e) => setSort(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="date">Newest first</option><option value="views">Most viewed</option><option value="clicks">Most search clicks</option><option value="impressions">Most impressions</option></select>
         </div>
         {!posts.length ? (
           <Empty>No posts yet. Click “Sync now” to load both sites’ blogs.</Empty>
         ) : (
           <div className="-mx-5 overflow-x-auto">
-            <table className="w-full min-w-[820px] text-sm">
+            <table className="w-full min-w-[960px] text-sm">
               <thead className="border-y border-neutral-100 bg-neutral-50/70 text-xs text-neutral-500">
-                <tr><th className="py-2 pl-5 pr-2 text-left font-medium">Post</th><th className="px-2 text-left font-medium">Site</th><th className="px-2 text-left font-medium">Published</th><th className="px-2 text-left font-medium">Source</th><th className="px-2 text-right font-medium">Views</th><th className="px-2 font-medium">Last 4 wks</th><th className="py-2 pl-2 pr-5 text-left font-medium">Refresh due</th></tr>
+                <tr><th className="py-2 pl-5 pr-2 text-left font-medium">Post</th><th className="px-2 text-left font-medium">Site</th><th className="px-2 text-left font-medium">Published</th><th className="px-2 text-left font-medium">Source</th><th className="px-2 text-right font-medium">Views</th><th className="px-2 text-right font-medium">Clicks</th><th className="px-2 text-right font-medium">Impressions</th><th className="px-2 font-medium">Clicks, last 4 wks</th><th className="py-2 pl-2 pr-5 text-left font-medium">Refresh due</th></tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
                 {shown.slice(0, limit).map((p) => (
@@ -2002,7 +2078,9 @@ function BlogTracker({ posts, reload, setToast }: { posts: BlogPost[]; reload: (
                       </select>
                     </td>
                     <td className="px-2 text-right tabular-nums">{p.views == null ? "–" : p.views.toLocaleString()}</td>
-                    <td className="px-2">{p.recent?.length ? <Sparkline values={p.recent.map((r) => r.views)} color={C.blue} /> : null}</td>
+                    <td className="px-2 text-right tabular-nums">{p.clicks == null ? "–" : p.clicks.toLocaleString()}</td>
+                    <td className="px-2 text-right tabular-nums text-neutral-600">{p.impressions == null ? "–" : p.impressions.toLocaleString()}</td>
+                    <td className="px-2">{p.recent?.some((r) => r.clicks != null) ? <Sparkline values={p.recent.map((r) => r.clicks ?? 0)} color={C.blue} /> : null}</td>
                     <td className={`whitespace-nowrap py-1.5 pl-2 pr-5 tabular-nums ${p.refreshDue && p.refreshDue <= TODAY ? "font-medium text-orange-700" : "text-neutral-500"}`}>{p.refreshDue ?? "–"}</td>
                   </tr>
                 ))}

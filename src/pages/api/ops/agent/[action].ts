@@ -6,7 +6,8 @@
 //   GET  me                         which agent you are
 //   GET  scorecard                  the weekly numbers (both sites) for the KPI tracker
 //   GET  kpis?site=&weeks=          raw weekly GA4 / Search Console / HubSpot snapshots
-//   GET  blogs?site=&traffic=1      every blog post: date, source, views (+ weekly traffic)
+//   GET  blogs?site=&traffic=1      every blog post: date, source, views, search clicks/impressions (+ weekly traffic)
+//   GET  blogs-monthly?site=&from=  blog views / search clicks / impressions per month and source
 //   GET  refresh-due?days=          posts 11+ months old (or within `days` of it), most viewed first
 //   GET  files?kind=&status=        dropped .md files (without their content)
 //   GET  file?id=                   one file with its content
@@ -19,7 +20,7 @@
 import type { APIRoute } from "astro";
 import { json } from "../../../../lib/ops/auth";
 import { agentFor, dropFile, setFileStatus, setBlogSources, setPulse, importSubmissions, HttpError } from "../../../../lib/ops/agent";
-import { loadBlogs, refreshDueDate, blogUrl, SOURCE_LABEL } from "../../../../lib/ops/blogs";
+import { loadBlogs, monthlyBySource, refreshDueDate, blogUrl, SOURCE_LABEL } from "../../../../lib/ops/blogs";
 import { opsClient, loadAll, loadSiteKpis, addDays, type InboxFile } from "../../../../lib/ops/store";
 import { loadSubmissions } from "../../../../lib/ops/submissions";
 import { buildScorecard, loadWeeklyNotes } from "../../../../lib/ops/scorecard";
@@ -58,6 +59,13 @@ export const GET: APIRoute = async ({ params, request, url }) => {
           .filter((p) => !site || p.site === site)
           .map((p) => ({ ...p, url: blogUrl(p.site, p.path), sourceLabel: p.source ? SOURCE_LABEL[p.source] : null, refreshDue: refreshDueDate(p) }));
         return json({ count: posts.length, posts });
+      }
+
+      case "blogs-monthly": {
+        const site = q("site");
+        const from = q("from");
+        const rows = await monthlyBySource({ site: site === "synergy" || site === "bolder" ? site : undefined, from: from && /^\d{4}-\d{2}$/.test(from) ? from : undefined });
+        return json({ note: "A week counts in the month its Thursday falls in. clicks/impressions are Google Search Console.", rows: rows.map((r) => ({ ...r, sourceLabel: r.source === "none" ? "Not tagged" : SOURCE_LABEL[r.source] })) });
       }
 
       case "refresh-due": {
