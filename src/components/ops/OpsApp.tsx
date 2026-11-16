@@ -1987,9 +1987,9 @@ function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; 
           <StackedBars x={months.map((m) => new Date(`${m}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }))} series={series} height={180} format={(v) => String(Math.round(v))} />
         </Card>
         <Card title={`${BLOG_METRIC[metric]} by source, ${year}`} sub="All blog posts, whenever published">
-          {trafficMonths.length ? (
+          {shownSources.length ? (
             <HBars rows={shownSources.map((s) => ({ label: s === "none" ? "Not tagged" : SOURCE_LABEL[s], value: trafficMonths.reduce((a, m) => a + cellOf(m, s), 0) }))} color={C.blue} />
-          ) : <Empty>No traffic yet: run “Backfill 2026 traffic”.</Empty>}
+          ) : <Empty>{metric === "views" ? "No traffic yet" : "No Search Console data yet"}: click “Backfill 2026 traffic” (top right), then reload in a few minutes.</Empty>}
         </Card>
       </div>
       <Card
@@ -2006,7 +2006,7 @@ function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; 
           </div>
         }
       >
-        {!trafficMonths.length ? <Empty>No traffic yet: run “Backfill 2026 traffic”.</Empty> : (
+        {!shownSources.length ? <Empty>{metric === "views" ? "No traffic yet" : "No Search Console data yet"}: click “Backfill 2026 traffic” (top right), then reload in a few minutes.</Empty> : (
           <>
             <Legend items={trafficSeries.filter((s) => shownSources.includes(s.key as any))} />
             <StackedBars x={trafficMonths.map((m) => monthLabel(m).split(" ")[0])} series={trafficSeries.filter((s) => shownSources.includes(s.key as any))} height={180} />
