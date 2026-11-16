@@ -308,6 +308,11 @@ async function gscQuery(siteUrl: string, body: object): Promise<GscRow[]> {
   return data.rows ?? [];
 }
 
+/** Search Console rows for one of the two websites (property from SOURCES). */
+export function gscQueryForSite(site: KpiSite, body: object): Promise<GscRow[]> {
+  return gscQuery(SOURCES[site].gscSite(), body);
+}
+
 async function syncGsc(siteUrl: string, start: string, end: string, metrics: Record<string, number>, lists: KpiSnapshot["lists"]) {
   const prevStart = addDays(start, -7);
   const prevEnd = addDays(end, -7);
