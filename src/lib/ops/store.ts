@@ -18,16 +18,41 @@ let client: SanityClient | undefined;
 export function opsClient(): SanityClient {
   const token = process.env.SANITY_API_WRITE_TOKEN || import.meta.env.SANITY_API_WRITE_TOKEN;
   if (!token) throw new Error("SANITY_API_WRITE_TOKEN is not set");
-  client ??= createClient({
-    projectId: process.env.PUBLIC_SANITY_PROJECT_ID || import.meta.env.PUBLIC_SANITY_PROJECT_ID || "toot3mhg",
-    dataset: process.env.PUBLIC_SANITY_DATASET || import.meta.env.PUBLIC_SANITY_DATASET || "production",
-    apiVersion: "2024-01-01",
-    token,
-    useCdn: false,
-    // "raw" so drafts (blog drafts written by the content bot) are visible.
-    perspective: "raw",
-  });
+  if (!client) {
+    const config = {
+      projectId: process.env.PUBLIC_SANITY_PROJECT_ID || import.meta.env.PUBLIC_SANITY_PROJECT_ID || "toot3mhg",
+      dataset: process.env.PUBLIC_SANITY_DATASET || import.meta.env.PUBLIC_SANITY_DATASET || "production",
+      apiVersion: "2024-01-01",
+      token,
+      useCdn: false,
+      // "raw" so drafts (blog drafts written by the content bot) are visible.
+      perspective: "raw",
+    } as const;
+    client = createClient(config);
+    withCdnFallback(client, createClient({ ...config, useCdn: true }));
+  }
   return client;
+}
+
+/**
+ * When the API's monthly request quota is used up (402) or it rate-limits
+ * (429), reads go to the CDN instead, which has its own quota and accepts the
+ * token. Writes have no fallback: they fail until the quota is back.
+ */
+function withCdnFallback(api: SanityClient, cdn: SanityClient) {
+  for (const method of ["fetch", "getDocument"] as const) {
+    const viaApi = (api[method] as (...a: unknown[]) => Promise<unknown>).bind(api);
+    const viaCdn = (cdn[method] as (...a: unknown[]) => Promise<unknown>).bind(cdn);
+    (api as unknown as Record<string, unknown>)[method] = async (...args: unknown[]) => {
+      try {
+        return await viaApi(...args);
+      } catch (err) {
+        const status = (err as { statusCode?: number }).statusCode;
+        if (status !== 402 && status !== 429) throw err;
+        return viaCdn(...args);
+      }
+    };
+  }
 }
 
 export const OPS_TYPES = ["opsKeyResult", "opsTask", "opsContent", "opsRun", "opsKpi", "opsFeedback", "opsSubmission", "opsWeekly", "opsBlog", "opsInbox"] as const;
