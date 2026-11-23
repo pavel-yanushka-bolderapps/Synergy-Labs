@@ -44,7 +44,7 @@ import { buildDigest, emailStatus, sendDigest } from "../../../lib/ops/digest";
 import { randomUUID } from "node:crypto";
 import { loadSubmissions, SETTINGS_ID } from "../../../lib/ops/submissions";
 import { buildScorecard, DERIVED_METRICS, loadWeeklyNotes, weeklyField } from "../../../lib/ops/scorecard";
-import { loadBlogs, monthlyBySource, runBlogSync, refreshDueDate, weeksSinceYearStart } from "../../../lib/ops/blogs";
+import { blogPeriodTotals, blogPostLive, blogPostWeeks, loadBlogs, monthlyBySource, runBlogSync, refreshDueDate, weeksSinceYearStart } from "../../../lib/ops/blogs";
 import { agentCount, dropFile, setBlogSources, setFileStatus, setPulse, HttpError } from "../../../lib/ops/agent";
 import type { InboxFile } from "../../../lib/ops/store";
 
@@ -97,6 +97,20 @@ export const GET: APIRoute = async ({ params, cookies, url }) => {
       opsClient().fetch<Omit<InboxFile, "content">[]>(`*[_type == "opsInbox" && _id in path("ops.**")] | order(createdAt desc)[0...300]{..., "content": null}`),
     ]);
     return json({ posts: posts.map((p) => ({ ...p, refreshDue: refreshDueDate(p) })), monthly, files });
+  }
+  if (params.action === "blog-period" || params.action === "blog-post") {
+    const site = url.searchParams.get("site");
+    const from = url.searchParams.get("from") ?? "";
+    const to = url.searchParams.get("to") ?? "";
+    const day = /^\d{4}-\d{2}-\d{2}$/;
+    if (site !== "synergy" && site !== "bolder") return json({ error: "site must be synergy or bolder" }, 400);
+    if (!day.test(from) || !day.test(to) || from > to) return json({ error: "from and to must be YYYY-MM-DD, from first" }, 400);
+    if (params.action === "blog-period") return json({ totals: await blogPeriodTotals(site, from, to) });
+    const id = url.searchParams.get("id") ?? "";
+    const path = url.searchParams.get("path") ?? "";
+    if (!id.startsWith("ops.blog.") || !path.startsWith("/")) return json({ error: "id and path are required" }, 400);
+    const [live, weeks] = await Promise.all([blogPostLive(site, path, from, to), blogPostWeeks(id).catch(() => [])]);
+    return json({ ...live, weeks });
   }
   if (params.action === "file") {
     const id = url.searchParams.get("id") ?? "";

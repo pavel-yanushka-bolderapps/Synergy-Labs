@@ -1907,15 +1907,38 @@ function BlogsTab({ data, site, setToast }: { data: Data; site: Site; setToast: 
         </div>
       </div>
       {!data.sources.ga4 && <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">Per-article traffic for {SITES[site].host} is waiting for GA4 access ({site === "bolder" ? "BOLDER_GA4_PROPERTY_ID" : "GA4_PROPERTY_ID"} in Vercel, and the service account as Viewer on that property). The post list and source tags work now.</p>}
-      {view === "Tracker" && <BlogTracker posts={posts} monthly={monthly} reload={load} setToast={setToast} />}
+      {view === "Tracker" && <BlogTracker site={site} posts={posts} monthly={monthly} reload={load} setToast={setToast} />}
       {view === "Refresh queue" && <RefreshQueue posts={posts} files={files} reload={load} setToast={setToast} />}
       {view === "Files" && <FilesList files={files} reload={load} setToast={setToast} />}
     </div>
   );
 }
 
-function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; monthly: MonthBySource[]; reload: () => void; setToast: (s: string) => void }) {
+type TrafficPeriod = "all" | "4w" | "3m" | "ytd" | "custom";
+const TRAFFIC_PERIOD: Record<TrafficPeriod, string> = { all: "All time", "4w": "Last 4 weeks", "3m": "Last 3 months", ytd: "This year", custom: "Custom dates…" };
+
+function BlogTracker({ site, posts, monthly, reload, setToast }: { site: Site; posts: BlogPost[]; monthly: MonthBySource[]; reload: () => void; setToast: (s: string) => void }) {
   const year = THIS_WEEK.slice(0, 4);
+  // Which weeks the Views / Clicks / Impressions columns add up.
+  const [traffic, setTraffic] = useState<TrafficPeriod>("all");
+  const [customFrom, setCustomFrom] = useState(addDays(TODAY, -28));
+  const [customTo, setCustomTo] = useState(TODAY);
+  const [totals, setTotals] = useState<Record<string, { views: number; clicks: number; impressions: number }> | null>(null);
+  const [detail, setDetail] = useState<BlogPost | null>(null);
+  const range: [string, string] | null =
+    traffic === "4w" ? [addDays(THIS_WEEK, -28), TODAY]
+    : traffic === "3m" ? [addDays(THIS_WEEK, -91), TODAY]
+    : traffic === "ytd" ? [`${year}-01-01`, TODAY]
+    : traffic === "custom" ? [customFrom, customTo]
+    : null;
+  useEffect(() => {
+    setTotals(null);
+    if (!range || range[0] > range[1]) return;
+    api<{ totals: Record<string, { views: number; clicks: number; impressions: number }> }>(`blog-period?site=${site}&from=${range[0]}&to=${range[1]}`)
+      .then((d) => setTotals(d.totals))
+      .catch((e) => setToast(`Could not load that period: ${e.message}`));
+  }, [site, range?.[0], range?.[1]]);
+  const val = (p: BlogPost, k: BlogMetric): number | undefined => (range ? totals?.[p._id]?.[k] : p[k]);
   const [source, setSource] = useState<"" | BlogSource | "none">("");
   const [period, setPeriod] = useState<"year" | "all">("year");
   const [q, setQ] = useState("");
@@ -1927,7 +1950,7 @@ function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; 
   const shown = live
     .filter((p) => (!source || (source === "none" ? !p.source : p.source === source)) && (period === "all" || (p.publishedAt ?? "") >= `${year}-01-01`))
     .filter((p) => !q || `${p.title} ${p.path}`.toLowerCase().includes(q.toLowerCase()))
-    .sort((a, b) => (sort === "date" ? (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "") : (b[sort] ?? 0) - (a[sort] ?? 0)));
+    .sort((a, b) => (sort === "date" ? (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "") : (val(b, sort) ?? 0) - (val(a, sort) ?? 0)));
   const thisYear = live.filter((p) => (p.publishedAt ?? "") >= `${year}-01-01`);
 
   // Posts per month this year, stacked by source.
@@ -1965,8 +1988,9 @@ function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; 
   };
   const csv = () => {
     const cell = (x: unknown) => { const t = x === undefined || x === null ? "" : String(x); return /[",\n]/.test(t) || /^[=+\-@]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
-    const head = ["Site", "Title", "URL", "Published", "Source", "Views (tracked)", "Search clicks", "Search impressions", "Refresh due"];
-    const body = shown.map((p) => [SITE_NAME[p.site], p.title, SITE_HOST[p.site] + p.path, p.publishedAt, p.source ? SOURCE_LABEL[p.source] : "", p.views ?? "", p.clicks ?? "", p.impressions ?? "", p.refreshDue].map(cell).join(","));
+    const when = range ? ` ${range[0]} to ${range[1]}` : "";
+    const head = ["Site", "Title", "URL", "Published", "Source", `Views${when || " (tracked)"}`, `Search clicks${when}`, `Search impressions${when}`, "Refresh due"];
+    const body = shown.map((p) => [SITE_NAME[p.site], p.title, SITE_HOST[p.site] + p.path, p.publishedAt, p.source ? SOURCE_LABEL[p.source] : "", val(p, "views") ?? "", val(p, "clicks") ?? "", val(p, "impressions") ?? "", p.refreshDue].map(cell).join(","));
     download(`blogs-${TODAY}.csv`, "﻿" + [head.join(","), ...body].join("\r\n"));
   };
   const tile = (label: string, value: ReactNode, sub: string) => (
@@ -2050,13 +2074,23 @@ function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; 
           </>
         )}
       </Card>
-      <Card title="Every post" sub="Source tags save as you pick them; agents can set them through the API too." action={<Btn kind="ghost" onClick={csv}>Download CSV</Btn>}>
+      {detail && <PostDetail post={detail} onClose={() => setDetail(null)} />}
+      <Card title="Every post" sub="Click a post for its numbers day by day, any dates, and the searches it shows up for. Source tags save as you pick them." action={<Btn kind="ghost" onClick={csv}>Download CSV</Btn>}>
         <div className="mb-3 flex flex-wrap gap-2 text-sm">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search titles…" className="min-w-[12rem] flex-1 rounded-lg border border-neutral-300 px-3 py-1.5" />
           <select value={source} onChange={(e) => setSource(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="">Any source</option>{Object.entries(SOURCE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}<option value="none">Not tagged</option></select>
           <select value={period} onChange={(e) => setPeriod(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="year">Published {year}</option><option value="all">All time</option></select>
           <select value={sort} onChange={(e) => setSort(e.target.value as any)} className="rounded-lg border border-neutral-300 px-2 py-1.5"><option value="date">Newest first</option><option value="views">Most viewed</option><option value="clicks">Most search clicks</option><option value="impressions">Most impressions</option></select>
+          <select value={traffic} onChange={(e) => setTraffic(e.target.value as TrafficPeriod)} title="Which weeks the Views, Clicks and Impressions columns add up" className="rounded-lg border border-neutral-300 px-2 py-1.5">{(Object.keys(TRAFFIC_PERIOD) as TrafficPeriod[]).map((k) => <option key={k} value={k}>Traffic: {TRAFFIC_PERIOD[k]}</option>)}</select>
+          {traffic === "custom" && (
+            <span className="flex items-center gap-1">
+              <input type="date" value={customFrom} max={customTo} onChange={(e) => e.target.value && setCustomFrom(e.target.value)} className="rounded-lg border border-neutral-300 px-2 py-1" />
+              <span className="text-neutral-400">to</span>
+              <input type="date" value={customTo} min={customFrom} max={TODAY} onChange={(e) => e.target.value && setCustomTo(e.target.value)} className="rounded-lg border border-neutral-300 px-2 py-1" />
+            </span>
+          )}
         </div>
+        {range && <p className="mb-2 text-xs text-neutral-500">Views, clicks and impressions for the weeks of {range[0]} to {range[1]} (whole weeks, up to the last weekly sync).{!totals && " Loading…"}</p>}
         {!posts.length ? (
           <Empty>No posts yet. Click “Sync now” to load both sites’ blogs.</Empty>
         ) : (
@@ -2068,7 +2102,10 @@ function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; 
               <tbody className="divide-y divide-neutral-100">
                 {shown.slice(0, limit).map((p) => (
                   <tr key={p._id}>
-                    <td className="max-w-[26rem] py-1.5 pl-5 pr-2"><a className="line-clamp-2 hover:underline" href={SITE_HOST[p.site] + p.path} target="_blank" rel="noreferrer">{p.title}</a></td>
+                    <td className="max-w-[26rem] py-1.5 pl-5 pr-2">
+                      <button onClick={() => setDetail(p)} className="line-clamp-2 text-left hover:text-primary-green hover:underline">{p.title}</button>
+                      <a href={SITE_HOST[p.site] + p.path} target="_blank" rel="noreferrer" className="text-xs text-neutral-400 hover:underline">open post ↗</a>
+                    </td>
                     <td className="px-2 text-xs text-neutral-600">{SITE_NAME[p.site]}</td>
                     <td className="whitespace-nowrap px-2 tabular-nums text-neutral-600">{p.publishedAt ?? "–"}</td>
                     <td className="px-2">
@@ -2077,9 +2114,9 @@ function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; 
                         {Object.entries(SOURCE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                       </select>
                     </td>
-                    <td className="px-2 text-right tabular-nums">{p.views == null ? "–" : p.views.toLocaleString()}</td>
-                    <td className="px-2 text-right tabular-nums">{p.clicks == null ? "–" : p.clicks.toLocaleString()}</td>
-                    <td className="px-2 text-right tabular-nums text-neutral-600">{p.impressions == null ? "–" : p.impressions.toLocaleString()}</td>
+                    <td className="px-2 text-right tabular-nums">{val(p, "views")?.toLocaleString() ?? "–"}</td>
+                    <td className="px-2 text-right tabular-nums">{val(p, "clicks")?.toLocaleString() ?? "–"}</td>
+                    <td className="px-2 text-right tabular-nums text-neutral-600">{val(p, "impressions")?.toLocaleString() ?? "–"}</td>
                     <td className="px-2">{p.recent?.some((r) => r.clicks != null) ? <Sparkline values={p.recent.map((r) => r.clicks ?? 0)} color={C.blue} /> : null}</td>
                     <td className={`whitespace-nowrap py-1.5 pl-2 pr-5 tabular-nums ${p.refreshDue && p.refreshDue <= TODAY ? "font-medium text-orange-700" : "text-neutral-500"}`}>{p.refreshDue ?? "–"}</td>
                   </tr>
@@ -2092,6 +2129,153 @@ function BlogTracker({ posts, monthly, reload, setToast }: { posts: BlogPost[]; 
         )}
       </Card>
     </>
+  );
+}
+
+interface PostDetailData {
+  days: { date: string; views?: number; users?: number; clicks?: number; impressions?: number; position?: number }[];
+  queries: { query: string; clicks: number; impressions: number; position: number }[];
+  sources: { gsc: boolean; ga4: boolean };
+  errors: string[];
+  weeks: { week: string; views?: number; clicks?: number; impressions?: number }[];
+}
+
+// Search Console keeps 16 months.
+const GSC_OLDEST = addDays(TODAY, -480);
+
+/** One post's numbers for any dates, live from Search Console and GA4. */
+function PostDetail({ post, onClose }: { post: BlogPost; onClose: () => void }) {
+  const published = post.publishedAt && post.publishedAt > GSC_OLDEST ? post.publishedAt : GSC_OLDEST;
+  const clampFrom = (d: string) => (d < published ? published : d);
+  const [from, setFrom] = useState(clampFrom(addDays(TODAY, -90)));
+  const [to, setTo] = useState(TODAY);
+  const [data, setData] = useState<PostDetailData | null>(null);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    setData(null);
+    setErr("");
+    if (from > to) return;
+    const q = new URLSearchParams({ site: post.site, id: post._id, path: post.path, from, to });
+    api<PostDetailData>(`blog-post?${q}`).then(setData).catch((e) => setErr(e.message));
+  }, [from, to]);
+
+  const presets: [string, string][] = [
+    ["Last 28 days", clampFrom(addDays(TODAY, -28))],
+    ["3 months", clampFrom(addDays(TODAY, -91))],
+    ["6 months", clampFrom(addDays(TODAY, -182))],
+    ["12 months", clampFrom(addDays(TODAY, -365))],
+    ["Since published", published],
+  ];
+  // Short-lived posts clip several presets to the same start: light up one.
+  const activePreset = to === TODAY ? presets.findIndex(([, start]) => start === from) : -1;
+
+  // Live data when Google answered; otherwise the stored weekly numbers.
+  const live = data && (data.sources.gsc || data.sources.ga4);
+  const span = Math.round((toDate(to).getTime() - toDate(from).getTime()) / DAY) + 1;
+  const weekly = !live || span > 120;
+  type Row = { key: string; views: number; clicks: number; impressions: number; posImpr: number };
+  const rows: Row[] = [];
+  if (data) {
+    const bucket = new Map<string, Row>();
+    const put = (key: string, r: { views?: number; clicks?: number; impressions?: number; position?: number }) => {
+      const b = bucket.get(key) ?? { key, views: 0, clicks: 0, impressions: 0, posImpr: 0 };
+      b.views += r.views ?? 0;
+      b.clicks += r.clicks ?? 0;
+      b.impressions += r.impressions ?? 0;
+      b.posImpr += (r.position ?? 0) * (r.impressions ?? 0);
+      bucket.set(key, b);
+    };
+    // Every day / week in the range gets a row, so quiet days show as 0.
+    // Search Console runs 2-3 days behind: stop at its last day.
+    const last = live ? data.days.reduce((m, d) => (d.date > m ? d.date : m), from) : to;
+    for (let d = from; d <= last; d = addDays(d, weekly ? 7 : 1)) bucket.set(weekly ? mondayOf(d) : d, { key: weekly ? mondayOf(d) : d, views: 0, clicks: 0, impressions: 0, posImpr: 0 });
+    if (live) for (const d of data.days) put(weekly ? mondayOf(d.date) : d.date, d);
+    else for (const w of data.weeks) if (w.week >= mondayOf(from) && w.week <= to) put(w.week, w);
+    rows.push(...[...bucket.values()].sort((a, b) => a.key.localeCompare(b.key)));
+  }
+  const sum = (k: "views" | "clicks" | "impressions") => rows.reduce((a, r) => a + r[k], 0);
+  const impressions = sum("impressions");
+  const clicks = sum("clicks");
+  const position = impressions ? rows.reduce((a, r) => a + r.posImpr, 0) / impressions : undefined;
+  const label = (k: string) => new Date(`${k}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+
+  const csv = () => {
+    const head = [weekly ? "Week of" : "Date", "Views", "Search clicks", "Search impressions", "Avg position"];
+    const body = rows.map((r) => [r.key, r.views, r.clicks, r.impressions, r.impressions ? (r.posImpr / r.impressions).toFixed(1) : ""].join(","));
+    const qs = data?.queries.length ? ["", "Search query,Clicks,Impressions,Avg position", ...data.queries.map((q) => `"${q.query.replace(/"/g, '""')}",${q.clicks},${q.impressions},${q.position.toFixed(1)}`)] : [];
+    download(`${post.slug}-${from}-to-${to}.csv`, "﻿" + [head.join(","), ...body, ...qs].join("\r\n"));
+  };
+
+  const tile = (name: string, value: string, sub?: string) => (
+    <div className="rounded-xl border border-black/[0.07] p-3"><p className="text-xs text-neutral-500">{name}</p><p className="text-xl font-semibold tabular-nums">{value}</p>{sub && <p className="text-[11px] text-neutral-400">{sub}</p>}</div>
+  );
+
+  return (
+    <Modal title={post.title} onClose={onClose} wide>
+      <div className="-mt-2 mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500">
+        <span>{SITE_NAME[post.site]}</span>
+        <span>Published {post.publishedAt ?? "–"}</span>
+        <span>{post.source ? SOURCE_LABEL[post.source] : "Not tagged"}</span>
+        <a href={SITE_HOST[post.site] + post.path} target="_blank" rel="noreferrer" className="hover:underline">{post.path} ↗</a>
+      </div>
+      <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
+        {presets.map(([name, start], i) => (
+          <button key={name} onClick={() => { setFrom(start); setTo(TODAY); }} className={`rounded-lg px-2.5 py-1 ${i === activePreset ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"}`}>{name}</button>
+        ))}
+        <span className="ml-auto flex items-center gap-1">
+          <input type="date" value={from} min={GSC_OLDEST} max={to} onChange={(e) => e.target.value && setFrom(e.target.value)} className="rounded-lg border border-neutral-300 px-2 py-1" />
+          <span className="text-neutral-400">to</span>
+          <input type="date" value={to} min={from} max={TODAY} onChange={(e) => e.target.value && setTo(e.target.value)} className="rounded-lg border border-neutral-300 px-2 py-1" />
+          <Btn kind="ghost" onClick={csv} disabled={!rows.length}>CSV</Btn>
+        </span>
+      </div>
+      {err && <p className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{err}</p>}
+      {!data && !err && <Empty>Asking Google…</Empty>}
+      {data && (
+        <>
+          {!!data.errors.length && <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">{data.errors.join(" · ")}{!live && " — showing the stored weekly numbers instead."}</p>}
+          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            {tile("Views", sum("views").toLocaleString(), data.sources.ga4 || !live ? "GA4" : "GA4 not available")}
+            {tile("Search clicks", clicks.toLocaleString(), "Search Console")}
+            {tile("Impressions", impressions.toLocaleString(), "Search Console")}
+            {tile("Click rate", impressions ? `${((clicks / impressions) * 100).toFixed(1)}%` : "–", "clicks ÷ impressions")}
+            {tile("Avg position", position ? position.toFixed(1) : "–", "in Google results")}
+          </div>
+          {rows.length ? (
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div>
+                <p className="mb-1 text-xs font-medium text-neutral-500">Impressions {weekly ? "per week" : "per day"}</p>
+                <LineChart x={rows.map((r) => label(r.key))} series={[{ key: "impressions", label: "Impressions", color: C.violet, values: rows.map((r) => r.impressions) }]} height={170} />
+              </div>
+              <div>
+                <p className="mb-1 text-xs font-medium text-neutral-500">Clicks and views {weekly ? "per week" : "per day"}</p>
+                <Legend items={[{ label: "Search clicks", color: C.blue }, { label: "Views", color: C.aqua }]} />
+                <LineChart x={rows.map((r) => label(r.key))} series={[{ key: "clicks", label: "Search clicks", color: C.blue, values: rows.map((r) => r.clicks) }, { key: "views", label: "Views", color: C.aqua, values: rows.map((r) => r.views) }]} height={150} />
+              </div>
+            </div>
+          ) : <Empty>No numbers for these dates.</Empty>}
+          {live && (
+            <div className="mt-5">
+              <p className="mb-2 text-sm font-medium">Searches it showed up for <span className="font-normal text-neutral-500">({data.queries.length === 100 ? "top 100" : data.queries.length}; Google hides rare searches)</span></p>
+              {data.queries.length ? (
+                <div className="max-h-80 overflow-y-auto rounded-lg border border-neutral-100">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 bg-neutral-50 text-xs text-neutral-500"><tr><th className="py-1.5 pl-3 text-left font-medium">Search</th><th className="px-2 text-right font-medium">Clicks</th><th className="px-2 text-right font-medium">Impressions</th><th className="px-2 text-right font-medium">Click rate</th><th className="py-1.5 pl-2 pr-3 text-right font-medium">Position</th></tr></thead>
+                    <tbody className="divide-y divide-neutral-100">
+                      {data.queries.map((q) => (
+                        <tr key={q.query}><td className="py-1 pl-3">{q.query}</td><td className="px-2 text-right tabular-nums">{q.clicks}</td><td className="px-2 text-right tabular-nums">{q.impressions.toLocaleString()}</td><td className="px-2 text-right tabular-nums text-neutral-600">{q.impressions ? `${((q.clicks / q.impressions) * 100).toFixed(1)}%` : "–"}</td><td className="py-1 pl-2 pr-3 text-right tabular-nums text-neutral-600">{q.position.toFixed(1)}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : <Empty>No searches with enough volume for Google to report.</Empty>}
+            </div>
+          )}
+          <p className="mt-4 text-xs text-neutral-400">{live ? "Live from Google: Search Console (all versions of the URL) and GA4. Search Console runs 2–3 days behind." : "Stored weekly numbers from the Monday sync."}{weekly && live ? " Ranges over 4 months are shown by week." : ""}</p>
+        </>
+      )}
+    </Modal>
   );
 }
 
