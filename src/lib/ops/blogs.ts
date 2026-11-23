@@ -261,6 +261,10 @@ export async function syncBlogTraffic(weeks: string[]): Promise<{ site: BlogSite
           t.organic = org.get(path) ?? 0;
         }
         for (const r of search ?? []) {
+          // "#section" URLs are Google's jump-to links, shown inside the same
+          // result as the page itself: counting them would count one search
+          // several times. Search Console's Pages table lists them separately.
+          if (r.keys![0].includes("#")) continue;
           let path: string;
           try {
             path = clean(new URL(r.keys![0]).pathname);
@@ -462,7 +466,8 @@ export async function blogPostLive(site: BlogSite, path: string, from: string, t
   // Every URL counted as this post (Search Console lists them separately).
   const urls = new Map<string, { url: string; clicks: number; impressions: number }>();
   for (const r of daily ?? []) {
-    if (pathOf(r.keys![1]) !== target) continue;
+    // Jump-to-section links ("#...") ride along in the page's own result.
+    if (r.keys![1].includes("#") || pathOf(r.keys![1]) !== target) continue;
     const u = urls.get(r.keys![1]) ?? { url: r.keys![1], clicks: 0, impressions: 0 };
     u.clicks += r.clicks;
     u.impressions += r.impressions;
@@ -481,7 +486,7 @@ export async function blogPostLive(site: BlogSite, path: string, from: string, t
   }
   const byQuery = new Map<string, PostQuery & { posSum: number }>();
   for (const r of queries ?? []) {
-    if (pathOf(r.keys![1]) !== target) continue;
+    if (r.keys![1].includes("#") || pathOf(r.keys![1]) !== target) continue;
     const q = byQuery.get(r.keys![0]) ?? { query: r.keys![0], clicks: 0, impressions: 0, position: 0, posSum: 0 };
     q.clicks += r.clicks;
     q.impressions += r.impressions;
