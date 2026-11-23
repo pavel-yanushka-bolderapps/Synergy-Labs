@@ -387,3 +387,117 @@ export async function monthlyBySource(opts: { site?: BlogSite; from?: string } =
   }
   return [...rows.values()].sort((a, b) => a.site.localeCompare(b.site) || a.month.localeCompare(b.month) || a.source.localeCompare(b.source));
 }
+
+// ---- Per-post analytics -------------------------------------------------------
+
+export interface PeriodTotals { views: number; clicks: number; impressions: number }
+
+/**
+ * Each post's stored traffic summed over a period. A week counts when its
+ * Monday falls between the Monday of `from` and `to`, so the period snaps to
+ * whole weeks (the stored data is weekly).
+ */
+export async function blogPeriodTotals(site: BlogSite, from: string, to: string): Promise<Record<string, PeriodTotals>> {
+  const start = mondayOf(from);
+  const posts = await opsClient().fetch<{ _id: string; traffic?: TrafficWeek[] }[]>(
+    `*[_type == "opsBlog" && _id in path("ops.**") && site == $site]{_id, "traffic": traffic[week >= $start && week <= $to]{week, views, clicks, impressions}}`,
+    { site, start, to }
+  );
+  const out: Record<string, PeriodTotals> = {};
+  for (const p of posts) {
+    const t = { views: 0, clicks: 0, impressions: 0 };
+    for (const w of p.traffic ?? []) {
+      t.views += w.views ?? 0;
+      t.clicks += w.clicks ?? 0;
+      t.impressions += w.impressions ?? 0;
+    }
+    out[p._id] = t;
+  }
+  return out;
+}
+
+export interface PostDay { date: string; views?: number; users?: number; clicks?: number; impressions?: number; position?: number }
+export interface PostQuery { query: string; clicks: number; impressions: number; position: number }
+
+/**
+ * One post, straight from Google for any date range: Search Console clicks,
+ * impressions and average position per day, the searches it showed up for,
+ * and GA4 views per day. Nothing is stored. URLs on any host of the property
+ * count (www or not, http or https), the same matching the weekly sync uses.
+ */
+export async function blogPostLive(site: BlogSite, path: string, from: string, to: string) {
+  const clean = (p: string) => p.split("?")[0].split("#")[0].replace(/\/$/, "");
+  const target = clean(path);
+  const pathOf = (url: string) => { try { return clean(new URL(url).pathname); } catch { return ""; } };
+  const status = sourceStatus(site);
+  const errors: string[] = [];
+  const pageFilter = [{ filters: [{ dimension: "page", operator: "contains", expression: target }] }];
+
+  const [daily, queries, ga4] = await Promise.all([
+    status.gsc
+      ? gscQueryForSite(site, { startDate: from, endDate: to, dimensions: ["date", "page"], dimensionFilterGroups: pageFilter, rowLimit: 25000 })
+          .catch((e) => (errors.push(`Search Console: ${e.message}`), null))
+      : (errors.push("Search Console not connected"), null),
+    status.gsc
+      ? gscQueryForSite(site, { startDate: from, endDate: to, dimensions: ["query", "page"], dimensionFilterGroups: pageFilter, rowLimit: 25000 })
+          .catch(() => null)
+      : null,
+    status.ga4
+      ? ga4ReportForSite(site, {
+          dateRanges: [{ startDate: from, endDate: to }],
+          dimensions: [{ name: "date" }, { name: "pagePath" }],
+          metrics: [{ name: "screenPageViews" }, { name: "activeUsers" }],
+          dimensionFilter: { filter: { fieldName: "pagePath", stringFilter: { matchType: "BEGINS_WITH", value: target } } },
+          limit: 25000,
+        }).catch((e) => (errors.push(`GA4: ${e.message}`), null))
+      : (errors.push("GA4 not connected"), null),
+  ]);
+
+  const days = new Map<string, PostDay & { posSum: number }>();
+  const day = (date: string) => {
+    let d = days.get(date);
+    if (!d) days.set(date, (d = { date, posSum: 0 }));
+    return d;
+  };
+  for (const r of daily ?? []) {
+    if (pathOf(r.keys![1]) !== target) continue;
+    const d = day(r.keys![0]);
+    d.clicks = (d.clicks ?? 0) + r.clicks;
+    d.impressions = (d.impressions ?? 0) + r.impressions;
+    d.posSum += r.position * r.impressions;
+  }
+  for (const r of ga4 ?? []) {
+    if (clean(r.dimensionValues![1].value) !== target) continue;
+    const v = r.dimensionValues![0].value; // YYYYMMDD
+    const d = day(`${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}`);
+    d.views = (d.views ?? 0) + Number(r.metricValues[0].value);
+    d.users = (d.users ?? 0) + Number(r.metricValues[1].value);
+  }
+  const byQuery = new Map<string, PostQuery & { posSum: number }>();
+  for (const r of queries ?? []) {
+    if (pathOf(r.keys![1]) !== target) continue;
+    const q = byQuery.get(r.keys![0]) ?? { query: r.keys![0], clicks: 0, impressions: 0, position: 0, posSum: 0 };
+    q.clicks += r.clicks;
+    q.impressions += r.impressions;
+    q.posSum += r.position * r.impressions;
+    byQuery.set(q.query, q);
+  }
+
+  return {
+    days: [...days.values()]
+      .map(({ posSum, ...d }) => ({ ...d, position: d.impressions ? posSum / d.impressions : undefined }))
+      .sort((a, b) => a.date.localeCompare(b.date)),
+    queries: [...byQuery.values()]
+      .map(({ posSum, ...q }) => ({ ...q, position: q.impressions ? posSum / q.impressions : 0 }))
+      .sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions)
+      .slice(0, 100),
+    sources: { gsc: Boolean(daily), ga4: Boolean(ga4) },
+    errors,
+  };
+}
+
+/** One post's stored weekly numbers (the fallback when Google can't be reached). */
+export async function blogPostWeeks(id: string): Promise<TrafficWeek[]> {
+  const doc = await opsClient().fetch<{ traffic?: TrafficWeek[] } | null>(`*[_id == $id][0]{traffic}`, { id });
+  return doc?.traffic ?? [];
+}
