@@ -459,8 +459,14 @@ export async function blogPostLive(site: BlogSite, path: string, from: string, t
     if (!d) days.set(date, (d = { date, posSum: 0 }));
     return d;
   };
+  // Every URL counted as this post (Search Console lists them separately).
+  const urls = new Map<string, { url: string; clicks: number; impressions: number }>();
   for (const r of daily ?? []) {
     if (pathOf(r.keys![1]) !== target) continue;
+    const u = urls.get(r.keys![1]) ?? { url: r.keys![1], clicks: 0, impressions: 0 };
+    u.clicks += r.clicks;
+    u.impressions += r.impressions;
+    urls.set(u.url, u);
     const d = day(r.keys![0]);
     d.clicks = (d.clicks ?? 0) + r.clicks;
     d.impressions = (d.impressions ?? 0) + r.impressions;
@@ -491,6 +497,7 @@ export async function blogPostLive(site: BlogSite, path: string, from: string, t
       .map(({ posSum, ...q }) => ({ ...q, position: q.impressions ? posSum / q.impressions : 0 }))
       .sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions)
       .slice(0, 100),
+    urls: [...urls.values()].sort((a, b) => b.impressions - a.impressions),
     sources: { gsc: Boolean(daily), ga4: Boolean(ga4) },
     errors,
   };
