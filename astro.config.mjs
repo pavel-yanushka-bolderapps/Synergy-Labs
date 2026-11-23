@@ -57,8 +57,12 @@ export default defineConfig({
       // builds), pages are still cached, just never refreshed on demand.
       bypassToken: ISR_BYPASS_TOKEN || undefined,
       // Safety net if a webhook delivery is ever lost: a cached page is
-      // re-rendered in the background at most an hour after it went stale.
-      expiration: 60 * 60,
+      // re-rendered in the background at most a day after it went stale.
+      // Publishes refresh their pages at once via /api/revalidate, so this
+      // only bounds how stale a neighbouring "More from the blog" row can
+      // get. It was an hour; crawlers then re-rendered every page up to 24
+      // times a day, each render a few Sanity requests.
+      expiration: 60 * 60 * 24,
       // POST endpoints and the revalidation hook itself must never be cached.
       // Plain strings only -- the adapter turns a RegExp exclusion into a
       // literal route pattern, which never matches a real URL.
@@ -84,10 +88,9 @@ export default defineConfig({
       // study pages, which have none, are never generated and 404.
       projectId: PUBLIC_SANITY_PROJECT_ID || SANITY_PROJECT_ID,
       dataset: PUBLIC_SANITY_DATASET || 'production',
-      // The live API, not Sanity's CDN. A page is only rendered when a publish
-      // asks for it, a moment after the change -- the CDN can still be serving
-      // the previous version then, and that stale copy would be what Vercel
-      // caches. Vercel's cache already absorbs the traffic the CDN was for.
+      // Default for the client; public page reads override it and go through
+      // the CDN -- see fetchPublished in src/lib/loadQuery.ts for why, and
+      // /api/revalidate for how a publish still shows up promptly.
       useCdn: false,
       apiVersion: '2025-08-31',
       studioBasePath: '/studio',

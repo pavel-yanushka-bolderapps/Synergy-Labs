@@ -107,7 +107,18 @@ export async function loadQuery<QueryResponse>({
   }
 }
 
-/** The plain, public read that the live site has always used. */
+/**
+ * The plain, public read the live site uses: Sanity's CDN (apicdn), with the
+ * live API only as a fallback.
+ *
+ * Why the CDN: the live API's monthly request quota is shared with everything
+ * that writes (Adaptify publishing posts, the Studio, Ops). Page renders --
+ * mostly crawlers hitting pages whose cached copy had expired -- used it up in
+ * Nov 2026 and took the site down. The CDN has its own, larger quota.
+ *
+ * The CDN can lag a publish by a moment, so /api/revalidate re-renders the
+ * changed pages twice (see there) instead of once, right after the webhook.
+ */
 async function fetchPublished<QueryResponse>(
   query: string,
   params?: QueryParams
@@ -116,8 +127,7 @@ async function fetchPublished<QueryResponse>(
     filterResponse: false,
     perspective: "published",
     resultSourceMap: false,
-    // Not the CDN: see the useCdn note on the sanity() call in astro.config.mjs.
-    useCdn: false,
+    useCdn: true,
     stega: false,
   } as const;
 
@@ -125,13 +135,12 @@ async function fetchPublished<QueryResponse>(
     const { result } = await sanityClient.fetch<QueryResponse>(query, params ?? {}, options);
     return result;
   } catch (err) {
-    // 402 = the project's monthly API request quota is used up; 429 = rate
-    // limited. The CDN (apicdn) has its own quota and still answers, so a
-    // possibly slightly stale page beats a 404 on every Sanity-backed route.
+    // CDN quota (402), rate limit (429), outage (5xx) or network error: try
+    // the live API once. Anything else (a bad query) would fail there too.
     const status = (err as { statusCode?: number }).statusCode;
-    if (status !== 402 && status !== 429) throw err;
-    console.warn(`[sanity] API returned ${status}; reading from the CDN instead.`);
-    const { result } = await sanityClient.fetch<QueryResponse>(query, params ?? {}, { ...options, useCdn: true });
+    if (status !== undefined && status !== 402 && status !== 429 && status < 500) throw err;
+    console.warn(`[sanity] CDN returned ${status ?? "a network error"}; reading from the API instead.`);
+    const { result } = await sanityClient.fetch<QueryResponse>(query, params ?? {}, { ...options, useCdn: false });
     return result;
   }
 }

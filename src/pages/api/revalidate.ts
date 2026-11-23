@@ -23,11 +23,24 @@ import { pathsFor, revalidate, type PublishEvent } from "../../lib/revalidate";
 
 export const prerender = false;
 
-// A publish that touches every post (an author edit) is a few hundred
-// re-renders -- longer than Sanity waits for a webhook to answer, which would
-// make it retry and do the whole lot again. Past this many, reply at once and
-// finish in the background.
-const ANSWER_FIRST_ABOVE = 40;
+// Pages read Sanity through its CDN (src/lib/loadQuery.ts), which can still
+// serve the previous version for a moment after a publish. So: reply to Sanity
+// at once (it retries a slow webhook, which would redo the lot), re-render
+// after a short wait, and once more later in case the CDN was still behind the
+// first time. Both run in the background, well inside the function time limit.
+const FIRST_PASS_MS = 10_000;
+const SECOND_PASS_MS = 75_000;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function revalidateTwice(origin: string, paths: string[], token: string) {
+  await sleep(FIRST_PASS_MS);
+  await revalidate(origin, paths, token);
+  await sleep(SECOND_PASS_MS - FIRST_PASS_MS);
+  const results = await revalidate(origin, paths, token);
+  const failed = results.filter((r) => r.status === "error" || r.status >= 500);
+  if (failed.length) console.error("[revalidate] Failed:", failed);
+}
 
 export const POST: APIRoute = async ({ request, url }) => {
   const token = process.env.ISR_BYPASS_TOKEN;
@@ -52,14 +65,6 @@ export const POST: APIRoute = async ({ request, url }) => {
 
   const paths = await pathsFor(event);
 
-  if (paths.length > ANSWER_FIRST_ABOVE) {
-    waitUntil(revalidate(url.origin, paths, token));
-    return Response.json({ type: event.type, queued: paths.length }, { status: 202 });
-  }
-
-  const results = await revalidate(url.origin, paths, token);
-  const failed = results.filter((r) => r.status === "error" || r.status >= 500);
-  if (failed.length) console.error("[revalidate] Failed:", failed);
-
-  return Response.json({ type: event.type, results }, { status: failed.length ? 502 : 200 });
+  waitUntil(revalidateTwice(url.origin, paths, token));
+  return Response.json({ type: event.type, queued: paths.length }, { status: 202 });
 };

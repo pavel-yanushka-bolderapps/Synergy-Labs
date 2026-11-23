@@ -36,7 +36,7 @@ export async function pathsFor(event: PublishEvent): Promise<string[]> {
   switch (event.type) {
     // A post shows on its own page, the archive, and the "latest posts" rows
     // on the homepage and /synergy-builder. The "More from the blog" row on
-    // its neighbours catches up when their cache expires (an hour at most).
+    // its neighbours catches up when their cache expires (a day at most).
     case "blogPost":
       return [
         ...slugs.map((slug) => `/blog/${slug}`),
