@@ -112,16 +112,28 @@ async function fetchPublished<QueryResponse>(
   query: string,
   params?: QueryParams
 ): Promise<QueryResponse> {
-  const { result } = await sanityClient.fetch<QueryResponse>(query, params ?? {}, {
+  const options = {
     filterResponse: false,
     perspective: "published",
     resultSourceMap: false,
     // Not the CDN: see the useCdn note on the sanity() call in astro.config.mjs.
     useCdn: false,
     stega: false,
-  });
+  } as const;
 
-  return result;
+  try {
+    const { result } = await sanityClient.fetch<QueryResponse>(query, params ?? {}, options);
+    return result;
+  } catch (err) {
+    // 402 = the project's monthly API request quota is used up; 429 = rate
+    // limited. The CDN (apicdn) has its own quota and still answers, so a
+    // possibly slightly stale page beats a 404 on every Sanity-backed route.
+    const status = (err as { statusCode?: number }).statusCode;
+    if (status !== 402 && status !== 429) throw err;
+    console.warn(`[sanity] API returned ${status}; reading from the CDN instead.`);
+    const { result } = await sanityClient.fetch<QueryResponse>(query, params ?? {}, { ...options, useCdn: true });
+    return result;
+  }
 }
 
 function isAuthError(err: unknown): boolean {
