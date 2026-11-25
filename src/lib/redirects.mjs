@@ -161,6 +161,10 @@ export const redirects = optionalTrailingSlash({
   ...Object.fromEntries(
     Object.entries(WEBFLOW_301S).map(([source, destination]) => [source, { status: 301, destination }])
   ),
+  // Webflow served its sitemap at /sitemap.xml, and that is still the URL in
+  // Search Console and in crawlers' caches. Astro's is /sitemap-index.xml.
+  // 301 because this one is certain: /sitemap.xml will never be a real route.
+  '/sitemap.xml': { status: 301, destination: '/sitemap-index.xml' },
   ...Object.fromEntries(
     Object.entries(LEGACY_LOCATIONS).map(([slug, city]) => [
       `/synergy-labs---${slug}`,
